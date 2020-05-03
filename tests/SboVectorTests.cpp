@@ -14,8 +14,8 @@ struct PodWithDefaultCtor
 {
    PodWithDefaultCtor() { ++defaultCtorCalls; }
 
-   int i = 1;
    double d = 2.0;
+   int i = 1;
    bool b = true;
 
    inline static int defaultCtorCalls = 0;
@@ -31,8 +31,8 @@ struct PodWithoutDefaultCtor
       ++ctorCalls;
    }
 
-   int i;
    double d;
+   int i;
    bool b;
 
    inline static int ctorCalls = 0;

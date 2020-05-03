@@ -88,14 +88,14 @@ template <typename T, std::size_t N> class SboVector
    std::size_t recalcCapacity(std::size_t minCap) const;
 
  private:
+   // Internal buffer.
+   std::aligned_storage_t<sizeof(T), alignof(T)> m_buffer[N];
+   // Beginning of data (heap or buffer).
+   T* m_data = buffer();
    // Number of occupied elements.
    std::size_t m_size = 0;
    // Number of allocated elements.
    std::size_t m_capacity = BufferCapacity;
-   // Beginning of data (heap or buffer).
-   T* m_data = buffer();
-   // Internal buffer.
-   std::aligned_storage_t<sizeof(T), alignof(T)> m_buffer[N];
 };
 
 
