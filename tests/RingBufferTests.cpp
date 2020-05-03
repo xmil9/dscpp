@@ -6,6 +6,8 @@
 
 ///////////////////
 
+namespace
+{
 
 void TestRingBufferDefaultCtor()
 {
@@ -3318,6 +3320,8 @@ void TestRingBufferReverseIteratorGreaterThanEqualOperator()
      // are related by the opposite relation.
    }
 }
+
+} // namespace
 
 
 void TestRingBuffer()
