@@ -1,7 +1,11 @@
 #pragma once
 #include <algorithm>
 #include <cassert>
-#include <cstddef>
+#include <cstdlib>
+#ifdef _MSC_VER
+#include <malloc.h>
+#endif
+#include <memory>
 #include <type_traits>
 
 
@@ -59,6 +63,9 @@ template <typename T, std::size_t N> class SboVector
 
    SboVector& operator=(const SboVector& other);
 
+   T& operator[](std::size_t pos);
+   const T& operator[](std::size_t pos) const;
+
    std::size_t size() const noexcept;
    constexpr std::size_t max_size() const noexcept;
    std::size_t capacity() const noexcept;
@@ -69,11 +76,12 @@ template <typename T, std::size_t N> class SboVector
    void clear() noexcept;
    void push_back(T val);
 
+   bool inBuffer() const;
+   bool onHeap() const;
+
  private:
    constexpr T* buffer();
    constexpr const T* buffer() const;
-   bool inBuffer() const;
-   bool onHeap() const;
    void allocate(std::size_t cap);
    void reallocate(std::size_t newCap);
    void deallocate();
@@ -87,16 +95,16 @@ template <typename T, std::size_t N> class SboVector
    // Beginning of data (heap or buffer).
    T* m_data = buffer();
    // Internal buffer.
-   std::byte m_buffer[N * sizeof(T)];
+   std::aligned_storage_t<sizeof(T), alignof(T)> m_buffer[N];
 };
 
 
 template <typename T, std::size_t N>
 SboVector<T, N>::SboVector(std::size_t count, const T& value)
 {
-   allocate(count);
-   m_capacity = count;
-   std::fill_n(m_data, count, value);
+   if (count > BufferCapacity)
+      allocate(count);
+   std::uninitialized_fill_n(m_data, count, value);
    m_size = count;
 }
 
@@ -154,6 +162,20 @@ SboVector<T, N>& SboVector<T, N>::operator=(const SboVector& other)
 }
 
 
+template <typename T, std::size_t N>
+T& SboVector<T, N>::operator[](std::size_t pos)
+{
+   return m_data[pos];
+}
+
+
+template <typename T, std::size_t N>
+const T& SboVector<T, N>::operator[](std::size_t pos) const
+{
+   return m_data[pos];
+}
+
+
 template <typename T, std::size_t N> std::size_t SboVector<T, N>::size() const noexcept
 {
    return m_size;
@@ -207,18 +229,6 @@ template <typename T, std::size_t N> void SboVector<T, N>::push_back(T val)
 }
 
 
-template <typename T, std::size_t N> constexpr T* SboVector<T, N>::buffer()
-{
-   return reinterpret_cast<T*>(m_buffer);
-}
-
-
-template <typename T, std::size_t N> constexpr const T* SboVector<T, N>::buffer() const
-{
-   return reinterpret_cast<const T*>(m_buffer);
-}
-
-
 template <typename T, std::size_t N> bool SboVector<T, N>::inBuffer() const
 {
    return (m_data == buffer());
@@ -231,12 +241,26 @@ template <typename T, std::size_t N> bool SboVector<T, N>::onHeap() const
 }
 
 
+template <typename T, std::size_t N> constexpr T* SboVector<T, N>::buffer()
+{
+   return reinterpret_cast<T*>(m_buffer);
+}
+
+
+template <typename T, std::size_t N> constexpr const T* SboVector<T, N>::buffer() const
+{
+   return reinterpret_cast<const T*>(m_buffer);
+}
+
+
 template <typename T, std::size_t N> void SboVector<T, N>::allocate(std::size_t cap)
 {
-   if (cap <= BufferCapacity)
-      ;
-   else
-      m_data = new T[cap];
+#ifdef _MSC_VER
+   m_data = reinterpret_cast<T*>(_aligned_malloc(cap * sizeof(T), alignof(T)));
+#else
+   m_data = reinterpret_cast<T*>(std::aligned_alloc(alignof(T), cap * sizeof(T)));
+#endif
+   m_capacity = cap;
 }
 
 
@@ -257,7 +281,14 @@ template <typename T, std::size_t N> void SboVector<T, N>::reallocate(std::size_
 template <typename T, std::size_t N> void SboVector<T, N>::deallocate()
 {
    if (onHeap())
-      delete[] m_data;
+   {
+#ifdef _MSC_VER
+      _aligned_free(m_data);
+#else
+      std::free(m_data);
+#endif
+      m_data = buffer();
+   }
 }
 
 
