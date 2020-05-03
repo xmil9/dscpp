@@ -2,14 +2,40 @@
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
+#include <type_traits>
 
 
 ///////////////////
 
 // Vector type that use the small buffer optimization to avoid heap usage for
 // sizes below a given number of elements.
+// Just like for std::vector the template parameter type must be
+// - copy-constructible
+// - copy-assignable
+// - erasable
+// Where erasable is defined as p->~T() (a call to the type's dtor through a pointer
+// to T) being valid. This allows class types with accessible dtors and scalar types.
+// It excludes array types, function types, reference types, and void.
 template <typename T, std::size_t N> class SboVector
 {
+   // Requirements for T.
+   static_assert(std::is_copy_constructible_v<T>,
+                 "Element type must be copy-constructible");
+   static_assert(std::is_copy_assignable_v<T>, "Element type must be copy-assignable");
+   static_assert(std::is_copy_assignable_v<T>, "Element type must be copy-assignable");
+   static_assert(!std::is_array_v<T>,
+                 "Element type must be erasable, i.e. calls to p->~T() must be valid. "
+                 "Array types are not erasable.");
+   static_assert(!std::is_function_v<T>,
+                 "Element type must be erasable, i.e. calls to p->~T() must be valid. "
+                 "Function types are not erasable.");
+   static_assert(!std::is_reference_v<T>,
+                 "Element type must be erasable, i.e. calls to p->~T() must be valid. "
+                 "Reference types are not erasable.");
+   static_assert(!std::is_same_v<T, void>,
+                 "Element type must be erasable, i.e. calls to p->~T() must be valid. "
+                 "Type void is not erasable.");
+   // Requirements for N.
    static_assert(N > 0, "Zero-sized buffer is not supported. Use std::vector.");
 
  public:
@@ -68,8 +94,7 @@ template <typename T, std::size_t N> class SboVector
 template <typename T, std::size_t N>
 SboVector<T, N>::SboVector(std::size_t count, const T& value)
 {
-   if (count > BufferCapacity)
-      allocate(count);
+   allocate(count);
    m_capacity = count;
    std::fill_n(m_data, count, value);
    m_size = count;
@@ -208,7 +233,10 @@ template <typename T, std::size_t N> bool SboVector<T, N>::onHeap() const
 
 template <typename T, std::size_t N> void SboVector<T, N>::allocate(std::size_t cap)
 {
-   m_data = new T[cap];
+   if (cap <= BufferCapacity)
+      ;
+   else
+      m_data = new T[cap];
 }
 
 

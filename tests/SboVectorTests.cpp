@@ -43,8 +43,6 @@ struct DerivedWithVtable : public AbstractBase
    int i = 0;
 };
 
-} // namespace
-
 
 ///////////////////
 
@@ -87,11 +85,14 @@ void TestSboVectorDefaultCtor()
    }
 }
 
-
 void TestSboVectorCtorForElementCountAndValue()
 {
 }
 
+} // namespace
+
+
+///////////////////
 
 void TestSboVector()
 {
