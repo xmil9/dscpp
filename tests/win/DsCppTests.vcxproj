@@ -21,11 +21,14 @@
   <ItemGroup>
     <ClCompile Include="..\DsCppTests.cpp" />
     <ClCompile Include="..\RingBufferTests.cpp" />
+    <ClCompile Include="..\SboVectorTests.cpp" />
     <ClCompile Include="..\TestUtil.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\RingBuffer.h" />
+    <ClInclude Include="..\..\SboVector.h" />
     <ClInclude Include="..\RingBufferTests.h" />
+    <ClInclude Include="..\SboVectorTests.h" />
     <ClInclude Include="..\TestUtil.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -128,6 +131,7 @@
       <TreatWarningAsError>true</TreatWarningAsError>
       <AdditionalIncludeDirectories>../..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <EnablePREfast>false</EnablePREfast>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -168,6 +172,7 @@
       <TreatWarningAsError>true</TreatWarningAsError>
       <AdditionalIncludeDirectories>../..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <EnablePREfast>false</EnablePREfast>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
