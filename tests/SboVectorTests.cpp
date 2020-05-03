@@ -9,6 +9,7 @@ namespace
 {
 ///////////////////
 
+// Verifies that SboVector works for types with a default ctor.
 struct PodWithDefaultCtor
 {
    PodWithDefaultCtor() { ++defaultCtorCalls; }
@@ -22,6 +23,7 @@ struct PodWithDefaultCtor
 };
 
 
+// Verifies that SboVector works for types without a default ctor.
 struct PodWithoutDefaultCtor
 {
    PodWithoutDefaultCtor(int ii, double dd, bool bb) : i{ii}, d{dd}, b{bb}
@@ -41,15 +43,37 @@ struct PodWithoutDefaultCtor
 struct AbstractBase
 {
    virtual ~AbstractBase() = default;
-   virtual void funcA() = 0;
+   virtual int getValue() = 0;
 };
 
 
-struct DerivedWithVtable : public AbstractBase
+// Verifies that SboVector works for types that have vtables and that virtual
+// function calls get dispatched correctly.
+class DerivedWithVtableA : public AbstractBase
 {
-   void funcA() override { i = 10; }
+ public:
+   explicit DerivedWithVtableA(int init) : i{init} {}
 
-   int i = 0;
+   int getValue() override { return i++; }
+
+ private:
+   int i;
+};
+
+class DerivedWithVtableB : public AbstractBase
+{
+ public:
+   explicit DerivedWithVtableB(int init) : i{init} {}
+
+   int getValue() override
+   {
+      int prev = i;
+      i += 2;
+      return prev;
+   }
+
+ private:
+   int i;
 };
 
 
@@ -84,7 +108,7 @@ void TestSboVectorDefaultCtor()
    {
       const std::string caseLabel{"SboVector default ctor for class with vtable."};
 
-      SboVector<DerivedWithVtable, 10> sv;
+      SboVector<DerivedWithVtableA, 10> sv;
 
       VERIFY(sv.empty(), caseLabel);
       VERIFY(sv.capacity() == 10, caseLabel);
@@ -100,7 +124,7 @@ void TestSboVectorDefaultCtor()
       VERIFY(sv.inBuffer(), caseLabel);
    }
    {
-      const std::string caseLabel{"SboVector default ctor for built-in type."};
+      const std::string caseLabel{"SboVector default ctor for scalar type."};
 
       SboVector<int, 10> sv;
 
@@ -146,6 +170,126 @@ void TestSboVectorCtorForElementCountAndValue()
       VERIFY(PodWithDefaultCtor::defaultCtorCalls == 1, caseLabel);
       for (int i = 0; i < sv.size(); ++i)
          VERIFY(sv[i].i == 3, caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "SboVector count-and-value ctor for pod-type without "
+         "default ctor where elements fit into internal buffer."};
+      PodWithDefaultCtor::resetCallCount();
+
+      PodWithoutDefaultCtor val{2, 3.0, false};
+      SboVector<PodWithoutDefaultCtor, 10> sv{5, val};
+
+      VERIFY(sv.size() == 5, caseLabel);
+      VERIFY(sv.capacity() == 10, caseLabel);
+      VERIFY(sv.inBuffer(), caseLabel);
+      VERIFY(PodWithoutDefaultCtor::ctorCalls == 1, caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+      {
+         VERIFY(sv[i].i == 2, caseLabel);
+         VERIFY(sv[i].d == 3.0, caseLabel);
+         VERIFY(sv[i].b == false, caseLabel);
+      }
+   }
+   {
+      const std::string caseLabel{
+         "SboVector count-and-value ctor for pod-type without "
+         "default ctor where elements don't fit into internal buffer."};
+      PodWithoutDefaultCtor::resetCallCount();
+
+      PodWithoutDefaultCtor val{2, 3.0, false};
+      SboVector<PodWithoutDefaultCtor, 10> sv{20, val};
+
+      VERIFY(sv.size() == 20, caseLabel);
+      VERIFY(sv.capacity() == 20, caseLabel);
+      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(PodWithoutDefaultCtor::ctorCalls == 1, caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+      {
+         VERIFY(sv[i].i == 2, caseLabel);
+         VERIFY(sv[i].d == 3.0, caseLabel);
+         VERIFY(sv[i].b == false, caseLabel);
+      }
+   }
+   {
+      const std::string caseLabel{"SboVector count-and-value ctor for class with vtable "
+                                  "where elements fit into internal buffer."};
+
+      DerivedWithVtableA val{1};
+      SboVector<DerivedWithVtableA, 10> sv{5, val};
+
+      VERIFY(sv.size() == 5, caseLabel);
+      VERIFY(sv.capacity() == 10, caseLabel);
+      VERIFY(sv.inBuffer(), caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i].getValue() == 1, caseLabel);
+   }
+   {
+      const std::string caseLabel{"SboVector count-and-value ctor for class with vtable "
+                                  "where elements don't fit into internal buffer."};
+
+      DerivedWithVtableA val{1};
+      SboVector<DerivedWithVtableA, 10> sv{20, val};
+
+      VERIFY(sv.size() == 20, caseLabel);
+      VERIFY(sv.capacity() == 20, caseLabel);
+      VERIFY(sv.onHeap(), caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i].getValue() == 1, caseLabel);
+   }
+   {
+      const std::string caseLabel{"SboVector default ctor for std::string where elements "
+                                  "fit into internal buffer."};
+
+      std::string val{"abc"};
+      SboVector<std::string, 10> sv{5, val};
+
+      VERIFY(sv.size() == 5, caseLabel);
+      VERIFY(sv.capacity() == 10, caseLabel);
+      VERIFY(sv.inBuffer(), caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i] == "abc", caseLabel);
+   }
+   {
+      const std::string caseLabel{"SboVector default ctor for std::string where elements "
+                                  "don't fit into internal buffer."};
+
+      std::string val{"abc"};
+      SboVector<std::string, 10> sv{20, val};
+
+      VERIFY(sv.size() == 20, caseLabel);
+      VERIFY(sv.capacity() == 20, caseLabel);
+      VERIFY(sv.onHeap(), caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i] == val, caseLabel);
+   }
+   {
+      const std::string caseLabel{"SboVector default ctor for scalar type where elements "
+                                  "fit into internal buffer."};
+
+      const int val = 1000;
+      // Call with parenthesis to prevent ctor for initializer list to be selected.
+      SboVector<int, 10> sv(5, val);
+
+      VERIFY(sv.size() == 5, caseLabel);
+      VERIFY(sv.capacity() == 10, caseLabel);
+      VERIFY(sv.inBuffer(), caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i] == val, caseLabel);
+   }
+   {
+      const std::string caseLabel{"SboVector default ctor for scalar type where elements "
+                                  "don't fit into internal buffer."};
+
+      int val = 1000;
+      // Call with parenthesis to prevent ctor for initializer list to be selected.
+      SboVector<int, 10> sv(20, val);
+
+      VERIFY(sv.size() == 20, caseLabel);
+      VERIFY(sv.capacity() == 20, caseLabel);
+      VERIFY(sv.onHeap(), caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i] == val, caseLabel);
    }
 }
 

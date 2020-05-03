@@ -256,6 +256,7 @@ template <typename T, std::size_t N> constexpr const T* SboVector<T, N>::buffer(
 template <typename T, std::size_t N> void SboVector<T, N>::allocate(std::size_t cap)
 {
 #ifdef _MSC_VER
+   // Visual Studio does not support std::aligned_alloc.
    m_data = reinterpret_cast<T*>(_aligned_malloc(cap * sizeof(T), alignof(T)));
 #else
    m_data = reinterpret_cast<T*>(std::aligned_alloc(alignof(T), cap * sizeof(T)));
