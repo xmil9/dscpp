@@ -22,7 +22,7 @@
 // It excludes array types, function types, reference types, and void.
 template <typename T, std::size_t N> class SboVector
 {
-   // Requirements for T.
+   // Requirements for T (std::vector has the same requirements for its T).
    static_assert(std::is_copy_constructible_v<T>,
                  "Element type must be copy-constructible");
    static_assert(std::is_copy_assignable_v<T>, "Element type must be copy-assignable");
@@ -113,8 +113,7 @@ template <typename T, std::size_t N> SboVector<T, N>::SboVector(const SboVector&
 {
    if (other.capacity() > BufferCapacity)
       allocate(other.capacity());
-   m_capacity = other.capacity();
-   std::copy_n(other.m_data, other.size(), m_data);
+   std::uninitialized_copy_n(other.m_data, other.size(), m_data);
    m_size = other.size();
 }
 
