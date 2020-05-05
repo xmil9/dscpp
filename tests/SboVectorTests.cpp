@@ -135,6 +135,18 @@ class DerivedWithVtableB : public AbstractBase
 };
 
 
+struct InstrumentedDtor
+{
+   explicit InstrumentedDtor(int ii) : i{ii} {}
+   ~InstrumentedDtor() { ++dtorCalls; }
+
+   int i = 0;
+
+   inline static std::size_t dtorCalls = 0;
+   inline static void resetCallCount() { dtorCalls = 0; }
+};
+
+
 ///////////////////
 
 void TestSboVectorDefaultCtor()
@@ -745,8 +757,7 @@ void TestSboVectorInitializerListCtor()
    }
    {
       const std::string caseLabel{
-         "SboVector initializer list ctor for scala type where elements "
-         "don't fit into internal buffer."};
+         "SboVector initializer list ctor for scalar type on heap."};
 
       SboVector<int, 10> sv{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
 
@@ -755,6 +766,36 @@ void TestSboVectorInitializerListCtor()
       VERIFY(sv.onHeap(), caseLabel);
       for (int i = 0; i < sv.size(); ++i)
          VERIFY(sv[i] == i + 1, caseLabel);
+   }
+}
+
+
+void TestSboVectorDtor()
+{
+   {
+      const std::string caseLabel{"SboVector dtor for internal buffer."};
+
+      InstrumentedDtor::resetCallCount();
+      {
+         SboVector<InstrumentedDtor, 10> sv{InstrumentedDtor{1}, InstrumentedDtor{2},
+                                            InstrumentedDtor{3}};
+         VERIFY(sv.inBuffer(), caseLabel);
+      }
+
+      VERIFY(InstrumentedDtor::dtorCalls == 3, caseLabel);
+   }
+   {
+      const std::string caseLabel{"SboVector dtor for heap."};
+
+      InstrumentedDtor::resetCallCount();
+      {
+         SboVector<InstrumentedDtor, 3> sv{InstrumentedDtor{1}, InstrumentedDtor{2},
+                                           InstrumentedDtor{3}, InstrumentedDtor{4},
+                                           InstrumentedDtor{5}};
+         VERIFY(sv.onHeap(), caseLabel);
+      }
+
+      VERIFY(InstrumentedDtor::dtorCalls == 5, caseLabel);
    }
 }
 
@@ -770,4 +811,5 @@ void TestSboVector()
    TestSboVectorCopyCtor();
    TestSboVectorMoveCtor();
    TestSboVectorInitializerListCtor();
+   TestSboVectorDtor();
 }
