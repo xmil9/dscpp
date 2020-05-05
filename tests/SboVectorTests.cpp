@@ -18,6 +18,13 @@ struct PodWithDefaultCtor
    {
       ++copyCtorCalls;
    }
+   PodWithDefaultCtor(PodWithDefaultCtor&& other)
+   {
+      std::swap(d, other.d);
+      std::swap(i, other.i);
+      std::swap(b, other.b);
+      ++moveCtorCalls;
+   }
    PodWithDefaultCtor& operator=(const PodWithDefaultCtor& other)
    {
       d = other.d;
@@ -32,12 +39,14 @@ struct PodWithDefaultCtor
 
    inline static int defaultCtorCalls = 0;
    inline static int copyCtorCalls = 0;
+   inline static int moveCtorCalls = 0;
    inline static int assignmentCalls = 0;
 
    inline static void resetCallCount()
    {
       defaultCtorCalls = 0;
       copyCtorCalls = 0;
+      moveCtorCalls = 0;
       assignmentCalls = 0;
    }
 };
@@ -55,6 +64,13 @@ struct PodWithoutDefaultCtor
    {
       ++copyCtorCalls;
    }
+   PodWithoutDefaultCtor(PodWithoutDefaultCtor&& other)
+   {
+      std::swap(d, other.d);
+      std::swap(i, other.i);
+      std::swap(b, other.b);
+      ++moveCtorCalls;
+   }
    PodWithoutDefaultCtor& operator=(const PodWithoutDefaultCtor& other)
    {
       d = other.d;
@@ -69,12 +85,14 @@ struct PodWithoutDefaultCtor
 
    inline static int ctorCalls = 0;
    inline static int copyCtorCalls = 0;
+   inline static int moveCtorCalls = 0;
    inline static int assignmentCalls = 0;
 
    inline static void resetCallCount()
    {
       ctorCalls = 0;
       copyCtorCalls = 0;
+      moveCtorCalls = 0;
       assignmentCalls = 0;
    }
 };
@@ -510,6 +528,139 @@ void TestSboVectorCopyCtor()
    }
 }
 
+
+void TestSboVectorMoveCtor()
+{
+   {
+      const std::string caseLabel{
+         "SboVector move ctor for pod-type with default ctor where elements "
+         "fit into internal buffer."};
+
+      PodWithDefaultCtor val;
+      SboVector<PodWithDefaultCtor, 10> src{5, val};
+      for (int i = 0; i < src.size(); ++i)
+         src[i].i = i;
+
+      PodWithDefaultCtor::resetCallCount();
+      SboVector<PodWithDefaultCtor, 10> moveDest{std::move(src)};
+
+      VERIFY(moveDest.size() == 5, caseLabel);
+      VERIFY(moveDest.capacity() == 10, caseLabel);
+      VERIFY(moveDest.inBuffer(), caseLabel);
+      VERIFY(PodWithDefaultCtor::defaultCtorCalls == 0, caseLabel);
+      VERIFY(PodWithDefaultCtor::copyCtorCalls == 0, caseLabel);
+      VERIFY(PodWithDefaultCtor::moveCtorCalls == 5, caseLabel);
+      VERIFY(PodWithDefaultCtor::assignmentCalls == 0, caseLabel);
+      for (int i = 0; i < moveDest.size(); ++i)
+         VERIFY(moveDest[i].i == i, caseLabel);
+      // Verify moved-from instance is empty.
+      VERIFY(src.size() == 0, caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "SboVector move ctor for pod-type with default ctor where elements "
+         "don't fit into internal buffer."};
+
+      PodWithDefaultCtor val;
+      SboVector<PodWithDefaultCtor, 10> src{20, val};
+      for (int i = 0; i < src.size(); ++i)
+         src[i].i = i;
+
+      PodWithDefaultCtor::resetCallCount();
+      SboVector<PodWithDefaultCtor, 10> moveDest{std::move(src)};
+
+      VERIFY(moveDest.size() == 20, caseLabel);
+      VERIFY(moveDest.capacity() == 20, caseLabel);
+      VERIFY(moveDest.onHeap(), caseLabel);
+      VERIFY(PodWithDefaultCtor::defaultCtorCalls == 0, caseLabel);
+      VERIFY(PodWithDefaultCtor::copyCtorCalls == 0, caseLabel);
+      // None of the elements move ctors executed because the SboVector simply
+      // stole the pointer to the heap memory.
+      VERIFY(PodWithDefaultCtor::moveCtorCalls == 0, caseLabel);
+      VERIFY(PodWithDefaultCtor::assignmentCalls == 0, caseLabel);
+      for (int i = 0; i < moveDest.size(); ++i)
+         VERIFY(moveDest[i].i == i, caseLabel);
+      // Verify moved-from instance is empty.
+      VERIFY(src.size() == 0, caseLabel);
+   }
+   {
+      const std::string caseLabel{"SboVector move ctor for std::string where elements "
+                                  "fit into internal buffer."};
+
+      std::string val;
+      SboVector<std::string, 10> src{5, val};
+      for (int i = 0; i < src.size(); ++i)
+         src[i] = std::to_string(i);
+
+      SboVector<std::string, 10> moveDest{std::move(src)};
+
+      VERIFY(moveDest.size() == 5, caseLabel);
+      VERIFY(moveDest.capacity() == 10, caseLabel);
+      VERIFY(moveDest.inBuffer(), caseLabel);
+      for (int i = 0; i < moveDest.size(); ++i)
+         VERIFY(moveDest[i] == std::to_string(i), caseLabel);
+      // Verify moved-from instance is empty.
+      VERIFY(src.size() == 0, caseLabel);
+   }
+   {
+      const std::string caseLabel{"SboVector move ctor for std::string where elements "
+                                  "don't fit into internal buffer."};
+
+      std::string val;
+      SboVector<std::string, 10> src{20, val};
+      for (int i = 0; i < src.size(); ++i)
+         src[i] = std::to_string(i);
+
+      SboVector<std::string, 10> moveDest{std::move(src)};
+
+      VERIFY(moveDest.size() == 20, caseLabel);
+      VERIFY(moveDest.capacity() == 20, caseLabel);
+      VERIFY(moveDest.onHeap(), caseLabel);
+      for (int i = 0; i < moveDest.size(); ++i)
+         VERIFY(moveDest[i] == std::to_string(i), caseLabel);
+      // Verify moved-from instance is empty.
+      VERIFY(src.size() == 0, caseLabel);
+   }
+   {
+      const std::string caseLabel{"SboVector move ctor for scalar type where elements "
+                                  "fit into internal buffer."};
+
+      // Call with parenthesis to prevent ctor for initializer list to be selected.
+      SboVector<int, 10> src(5, 0);
+      for (int i = 0; i < src.size(); ++i)
+         src[i] = i;
+
+      SboVector<int, 10> moveDest{std::move(src)};
+
+      VERIFY(moveDest.size() == 5, caseLabel);
+      VERIFY(moveDest.capacity() == 10, caseLabel);
+      VERIFY(moveDest.inBuffer(), caseLabel);
+      for (int i = 0; i < moveDest.size(); ++i)
+         VERIFY(moveDest[i] == i, caseLabel);
+      // Verify moved-from instance is empty.
+      VERIFY(src.size() == 0, caseLabel);
+   }
+   {
+      const std::string caseLabel{"SboVector move ctor for scalar type where elements "
+                                  "don't fit into internal buffer."};
+
+      // Call with parenthesis to prevent ctor for initializer list to be selected.
+      SboVector<int, 10> src(20, 0);
+      for (int i = 0; i < src.size(); ++i)
+         src[i] = i;
+
+      SboVector<int, 10> moveDest{std::move(src)};
+
+      VERIFY(moveDest.size() == 20, caseLabel);
+      VERIFY(moveDest.capacity() == 20, caseLabel);
+      VERIFY(moveDest.onHeap(), caseLabel);
+      for (int i = 0; i < moveDest.size(); ++i)
+         VERIFY(moveDest[i] == i, caseLabel);
+      // Verify moved-from instance is empty.
+      VERIFY(src.size() == 0, caseLabel);
+   }
+}
+
 } // namespace
 
 
@@ -520,4 +671,5 @@ void TestSboVector()
    TestSboVectorDefaultCtor();
    TestSboVectorCtorForElementCountAndValue();
    TestSboVectorCopyCtor();
+   TestSboVectorMoveCtor();
 }

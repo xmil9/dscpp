@@ -123,14 +123,14 @@ SboVector<T, N>::SboVector(SboVector&& other) noexcept
 {
    if (other.onHeap())
    {
-      // Steal heap data.
+      // Steal heap memory.
       m_data = other.m_data;
-      // Reset other data pointer to buffer.
-      other.m_data = other.m_buffer;
+      // Reset 'other' data pointer to its buffer.
+      other.m_data = other.buffer();
    }
    else
    {
-      std::swap(m_buffer, other.m_buffer);
+      std::uninitialized_move_n(other.buffer(), other.size(), buffer());
    }
    std::swap(m_capacity, other.m_capacity);
    std::swap(m_size, other.m_size);
