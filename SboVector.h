@@ -57,7 +57,7 @@ template <typename T, std::size_t N> class SboVector
    SboVector() = default;
    explicit SboVector(std::size_t count, const T& value);
    SboVector(const SboVector& other);
-   SboVector(SboVector&& other) noexcept;
+   SboVector(SboVector&& other);
    SboVector(std::initializer_list<T> ilist);
    ~SboVector();
 
@@ -119,7 +119,7 @@ template <typename T, std::size_t N> SboVector<T, N>::SboVector(const SboVector&
 
 
 template <typename T, std::size_t N>
-SboVector<T, N>::SboVector(SboVector&& other) noexcept
+SboVector<T, N>::SboVector(SboVector&& other)
 {
    if (other.onHeap())
    {
