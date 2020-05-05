@@ -66,15 +66,15 @@ struct PodWithoutDefaultCtor
    }
    PodWithoutDefaultCtor(PodWithoutDefaultCtor&& other)
    {
-      std::swap(d, other.d);
       std::swap(i, other.i);
+      std::swap(d, other.d);
       std::swap(b, other.b);
       ++moveCtorCalls;
    }
    PodWithoutDefaultCtor& operator=(const PodWithoutDefaultCtor& other)
    {
-      d = other.d;
       i = other.i;
+      d = other.d;
       b = other.b;
       ++assignmentCalls;
    }
@@ -661,6 +661,103 @@ void TestSboVectorMoveCtor()
    }
 }
 
+
+void TestSboVectorInitializerListCtor()
+{
+   {
+      const std::string caseLabel{
+         "SboVector initializer list ctor for pod-type where elements "
+         "fit into internal buffer."};
+
+      PodWithoutDefaultCtor::resetCallCount();
+      SboVector<PodWithoutDefaultCtor, 10> sv{
+         {1, 1.0, true}, {2, 2.0, true}, {3, 3.0, true}, {4, 4.0, true}};
+
+      VERIFY(sv.size() == 4, caseLabel);
+      VERIFY(sv.capacity() == 10, caseLabel);
+      VERIFY(sv.inBuffer(), caseLabel);
+      VERIFY(PodWithoutDefaultCtor::copyCtorCalls == 4, caseLabel);
+      VERIFY(PodWithoutDefaultCtor::moveCtorCalls == 0, caseLabel);
+      VERIFY(PodWithoutDefaultCtor::assignmentCalls == 0, caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i].i == i + 1, caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "SboVector initializer list ctor for pod-type where elements don't "
+         "fit into internal buffer."};
+
+      PodWithoutDefaultCtor::resetCallCount();
+      SboVector<PodWithoutDefaultCtor, 10> sv{
+         {1, 1.0, true}, {2, 2.0, true},   {3, 3.0, true},   {4, 4.0, true},
+         {5, 5.0, true}, {6, 6.0, true},   {7, 7.0, true},   {8, 8.0, true},
+         {9, 9.0, true}, {10, 10.0, true}, {11, 11.0, true}, {12, 12.0, true},
+      };
+
+      VERIFY(sv.size() == 12, caseLabel);
+      VERIFY(sv.capacity() == 12, caseLabel);
+      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(PodWithoutDefaultCtor::copyCtorCalls == 12, caseLabel);
+      VERIFY(PodWithoutDefaultCtor::moveCtorCalls == 0, caseLabel);
+      VERIFY(PodWithoutDefaultCtor::assignmentCalls == 0, caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i].i == i + 1, caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "SboVector initializer list ctor for std::string where elements "
+         "fit into internal buffer."};
+
+      SboVector<std::string, 10> sv{"1", "2", "3", "4"};
+
+      VERIFY(sv.size() == 4, caseLabel);
+      VERIFY(sv.capacity() == 10, caseLabel);
+      VERIFY(sv.inBuffer(), caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i] == std::to_string(i + 1), caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "SboVector initializer list ctor for std::string where elements "
+         "don't fit into internal buffer."};
+
+      SboVector<std::string, 10> sv{"1", "2", "3", "4",  "5",  "6",
+                                    "7", "8", "9", "10", "11", "12"};
+
+      VERIFY(sv.size() == 12, caseLabel);
+      VERIFY(sv.capacity() == 12, caseLabel);
+      VERIFY(sv.onHeap(), caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i] == std::to_string(i + 1), caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "SboVector initializer list ctor for scala type where elements "
+         "fit into internal buffer."};
+
+      SboVector<int, 10> sv{1, 2, 3, 4};
+
+      VERIFY(sv.size() == 4, caseLabel);
+      VERIFY(sv.capacity() == 10, caseLabel);
+      VERIFY(sv.inBuffer(), caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i] == i + 1, caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "SboVector initializer list ctor for scala type where elements "
+         "don't fit into internal buffer."};
+
+      SboVector<int, 10> sv{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
+
+      VERIFY(sv.size() == 12, caseLabel);
+      VERIFY(sv.capacity() == 12, caseLabel);
+      VERIFY(sv.onHeap(), caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i] == i + 1, caseLabel);
+   }
+}
+
 } // namespace
 
 
@@ -672,4 +769,5 @@ void TestSboVector()
    TestSboVectorCtorForElementCountAndValue();
    TestSboVectorCopyCtor();
    TestSboVectorMoveCtor();
+   TestSboVectorInitializerListCtor();
 }

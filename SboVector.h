@@ -142,8 +142,7 @@ SboVector<T, N>::SboVector(std::initializer_list<T> ilist)
 {
    if (ilist.size() > BufferCapacity)
       allocate(ilist.size());
-   m_capacity = ilist.size();
-   std::copy_n(ilist.begin(), ilist.size(), m_data);
+   std::uninitialized_copy_n(ilist.begin(), ilist.size(), m_data);
    m_size = ilist.size();
 }
 
