@@ -1,8 +1,13 @@
 #pragma once
+
+#ifdef _MSC_VER
+#define VS_COMPILER
+#endif
+
 #include <algorithm>
 #include <cassert>
 #include <cstdlib>
-#ifdef _MSC_VER
+#ifdef VS_COMPILER
 #include <malloc.h>
 #endif
 #include <memory>
@@ -253,7 +258,7 @@ template <typename T, std::size_t N> constexpr const T* SboVector<T, N>::buffer(
 
 template <typename T, std::size_t N> void SboVector<T, N>::allocate(std::size_t cap)
 {
-#ifdef _MSC_VER
+#ifdef VS_COMPILER
    // Visual Studio does not support std::aligned_alloc.
    m_data = reinterpret_cast<T*>(_aligned_malloc(cap * sizeof(T), alignof(T)));
 #else
@@ -281,7 +286,7 @@ template <typename T, std::size_t N> void SboVector<T, N>::deallocate()
 {
    if (onHeap())
    {
-#ifdef _MSC_VER
+#ifdef VS_COMPILER
       _aligned_free(m_data);
 #else
       std::free(m_data);
