@@ -213,8 +213,7 @@ void TestSboVectorCtorForElementCountAndValue()
 {
    {
       const std::string caseLabel{
-         "SboVector count-and-value ctor for pod-type with default ctor where elements "
-         "fit into internal buffer."};
+         "SboVector count-and-value ctor for pod-type with default ctor in buffer."};
       PodWithDefaultCtor::resetCallCount();
 
       PodWithDefaultCtor val;
@@ -232,8 +231,7 @@ void TestSboVectorCtorForElementCountAndValue()
    }
    {
       const std::string caseLabel{
-         "SboVector count-and-value ctor for pod-type with default ctor where elements "
-         "don't fit into internal buffer."};
+         "SboVector count-and-value ctor for pod-type with default ctor on heap."};
       PodWithDefaultCtor::resetCallCount();
 
       PodWithDefaultCtor val;
@@ -251,8 +249,7 @@ void TestSboVectorCtorForElementCountAndValue()
    }
    {
       const std::string caseLabel{
-         "SboVector count-and-value ctor for pod-type without "
-         "default ctor where elements fit into internal buffer."};
+         "SboVector count-and-value ctor for pod-type without default ctor in buffer."};
       PodWithDefaultCtor::resetCallCount();
 
       PodWithoutDefaultCtor val{2, 3.0, false};
@@ -273,8 +270,7 @@ void TestSboVectorCtorForElementCountAndValue()
    }
    {
       const std::string caseLabel{
-         "SboVector count-and-value ctor for pod-type without "
-         "default ctor where elements don't fit into internal buffer."};
+         "SboVector count-and-value ctor for pod-type without default ctor on heap."};
       PodWithoutDefaultCtor::resetCallCount();
 
       PodWithoutDefaultCtor val{2, 3.0, false};
@@ -295,7 +291,7 @@ void TestSboVectorCtorForElementCountAndValue()
    }
    {
       const std::string caseLabel{"SboVector count-and-value ctor for class with vtable "
-                                  "where elements fit into internal buffer."};
+                                  "in buffer."};
 
       DerivedWithVtableA val{1};
       SboVector<DerivedWithVtableA, 10> sv{5, val};
@@ -308,7 +304,7 @@ void TestSboVectorCtorForElementCountAndValue()
    }
    {
       const std::string caseLabel{"SboVector count-and-value ctor for class with vtable "
-                                  "where elements don't fit into internal buffer."};
+                                  "on heap."};
 
       DerivedWithVtableA val{1};
       SboVector<DerivedWithVtableA, 10> sv{20, val};
@@ -321,8 +317,7 @@ void TestSboVectorCtorForElementCountAndValue()
    }
    {
       const std::string caseLabel{
-         "SboVector count-and-value ctor for std::string where elements "
-         "fit into internal buffer."};
+         "SboVector count-and-value ctor for std::string in buffer."};
 
       std::string val{"abc"};
       SboVector<std::string, 10> sv{5, val};
@@ -335,8 +330,7 @@ void TestSboVectorCtorForElementCountAndValue()
    }
    {
       const std::string caseLabel{
-         "SboVector count-and-value ctor for std::string where elements "
-         "don't fit into internal buffer."};
+         "SboVector count-and-value ctor for std::string on heap."};
 
       std::string val{"abc"};
       SboVector<std::string, 10> sv{20, val};
@@ -349,8 +343,7 @@ void TestSboVectorCtorForElementCountAndValue()
    }
    {
       const std::string caseLabel{
-         "SboVector count-and-value ctor for scalar type where elements "
-         "fit into internal buffer."};
+         "SboVector count-and-value ctor for scalar type in buffer."};
 
       const int val = 1000;
       // Call with parenthesis to prevent ctor for initializer list to be selected.
@@ -364,8 +357,7 @@ void TestSboVectorCtorForElementCountAndValue()
    }
    {
       const std::string caseLabel{
-         "SboVector count-and-value ctor for scalar type where elements "
-         "don't fit into internal buffer."};
+         "SboVector count-and-value ctor for scalar type on heap."};
 
       int val = 1000;
       // Call with parenthesis to prevent ctor for initializer list to be selected.
@@ -384,8 +376,7 @@ void TestSboVectorCopyCtor()
 {
    {
       const std::string caseLabel{
-         "SboVector copy ctor for pod-type with default ctor where elements "
-         "fit into internal buffer."};
+         "SboVector copy ctor for pod-type with default ctor in buffer."};
 
       PodWithDefaultCtor val;
       SboVector<PodWithDefaultCtor, 10> src{5, val};
@@ -406,8 +397,7 @@ void TestSboVectorCopyCtor()
    }
    {
       const std::string caseLabel{
-         "SboVector copy ctor for pod-type with default ctor where elements don't "
-         "fit into internal buffer."};
+         "SboVector copy ctor for pod-type with default ctor on heap."};
 
       PodWithDefaultCtor val;
       SboVector<PodWithDefaultCtor, 10> src{20, val};
@@ -428,8 +418,7 @@ void TestSboVectorCopyCtor()
    }
    {
       const std::string caseLabel{
-         "SboVector copy ctor for pod-type without default ctor where elements "
-         "fit into internal buffer."};
+         "SboVector copy ctor for pod-type without default ctor in buffer."};
 
       PodWithoutDefaultCtor val{1, 1.0, true};
       SboVector<PodWithoutDefaultCtor, 10> src{5, val};
@@ -450,8 +439,7 @@ void TestSboVectorCopyCtor()
    }
    {
       const std::string caseLabel{
-         "SboVector copy ctor for pod-type without default ctor where elements don't "
-         "fit into internal buffer."};
+         "SboVector copy ctor for pod-type without default ctor on heap."};
 
       PodWithoutDefaultCtor val{1, 1.0, true};
       SboVector<PodWithoutDefaultCtor, 10> src{20, val};
@@ -471,8 +459,7 @@ void TestSboVectorCopyCtor()
          VERIFY(copy[i].i == src[i].i, caseLabel);
    }
    {
-      const std::string caseLabel{"SboVector copy ctor for std::string where elements "
-                                  "fit into internal buffer."};
+      const std::string caseLabel{"SboVector copy ctor for std::string in buffer."};
 
       std::string val;
       SboVector<std::string, 10> src{5, val};
@@ -488,8 +475,7 @@ void TestSboVectorCopyCtor()
          VERIFY(copy[i] == src[i], caseLabel);
    }
    {
-      const std::string caseLabel{"SboVector copy ctor for std::string where elements "
-                                  "don't fit into internal buffer."};
+      const std::string caseLabel{"SboVector copy ctor for std::string on heap."};
 
       std::string val;
       SboVector<std::string, 10> src{20, val};
@@ -505,8 +491,7 @@ void TestSboVectorCopyCtor()
          VERIFY(copy[i] == src[i], caseLabel);
    }
    {
-      const std::string caseLabel{"SboVector copy ctor for scalar type where elements "
-                                  "fit into internal buffer."};
+      const std::string caseLabel{"SboVector copy ctor for scalar type in buffer."};
 
       // Call with parenthesis to prevent ctor for initializer list to be selected.
       SboVector<int, 10> src(5, 0);
@@ -522,8 +507,7 @@ void TestSboVectorCopyCtor()
          VERIFY(copy[i] == src[i], caseLabel);
    }
    {
-      const std::string caseLabel{"SboVector copy ctor for scalar type where elements "
-                                  "don't fit into internal buffer."};
+      const std::string caseLabel{"SboVector copy ctor for scalar type on heap."};
 
       // Call with parenthesis to prevent ctor for initializer list to be selected.
       SboVector<int, 10> src(20, 0);
@@ -545,8 +529,7 @@ void TestSboVectorMoveCtor()
 {
    {
       const std::string caseLabel{
-         "SboVector move ctor for pod-type with default ctor where elements "
-         "fit into internal buffer."};
+         "SboVector move ctor for pod-type with default ctor in buffer."};
 
       PodWithDefaultCtor val;
       SboVector<PodWithDefaultCtor, 10> src{5, val};
@@ -570,8 +553,7 @@ void TestSboVectorMoveCtor()
    }
    {
       const std::string caseLabel{
-         "SboVector move ctor for pod-type with default ctor where elements "
-         "don't fit into internal buffer."};
+         "SboVector move ctor for pod-type with default ctor on heap."};
 
       PodWithDefaultCtor val;
       SboVector<PodWithDefaultCtor, 10> src{20, val};
@@ -596,8 +578,7 @@ void TestSboVectorMoveCtor()
       VERIFY(src.size() == 0, caseLabel);
    }
    {
-      const std::string caseLabel{"SboVector move ctor for std::string where elements "
-                                  "fit into internal buffer."};
+      const std::string caseLabel{"SboVector move ctor for std::string in buffer."};
 
       std::string val;
       SboVector<std::string, 10> src{5, val};
@@ -615,8 +596,7 @@ void TestSboVectorMoveCtor()
       VERIFY(src.size() == 0, caseLabel);
    }
    {
-      const std::string caseLabel{"SboVector move ctor for std::string where elements "
-                                  "don't fit into internal buffer."};
+      const std::string caseLabel{"SboVector move ctor for std::string on heap."};
 
       std::string val;
       SboVector<std::string, 10> src{20, val};
@@ -634,8 +614,7 @@ void TestSboVectorMoveCtor()
       VERIFY(src.size() == 0, caseLabel);
    }
    {
-      const std::string caseLabel{"SboVector move ctor for scalar type where elements "
-                                  "fit into internal buffer."};
+      const std::string caseLabel{"SboVector move ctor for scalar type in buffer."};
 
       // Call with parenthesis to prevent ctor for initializer list to be selected.
       SboVector<int, 10> src(5, 0);
@@ -653,8 +632,7 @@ void TestSboVectorMoveCtor()
       VERIFY(src.size() == 0, caseLabel);
    }
    {
-      const std::string caseLabel{"SboVector move ctor for scalar type where elements "
-                                  "don't fit into internal buffer."};
+      const std::string caseLabel{"SboVector move ctor for scalar type on heap."};
 
       // Call with parenthesis to prevent ctor for initializer list to be selected.
       SboVector<int, 10> src(20, 0);
@@ -678,8 +656,7 @@ void TestSboVectorInitializerListCtor()
 {
    {
       const std::string caseLabel{
-         "SboVector initializer list ctor for pod-type where elements "
-         "fit into internal buffer."};
+         "SboVector initializer list ctor for pod-type in buffer."};
 
       PodWithoutDefaultCtor::resetCallCount();
       SboVector<PodWithoutDefaultCtor, 10> sv{
@@ -696,8 +673,7 @@ void TestSboVectorInitializerListCtor()
    }
    {
       const std::string caseLabel{
-         "SboVector initializer list ctor for pod-type where elements don't "
-         "fit into internal buffer."};
+         "SboVector initializer list ctor for pod-type on heap."};
 
       PodWithoutDefaultCtor::resetCallCount();
       SboVector<PodWithoutDefaultCtor, 10> sv{
@@ -717,8 +693,7 @@ void TestSboVectorInitializerListCtor()
    }
    {
       const std::string caseLabel{
-         "SboVector initializer list ctor for std::string where elements "
-         "fit into internal buffer."};
+         "SboVector initializer list ctor for std::string in buffer."};
 
       SboVector<std::string, 10> sv{"1", "2", "3", "4"};
 
@@ -730,8 +705,7 @@ void TestSboVectorInitializerListCtor()
    }
    {
       const std::string caseLabel{
-         "SboVector initializer list ctor for std::string where elements "
-         "don't fit into internal buffer."};
+         "SboVector initializer list ctor for std::string on heap."};
 
       SboVector<std::string, 10> sv{"1", "2", "3", "4",  "5",  "6",
                                     "7", "8", "9", "10", "11", "12"};
@@ -744,8 +718,7 @@ void TestSboVectorInitializerListCtor()
    }
    {
       const std::string caseLabel{
-         "SboVector initializer list ctor for scala type where elements "
-         "fit into internal buffer."};
+         "SboVector initializer list ctor for scalar type in buffer."};
 
       SboVector<int, 10> sv{1, 2, 3, 4};
 
