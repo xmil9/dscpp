@@ -783,11 +783,11 @@ void TestSboVectorDtor()
 }
 
 
-void TestSboVectorAssignment()
+void TestSboVectorCopyAssignment()
 {
    {
-      const std::string caseLabel{
-         "SboVector assignment for pod-type from buffer instance to buffer instance."};
+      const std::string caseLabel{"SboVector copy assignment for pod-type from buffer "
+                                  "instance to buffer instance."};
 
       PodWithDefaultCtor val;
       SboVector<PodWithDefaultCtor, 10> src{5, val};
@@ -812,7 +812,7 @@ void TestSboVectorAssignment()
    }
    {
       const std::string caseLabel{
-         "SboVector assignment for pod-type from heap instance to buffer instance."};
+         "SboVector copy assignment for pod-type from heap instance to buffer instance."};
 
       PodWithDefaultCtor val;
       SboVector<PodWithDefaultCtor, 10> src{20, val};
@@ -837,7 +837,7 @@ void TestSboVectorAssignment()
    }
    {
       const std::string caseLabel{
-         "SboVector assignment for pod-type from buffer instance to heap instance."};
+         "SboVector copy assignment for pod-type from buffer instance to heap instance."};
 
       PodWithDefaultCtor val;
       SboVector<PodWithDefaultCtor, 10> src{5, val};
@@ -862,7 +862,7 @@ void TestSboVectorAssignment()
    }
    {
       const std::string caseLabel{
-         "SboVector assignment for pod-type from heap instance to heap instance."};
+         "SboVector copy assignment for pod-type from heap instance to heap instance."};
 
       PodWithDefaultCtor val;
       SboVector<PodWithDefaultCtor, 10> src{20, val};
@@ -887,6 +887,119 @@ void TestSboVectorAssignment()
    }
 }
 
+
+void TestSboVectorMoveAssignment()
+{
+   {
+      const std::string caseLabel{"SboVector move assignment for pod-type from buffer "
+                                  "instance to buffer instance."};
+
+      PodWithDefaultCtor val;
+      SboVector<PodWithDefaultCtor, 10> src{5, val};
+      for (int i = 0; i < src.size(); ++i)
+         src[i].i = i;
+
+      SboVector<PodWithDefaultCtor, 10> copy{3, PodWithDefaultCtor{}};
+      VERIFY(copy.inBuffer(), caseLabel);
+
+      PodWithDefaultCtor::resetCallCount();
+      copy = std::move(src);
+
+      VERIFY(copy.size() == 5, caseLabel);
+      VERIFY(copy.capacity() == 10, caseLabel);
+      VERIFY(copy.inBuffer(), caseLabel);
+      VERIFY(PodWithDefaultCtor::defaultCtorCalls == 0, caseLabel);
+      VERIFY(PodWithDefaultCtor::copyCtorCalls == 0, caseLabel);
+      VERIFY(PodWithDefaultCtor::moveCtorCalls == 5, caseLabel);
+      VERIFY(PodWithDefaultCtor::assignmentCalls == 0, caseLabel);
+      VERIFY(PodWithDefaultCtor::dtorCalls == 3, caseLabel);
+      for (int i = 0; i < copy.size(); ++i)
+         VERIFY(copy[i].i == i, caseLabel);
+   }
+   {
+      const std::string caseLabel{"SboVector move assignment for pod-type from heap "
+                                  "instance to buffer instance."};
+
+      PodWithDefaultCtor val;
+      SboVector<PodWithDefaultCtor, 10> src{20, val};
+      for (int i = 0; i < src.size(); ++i)
+         src[i].i = i;
+
+      SboVector<PodWithDefaultCtor, 10> copy{3, PodWithDefaultCtor{}};
+      VERIFY(copy.inBuffer(), caseLabel);
+
+      PodWithDefaultCtor::resetCallCount();
+      copy = std::move(src);
+
+      VERIFY(copy.size() == 20, caseLabel);
+      VERIFY(copy.capacity() == 20, caseLabel);
+      VERIFY(copy.onHeap(), caseLabel);
+      VERIFY(PodWithDefaultCtor::defaultCtorCalls == 0, caseLabel);
+      VERIFY(PodWithDefaultCtor::copyCtorCalls == 0, caseLabel);
+      // None of the elements move ctors executed because the SboVector simply
+      // stole the pointer to the heap memory.
+      VERIFY(PodWithDefaultCtor::moveCtorCalls == 0, caseLabel);
+      VERIFY(PodWithDefaultCtor::assignmentCalls == 0, caseLabel);
+      VERIFY(PodWithDefaultCtor::dtorCalls == 3, caseLabel);
+      for (int i = 0; i < copy.size(); ++i)
+         VERIFY(copy[i].i == i, caseLabel);
+   }
+   {
+      const std::string caseLabel{"SboVector move assignment for pod-type from buffer "
+                                  "instance to heap instance."};
+
+      PodWithDefaultCtor val;
+      SboVector<PodWithDefaultCtor, 10> src{5, val};
+      for (int i = 0; i < src.size(); ++i)
+         src[i].i = i;
+
+      SboVector<PodWithDefaultCtor, 10> copy{20, PodWithDefaultCtor{}};
+      VERIFY(copy.onHeap(), caseLabel);
+
+      PodWithDefaultCtor::resetCallCount();
+      copy = std::move(src);
+
+      VERIFY(copy.size() == 5, caseLabel);
+      VERIFY(copy.capacity() == 10, caseLabel);
+      VERIFY(copy.inBuffer(), caseLabel);
+      VERIFY(PodWithDefaultCtor::defaultCtorCalls == 0, caseLabel);
+      VERIFY(PodWithDefaultCtor::copyCtorCalls == 0, caseLabel);
+      VERIFY(PodWithDefaultCtor::moveCtorCalls == 5, caseLabel);
+      VERIFY(PodWithDefaultCtor::assignmentCalls == 0, caseLabel);
+      VERIFY(PodWithDefaultCtor::dtorCalls == 20, caseLabel);
+      for (int i = 0; i < copy.size(); ++i)
+         VERIFY(copy[i].i == i, caseLabel);
+   }
+   {
+      const std::string caseLabel{"SboVector move assignment for pod-type from heap "
+                                  "instance to heap instance."};
+
+      PodWithDefaultCtor val;
+      SboVector<PodWithDefaultCtor, 10> src{20, val};
+      for (int i = 0; i < src.size(); ++i)
+         src[i].i = i;
+
+      SboVector<PodWithDefaultCtor, 10> copy{30, PodWithDefaultCtor{}};
+      VERIFY(copy.onHeap(), caseLabel);
+
+      PodWithDefaultCtor::resetCallCount();
+      copy = std::move(src);
+
+      VERIFY(copy.size() == 20, caseLabel);
+      VERIFY(copy.capacity() == 20, caseLabel);
+      VERIFY(copy.onHeap(), caseLabel);
+      VERIFY(PodWithDefaultCtor::defaultCtorCalls == 0, caseLabel);
+      VERIFY(PodWithDefaultCtor::copyCtorCalls == 0, caseLabel);
+      // None of the elements move ctors executed because the SboVector simply
+      // stole the pointer to the heap memory.
+      VERIFY(PodWithDefaultCtor::moveCtorCalls == 0, caseLabel);
+      VERIFY(PodWithDefaultCtor::assignmentCalls == 0, caseLabel);
+      VERIFY(PodWithDefaultCtor::dtorCalls == 30, caseLabel);
+      for (int i = 0; i < copy.size(); ++i)
+         VERIFY(copy[i].i == i, caseLabel);
+   }
+}
+
 } // namespace
 
 
@@ -900,5 +1013,6 @@ void TestSboVector()
    TestSboVectorMoveCtor();
    TestSboVectorInitializerListCtor();
    TestSboVectorDtor();
-   TestSboVectorAssignment();
+   TestSboVectorCopyAssignment();
+   TestSboVectorMoveAssignment();
 }

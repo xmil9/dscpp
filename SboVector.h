@@ -67,6 +67,7 @@ template <typename T, std::size_t N> class SboVector
    ~SboVector();
 
    SboVector& operator=(const SboVector& other);
+   SboVector& operator=(SboVector&& other);
 
    T& operator[](std::size_t pos);
    const T& operator[](std::size_t pos) const;
@@ -88,6 +89,7 @@ template <typename T, std::size_t N> class SboVector
    constexpr T* buffer();
    constexpr const T* buffer() const;
    void destroy();
+   void moveFrom(SboVector&& other);
    void allocate(std::size_t cap);
    void reallocate(std::size_t newCap);
    void deallocate();
@@ -129,19 +131,7 @@ template <typename T, std::size_t N> SboVector<T, N>::SboVector(const SboVector&
 template <typename T, std::size_t N>
 SboVector<T, N>::SboVector(SboVector&& other)
 {
-   if (other.onHeap())
-   {
-      // Steal heap memory.
-      m_data = other.m_data;
-      // Reset 'other' data pointer to its buffer.
-      other.m_data = other.buffer();
-   }
-   else
-   {
-      std::uninitialized_move_n(other.buffer(), other.size(), buffer());
-   }
-   std::swap(m_capacity, other.m_capacity);
-   std::swap(m_size, other.m_size);
+   moveFrom(std::move(other));
 }
 
 
@@ -177,6 +167,15 @@ SboVector<T, N>& SboVector<T, N>::operator=(const SboVector& other)
    m_size = other.size();
    m_capacity = onHeap() ? m_size : BufferCapacity;
 
+   return *this;
+}
+
+
+template <typename T, std::size_t N>
+SboVector<T, N>& SboVector<T, N>::operator=(SboVector&& other)
+{
+   destroy();
+   moveFrom(std::move(other));
    return *this;
 }
 
@@ -277,6 +276,28 @@ template <typename T, std::size_t N> void SboVector<T, N>::destroy()
    std::destroy_n(m_data, size());
    if (onHeap())
       deallocate();
+}
+
+
+template <typename T, std::size_t N> 
+void SboVector<T, N>::moveFrom(SboVector&& other)
+{
+   if (other.onHeap())
+   {
+      // Steal heap memory.
+      m_data = other.m_data;
+   }
+   else
+   {
+      std::uninitialized_move_n(other.buffer(), other.size(), buffer());
+   }
+   m_capacity = other.m_capacity;
+   m_size = other.m_size;
+
+   // Clear other.
+   other.m_data = other.buffer();
+   other.m_capacity = BufferCapacity;
+   other.m_size = 0;
 }
 
 
