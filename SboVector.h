@@ -87,9 +87,12 @@ template <typename T, std::size_t N> class SboVector
  private:
    constexpr T* buffer();
    constexpr const T* buffer() const;
+   void destroy();
    void allocate(std::size_t cap);
    void reallocate(std::size_t newCap);
    void deallocate();
+   static T* allocateMem(std::size_t cap);
+   static void deallocateMem(T* mem);
    std::size_t recalcCapacity(std::size_t minCap) const;
 
  private:
@@ -154,14 +157,27 @@ SboVector<T, N>::SboVector(std::initializer_list<T> ilist)
 
 template <typename T, std::size_t N> SboVector<T, N>::~SboVector()
 {
-   deallocate();
+   destroy();
 }
 
 
 template <typename T, std::size_t N>
 SboVector<T, N>& SboVector<T, N>::operator=(const SboVector& other)
 {
-   deallocate();
+   // Perform allocation up front.
+   T* newData = nullptr;
+   if (other.size() > BufferCapacity)
+      newData = allocateMem(other.size());
+
+   destroy();
+
+   if (newData)
+      m_data = newData;
+   std::uninitialized_copy_n(other.m_data, other.size(), m_data);
+   m_size = other.size();
+   m_capacity = onHeap() ? m_size : BufferCapacity;
+
+   return *this;
 }
 
 
@@ -256,14 +272,17 @@ template <typename T, std::size_t N> constexpr const T* SboVector<T, N>::buffer(
 }
 
 
+template <typename T, std::size_t N> void SboVector<T, N>::destroy()
+{
+   std::destroy_n(m_data, size());
+   if (onHeap())
+      deallocate();
+}
+
+
 template <typename T, std::size_t N> void SboVector<T, N>::allocate(std::size_t cap)
 {
-#ifdef VS_COMPILER
-   // Visual Studio does not support std::aligned_alloc.
-   m_data = reinterpret_cast<T*>(_aligned_malloc(cap * sizeof(T), alignof(T)));
-#else
-   m_data = reinterpret_cast<T*>(std::aligned_alloc(alignof(T), cap * sizeof(T)));
-#endif
+   m_data = allocateMem(cap);
    m_capacity = cap;
 }
 
@@ -274,8 +293,11 @@ template <typename T, std::size_t N> void SboVector<T, N>::reallocate(std::size_
    if (newCap >= m_size)
    {
       T* newData = new T[newCap];
-      std::copy_n(m_data, m_size, newData);
-      deallocate();
+      if constexpr (std::is_move_constructible_v<T>)
+         std::uninitialized_move_n(m_data, m_size, newData);
+      else
+         std::uninitialized_copy_n(m_data, m_size, newData);
+      destroy();
       m_data = newData;
       m_capacity = newCap;
    }
@@ -286,13 +308,30 @@ template <typename T, std::size_t N> void SboVector<T, N>::deallocate()
 {
    if (onHeap())
    {
-#ifdef VS_COMPILER
-      _aligned_free(m_data);
-#else
-      std::free(m_data);
-#endif
+      deallocateMem(m_data);
       m_data = buffer();
    }
+}
+
+
+template <typename T, std::size_t N> T* SboVector<T, N>::allocateMem(std::size_t cap)
+{
+#ifdef VS_COMPILER
+   // Visual Studio does not support std::aligned_alloc.
+   return reinterpret_cast<T*>(_aligned_malloc(cap * sizeof(T), alignof(T)));
+#else
+   return reinterpret_cast<T*>(std::aligned_alloc(alignof(T), cap * sizeof(T)));
+#endif
+}
+
+
+template <typename T, std::size_t N> void SboVector<T, N>::deallocateMem(T* mem)
+{
+#ifdef VS_COMPILER
+      _aligned_free(mem);
+#else
+      std::free(mem);
+#endif
 }
 
 
