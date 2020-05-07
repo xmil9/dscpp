@@ -166,7 +166,7 @@ void TestSboVectorDefaultCtor()
 
       VERIFY(sv.empty(), caseLabel);
       VERIFY(sv.capacity() == 10, caseLabel);
-      VERIFY(sv.inBuffer(), caseLabel);
+      VERIFY(sv.in_buffer(), caseLabel);
       VERIFY(PodWithDefaultCtor::defaultCtorCalls == 0, caseLabel);
       VERIFY(PodWithDefaultCtor::copyCtorCalls == 0, caseLabel);
       VERIFY(PodWithDefaultCtor::assignmentCalls == 0, caseLabel);
@@ -180,7 +180,7 @@ void TestSboVectorDefaultCtor()
 
       VERIFY(sv.empty(), caseLabel);
       VERIFY(sv.capacity() == 10, caseLabel);
-      VERIFY(sv.inBuffer(), caseLabel);
+      VERIFY(sv.in_buffer(), caseLabel);
       VERIFY(PodWithoutDefaultCtor::ctorCalls == 0, caseLabel);
       VERIFY(PodWithDefaultCtor::copyCtorCalls == 0, caseLabel);
       VERIFY(PodWithDefaultCtor::assignmentCalls == 0, caseLabel);
@@ -192,7 +192,7 @@ void TestSboVectorDefaultCtor()
 
       VERIFY(sv.empty(), caseLabel);
       VERIFY(sv.capacity() == 10, caseLabel);
-      VERIFY(sv.inBuffer(), caseLabel);
+      VERIFY(sv.in_buffer(), caseLabel);
    }
    {
       const std::string caseLabel{"SboVector default ctor for std::string."};
@@ -201,7 +201,7 @@ void TestSboVectorDefaultCtor()
 
       VERIFY(sv.empty(), caseLabel);
       VERIFY(sv.capacity() == 10, caseLabel);
-      VERIFY(sv.inBuffer(), caseLabel);
+      VERIFY(sv.in_buffer(), caseLabel);
    }
    {
       const std::string caseLabel{"SboVector default ctor for scalar type."};
@@ -210,7 +210,7 @@ void TestSboVectorDefaultCtor()
 
       VERIFY(sv.empty(), caseLabel);
       VERIFY(sv.capacity() == 10, caseLabel);
-      VERIFY(sv.inBuffer(), caseLabel);
+      VERIFY(sv.in_buffer(), caseLabel);
    }
 }
 
@@ -228,7 +228,7 @@ void TestSboVectorCtorForElementCountAndValue()
 
       VERIFY(sv.size() == 5, caseLabel);
       VERIFY(sv.capacity() == 10, caseLabel);
-      VERIFY(sv.inBuffer(), caseLabel);
+      VERIFY(sv.in_buffer(), caseLabel);
       VERIFY(PodWithDefaultCtor::defaultCtorCalls == 1, caseLabel);
       VERIFY(PodWithDefaultCtor::copyCtorCalls == 5, caseLabel);
       VERIFY(PodWithDefaultCtor::assignmentCalls == 0, caseLabel);
@@ -246,7 +246,7 @@ void TestSboVectorCtorForElementCountAndValue()
 
       VERIFY(sv.size() == 20, caseLabel);
       VERIFY(sv.capacity() == 20, caseLabel);
-      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(sv.on_heap(), caseLabel);
       VERIFY(PodWithDefaultCtor::defaultCtorCalls == 1, caseLabel);
       VERIFY(PodWithDefaultCtor::copyCtorCalls == 20, caseLabel);
       VERIFY(PodWithDefaultCtor::assignmentCalls == 0, caseLabel);
@@ -263,7 +263,7 @@ void TestSboVectorCtorForElementCountAndValue()
 
       VERIFY(sv.size() == 5, caseLabel);
       VERIFY(sv.capacity() == 10, caseLabel);
-      VERIFY(sv.inBuffer(), caseLabel);
+      VERIFY(sv.in_buffer(), caseLabel);
       VERIFY(PodWithoutDefaultCtor::ctorCalls == 1, caseLabel);
       VERIFY(PodWithoutDefaultCtor::copyCtorCalls == 5, caseLabel);
       VERIFY(PodWithoutDefaultCtor::assignmentCalls == 0, caseLabel);
@@ -284,7 +284,7 @@ void TestSboVectorCtorForElementCountAndValue()
 
       VERIFY(sv.size() == 20, caseLabel);
       VERIFY(sv.capacity() == 20, caseLabel);
-      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(sv.on_heap(), caseLabel);
       VERIFY(PodWithoutDefaultCtor::ctorCalls == 1, caseLabel);
       VERIFY(PodWithoutDefaultCtor::copyCtorCalls == 20, caseLabel);
       VERIFY(PodWithoutDefaultCtor::assignmentCalls == 0, caseLabel);
@@ -304,7 +304,7 @@ void TestSboVectorCtorForElementCountAndValue()
 
       VERIFY(sv.size() == 5, caseLabel);
       VERIFY(sv.capacity() == 10, caseLabel);
-      VERIFY(sv.inBuffer(), caseLabel);
+      VERIFY(sv.in_buffer(), caseLabel);
       for (int i = 0; i < sv.size(); ++i)
          VERIFY(sv[i].getValue() == 1, caseLabel);
    }
@@ -317,7 +317,7 @@ void TestSboVectorCtorForElementCountAndValue()
 
       VERIFY(sv.size() == 20, caseLabel);
       VERIFY(sv.capacity() == 20, caseLabel);
-      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(sv.on_heap(), caseLabel);
       for (int i = 0; i < sv.size(); ++i)
          VERIFY(sv[i].getValue() == 1, caseLabel);
    }
@@ -330,7 +330,7 @@ void TestSboVectorCtorForElementCountAndValue()
 
       VERIFY(sv.size() == 5, caseLabel);
       VERIFY(sv.capacity() == 10, caseLabel);
-      VERIFY(sv.inBuffer(), caseLabel);
+      VERIFY(sv.in_buffer(), caseLabel);
       for (int i = 0; i < sv.size(); ++i)
          VERIFY(sv[i] == "abc", caseLabel);
    }
@@ -343,7 +343,7 @@ void TestSboVectorCtorForElementCountAndValue()
 
       VERIFY(sv.size() == 20, caseLabel);
       VERIFY(sv.capacity() == 20, caseLabel);
-      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(sv.on_heap(), caseLabel);
       for (int i = 0; i < sv.size(); ++i)
          VERIFY(sv[i] == val, caseLabel);
    }
@@ -357,7 +357,7 @@ void TestSboVectorCtorForElementCountAndValue()
 
       VERIFY(sv.size() == 5, caseLabel);
       VERIFY(sv.capacity() == 10, caseLabel);
-      VERIFY(sv.inBuffer(), caseLabel);
+      VERIFY(sv.in_buffer(), caseLabel);
       for (int i = 0; i < sv.size(); ++i)
          VERIFY(sv[i] == val, caseLabel);
    }
@@ -371,7 +371,7 @@ void TestSboVectorCtorForElementCountAndValue()
 
       VERIFY(sv.size() == 20, caseLabel);
       VERIFY(sv.capacity() == 20, caseLabel);
-      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(sv.on_heap(), caseLabel);
       for (int i = 0; i < sv.size(); ++i)
          VERIFY(sv[i] == val, caseLabel);
    }
@@ -394,7 +394,7 @@ void TestSboVectorCopyCtor()
 
       VERIFY(copy.size() == 5, caseLabel);
       VERIFY(copy.capacity() == 10, caseLabel);
-      VERIFY(copy.inBuffer(), caseLabel);
+      VERIFY(copy.in_buffer(), caseLabel);
       VERIFY(PodWithDefaultCtor::defaultCtorCalls == 0, caseLabel);
       VERIFY(PodWithDefaultCtor::copyCtorCalls == 5, caseLabel);
       VERIFY(PodWithDefaultCtor::assignmentCalls == 0, caseLabel);
@@ -415,7 +415,7 @@ void TestSboVectorCopyCtor()
 
       VERIFY(copy.size() == 20, caseLabel);
       VERIFY(copy.capacity() == 20, caseLabel);
-      VERIFY(copy.onHeap(), caseLabel);
+      VERIFY(copy.on_heap(), caseLabel);
       VERIFY(PodWithDefaultCtor::defaultCtorCalls == 0, caseLabel);
       VERIFY(PodWithDefaultCtor::copyCtorCalls == 20, caseLabel);
       VERIFY(PodWithDefaultCtor::assignmentCalls == 0, caseLabel);
@@ -436,7 +436,7 @@ void TestSboVectorCopyCtor()
 
       VERIFY(copy.size() == src.size(), caseLabel);
       VERIFY(copy.capacity() == src.capacity(), caseLabel);
-      VERIFY(copy.inBuffer(), caseLabel);
+      VERIFY(copy.in_buffer(), caseLabel);
       VERIFY(PodWithoutDefaultCtor::ctorCalls == 0, caseLabel);
       VERIFY(PodWithoutDefaultCtor::copyCtorCalls == copy.size(), caseLabel);
       VERIFY(PodWithoutDefaultCtor::assignmentCalls == 0, caseLabel);
@@ -457,7 +457,7 @@ void TestSboVectorCopyCtor()
 
       VERIFY(copy.size() == src.size(), caseLabel);
       VERIFY(copy.capacity() == src.capacity(), caseLabel);
-      VERIFY(copy.onHeap(), caseLabel);
+      VERIFY(copy.on_heap(), caseLabel);
       VERIFY(PodWithoutDefaultCtor::ctorCalls == 0, caseLabel);
       VERIFY(PodWithoutDefaultCtor::copyCtorCalls == copy.size(), caseLabel);
       VERIFY(PodWithoutDefaultCtor::assignmentCalls == 0, caseLabel);
@@ -476,7 +476,7 @@ void TestSboVectorCopyCtor()
 
       VERIFY(copy.size() == src.size(), caseLabel);
       VERIFY(copy.capacity() == src.capacity(), caseLabel);
-      VERIFY(copy.inBuffer(), caseLabel);
+      VERIFY(copy.in_buffer(), caseLabel);
       for (int i = 0; i < copy.size(); ++i)
          VERIFY(copy[i] == src[i], caseLabel);
    }
@@ -492,7 +492,7 @@ void TestSboVectorCopyCtor()
 
       VERIFY(copy.size() == src.size(), caseLabel);
       VERIFY(copy.capacity() == src.capacity(), caseLabel);
-      VERIFY(copy.onHeap(), caseLabel);
+      VERIFY(copy.on_heap(), caseLabel);
       for (int i = 0; i < copy.size(); ++i)
          VERIFY(copy[i] == src[i], caseLabel);
    }
@@ -508,7 +508,7 @@ void TestSboVectorCopyCtor()
 
       VERIFY(copy.size() == src.size(), caseLabel);
       VERIFY(copy.capacity() == src.capacity(), caseLabel);
-      VERIFY(copy.inBuffer(), caseLabel);
+      VERIFY(copy.in_buffer(), caseLabel);
       for (int i = 0; i < copy.size(); ++i)
          VERIFY(copy[i] == src[i], caseLabel);
    }
@@ -524,7 +524,7 @@ void TestSboVectorCopyCtor()
 
       VERIFY(copy.size() == src.size(), caseLabel);
       VERIFY(copy.capacity() == src.capacity(), caseLabel);
-      VERIFY(copy.onHeap(), caseLabel);
+      VERIFY(copy.on_heap(), caseLabel);
       for (int i = 0; i < copy.size(); ++i)
          VERIFY(copy[i] == src[i], caseLabel);
    }
@@ -547,7 +547,7 @@ void TestSboVectorMoveCtor()
 
       VERIFY(moveDest.size() == 5, caseLabel);
       VERIFY(moveDest.capacity() == 10, caseLabel);
-      VERIFY(moveDest.inBuffer(), caseLabel);
+      VERIFY(moveDest.in_buffer(), caseLabel);
       VERIFY(PodWithDefaultCtor::defaultCtorCalls == 0, caseLabel);
       VERIFY(PodWithDefaultCtor::copyCtorCalls == 0, caseLabel);
       VERIFY(PodWithDefaultCtor::moveCtorCalls == 5, caseLabel);
@@ -571,7 +571,7 @@ void TestSboVectorMoveCtor()
 
       VERIFY(moveDest.size() == 20, caseLabel);
       VERIFY(moveDest.capacity() == 20, caseLabel);
-      VERIFY(moveDest.onHeap(), caseLabel);
+      VERIFY(moveDest.on_heap(), caseLabel);
       VERIFY(PodWithDefaultCtor::defaultCtorCalls == 0, caseLabel);
       VERIFY(PodWithDefaultCtor::copyCtorCalls == 0, caseLabel);
       // None of the elements move ctors executed because the SboVector simply
@@ -595,7 +595,7 @@ void TestSboVectorMoveCtor()
 
       VERIFY(moveDest.size() == 5, caseLabel);
       VERIFY(moveDest.capacity() == 10, caseLabel);
-      VERIFY(moveDest.inBuffer(), caseLabel);
+      VERIFY(moveDest.in_buffer(), caseLabel);
       for (int i = 0; i < moveDest.size(); ++i)
          VERIFY(moveDest[i] == std::to_string(i), caseLabel);
       // Verify moved-from instance is empty.
@@ -613,7 +613,7 @@ void TestSboVectorMoveCtor()
 
       VERIFY(moveDest.size() == 20, caseLabel);
       VERIFY(moveDest.capacity() == 20, caseLabel);
-      VERIFY(moveDest.onHeap(), caseLabel);
+      VERIFY(moveDest.on_heap(), caseLabel);
       for (int i = 0; i < moveDest.size(); ++i)
          VERIFY(moveDest[i] == std::to_string(i), caseLabel);
       // Verify moved-from instance is empty.
@@ -631,7 +631,7 @@ void TestSboVectorMoveCtor()
 
       VERIFY(moveDest.size() == 5, caseLabel);
       VERIFY(moveDest.capacity() == 10, caseLabel);
-      VERIFY(moveDest.inBuffer(), caseLabel);
+      VERIFY(moveDest.in_buffer(), caseLabel);
       for (int i = 0; i < moveDest.size(); ++i)
          VERIFY(moveDest[i] == i, caseLabel);
       // Verify moved-from instance is empty.
@@ -649,7 +649,7 @@ void TestSboVectorMoveCtor()
 
       VERIFY(moveDest.size() == 20, caseLabel);
       VERIFY(moveDest.capacity() == 20, caseLabel);
-      VERIFY(moveDest.onHeap(), caseLabel);
+      VERIFY(moveDest.on_heap(), caseLabel);
       for (int i = 0; i < moveDest.size(); ++i)
          VERIFY(moveDest[i] == i, caseLabel);
       // Verify moved-from instance is empty.
@@ -670,7 +670,7 @@ void TestSboVectorInitializerListCtor()
 
       VERIFY(sv.size() == 4, caseLabel);
       VERIFY(sv.capacity() == 10, caseLabel);
-      VERIFY(sv.inBuffer(), caseLabel);
+      VERIFY(sv.in_buffer(), caseLabel);
       VERIFY(PodWithoutDefaultCtor::copyCtorCalls == 4, caseLabel);
       VERIFY(PodWithoutDefaultCtor::moveCtorCalls == 0, caseLabel);
       VERIFY(PodWithoutDefaultCtor::assignmentCalls == 0, caseLabel);
@@ -690,7 +690,7 @@ void TestSboVectorInitializerListCtor()
 
       VERIFY(sv.size() == 12, caseLabel);
       VERIFY(sv.capacity() == 12, caseLabel);
-      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(sv.on_heap(), caseLabel);
       VERIFY(PodWithoutDefaultCtor::copyCtorCalls == 12, caseLabel);
       VERIFY(PodWithoutDefaultCtor::moveCtorCalls == 0, caseLabel);
       VERIFY(PodWithoutDefaultCtor::assignmentCalls == 0, caseLabel);
@@ -705,7 +705,7 @@ void TestSboVectorInitializerListCtor()
 
       VERIFY(sv.size() == 4, caseLabel);
       VERIFY(sv.capacity() == 10, caseLabel);
-      VERIFY(sv.inBuffer(), caseLabel);
+      VERIFY(sv.in_buffer(), caseLabel);
       for (int i = 0; i < sv.size(); ++i)
          VERIFY(sv[i] == std::to_string(i + 1), caseLabel);
    }
@@ -718,7 +718,7 @@ void TestSboVectorInitializerListCtor()
 
       VERIFY(sv.size() == 12, caseLabel);
       VERIFY(sv.capacity() == 12, caseLabel);
-      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(sv.on_heap(), caseLabel);
       for (int i = 0; i < sv.size(); ++i)
          VERIFY(sv[i] == std::to_string(i + 1), caseLabel);
    }
@@ -730,7 +730,7 @@ void TestSboVectorInitializerListCtor()
 
       VERIFY(sv.size() == 4, caseLabel);
       VERIFY(sv.capacity() == 10, caseLabel);
-      VERIFY(sv.inBuffer(), caseLabel);
+      VERIFY(sv.in_buffer(), caseLabel);
       for (int i = 0; i < sv.size(); ++i)
          VERIFY(sv[i] == i + 1, caseLabel);
    }
@@ -742,7 +742,7 @@ void TestSboVectorInitializerListCtor()
 
       VERIFY(sv.size() == 12, caseLabel);
       VERIFY(sv.capacity() == 12, caseLabel);
-      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(sv.on_heap(), caseLabel);
       for (int i = 0; i < sv.size(); ++i)
          VERIFY(sv[i] == i + 1, caseLabel);
    }
@@ -757,7 +757,7 @@ void TestSboVectorDtor()
       {
          SboVector<InstrumentedDtor, 10> sv{InstrumentedDtor{1}, InstrumentedDtor{2},
                                             InstrumentedDtor{3}};
-         VERIFY(sv.inBuffer(), caseLabel);
+         VERIFY(sv.in_buffer(), caseLabel);
 
          // Rest call counts before the SboVector gets destructed.
          InstrumentedDtor::resetCallCount();
@@ -772,7 +772,7 @@ void TestSboVectorDtor()
          SboVector<InstrumentedDtor, 3> sv{InstrumentedDtor{1}, InstrumentedDtor{2},
                                            InstrumentedDtor{3}, InstrumentedDtor{4},
                                            InstrumentedDtor{5}};
-         VERIFY(sv.onHeap(), caseLabel);
+         VERIFY(sv.on_heap(), caseLabel);
 
          // Rest call counts before the SboVector gets destructed.
          InstrumentedDtor::resetCallCount();
@@ -795,14 +795,14 @@ void TestSboVectorCopyAssignment()
          src[i].i = i;
 
       SboVector<PodWithDefaultCtor, 10> copy{3, PodWithDefaultCtor{}};
-      VERIFY(copy.inBuffer(), caseLabel);
+      VERIFY(copy.in_buffer(), caseLabel);
 
       PodWithDefaultCtor::resetCallCount();
       copy = src;
 
       VERIFY(copy.size() == 5, caseLabel);
       VERIFY(copy.capacity() == 10, caseLabel);
-      VERIFY(copy.inBuffer(), caseLabel);
+      VERIFY(copy.in_buffer(), caseLabel);
       VERIFY(PodWithDefaultCtor::defaultCtorCalls == 0, caseLabel);
       VERIFY(PodWithDefaultCtor::copyCtorCalls == 5, caseLabel);
       VERIFY(PodWithDefaultCtor::assignmentCalls == 0, caseLabel);
@@ -820,14 +820,14 @@ void TestSboVectorCopyAssignment()
          src[i].i = i;
 
       SboVector<PodWithDefaultCtor, 10> copy{3, PodWithDefaultCtor{}};
-      VERIFY(copy.inBuffer(), caseLabel);
+      VERIFY(copy.in_buffer(), caseLabel);
 
       PodWithDefaultCtor::resetCallCount();
       copy = src;
 
       VERIFY(copy.size() == 20, caseLabel);
       VERIFY(copy.capacity() == 20, caseLabel);
-      VERIFY(copy.onHeap(), caseLabel);
+      VERIFY(copy.on_heap(), caseLabel);
       VERIFY(PodWithDefaultCtor::defaultCtorCalls == 0, caseLabel);
       VERIFY(PodWithDefaultCtor::copyCtorCalls == 20, caseLabel);
       VERIFY(PodWithDefaultCtor::assignmentCalls == 0, caseLabel);
@@ -845,14 +845,14 @@ void TestSboVectorCopyAssignment()
          src[i].i = i;
 
       SboVector<PodWithDefaultCtor, 10> copy{20, PodWithDefaultCtor{}};
-      VERIFY(copy.onHeap(), caseLabel);
+      VERIFY(copy.on_heap(), caseLabel);
 
       PodWithDefaultCtor::resetCallCount();
       copy = src;
 
       VERIFY(copy.size() == 5, caseLabel);
       VERIFY(copy.capacity() == 10, caseLabel);
-      VERIFY(copy.inBuffer(), caseLabel);
+      VERIFY(copy.in_buffer(), caseLabel);
       VERIFY(PodWithDefaultCtor::defaultCtorCalls == 0, caseLabel);
       VERIFY(PodWithDefaultCtor::copyCtorCalls == 5, caseLabel);
       VERIFY(PodWithDefaultCtor::assignmentCalls == 0, caseLabel);
@@ -870,7 +870,7 @@ void TestSboVectorCopyAssignment()
          src[i].i = i;
 
       SboVector<PodWithDefaultCtor, 10> copy{15, PodWithDefaultCtor{}};
-      VERIFY(copy.onHeap(), caseLabel);
+      VERIFY(copy.on_heap(), caseLabel);
 
       PodWithDefaultCtor::resetCallCount();
       copy = src;
@@ -879,7 +879,7 @@ void TestSboVectorCopyAssignment()
       // Assigning data that needs a larger heap allocation will trigger a new
       // allocation. Capacity will increase to larger size.
       VERIFY(copy.capacity() == 20, caseLabel);
-      VERIFY(copy.onHeap(), caseLabel);
+      VERIFY(copy.on_heap(), caseLabel);
       VERIFY(PodWithDefaultCtor::defaultCtorCalls == 0, caseLabel);
       VERIFY(PodWithDefaultCtor::copyCtorCalls == 20, caseLabel);
       VERIFY(PodWithDefaultCtor::assignmentCalls == 0, caseLabel);
@@ -897,7 +897,7 @@ void TestSboVectorCopyAssignment()
          src[i].i = i;
 
       SboVector<PodWithDefaultCtor, 10> copy{20, PodWithDefaultCtor{}};
-      VERIFY(copy.onHeap(), caseLabel);
+      VERIFY(copy.on_heap(), caseLabel);
 
       PodWithDefaultCtor::resetCallCount();
       copy = src;
@@ -906,7 +906,7 @@ void TestSboVectorCopyAssignment()
       // Assigning data that needs a smaller heap allocation will reuse the existing
       // heap memory. Capacity will remain at previous (larger) size.
       VERIFY(copy.capacity() == 20, caseLabel);
-      VERIFY(copy.onHeap(), caseLabel);
+      VERIFY(copy.on_heap(), caseLabel);
       VERIFY(PodWithDefaultCtor::defaultCtorCalls == 0, caseLabel);
       VERIFY(PodWithDefaultCtor::copyCtorCalls == 15, caseLabel);
       VERIFY(PodWithDefaultCtor::assignmentCalls == 0, caseLabel);
@@ -929,14 +929,14 @@ void TestSboVectorMoveAssignment()
          src[i].i = i;
 
       SboVector<PodWithDefaultCtor, 10> copy{3, PodWithDefaultCtor{}};
-      VERIFY(copy.inBuffer(), caseLabel);
+      VERIFY(copy.in_buffer(), caseLabel);
 
       PodWithDefaultCtor::resetCallCount();
       copy = std::move(src);
 
       VERIFY(copy.size() == 5, caseLabel);
       VERIFY(copy.capacity() == 10, caseLabel);
-      VERIFY(copy.inBuffer(), caseLabel);
+      VERIFY(copy.in_buffer(), caseLabel);
       VERIFY(PodWithDefaultCtor::defaultCtorCalls == 0, caseLabel);
       VERIFY(PodWithDefaultCtor::copyCtorCalls == 0, caseLabel);
       VERIFY(PodWithDefaultCtor::moveCtorCalls == 5, caseLabel);
@@ -955,14 +955,14 @@ void TestSboVectorMoveAssignment()
          src[i].i = i;
 
       SboVector<PodWithDefaultCtor, 10> copy{3, PodWithDefaultCtor{}};
-      VERIFY(copy.inBuffer(), caseLabel);
+      VERIFY(copy.in_buffer(), caseLabel);
 
       PodWithDefaultCtor::resetCallCount();
       copy = std::move(src);
 
       VERIFY(copy.size() == 20, caseLabel);
       VERIFY(copy.capacity() == 20, caseLabel);
-      VERIFY(copy.onHeap(), caseLabel);
+      VERIFY(copy.on_heap(), caseLabel);
       VERIFY(PodWithDefaultCtor::defaultCtorCalls == 0, caseLabel);
       VERIFY(PodWithDefaultCtor::copyCtorCalls == 0, caseLabel);
       // None of the elements move ctors executed because the SboVector simply
@@ -983,14 +983,14 @@ void TestSboVectorMoveAssignment()
          src[i].i = i;
 
       SboVector<PodWithDefaultCtor, 10> copy{20, PodWithDefaultCtor{}};
-      VERIFY(copy.onHeap(), caseLabel);
+      VERIFY(copy.on_heap(), caseLabel);
 
       PodWithDefaultCtor::resetCallCount();
       copy = std::move(src);
 
       VERIFY(copy.size() == 5, caseLabel);
       VERIFY(copy.capacity() == 10, caseLabel);
-      VERIFY(copy.inBuffer(), caseLabel);
+      VERIFY(copy.in_buffer(), caseLabel);
       VERIFY(PodWithDefaultCtor::defaultCtorCalls == 0, caseLabel);
       VERIFY(PodWithDefaultCtor::copyCtorCalls == 0, caseLabel);
       VERIFY(PodWithDefaultCtor::moveCtorCalls == 5, caseLabel);
@@ -1009,14 +1009,14 @@ void TestSboVectorMoveAssignment()
          src[i].i = i;
 
       SboVector<PodWithDefaultCtor, 10> copy{30, PodWithDefaultCtor{}};
-      VERIFY(copy.onHeap(), caseLabel);
+      VERIFY(copy.on_heap(), caseLabel);
 
       PodWithDefaultCtor::resetCallCount();
       copy = std::move(src);
 
       VERIFY(copy.size() == 20, caseLabel);
       VERIFY(copy.capacity() == 20, caseLabel);
-      VERIFY(copy.onHeap(), caseLabel);
+      VERIFY(copy.on_heap(), caseLabel);
       VERIFY(PodWithDefaultCtor::defaultCtorCalls == 0, caseLabel);
       VERIFY(PodWithDefaultCtor::copyCtorCalls == 0, caseLabel);
       // None of the elements move ctors executed because the SboVector simply
@@ -1037,14 +1037,14 @@ void TestSboVectorInitializerListAssignment()
                                   "from buffer instance to buffer instance."};
 
       SboVector<PodWithoutDefaultCtor, 10> sv{3, PodWithoutDefaultCtor{1, 1.0, true}};
-      VERIFY(sv.inBuffer(), caseLabel);
+      VERIFY(sv.in_buffer(), caseLabel);
 
       PodWithoutDefaultCtor::resetCallCount();
       sv = {PodWithoutDefaultCtor{1, 1.0, true}, PodWithoutDefaultCtor{2, 2.0, true}};
 
       VERIFY(sv.size() == 2, caseLabel);
       VERIFY(sv.capacity() == 10, caseLabel);
-      VERIFY(sv.inBuffer(), caseLabel);
+      VERIFY(sv.in_buffer(), caseLabel);
       // Ctor calls are for constructing items in ilist.
       VERIFY(PodWithoutDefaultCtor::ctorCalls == 2, caseLabel);
       // Copy ctor calls are for assigning items into SboVector.
@@ -1061,14 +1061,14 @@ void TestSboVectorInitializerListAssignment()
                                   "from heap instance to buffer instance."};
 
       SboVector<PodWithoutDefaultCtor, 10> sv{20, PodWithoutDefaultCtor{1, 1.0, true}};
-      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(sv.on_heap(), caseLabel);
 
       PodWithoutDefaultCtor::resetCallCount();
       sv = {PodWithoutDefaultCtor{1, 1.0, true}, PodWithoutDefaultCtor{2, 2.0, true}};
 
       VERIFY(sv.size() == 2, caseLabel);
       VERIFY(sv.capacity() == 10, caseLabel);
-      VERIFY(sv.inBuffer(), caseLabel);
+      VERIFY(sv.in_buffer(), caseLabel);
       // Ctor calls are for constructing items in ilist.
       VERIFY(PodWithoutDefaultCtor::ctorCalls == 2, caseLabel);
       // Copy ctor calls are for assigning items into SboVector.
@@ -1085,7 +1085,7 @@ void TestSboVectorInitializerListAssignment()
                                   "from buffer instance to heap instance."};
 
       SboVector<PodWithoutDefaultCtor, 5> sv{3, PodWithoutDefaultCtor{1, 1.0, true}};
-      VERIFY(sv.inBuffer(), caseLabel);
+      VERIFY(sv.in_buffer(), caseLabel);
 
       PodWithoutDefaultCtor::resetCallCount();
       sv = {PodWithoutDefaultCtor{1, 1.0, true}, PodWithoutDefaultCtor{2, 2.0, true},
@@ -1095,7 +1095,7 @@ void TestSboVectorInitializerListAssignment()
 
       VERIFY(sv.size() == 7, caseLabel);
       VERIFY(sv.capacity() == 7, caseLabel);
-      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(sv.on_heap(), caseLabel);
       // Ctor calls are for constructing items in ilist.
       VERIFY(PodWithoutDefaultCtor::ctorCalls == 7, caseLabel);
       // Copy ctor calls are for assigning items into SboVector.
@@ -1112,7 +1112,7 @@ void TestSboVectorInitializerListAssignment()
                                   "from smaller heap instance to larger heap instance."};
 
       SboVector<PodWithoutDefaultCtor, 5> sv{7, PodWithoutDefaultCtor{1, 1.0, true}};
-      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(sv.on_heap(), caseLabel);
 
       PodWithoutDefaultCtor::resetCallCount();
       sv = {PodWithoutDefaultCtor{1, 1.0, true}, PodWithoutDefaultCtor{2, 2.0, true},
@@ -1125,7 +1125,7 @@ void TestSboVectorInitializerListAssignment()
       // Assigning data that needs a larger heap allocation will trigger a new
       // allocation. Capacity will increase to larger size.
       VERIFY(sv.capacity() == 9, caseLabel);
-      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(sv.on_heap(), caseLabel);
       // Ctor calls are for constructing items in ilist.
       VERIFY(PodWithoutDefaultCtor::ctorCalls == 9, caseLabel);
       // Copy ctor calls are for assigning items into SboVector.
@@ -1142,7 +1142,7 @@ void TestSboVectorInitializerListAssignment()
                                   "from larger heap instance to smaller heap instance."};
 
       SboVector<PodWithoutDefaultCtor, 5> sv{9, PodWithoutDefaultCtor{1, 1.0, true}};
-      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(sv.on_heap(), caseLabel);
 
       PodWithoutDefaultCtor::resetCallCount();
       sv = {PodWithoutDefaultCtor{1, 1.0, true}, PodWithoutDefaultCtor{2, 2.0, true},
@@ -1154,7 +1154,7 @@ void TestSboVectorInitializerListAssignment()
       // Assigning data that needs a smaller heap allocation will reuse the existing
       // heap memory. Capacity will remain at previous (larger) size.
       VERIFY(sv.capacity() == 9, caseLabel);
-      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(sv.on_heap(), caseLabel);
       // Ctor calls are for constructing items in ilist.
       VERIFY(PodWithoutDefaultCtor::ctorCalls == 7, caseLabel);
       // Copy ctor calls are for assigning items into SboVector.
