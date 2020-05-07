@@ -68,6 +68,7 @@ template <typename T, std::size_t N> class SboVector
 
    SboVector& operator=(const SboVector& other);
    SboVector& operator=(SboVector&& other);
+   SboVector& operator=(std::initializer_list<T> ilist);
 
    T& operator[](std::size_t pos);
    const T& operator[](std::size_t pos) const;
@@ -88,7 +89,11 @@ template <typename T, std::size_t N> class SboVector
  private:
    constexpr T* buffer();
    constexpr const T* buffer() const;
+   template<typename U, typename ElemIter>
+   void constructFrom(const U& other, ElemIter first);
    void destroy();
+   template<typename U, typename ElemIter>
+   void copyFrom(const U& other, ElemIter first);
    void moveFrom(SboVector&& other);
    void allocate(std::size_t cap);
    void reallocate(std::size_t newCap);
@@ -121,10 +126,7 @@ SboVector<T, N>::SboVector(std::size_t count, const T& value)
 
 template <typename T, std::size_t N> SboVector<T, N>::SboVector(const SboVector& other)
 {
-   if (other.capacity() > BufferCapacity)
-      allocate(other.capacity());
-   std::uninitialized_copy_n(other.m_data, other.size(), m_data);
-   m_size = other.size();
+   constructFrom(other, other.m_data);
 }
 
 
@@ -138,10 +140,7 @@ SboVector<T, N>::SboVector(SboVector&& other)
 template <typename T, std::size_t N>
 SboVector<T, N>::SboVector(std::initializer_list<T> ilist)
 {
-   if (ilist.size() > BufferCapacity)
-      allocate(ilist.size());
-   std::uninitialized_copy_n(ilist.begin(), ilist.size(), m_data);
-   m_size = ilist.size();
+   constructFrom(ilist, ilist.begin());
 }
 
 
@@ -154,19 +153,7 @@ template <typename T, std::size_t N> SboVector<T, N>::~SboVector()
 template <typename T, std::size_t N>
 SboVector<T, N>& SboVector<T, N>::operator=(const SboVector& other)
 {
-   // Perform allocation up front.
-   T* newData = nullptr;
-   if (other.size() > BufferCapacity)
-      newData = allocateMem(other.size());
-
-   destroy();
-
-   if (newData)
-      m_data = newData;
-   std::uninitialized_copy_n(other.m_data, other.size(), m_data);
-   m_size = other.size();
-   m_capacity = onHeap() ? m_size : BufferCapacity;
-
+   copyFrom(other, other.m_data);
    return *this;
 }
 
@@ -176,6 +163,14 @@ SboVector<T, N>& SboVector<T, N>::operator=(SboVector&& other)
 {
    destroy();
    moveFrom(std::move(other));
+   return *this;
+}
+
+
+template <typename T, std::size_t N>
+SboVector<T, N>& SboVector<T, N>::operator=(std::initializer_list<T> ilist)
+{
+   copyFrom(ilist, ilist.begin());
    return *this;
 }
 
@@ -271,11 +266,41 @@ template <typename T, std::size_t N> constexpr const T* SboVector<T, N>::buffer(
 }
 
 
+template <typename T, std::size_t N> 
+template<typename U, typename ElemIter>
+void SboVector<T, N>::constructFrom(const U& other, ElemIter first)
+{
+   if (other.size() > BufferCapacity)
+      allocate(other.size());
+   std::uninitialized_copy_n(first, other.size(), m_data);
+   m_size = other.size();
+}
+
+
 template <typename T, std::size_t N> void SboVector<T, N>::destroy()
 {
    std::destroy_n(m_data, size());
    if (onHeap())
       deallocate();
+}
+
+
+template <typename T, std::size_t N> 
+template<typename U, typename ElemIter>
+void SboVector<T, N>::copyFrom(const U& other, ElemIter first)
+{
+   // Perform allocation up front.
+   T* newData = nullptr;
+   if (other.size() > BufferCapacity)
+      newData = allocateMem(other.size());
+
+   destroy();
+
+   if (newData)
+      m_data = newData;
+   std::uninitialized_copy_n(first, other.size(), m_data);
+   m_size = other.size();
+   m_capacity = onHeap() ? m_size : BufferCapacity;
 }
 
 

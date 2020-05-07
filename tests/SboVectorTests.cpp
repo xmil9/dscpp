@@ -1000,6 +1000,113 @@ void TestSboVectorMoveAssignment()
    }
 }
 
+
+void TestSboVectorInitializerListAssignment()
+{
+   {
+      const std::string caseLabel{"SboVector initializer list assignment for pod-type "
+                                  "from buffer instance to buffer instance."};
+
+      SboVector<PodWithoutDefaultCtor, 10> sv{3, PodWithoutDefaultCtor{1, 1.0, true}};
+      VERIFY(sv.inBuffer(), caseLabel);
+
+      PodWithoutDefaultCtor::resetCallCount();
+      sv = {PodWithoutDefaultCtor{1, 1.0, true}, PodWithoutDefaultCtor{2, 2.0, true}};
+
+      VERIFY(sv.size() == 2, caseLabel);
+      VERIFY(sv.capacity() == 10, caseLabel);
+      VERIFY(sv.inBuffer(), caseLabel);
+      // Ctor calls are for constructing items in ilist.
+      VERIFY(PodWithoutDefaultCtor::ctorCalls == 2, caseLabel);
+      // Copy ctor calls are for assigning items into SboVector.
+      VERIFY(PodWithoutDefaultCtor::copyCtorCalls == 2, caseLabel);
+      VERIFY(PodWithoutDefaultCtor::moveCtorCalls == 0, caseLabel);
+      VERIFY(PodWithoutDefaultCtor::assignmentCalls == 0, caseLabel);
+      // Dtor calls are for original item in SboVector and for items in ilist.
+      VERIFY(PodWithoutDefaultCtor::dtorCalls == 5, caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i].i == i + 1, caseLabel);
+   }
+   {
+      const std::string caseLabel{"SboVector initializer list assignment for pod-type "
+                                  "from heap instance to buffer instance."};
+
+      SboVector<PodWithoutDefaultCtor, 10> sv{20, PodWithoutDefaultCtor{1, 1.0, true}};
+      VERIFY(sv.onHeap(), caseLabel);
+
+      PodWithoutDefaultCtor::resetCallCount();
+      sv = {PodWithoutDefaultCtor{1, 1.0, true}, PodWithoutDefaultCtor{2, 2.0, true}};
+
+      VERIFY(sv.size() == 2, caseLabel);
+      VERIFY(sv.capacity() == 10, caseLabel);
+      VERIFY(sv.inBuffer(), caseLabel);
+      // Ctor calls are for constructing items in ilist.
+      VERIFY(PodWithoutDefaultCtor::ctorCalls == 2, caseLabel);
+      // Copy ctor calls are for assigning items into SboVector.
+      VERIFY(PodWithoutDefaultCtor::copyCtorCalls == 2, caseLabel);
+      VERIFY(PodWithoutDefaultCtor::moveCtorCalls == 0, caseLabel);
+      VERIFY(PodWithoutDefaultCtor::assignmentCalls == 0, caseLabel);
+      // Dtor calls are for original item in SboVector and for items in ilist.
+      VERIFY(PodWithoutDefaultCtor::dtorCalls == 22, caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i].i == i + 1, caseLabel);
+   }
+   {
+      const std::string caseLabel{"SboVector initializer list assignment for pod-type "
+                                  "from buffer instance to heap instance."};
+
+      SboVector<PodWithoutDefaultCtor, 5> sv{3, PodWithoutDefaultCtor{1, 1.0, true}};
+      VERIFY(sv.inBuffer(), caseLabel);
+
+      PodWithoutDefaultCtor::resetCallCount();
+      sv = {PodWithoutDefaultCtor{1, 1.0, true}, PodWithoutDefaultCtor{2, 2.0, true},
+            PodWithoutDefaultCtor{3, 3.0, true}, PodWithoutDefaultCtor{4, 4.0, true},
+            PodWithoutDefaultCtor{5, 5.0, true}, PodWithoutDefaultCtor{6, 6.0, true},
+            PodWithoutDefaultCtor{7, 7.0, true}};
+
+      VERIFY(sv.size() == 7, caseLabel);
+      VERIFY(sv.capacity() == 7, caseLabel);
+      VERIFY(sv.onHeap(), caseLabel);
+      // Ctor calls are for constructing items in ilist.
+      VERIFY(PodWithoutDefaultCtor::ctorCalls == 7, caseLabel);
+      // Copy ctor calls are for assigning items into SboVector.
+      VERIFY(PodWithoutDefaultCtor::copyCtorCalls == 7, caseLabel);
+      VERIFY(PodWithoutDefaultCtor::moveCtorCalls == 0, caseLabel);
+      VERIFY(PodWithoutDefaultCtor::assignmentCalls == 0, caseLabel);
+      // Dtor calls are for original item in SboVector and for items in ilist.
+      VERIFY(PodWithoutDefaultCtor::dtorCalls == 10, caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i].i == i + 1, caseLabel);
+   }
+   {
+      const std::string caseLabel{"SboVector initializer list assignment for pod-type "
+                                  "from heap instance to heap instance."};
+
+      SboVector<PodWithoutDefaultCtor, 5> sv{10, PodWithoutDefaultCtor{1, 1.0, true}};
+      VERIFY(sv.onHeap(), caseLabel);
+
+      PodWithoutDefaultCtor::resetCallCount();
+      sv = {PodWithoutDefaultCtor{1, 1.0, true}, PodWithoutDefaultCtor{2, 2.0, true},
+            PodWithoutDefaultCtor{3, 3.0, true}, PodWithoutDefaultCtor{4, 4.0, true},
+            PodWithoutDefaultCtor{5, 5.0, true}, PodWithoutDefaultCtor{6, 6.0, true},
+            PodWithoutDefaultCtor{7, 7.0, true}};
+
+      VERIFY(sv.size() == 7, caseLabel);
+      VERIFY(sv.capacity() == 7, caseLabel);
+      VERIFY(sv.onHeap(), caseLabel);
+      // Ctor calls are for constructing items in ilist.
+      VERIFY(PodWithoutDefaultCtor::ctorCalls == 7, caseLabel);
+      // Copy ctor calls are for assigning items into SboVector.
+      VERIFY(PodWithoutDefaultCtor::copyCtorCalls == 7, caseLabel);
+      VERIFY(PodWithoutDefaultCtor::moveCtorCalls == 0, caseLabel);
+      VERIFY(PodWithoutDefaultCtor::assignmentCalls == 0, caseLabel);
+      // Dtor calls are for original item in SboVector and for items in ilist.
+      VERIFY(PodWithoutDefaultCtor::dtorCalls == 17, caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i].i == i + 1, caseLabel);
+   }
+}
+
 } // namespace
 
 
@@ -1015,4 +1122,5 @@ void TestSboVector()
    TestSboVectorDtor();
    TestSboVectorCopyAssignment();
    TestSboVectorMoveAssignment();
+   TestSboVectorInitializerListAssignment();
 }
