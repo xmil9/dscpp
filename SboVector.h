@@ -70,6 +70,8 @@ template <typename T, std::size_t N> class SboVector
    SboVector& operator=(SboVector&& other);
    SboVector& operator=(std::initializer_list<T> ilist);
 
+   void assign(size_type count, const T& value);
+
    T& operator[](std::size_t pos);
    const T& operator[](std::size_t pos) const;
 
@@ -172,6 +174,13 @@ SboVector<T, N>& SboVector<T, N>::operator=(std::initializer_list<T> ilist)
 {
    copyFrom(ilist, ilist.begin());
    return *this;
+}
+
+
+template <typename T, std::size_t N>
+void SboVector<T, N>::assign(size_type count, const T& value)
+{
+   // todo
 }
 
 
@@ -289,18 +298,40 @@ template <typename T, std::size_t N>
 template<typename U, typename ElemIter>
 void SboVector<T, N>::copyFrom(const U& other, ElemIter first)
 {
+   bool dealloc = false;
+
    // Perform allocation up front.
+   // Try to reuse existing heap memory if possible.
    T* newData = nullptr;
-   if (other.size() > BufferCapacity)
+   const bool needsHeap = other.size() > BufferCapacity;
+   const bool fitsIntoExistingMem = other.size() <= m_capacity;
+   if (needsHeap && !fitsIntoExistingMem)
+   {
+      dealloc = true;
       newData = allocateMem(other.size());
+   }
 
-   destroy();
+   // Clean up old data.
+   std::destroy_n(m_data, size());
+   if (onHeap() && dealloc)
+      deallocateMem(m_data);
 
-   if (newData)
-      m_data = newData;
+   // Set up new data.
+   if (needsHeap)
+   {
+      if (newData)
+      {
+         m_data = newData;
+         m_capacity = other.size();
+      }
+   }
+   else
+   {
+      m_data = buffer();
+      m_capacity = BufferCapacity;
+   }
    std::uninitialized_copy_n(first, other.size(), m_data);
    m_size = other.size();
-   m_capacity = onHeap() ? m_size : BufferCapacity;
 }
 
 

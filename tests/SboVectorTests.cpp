@@ -861,8 +861,8 @@ void TestSboVectorCopyAssignment()
          VERIFY(copy[i].i == i, caseLabel);
    }
    {
-      const std::string caseLabel{
-         "SboVector copy assignment for pod-type from heap instance to heap instance."};
+      const std::string caseLabel{"SboVector copy assignment for pod-type from larger "
+                                  "heap instance to smaller heap instance."};
 
       PodWithDefaultCtor val;
       SboVector<PodWithDefaultCtor, 10> src{20, val};
@@ -876,12 +876,41 @@ void TestSboVectorCopyAssignment()
       copy = src;
 
       VERIFY(copy.size() == 20, caseLabel);
+      // Assigning data that needs a larger heap allocation will trigger a new
+      // allocation. Capacity will increase to larger size.
       VERIFY(copy.capacity() == 20, caseLabel);
       VERIFY(copy.onHeap(), caseLabel);
       VERIFY(PodWithDefaultCtor::defaultCtorCalls == 0, caseLabel);
       VERIFY(PodWithDefaultCtor::copyCtorCalls == 20, caseLabel);
       VERIFY(PodWithDefaultCtor::assignmentCalls == 0, caseLabel);
       VERIFY(PodWithDefaultCtor::dtorCalls == 15, caseLabel);
+      for (int i = 0; i < copy.size(); ++i)
+         VERIFY(copy[i].i == i, caseLabel);
+   }
+   {
+      const std::string caseLabel{"SboVector copy assignment for pod-type from smaller "
+                                  "heap instance to larger heap instance."};
+
+      PodWithDefaultCtor val;
+      SboVector<PodWithDefaultCtor, 10> src{15, val};
+      for (int i = 0; i < src.size(); ++i)
+         src[i].i = i;
+
+      SboVector<PodWithDefaultCtor, 10> copy{20, PodWithDefaultCtor{}};
+      VERIFY(copy.onHeap(), caseLabel);
+
+      PodWithDefaultCtor::resetCallCount();
+      copy = src;
+
+      VERIFY(copy.size() == 15, caseLabel);
+      // Assigning data that needs a smaller heap allocation will reuse the existing
+      // heap memory. Capacity will remain at previous (larger) size.
+      VERIFY(copy.capacity() == 20, caseLabel);
+      VERIFY(copy.onHeap(), caseLabel);
+      VERIFY(PodWithDefaultCtor::defaultCtorCalls == 0, caseLabel);
+      VERIFY(PodWithDefaultCtor::copyCtorCalls == 15, caseLabel);
+      VERIFY(PodWithDefaultCtor::assignmentCalls == 0, caseLabel);
+      VERIFY(PodWithDefaultCtor::dtorCalls == 20, caseLabel);
       for (int i = 0; i < copy.size(); ++i)
          VERIFY(copy[i].i == i, caseLabel);
    }
@@ -1080,9 +1109,39 @@ void TestSboVectorInitializerListAssignment()
    }
    {
       const std::string caseLabel{"SboVector initializer list assignment for pod-type "
-                                  "from heap instance to heap instance."};
+                                  "from smaller heap instance to larger heap instance."};
 
-      SboVector<PodWithoutDefaultCtor, 5> sv{10, PodWithoutDefaultCtor{1, 1.0, true}};
+      SboVector<PodWithoutDefaultCtor, 5> sv{7, PodWithoutDefaultCtor{1, 1.0, true}};
+      VERIFY(sv.onHeap(), caseLabel);
+
+      PodWithoutDefaultCtor::resetCallCount();
+      sv = {PodWithoutDefaultCtor{1, 1.0, true}, PodWithoutDefaultCtor{2, 2.0, true},
+            PodWithoutDefaultCtor{3, 3.0, true}, PodWithoutDefaultCtor{4, 4.0, true},
+            PodWithoutDefaultCtor{5, 5.0, true}, PodWithoutDefaultCtor{6, 6.0, true},
+            PodWithoutDefaultCtor{7, 7.0, true}, PodWithoutDefaultCtor{8, 8.0, true},
+            PodWithoutDefaultCtor{9, 9.0, true}};
+
+      VERIFY(sv.size() == 9, caseLabel);
+      // Assigning data that needs a larger heap allocation will trigger a new
+      // allocation. Capacity will increase to larger size.
+      VERIFY(sv.capacity() == 9, caseLabel);
+      VERIFY(sv.onHeap(), caseLabel);
+      // Ctor calls are for constructing items in ilist.
+      VERIFY(PodWithoutDefaultCtor::ctorCalls == 9, caseLabel);
+      // Copy ctor calls are for assigning items into SboVector.
+      VERIFY(PodWithoutDefaultCtor::copyCtorCalls == 9, caseLabel);
+      VERIFY(PodWithoutDefaultCtor::moveCtorCalls == 0, caseLabel);
+      VERIFY(PodWithoutDefaultCtor::assignmentCalls == 0, caseLabel);
+      // Dtor calls are for original item in SboVector and for items in ilist.
+      VERIFY(PodWithoutDefaultCtor::dtorCalls == 16, caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i].i == i + 1, caseLabel);
+   }
+   {
+      const std::string caseLabel{"SboVector initializer list assignment for pod-type "
+                                  "from larger heap instance to smaller heap instance."};
+
+      SboVector<PodWithoutDefaultCtor, 5> sv{9, PodWithoutDefaultCtor{1, 1.0, true}};
       VERIFY(sv.onHeap(), caseLabel);
 
       PodWithoutDefaultCtor::resetCallCount();
@@ -1092,7 +1151,9 @@ void TestSboVectorInitializerListAssignment()
             PodWithoutDefaultCtor{7, 7.0, true}};
 
       VERIFY(sv.size() == 7, caseLabel);
-      VERIFY(sv.capacity() == 7, caseLabel);
+      // Assigning data that needs a smaller heap allocation will reuse the existing
+      // heap memory. Capacity will remain at previous (larger) size.
+      VERIFY(sv.capacity() == 9, caseLabel);
       VERIFY(sv.onHeap(), caseLabel);
       // Ctor calls are for constructing items in ilist.
       VERIFY(PodWithoutDefaultCtor::ctorCalls == 7, caseLabel);
@@ -1101,7 +1162,7 @@ void TestSboVectorInitializerListAssignment()
       VERIFY(PodWithoutDefaultCtor::moveCtorCalls == 0, caseLabel);
       VERIFY(PodWithoutDefaultCtor::assignmentCalls == 0, caseLabel);
       // Dtor calls are for original item in SboVector and for items in ilist.
-      VERIFY(PodWithoutDefaultCtor::dtorCalls == 17, caseLabel);
+      VERIFY(PodWithoutDefaultCtor::dtorCalls == 16, caseLabel);
       for (int i = 0; i < sv.size(); ++i)
          VERIFY(sv[i].i == i + 1, caseLabel);
    }
