@@ -143,10 +143,9 @@ void TestSboVectorCtorForElementCountAndValue()
 void TestSboVectorCopyCtor()
 {
    {
-      const std::string caseLabel{
-         "SboVector copy ctor for pod-type with default ctor in buffer."};
+      const std::string caseLabel{"SboVector copy ctor for buffer instance."};
 
-      SboVector<Instrumented, 10> src{5, Instrumented{}};
+      SboVector<Instrumented, 10> src(5, {1});
       for (int i = 0; i < src.size(); ++i)
          src[i].i = i;
 
@@ -157,17 +156,20 @@ void TestSboVectorCopyCtor()
       VERIFY(copy.capacity() == 10, caseLabel);
       VERIFY(copy.in_buffer(), caseLabel);
       VERIFY(Instrumented::defaultCtorCalls == 0, caseLabel);
+      // Copied elements.
       VERIFY(Instrumented::copyCtorCalls == 5, caseLabel);
+      VERIFY(Instrumented::moveCtorCalls == 0, caseLabel);
       VERIFY(Instrumented::assignmentCalls == 0, caseLabel);
+      VERIFY(Instrumented::moveAssignmentCalls == 0, caseLabel);
+      // Neither source nor copied elements got destructed yet.
+      VERIFY(Instrumented::dtorCalls == 0, caseLabel);
       for (int i = 0; i < copy.size(); ++i)
          VERIFY(copy[i].i == i, caseLabel);
    }
    {
-      const std::string caseLabel{
-         "SboVector copy ctor for pod-type with default ctor on heap."};
+      const std::string caseLabel{"SboVector copy ctor for heap instance."};
 
-      Instrumented val;
-      SboVector<Instrumented, 10> src{20, val};
+      SboVector<Instrumented, 10> src(20, {1});
       for (int i = 0; i < src.size(); ++i)
          src[i].i = i;
 
@@ -178,8 +180,13 @@ void TestSboVectorCopyCtor()
       VERIFY(copy.capacity() == 20, caseLabel);
       VERIFY(copy.on_heap(), caseLabel);
       VERIFY(Instrumented::defaultCtorCalls == 0, caseLabel);
+      // Copied elements.
       VERIFY(Instrumented::copyCtorCalls == 20, caseLabel);
+      VERIFY(Instrumented::moveCtorCalls == 0, caseLabel);
       VERIFY(Instrumented::assignmentCalls == 0, caseLabel);
+      VERIFY(Instrumented::moveAssignmentCalls == 0, caseLabel);
+      // Neither source nor copied elements got destructed yet.
+      VERIFY(Instrumented::dtorCalls == 0, caseLabel);
       for (int i = 0; i < copy.size(); ++i)
          VERIFY(copy[i].i == i, caseLabel);
    }
@@ -872,7 +879,7 @@ void TestSboVector()
 {
    TestSboVectorDefaultCtor();
    TestSboVectorCtorForElementCountAndValue();
-   // TestSboVectorCopyCtor();
+    TestSboVectorCopyCtor();
    // TestSboVectorMoveCtor();
    // TestSboVectorInitializerListCtor();
    // TestSboVectorDtor();

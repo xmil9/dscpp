@@ -157,15 +157,16 @@ SboVector<T, N>::SboVector(std::size_t count, const T& value)
 
 template <typename T, std::size_t N> SboVector<T, N>::SboVector(const SboVector& other)
 {
-   const auto count = other.size();
+   // Only available strategies are to use the buffer or make a new heap allocation.
 
-   if (!fitsIntoBuffer(count))
+   const auto otherSize = other.size();
+   if (!fitsIntoBuffer(otherSize))
    {
-      allocate(count);
-      m_capacity = count;
+      allocate(otherSize);
+      m_capacity = otherSize;
    }
    copy_elements(other, other.m_data);
-   m_size = count;
+   m_size = otherSize;
 }
 
 
