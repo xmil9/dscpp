@@ -343,30 +343,38 @@ void TestSboVectorInitializerListCtor()
 void TestSboVectorDtor()
 {
    {
-      const std::string caseLabel{"SboVector dtor for internal buffer."};
+      const std::string caseLabel{"SboVector dtor for buffer instance."};
+
+      constexpr std::size_t Cap = 10;
+      constexpr std::size_t NumElems = 3;
 
       {
-         SboVector<Instrumented, 10> sv{{1}, {2}, {3}};
+         SboVector<Instrumented, Cap> sv{{1}, {2}, {3}};
+         // Precondition.
          VERIFY(sv.in_buffer(), caseLabel);
 
-         // Rest call counts before the SboVector gets destroyed.
+         // Reset call counts before the SboVector gets destroyed.
          Instrumented::resetCallCount();
       }
 
-      VERIFY(Instrumented::dtorCalls == 3, caseLabel);
+      VERIFY(Instrumented::dtorCalls == NumElems, caseLabel);
    }
    {
-      const std::string caseLabel{"SboVector dtor for heap."};
+      const std::string caseLabel{"SboVector dtor for heap instance."};
+
+      constexpr std::size_t Cap = 3;
+      constexpr std::size_t NumElems = 5;
 
       {
-         SboVector<Instrumented, 3> sv{{1}, {2}, {3}, {4}, {5}};
+         SboVector<Instrumented, Cap> sv{{1}, {2}, {3}, {4}, {5}};
+         // Precondition.
          VERIFY(sv.on_heap(), caseLabel);
 
-         // Rest call counts before the SboVector gets destroyed.
+         // Reset call counts before the SboVector gets destroyed.
          Instrumented::resetCallCount();
       }
 
-      VERIFY(Instrumented::dtorCalls == 5, caseLabel);
+      VERIFY(Instrumented::dtorCalls == NumElems, caseLabel);
    }
 }
 
@@ -814,7 +822,7 @@ void TestSboVector()
    TestSboVectorCopyCtor();
    TestSboVectorMoveCtor();
    TestSboVectorInitializerListCtor();
-   // TestSboVectorDtor();
+   TestSboVectorDtor();
    // TestSboVectorCopyAssignment();
    // TestSboVectorMoveAssignment();
    // TestSboVectorInitializerListAssignment();
