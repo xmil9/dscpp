@@ -382,133 +382,195 @@ void TestSboVectorDtor()
 void TestSboVectorCopyAssignment()
 {
    {
-      const std::string caseLabel{"SboVector copy assignment for pod-type from buffer "
-                                  "instance to buffer instance."};
+      const std::string caseLabel{
+         "SboVector copy assignment from buffer instance to buffer instance."};
 
-      Instrumented val;
-      SboVector<Instrumented, 10> src{5, val};
+      constexpr std::size_t Cap = 10;
+      constexpr std::size_t NumElems = 5;
+      constexpr std::size_t NumOrigElems = 3;
+
+      SboVector<Instrumented, Cap> src(NumElems, {2});
       for (int i = 0; i < src.size(); ++i)
          src[i].i = i;
 
-      SboVector<Instrumented, 10> copy{3, Instrumented{}};
-      VERIFY(copy.in_buffer(), caseLabel);
+      SboVector<Instrumented, Cap> sv(NumOrigElems, {1});
+
+      // Preconditions.
+      VERIFY(NumElems < Cap, caseLabel);
+      VERIFY(NumOrigElems < Cap, caseLabel);
+      VERIFY(src.in_buffer(), caseLabel);
+      VERIFY(sv.in_buffer(), caseLabel);
 
       Instrumented::resetCallCount();
-      copy = src;
+      sv = src;
 
-      VERIFY(copy.size() == 5, caseLabel);
-      VERIFY(copy.capacity() == 10, caseLabel);
-      VERIFY(copy.in_buffer(), caseLabel);
+      VERIFY(sv.size() == NumElems, caseLabel);
+      VERIFY(sv.capacity() == Cap, caseLabel);
+      VERIFY(sv.in_buffer(), caseLabel);
       VERIFY(Instrumented::defaultCtorCalls == 0, caseLabel);
-      VERIFY(Instrumented::copyCtorCalls == 5, caseLabel);
+      // Copied elements.
+      VERIFY(Instrumented::copyCtorCalls == NumElems, caseLabel);
+      VERIFY(Instrumented::moveCtorCalls == 0, caseLabel);
       VERIFY(Instrumented::assignmentCalls == 0, caseLabel);
-      VERIFY(Instrumented::dtorCalls == 3, caseLabel);
-      for (int i = 0; i < copy.size(); ++i)
-         VERIFY(copy[i].i == i, caseLabel);
+      VERIFY(Instrumented::moveAssignmentCalls == 0, caseLabel);
+      // Original elements got destroyed.
+      VERIFY(Instrumented::dtorCalls == NumOrigElems, caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i].i == i, caseLabel);
    }
    {
       const std::string caseLabel{
-         "SboVector copy assignment for pod-type from heap instance to buffer instance."};
+         "SboVector copy assignment from heap instance to buffer instance."};
 
-      Instrumented val;
-      SboVector<Instrumented, 10> src{20, val};
+      constexpr std::size_t Cap = 10;
+      constexpr std::size_t NumElems = 20;
+      constexpr std::size_t NumOrigElems = 3;
+
+      SboVector<Instrumented, Cap> src(NumElems, {2});
       for (int i = 0; i < src.size(); ++i)
          src[i].i = i;
 
-      SboVector<Instrumented, 10> copy{3, Instrumented{}};
-      VERIFY(copy.in_buffer(), caseLabel);
+      SboVector<Instrumented, Cap> sv(NumOrigElems, {1});
+
+      // Preconditions.
+      VERIFY(NumElems > Cap, caseLabel);
+      VERIFY(NumOrigElems < Cap, caseLabel);
+      VERIFY(src.on_heap(), caseLabel);
+      VERIFY(sv.in_buffer(), caseLabel);
 
       Instrumented::resetCallCount();
-      copy = src;
+      sv = src;
 
-      VERIFY(copy.size() == 20, caseLabel);
-      VERIFY(copy.capacity() == 20, caseLabel);
-      VERIFY(copy.on_heap(), caseLabel);
+      VERIFY(sv.size() == NumElems, caseLabel);
+      VERIFY(sv.capacity() == NumElems, caseLabel);
+      VERIFY(sv.on_heap(), caseLabel);
       VERIFY(Instrumented::defaultCtorCalls == 0, caseLabel);
-      VERIFY(Instrumented::copyCtorCalls == 20, caseLabel);
+      // Copied elements.
+      VERIFY(Instrumented::copyCtorCalls == NumElems, caseLabel);
+      VERIFY(Instrumented::moveCtorCalls == 0, caseLabel);
       VERIFY(Instrumented::assignmentCalls == 0, caseLabel);
-      VERIFY(Instrumented::dtorCalls == 3, caseLabel);
-      for (int i = 0; i < copy.size(); ++i)
-         VERIFY(copy[i].i == i, caseLabel);
+      VERIFY(Instrumented::moveAssignmentCalls == 0, caseLabel);
+      // Original elements got destroyed.
+      VERIFY(Instrumented::dtorCalls == NumOrigElems, caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i].i == i, caseLabel);
    }
    {
       const std::string caseLabel{
-         "SboVector copy assignment for pod-type from buffer instance to heap instance."};
+         "SboVector copy assignment from buffer instance to heap instance."};
 
-      Instrumented val;
-      SboVector<Instrumented, 10> src{5, val};
+      constexpr std::size_t Cap = 10;
+      constexpr std::size_t NumElems = 5;
+      constexpr std::size_t NumOrigElems = 20;
+
+      SboVector<Instrumented, Cap> src(NumElems, {2});
       for (int i = 0; i < src.size(); ++i)
          src[i].i = i;
 
-      SboVector<Instrumented, 10> copy{20, Instrumented{}};
-      VERIFY(copy.on_heap(), caseLabel);
+      SboVector<Instrumented, Cap> sv(NumOrigElems, {1});
+
+      // Preconditions.
+      VERIFY(NumElems < Cap, caseLabel);
+      VERIFY(NumOrigElems > Cap, caseLabel);
+      VERIFY(src.in_buffer(), caseLabel);
+      VERIFY(sv.on_heap(), caseLabel);
 
       Instrumented::resetCallCount();
-      copy = src;
+      sv = src;
 
-      VERIFY(copy.size() == 5, caseLabel);
-      VERIFY(copy.capacity() == 10, caseLabel);
-      VERIFY(copy.in_buffer(), caseLabel);
+      VERIFY(sv.size() == NumElems, caseLabel);
+      VERIFY(sv.capacity() == Cap, caseLabel);
+      VERIFY(sv.in_buffer(), caseLabel);
       VERIFY(Instrumented::defaultCtorCalls == 0, caseLabel);
-      VERIFY(Instrumented::copyCtorCalls == 5, caseLabel);
+      // Copied elements.
+      VERIFY(Instrumented::copyCtorCalls == NumElems, caseLabel);
+      VERIFY(Instrumented::moveCtorCalls == 0, caseLabel);
       VERIFY(Instrumented::assignmentCalls == 0, caseLabel);
-      VERIFY(Instrumented::dtorCalls == 20, caseLabel);
-      for (int i = 0; i < copy.size(); ++i)
-         VERIFY(copy[i].i == i, caseLabel);
+      VERIFY(Instrumented::moveAssignmentCalls == 0, caseLabel);
+      // Original elements got destroyed.
+      VERIFY(Instrumented::dtorCalls == NumOrigElems, caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i].i == i, caseLabel);
    }
    {
-      const std::string caseLabel{"SboVector copy assignment for pod-type from larger "
-                                  "heap instance to smaller heap instance."};
+      const std::string caseLabel{
+         "SboVector copy assignment from larger heap instance to smaller heap instance."};
 
-      Instrumented val;
-      SboVector<Instrumented, 10> src{20, val};
+      constexpr std::size_t Cap = 10;
+      constexpr std::size_t NumElems = 20;
+      constexpr std::size_t NumOrigElems = 15;
+
+      SboVector<Instrumented, Cap> src(NumElems, {2});
       for (int i = 0; i < src.size(); ++i)
          src[i].i = i;
 
-      SboVector<Instrumented, 10> copy{15, Instrumented{}};
-      VERIFY(copy.on_heap(), caseLabel);
+      SboVector<Instrumented, Cap> sv(NumOrigElems, {1});
+
+      // Preconditions.
+      VERIFY(NumElems > Cap, caseLabel);
+      VERIFY(NumOrigElems > Cap, caseLabel);
+      VERIFY(NumElems > NumOrigElems, caseLabel);
+      VERIFY(src.on_heap(), caseLabel);
+      VERIFY(sv.on_heap(), caseLabel);
 
       Instrumented::resetCallCount();
-      copy = src;
+      sv = src;
 
-      VERIFY(copy.size() == 20, caseLabel);
+      VERIFY(sv.size() == NumElems, caseLabel);
       // Assigning data that needs a larger heap allocation will trigger a new
       // allocation. Capacity will increase to larger size.
-      VERIFY(copy.capacity() == 20, caseLabel);
-      VERIFY(copy.on_heap(), caseLabel);
+      VERIFY(sv.capacity() == NumElems, caseLabel);
+      VERIFY(sv.on_heap(), caseLabel);
       VERIFY(Instrumented::defaultCtorCalls == 0, caseLabel);
-      VERIFY(Instrumented::copyCtorCalls == 20, caseLabel);
+      // Copied elements.
+      VERIFY(Instrumented::copyCtorCalls == NumElems, caseLabel);
+      VERIFY(Instrumented::moveCtorCalls == 0, caseLabel);
       VERIFY(Instrumented::assignmentCalls == 0, caseLabel);
-      VERIFY(Instrumented::dtorCalls == 15, caseLabel);
-      for (int i = 0; i < copy.size(); ++i)
-         VERIFY(copy[i].i == i, caseLabel);
+      VERIFY(Instrumented::moveAssignmentCalls == 0, caseLabel);
+      // Original elements got destroyed.
+      VERIFY(Instrumented::dtorCalls == NumOrigElems, caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i].i == i, caseLabel);
    }
    {
-      const std::string caseLabel{"SboVector copy assignment for pod-type from smaller "
-                                  "heap instance to larger heap instance."};
+      const std::string caseLabel{
+         "SboVector copy assignment from smaller heap instance to larger heap instance."};
 
-      Instrumented val;
-      SboVector<Instrumented, 10> src{15, val};
+      constexpr std::size_t Cap = 10;
+      constexpr std::size_t NumElems = 15;
+      constexpr std::size_t NumOrigElems = 20;
+
+      SboVector<Instrumented, Cap> src(NumElems, {2});
       for (int i = 0; i < src.size(); ++i)
          src[i].i = i;
 
-      SboVector<Instrumented, 10> copy{20, Instrumented{}};
-      VERIFY(copy.on_heap(), caseLabel);
+      SboVector<Instrumented, Cap> sv(NumOrigElems, {1});
+
+      // Preconditions.
+      VERIFY(NumElems > Cap, caseLabel);
+      VERIFY(NumOrigElems > Cap, caseLabel);
+      VERIFY(NumElems < NumOrigElems, caseLabel);
+      VERIFY(src.on_heap(), caseLabel);
+      VERIFY(sv.on_heap(), caseLabel);
 
       Instrumented::resetCallCount();
-      copy = src;
+      sv = src;
 
-      VERIFY(copy.size() == 15, caseLabel);
+      VERIFY(sv.size() == NumElems, caseLabel);
       // Assigning data that needs a smaller heap allocation will reuse the existing
       // heap memory. Capacity will remain at previous (larger) size.
-      VERIFY(copy.capacity() == 20, caseLabel);
-      VERIFY(copy.on_heap(), caseLabel);
+      VERIFY(sv.capacity() == NumOrigElems, caseLabel);
+      VERIFY(sv.on_heap(), caseLabel);
       VERIFY(Instrumented::defaultCtorCalls == 0, caseLabel);
-      VERIFY(Instrumented::copyCtorCalls == 15, caseLabel);
+      // Copied elements.
+      VERIFY(Instrumented::copyCtorCalls == NumElems, caseLabel);
+      VERIFY(Instrumented::moveCtorCalls == 0, caseLabel);
       VERIFY(Instrumented::assignmentCalls == 0, caseLabel);
-      VERIFY(Instrumented::dtorCalls == 20, caseLabel);
-      for (int i = 0; i < copy.size(); ++i)
-         VERIFY(copy[i].i == i, caseLabel);
+      VERIFY(Instrumented::moveAssignmentCalls == 0, caseLabel);
+      // Original elements got destroyed.
+      VERIFY(Instrumented::dtorCalls == NumOrigElems, caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i].i == i, caseLabel);
    }
 }
 
@@ -823,7 +885,7 @@ void TestSboVector()
    TestSboVectorMoveCtor();
    TestSboVectorInitializerListCtor();
    TestSboVectorDtor();
-   // TestSboVectorCopyAssignment();
+   TestSboVectorCopyAssignment();
    // TestSboVectorMoveAssignment();
    // TestSboVectorInitializerListAssignment();
 }

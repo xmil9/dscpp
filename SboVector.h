@@ -11,6 +11,7 @@
 #include <malloc.h>
 #endif
 #include <memory>
+#include <stdexcept>
 #include <type_traits>
 
 
@@ -177,7 +178,6 @@ template <typename T, std::size_t N> SboVector<T, N>::SboVector(SboVector&& othe
    const auto srcSize = other.size();
    const bool canSteal = other.on_heap();
 
-   // Prefer stealing.
    if (canSteal)
    {
       m_data = other.m_data;
@@ -185,9 +185,9 @@ template <typename T, std::size_t N> SboVector<T, N>::SboVector(SboVector&& othe
       // Reset other data to prevent deallocation of the stolen memory.
       other.m_data = other.buffer();
    }
-   // If we cannot steal, then the elements must fit into the buffer.
    else
    {
+      // Elements must fit into the buffer.
       assert(fitsIntoBuffer(srcSize));
       move_elements(other, other.m_data);
       m_capacity = BufferCapacity;
@@ -227,31 +227,46 @@ template <typename T, std::size_t N> SboVector<T, N>::~SboVector()
 template <typename T, std::size_t N>
 SboVector<T, N>& SboVector<T, N>::operator=(const SboVector& other)
 {
-   // Perform allocation up front.
-   T* newData = allocate_or_reuse_mem(other.size(), m_capacity);
+   // Available strategies are to use the buffer, to reuse an existing heap
+   // allocation, or make a new heap allocation.
 
-   // Clean up old data.
+   const auto srcSize = other.size();
+   const bool fitsBuffer = fitsIntoBuffer(srcSize);
+   const bool canReuseHeap = on_heap() && m_capacity >= srcSize;
+   const bool allocHeap = !fitsBuffer && !canReuseHeap;
+
+   // Perform allocation up front to prevent inconsistencies if allocation
+   // fails.
+   T* newData = nullptr;
+   if (allocHeap)
+      newData = allocate_mem(srcSize);
+
+   // Clean up existing data.
    destroy_elements();
-   if (newData)
+   if (fitsBuffer || allocHeap)
       deallocate();
 
    // Set up new data.
-   if (fitsIntoBuffer(other.size()))
+   if (fitsBuffer)
    {
-      assert(!newData);
-      m_data = buffer();
+      copy_elements(other, other.m_data);
       m_capacity = BufferCapacity;
+      m_size = srcSize;
+   }
+   else if (canReuseHeap)
+   {
+      copy_elements(other, other.m_data);
+      // Capacity stays the same.
+      m_size = srcSize;
    }
    else
    {
-      if (newData)
-      {
-         m_data = newData;
-         m_capacity = other.size();
-      }
+      assert(allocHeap && newData);
+      m_data = newData;
+      copy_elements(other, other.m_data);
+      m_capacity = srcSize;
+      m_size = srcSize;
    }
-   copy_elements(other, other.m_data);
-   m_size = other.size();
 
    return *this;
 }
@@ -584,10 +599,13 @@ template <typename T, std::size_t N> T* SboVector<T, N>::allocate_mem(std::size_
 {
 #ifdef VS_COMPILER
    // Visual Studio does not support std::aligned_alloc.
-   return reinterpret_cast<T*>(_aligned_malloc(cap * sizeof(T), alignof(T)));
+   T* mem = reinterpret_cast<T*>(_aligned_malloc(cap * sizeof(T), alignof(T)));
 #else
-   return reinterpret_cast<T*>(std::aligned_alloc(alignof(T), cap * sizeof(T)));
+   T* mem = reinterpret_cast<T*>(std::aligned_alloc(alignof(T), cap * sizeof(T)));
 #endif
+   if (!mem)
+      throw std::runtime_error("SboVector - Failed to allocate memory.");
+   return mem;
 }
 
 
