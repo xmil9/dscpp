@@ -146,11 +146,14 @@ SboVector<T, N>::SboVector(std::size_t count, const T& value)
 {
    // Available strategies are to use the buffer or make a new heap allocation.
 
-   if (!fitsIntoBuffer(count))
+   const bool allocHeap = !fitsIntoBuffer(count);
+
+   if (allocHeap)
    {
       allocate(count);
       m_capacity = count;
    }
+
    fill_elements(count, value);
    m_size = count;
 }
@@ -161,11 +164,14 @@ template <typename T, std::size_t N> SboVector<T, N>::SboVector(const SboVector&
    // Available strategies are to use the buffer or make a new heap allocation.
 
    const auto srcSize = other.size();
-   if (!fitsIntoBuffer(srcSize))
+   const bool allocHeap = !fitsIntoBuffer(srcSize);
+
+   if (allocHeap)
    {
       allocate(srcSize);
       m_capacity = srcSize;
    }
+
    copy_elements(other, other.m_data);
    m_size = srcSize;
 }
@@ -192,6 +198,7 @@ template <typename T, std::size_t N> SboVector<T, N>::SboVector(SboVector&& othe
       move_elements(other, other.m_data);
       m_capacity = BufferCapacity;
    }
+
    m_size = srcSize;
 
    // Clear other instance.
@@ -207,11 +214,14 @@ SboVector<T, N>::SboVector(std::initializer_list<T> ilist)
    // Available strategies are to use the buffer or make a new heap allocation.
 
    const auto srcSize = ilist.size();
-   if (!fitsIntoBuffer(srcSize))
+   const bool allocHeap = !fitsIntoBuffer(srcSize);
+
+   if (allocHeap)
    {
       allocate(srcSize);
       m_capacity = srcSize;
    }
+
    copy_elements(ilist, ilist.begin());
    m_size = srcSize;
 }
