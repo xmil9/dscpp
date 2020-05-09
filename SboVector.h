@@ -180,6 +180,7 @@ template <typename T, std::size_t N> SboVector<T, N>::SboVector(const SboVector&
 template <typename T, std::size_t N> SboVector<T, N>::SboVector(SboVector&& other)
 {
    // Available strategies are to use steal the heap allocation or use the buffer.
+   // A heap allocations does't make sense as strategys since stealing is faster.
 
    const auto srcSize = other.size();
    const bool canSteal = other.on_heap();
@@ -201,7 +202,7 @@ template <typename T, std::size_t N> SboVector<T, N>::SboVector(SboVector&& othe
 
    m_size = srcSize;
 
-   // Clear other instance.
+   // Clear source object.
    other.deallocate();
    other.m_capacity = BufferCapacity;
    other.m_size = 0;
@@ -285,50 +286,37 @@ SboVector<T, N>& SboVector<T, N>::operator=(const SboVector& other)
 template <typename T, std::size_t N>
 SboVector<T, N>& SboVector<T, N>::operator=(SboVector&& other)
 {
+   // Available strategies are to steal the heap allocation or to use the buffer.
+   // Heap reuse or a allocation don't make sense as strategies since stealing
+   // is faster.
+
    const auto srcSize = other.size();
-
    const bool canSteal = other.on_heap();
-   const bool canReuseHeap = on_heap() && m_capacity <= srcSize;
 
+   // Clean up existing data.
    destroy_elements();
+   deallocate();
 
-   // Best option is stealing the heap memory including its contents.
+   // Set up new data.
    if (canSteal)
    {
-      deallocate();
       m_data = other.m_data;
       m_capacity = other.m_capacity;
-      m_size = srcSize;
-      // Reset other data to buffer to prevent deallocation of the
+      // Reset source object to buffer to prevent deallocation of the
       // stolen memory.
       other.m_data = other.buffer();
    }
-   // Next best option is using the buffer.
-   else if (fitsIntoBuffer(srcSize))
-   {
-      deallocate();
-      move_elements(other, other.m_data);
-      m_capacity = BufferCapacity;
-      m_size = srcSize;
-   }
-   // Next best option is reusing the heap memory.
-   else if (canReuseHeap)
-   {
-      move_elements(other, other.m_data);
-      // Capacity stays the same.
-      m_size = srcSize;
-   }
-   // Last option is allocating heap memory.
    else
    {
-      deallocate();
-      allocate(srcSize);
+      // Elements must fit into the buffer.
+      assert(fitsIntoBuffer(srcSize));
       move_elements(other, other.m_data);
-      m_capacity = srcSize;
-      m_size = srcSize;
+      m_capacity = BufferCapacity;
    }
 
-   // Clear other instance.
+   m_size = srcSize;
+
+   // Clear source object.
    other.deallocate();
    other.m_capacity = BufferCapacity;
    other.m_size = 0;
