@@ -76,7 +76,7 @@ void TestSboVectorDefaultCtor()
 
       Instrumented::resetCallCount();
       SboVector<Instrumented, Cap> sv;
-      
+
       VERIFY(sv.empty(), caseLabel);
       VERIFY(sv.capacity() == Cap, caseLabel);
       VERIFY(sv.in_buffer(), caseLabel);
@@ -98,7 +98,7 @@ void TestSboVectorCtorForElementCountAndValue()
 
       constexpr std::size_t Cap = 10;
       constexpr std::size_t NumElems = 5;
-      
+
       // Precondition.
       VERIFY(Cap >= NumElems, caseLabel);
 
@@ -127,7 +127,7 @@ void TestSboVectorCtorForElementCountAndValue()
 
       constexpr std::size_t Cap = 10;
       constexpr std::size_t NumElems = 20;
-      
+
       // Precondition.
       VERIFY(Cap < NumElems, caseLabel);
 
@@ -170,11 +170,11 @@ void TestSboVectorCopyCtor()
       VERIFY(src.in_buffer(), caseLabel);
 
       Instrumented::resetCallCount();
-      SboVector<Instrumented, Cap> copy{src};
+      SboVector<Instrumented, Cap> sv{src};
 
-      VERIFY(copy.size() == NumElems, caseLabel);
-      VERIFY(copy.capacity() == Cap, caseLabel);
-      VERIFY(copy.in_buffer(), caseLabel);
+      VERIFY(sv.size() == NumElems, caseLabel);
+      VERIFY(sv.capacity() == Cap, caseLabel);
+      VERIFY(sv.in_buffer(), caseLabel);
       VERIFY(Instrumented::defaultCtorCalls == 0, caseLabel);
       // Copied elements.
       VERIFY(Instrumented::copyCtorCalls == NumElems, caseLabel);
@@ -183,8 +183,8 @@ void TestSboVectorCopyCtor()
       VERIFY(Instrumented::moveAssignmentCalls == 0, caseLabel);
       // Neither source nor copied elements got destroyed yet.
       VERIFY(Instrumented::dtorCalls == 0, caseLabel);
-      for (int i = 0; i < copy.size(); ++i)
-         VERIFY(copy[i].i == i, caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i].i == i, caseLabel);
    }
    {
       const std::string caseLabel{"SboVector copy ctor for heap instance."};
@@ -200,11 +200,11 @@ void TestSboVectorCopyCtor()
       VERIFY(src.on_heap(), caseLabel);
 
       Instrumented::resetCallCount();
-      SboVector<Instrumented, Cap> copy{src};
+      SboVector<Instrumented, Cap> sv{src};
 
-      VERIFY(copy.size() == NumElems, caseLabel);
-      VERIFY(copy.capacity() == NumElems, caseLabel);
-      VERIFY(copy.on_heap(), caseLabel);
+      VERIFY(sv.size() == NumElems, caseLabel);
+      VERIFY(sv.capacity() == NumElems, caseLabel);
+      VERIFY(sv.on_heap(), caseLabel);
       VERIFY(Instrumented::defaultCtorCalls == 0, caseLabel);
       // Copied elements.
       VERIFY(Instrumented::copyCtorCalls == NumElems, caseLabel);
@@ -213,8 +213,8 @@ void TestSboVectorCopyCtor()
       VERIFY(Instrumented::moveAssignmentCalls == 0, caseLabel);
       // Neither source nor copied elements got destroyed yet.
       VERIFY(Instrumented::dtorCalls == 0, caseLabel);
-      for (int i = 0; i < copy.size(); ++i)
-         VERIFY(copy[i].i == i, caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i].i == i, caseLabel);
    }
 }
 
@@ -235,11 +235,11 @@ void TestSboVectorMoveCtor()
       VERIFY(src.in_buffer(), caseLabel);
 
       Instrumented::resetCallCount();
-      SboVector<Instrumented, Cap> moveDest{std::move(src)};
+      SboVector<Instrumented, Cap> sv{std::move(src)};
 
-      VERIFY(moveDest.size() == NumElems, caseLabel);
-      VERIFY(moveDest.capacity() == Cap, caseLabel);
-      VERIFY(moveDest.in_buffer(), caseLabel);
+      VERIFY(sv.size() == NumElems, caseLabel);
+      VERIFY(sv.capacity() == Cap, caseLabel);
+      VERIFY(sv.in_buffer(), caseLabel);
       VERIFY(Instrumented::defaultCtorCalls == 0, caseLabel);
       VERIFY(Instrumented::copyCtorCalls == 0, caseLabel);
       // Moved elements.
@@ -248,8 +248,8 @@ void TestSboVectorMoveCtor()
       VERIFY(Instrumented::moveAssignmentCalls == 0, caseLabel);
       // No elements got destroyed.
       VERIFY(Instrumented::dtorCalls == 0, caseLabel);
-      for (int i = 0; i < moveDest.size(); ++i)
-         VERIFY(moveDest[i].i == i, caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i].i == i, caseLabel);
       // Verify moved-from instance is empty.
       VERIFY(src.size() == 0, caseLabel);
    }
@@ -267,11 +267,11 @@ void TestSboVectorMoveCtor()
       VERIFY(src.on_heap(), caseLabel);
 
       Instrumented::resetCallCount();
-      SboVector<Instrumented, 10> moveDest{std::move(src)};
+      SboVector<Instrumented, 10> sv{std::move(src)};
 
-      VERIFY(moveDest.size() == NumElems, caseLabel);
-      VERIFY(moveDest.capacity() == NumElems, caseLabel);
-      VERIFY(moveDest.on_heap(), caseLabel);
+      VERIFY(sv.size() == NumElems, caseLabel);
+      VERIFY(sv.capacity() == NumElems, caseLabel);
+      VERIFY(sv.on_heap(), caseLabel);
       VERIFY(Instrumented::defaultCtorCalls == 0, caseLabel);
       VERIFY(Instrumented::copyCtorCalls == 0, caseLabel);
       // None of the elements move ctors executed because the SboVector simply
@@ -281,8 +281,8 @@ void TestSboVectorMoveCtor()
       VERIFY(Instrumented::moveAssignmentCalls == 0, caseLabel);
       // No elements got destroyed.
       VERIFY(Instrumented::dtorCalls == 0, caseLabel);
-      for (int i = 0; i < moveDest.size(); ++i)
-         VERIFY(moveDest[i].i == i, caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i].i == i, caseLabel);
       // Verify moved-from instance is empty.
       VERIFY(src.size() == 0, caseLabel);
    }
@@ -292,87 +292,50 @@ void TestSboVectorMoveCtor()
 void TestSboVectorInitializerListCtor()
 {
    {
-      const std::string caseLabel{
-         "SboVector initializer list ctor for pod-type in buffer."};
+      const std::string caseLabel{"SboVector initializer list ctor for buffer instance."};
+
+      constexpr std::size_t Cap = 10;
+      constexpr std::size_t NumElems = 4;
 
       Instrumented::resetCallCount();
-      SboVector<Instrumented, 10> sv{{1}, {2}, {3}, {4}};
+      SboVector<Instrumented, Cap> sv{{1}, {2}, {3}, {4}};
 
-      VERIFY(sv.size() == 4, caseLabel);
-      VERIFY(sv.capacity() == 10, caseLabel);
+      VERIFY(sv.size() == NumElems, caseLabel);
+      VERIFY(sv.capacity() == Cap, caseLabel);
       VERIFY(sv.in_buffer(), caseLabel);
-      VERIFY(Instrumented::copyCtorCalls == 4, caseLabel);
+      VERIFY(Instrumented::defaultCtorCalls == 0, caseLabel);
+      VERIFY(Instrumented::copyCtorCalls == NumElems, caseLabel);
       VERIFY(Instrumented::moveCtorCalls == 0, caseLabel);
       VERIFY(Instrumented::assignmentCalls == 0, caseLabel);
+      VERIFY(Instrumented::moveAssignmentCalls == 0, caseLabel);
+      // Elements in inilializer list got destroyed.
+      VERIFY(Instrumented::dtorCalls == NumElems, caseLabel);
       for (int i = 0; i < sv.size(); ++i)
          VERIFY(sv[i].i == i + 1, caseLabel);
    }
    {
-      const std::string caseLabel{
-         "SboVector initializer list ctor for pod-type on heap."};
+      const std::string caseLabel{"SboVector initializer list ctor for heap instance."};
+
+      constexpr std::size_t Cap = 10;
+      constexpr std::size_t NumElems = 12;
 
       Instrumented::resetCallCount();
-      SboVector<Instrumented, 10> sv{
+      SboVector<Instrumented, Cap> sv{
          {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}, {12},
       };
 
-      VERIFY(sv.size() == 12, caseLabel);
-      VERIFY(sv.capacity() == 12, caseLabel);
+      VERIFY(sv.size() == NumElems, caseLabel);
+      VERIFY(sv.capacity() == NumElems, caseLabel);
       VERIFY(sv.on_heap(), caseLabel);
-      VERIFY(Instrumented::copyCtorCalls == 12, caseLabel);
+      VERIFY(Instrumented::defaultCtorCalls == 0, caseLabel);
+      VERIFY(Instrumented::copyCtorCalls == NumElems, caseLabel);
       VERIFY(Instrumented::moveCtorCalls == 0, caseLabel);
       VERIFY(Instrumented::assignmentCalls == 0, caseLabel);
+      VERIFY(Instrumented::moveAssignmentCalls == 0, caseLabel);
+      // Elements in inilializer list got destroyed.
+      VERIFY(Instrumented::dtorCalls == NumElems, caseLabel);
       for (int i = 0; i < sv.size(); ++i)
          VERIFY(sv[i].i == i + 1, caseLabel);
-   }
-   {
-      const std::string caseLabel{
-         "SboVector initializer list ctor for std::string in buffer."};
-
-      SboVector<std::string, 10> sv{"1", "2", "3", "4"};
-
-      VERIFY(sv.size() == 4, caseLabel);
-      VERIFY(sv.capacity() == 10, caseLabel);
-      VERIFY(sv.in_buffer(), caseLabel);
-      for (int i = 0; i < sv.size(); ++i)
-         VERIFY(sv[i] == std::to_string(i + 1), caseLabel);
-   }
-   {
-      const std::string caseLabel{
-         "SboVector initializer list ctor for std::string on heap."};
-
-      SboVector<std::string, 10> sv{"1", "2", "3", "4",  "5",  "6",
-                                    "7", "8", "9", "10", "11", "12"};
-
-      VERIFY(sv.size() == 12, caseLabel);
-      VERIFY(sv.capacity() == 12, caseLabel);
-      VERIFY(sv.on_heap(), caseLabel);
-      for (int i = 0; i < sv.size(); ++i)
-         VERIFY(sv[i] == std::to_string(i + 1), caseLabel);
-   }
-   {
-      const std::string caseLabel{
-         "SboVector initializer list ctor for scalar type in buffer."};
-
-      SboVector<int, 10> sv{1, 2, 3, 4};
-
-      VERIFY(sv.size() == 4, caseLabel);
-      VERIFY(sv.capacity() == 10, caseLabel);
-      VERIFY(sv.in_buffer(), caseLabel);
-      for (int i = 0; i < sv.size(); ++i)
-         VERIFY(sv[i] == i + 1, caseLabel);
-   }
-   {
-      const std::string caseLabel{
-         "SboVector initializer list ctor for scalar type on heap."};
-
-      SboVector<int, 10> sv{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
-
-      VERIFY(sv.size() == 12, caseLabel);
-      VERIFY(sv.capacity() == 12, caseLabel);
-      VERIFY(sv.on_heap(), caseLabel);
-      for (int i = 0; i < sv.size(); ++i)
-         VERIFY(sv[i] == i + 1, caseLabel);
    }
 }
 
@@ -850,7 +813,7 @@ void TestSboVector()
    TestSboVectorCtorForElementCountAndValue();
    TestSboVectorCopyCtor();
    TestSboVectorMoveCtor();
-   // TestSboVectorInitializerListCtor();
+   TestSboVectorInitializerListCtor();
    // TestSboVectorDtor();
    // TestSboVectorCopyAssignment();
    // TestSboVectorMoveAssignment();

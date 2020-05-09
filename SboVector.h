@@ -159,14 +159,14 @@ template <typename T, std::size_t N> SboVector<T, N>::SboVector(const SboVector&
 {
    // Available strategies are to use the buffer or make a new heap allocation.
 
-   const auto otherSize = other.size();
-   if (!fitsIntoBuffer(otherSize))
+   const auto srcSize = other.size();
+   if (!fitsIntoBuffer(srcSize))
    {
-      allocate(otherSize);
-      m_capacity = otherSize;
+      allocate(srcSize);
+      m_capacity = srcSize;
    }
    copy_elements(other, other.m_data);
-   m_size = otherSize;
+   m_size = srcSize;
 }
 
 
@@ -174,7 +174,7 @@ template <typename T, std::size_t N> SboVector<T, N>::SboVector(SboVector&& othe
 {
    // Available strategies are to use steal the heap allocation or use the buffer.
 
-   const auto otherSize = other.size();
+   const auto srcSize = other.size();
    const bool canSteal = other.on_heap();
 
    // Prefer stealing.
@@ -188,11 +188,11 @@ template <typename T, std::size_t N> SboVector<T, N>::SboVector(SboVector&& othe
    // If we cannot steal, then the elements must fit into the buffer.
    else
    {
-      assert(fitsIntoBuffer(otherSize));
+      assert(fitsIntoBuffer(srcSize));
       move_elements(other, other.m_data);
       m_capacity = BufferCapacity;
    }
-   m_size = otherSize;
+   m_size = srcSize;
 
    // Clear other instance.
    other.deallocate();
@@ -204,15 +204,16 @@ template <typename T, std::size_t N> SboVector<T, N>::SboVector(SboVector&& othe
 template <typename T, std::size_t N>
 SboVector<T, N>::SboVector(std::initializer_list<T> ilist)
 {
-   const auto count = ilist.size();
+   // Available strategies are to use the buffer or make a new heap allocation.
 
-   if (!fitsIntoBuffer(count))
+   const auto srcSize = ilist.size();
+   if (!fitsIntoBuffer(srcSize))
    {
-      allocate(count);
-      m_capacity = count;
+      allocate(srcSize);
+      m_capacity = srcSize;
    }
    copy_elements(ilist, ilist.begin());
-   m_size = count;
+   m_size = srcSize;
 }
 
 
@@ -259,10 +260,10 @@ SboVector<T, N>& SboVector<T, N>::operator=(const SboVector& other)
 template <typename T, std::size_t N>
 SboVector<T, N>& SboVector<T, N>::operator=(SboVector&& other)
 {
-   const auto otherSize = other.size();
+   const auto srcSize = other.size();
 
    const bool canSteal = other.on_heap();
-   const bool canReuseHeap = on_heap() && m_capacity <= otherSize;
+   const bool canReuseHeap = on_heap() && m_capacity <= srcSize;
 
    destroy_elements();
 
@@ -272,34 +273,34 @@ SboVector<T, N>& SboVector<T, N>::operator=(SboVector&& other)
       deallocate();
       m_data = other.m_data;
       m_capacity = other.m_capacity;
-      m_size = otherSize;
+      m_size = srcSize;
       // Reset other data to buffer to prevent deallocation of the
       // stolen memory.
       other.m_data = other.buffer();
    }
    // Next best option is using the buffer.
-   else if (fitsIntoBuffer(otherSize))
+   else if (fitsIntoBuffer(srcSize))
    {
       deallocate();
       move_elements(other, other.m_data);
       m_capacity = BufferCapacity;
-      m_size = otherSize;
+      m_size = srcSize;
    }
    // Next best option is reusing the heap memory.
    else if (canReuseHeap)
    {
       move_elements(other, other.m_data);
       // Capacity stays the same.
-      m_size = otherSize;
+      m_size = srcSize;
    }
    // Last option is allocating heap memory.
    else
    {
       deallocate();
-      allocate(otherSize);
+      allocate(srcSize);
       move_elements(other, other.m_data);
-      m_capacity = otherSize;
-      m_size = otherSize;
+      m_capacity = srcSize;
+      m_size = srcSize;
    }
 
    // Clear other instance.
