@@ -110,8 +110,8 @@ template <typename T, std::size_t N> class SboVector
    void copy_from(const U& other, ElemIter first);
    void move_from(SboVector&& other);
 
-   template <typename U, typename ElemIter>
-   void copyElements(const U& other, ElemIter first);
+   template <typename ElemIter>
+   void copyElements(ElemIter first, std::size_t count);
    template <typename U, typename ElemIter>
    void moveElements(const U& other, ElemIter first);
    void fillElements(size_type count, const T& value);
@@ -172,7 +172,7 @@ template <typename T, std::size_t N> SboVector<T, N>::SboVector(const SboVector&
       m_capacity = srcSize;
    }
 
-   copyElements(other, other.m_data);
+   copyElements(other.m_data, srcSize);
    m_size = srcSize;
 }
 
@@ -223,7 +223,7 @@ SboVector<T, N>::SboVector(std::initializer_list<T> ilist)
       m_capacity = srcSize;
    }
 
-   copyElements(ilist, ilist.begin());
+   copyElements(ilist.begin(), srcSize);
    m_size = srcSize;
 }
 
@@ -273,7 +273,7 @@ SboVector<T, N>& SboVector<T, N>::operator=(const SboVector& other)
       m_capacity = srcSize;
    }
 
-   copyElements(other, other.m_data);
+   copyElements(other.m_data, srcSize);
    m_size = srcSize;
 
    return *this;
@@ -360,7 +360,7 @@ SboVector<T, N>& SboVector<T, N>::operator=(std::initializer_list<T> ilist)
       m_capacity = srcSize;
    }
 
-   copyElements(ilist, ilist.begin());
+   copyElements(ilist.begin(), srcSize);
    m_size = srcSize;
 
    return *this;
@@ -565,10 +565,10 @@ template <typename T, std::size_t N> void SboVector<T, N>::move_from(SboVector&&
 
 
 template <typename T, std::size_t N>
-template <typename U, typename ElemIter>
-void SboVector<T, N>::copyElements(const U& other, ElemIter first)
+template <typename ElemIter>
+void SboVector<T, N>::copyElements(ElemIter first, std::size_t count)
 {
-   std::uninitialized_copy_n(first, other.size(), m_data);
+   std::uninitialized_copy_n(first, count, m_data);
 }
 
 
