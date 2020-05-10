@@ -1629,6 +1629,68 @@ void TestSboVectorAtConst()
    }
 }
 
+
+void TestSboVectorSubscriptOperator()
+{
+   {
+      const std::string caseLabel{
+         "SvoVector::operator[] for valid index into buffer instance."};
+
+      constexpr std::size_t Cap = 10;
+      SboVector<int, Cap> sv{{1}, {2}, {3}, {4}};
+
+      // Precondition.
+      VERIFY(sv.size() < Cap, caseLabel);
+
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i] == i + 1, caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "SvoVector::operator[] for valid index into heap instance."};
+
+      constexpr std::size_t Cap = 5;
+      SboVector<int, Cap> sv{{1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}};
+
+      // Precondition.
+      VERIFY(sv.size() > Cap, caseLabel);
+
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i] == i + 1, caseLabel);
+   }
+}
+
+
+void TestSboVectorSubscriptOperatorConst()
+{
+   {
+      const std::string caseLabel{
+         "SvoVector::operator[] const for valid index into buffer instance."};
+
+      constexpr std::size_t Cap = 10;
+      const SboVector<int, Cap> sv{{1}, {2}, {3}, {4}};
+
+      // Precondition.
+      VERIFY(sv.size() < Cap, caseLabel);
+
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i] == i + 1, caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "SvoVector::operator[] const for valid index into heap instance."};
+
+      constexpr std::size_t Cap = 5;
+      const SboVector<int, Cap> sv{{1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}};
+
+      // Precondition.
+      VERIFY(sv.size() > Cap, caseLabel);
+
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i] == i + 1, caseLabel);
+   }
+}
+
 } // namespace
 
 
@@ -1650,4 +1712,6 @@ void TestSboVector()
    TestSboVectorAssignInitializerList();
    TestSboVectorAt();
    TestSboVectorAtConst();
+   TestSboVectorSubscriptOperator();
+   TestSboVectorSubscriptOperatorConst();
 }
