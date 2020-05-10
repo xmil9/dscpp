@@ -22,7 +22,6 @@
     <ClCompile Include="..\DsCppTests.cpp" />
     <ClCompile Include="..\RingBufferTests.cpp" />
     <ClCompile Include="..\SboVectorTests.cpp" />
-    <ClCompile Include="..\TestUtil.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\RingBuffer.h" />

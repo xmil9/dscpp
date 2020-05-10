@@ -3,7 +3,6 @@
   <ItemGroup>
     <ClCompile Include="..\DsCppTests.cpp" />
     <ClCompile Include="..\RingBufferTests.cpp" />
-    <ClCompile Include="..\TestUtil.cpp" />
     <ClCompile Include="..\SboVectorTests.cpp" />
   </ItemGroup>
   <ItemGroup>
