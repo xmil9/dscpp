@@ -95,6 +95,8 @@ template <typename T, std::size_t N> class SboVector
    const T& front() const;
    T& back();
    const T& back() const;
+   T* data() noexcept;
+   const T* data() const noexcept;
 
    std::size_t size() const noexcept;
    constexpr std::size_t max_size() const noexcept;
@@ -557,6 +559,18 @@ template <typename T, std::size_t N> T& SboVector<T, N>::back()
 template <typename T, std::size_t N> const T& SboVector<T, N>::back() const
 {
    return m_data[m_size - 1];
+}
+
+
+template <typename T, std::size_t N> T* SboVector<T, N>::data() noexcept
+{
+   return m_data;
+}
+
+
+template <typename T, std::size_t N> const T* SboVector<T, N>::data() const noexcept
+{
+   return m_data;
 }
 
 

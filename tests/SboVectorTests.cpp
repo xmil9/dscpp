@@ -1926,6 +1926,105 @@ void TestSboVectorBackConst()
    }
 }
 
+
+void TestSboVectorData()
+{
+   {
+      const std::string caseLabel{
+         "SvoVector::data for reading from buffer instance."};
+
+      constexpr std::size_t Cap = 10;
+      SboVector<int, Cap> sv{{1}, {2}, {3}, {4}};
+
+      // Precondition.
+      VERIFY(sv.size() < Cap, caseLabel);
+
+      int* data = sv.data();
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(data[i] == i + 1, caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "SvoVector::data for writing to buffer instance."};
+
+      constexpr std::size_t Cap = 10;
+      SboVector<int, Cap> sv{{1}, {2}, {3}, {4}};
+
+      // Precondition.
+      VERIFY(sv.size() < Cap, caseLabel);
+
+      int* data = sv.data();
+      for (int i = 0; i < sv.size(); ++i)
+      {
+         data[i] = 1000 + i;
+         VERIFY(sv[i] == 1000 + i, caseLabel);
+      }
+   }
+   {
+      const std::string caseLabel{
+         "SvoVector::data for reading from heap instance."};
+
+      constexpr std::size_t Cap = 5;
+      SboVector<int, Cap> sv{{1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}};
+
+      // Precondition.
+      VERIFY(sv.size() > Cap, caseLabel);
+
+      int* data = sv.data();
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(data[i] == i + 1, caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "SvoVector::data for writing to valid index into heap instance."};
+
+      constexpr std::size_t Cap = 5;
+      SboVector<int, Cap> sv{{1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}};
+
+      // Precondition.
+      VERIFY(sv.size() > Cap, caseLabel);
+
+      int* data = sv.data();
+      for (int i = 0; i < sv.size(); ++i)
+      {
+         data[i] = 1000 + i;
+         VERIFY(sv[i] == 1000 + i, caseLabel);
+      }
+   }
+}
+
+
+void TestSboVectorDataConst()
+{
+   {
+      const std::string caseLabel{
+         "SvoVector::data const for buffer instance."};
+
+      constexpr std::size_t Cap = 10;
+      const SboVector<int, Cap> sv{{1}, {2}, {3}, {4}};
+
+      // Precondition.
+      VERIFY(sv.size() < Cap, caseLabel);
+
+      const int* data = sv.data();
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(data[i] == i + 1, caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "SvoVector::back const for heap instance."};
+
+      constexpr std::size_t Cap = 5;
+      const SboVector<int, Cap> sv{{1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}};
+
+      // Precondition.
+      VERIFY(sv.size() > Cap, caseLabel);
+
+      const int* data = sv.data();
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(data[i] == i + 1, caseLabel);
+   }
+}
 } // namespace
 
 
@@ -1953,4 +2052,6 @@ void TestSboVector()
    TestSboVectorFrontConst();
    TestSboVectorBack();
    TestSboVectorBackConst();
+   TestSboVectorData();
+   TestSboVectorDataConst();
 }
