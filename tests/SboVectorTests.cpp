@@ -971,6 +971,189 @@ void TestSboVectorInitializerListAssignment()
    }
 }
 
+
+void TestSboVectorAssignElementValue()
+{
+   {
+      const std::string caseLabel{
+         "SboVector assign element value n-times. Assigned values fit in buffer. "
+         "SboVector was a buffer instance."};
+
+      constexpr std::size_t Cap = 10;
+      constexpr std::size_t NumElems = 2;
+      constexpr std::size_t NumOrigElems = 3;
+
+      SboVector<Instrumented, Cap> sv(NumOrigElems, {1});
+
+      // Preconditions.
+      VERIFY(NumElems < Cap, caseLabel);
+      VERIFY(NumOrigElems < Cap, caseLabel);
+      VERIFY(sv.inBuffer(), caseLabel);
+
+      Instrumented::resetCallCount();
+      sv.assign(NumElems, {10});
+
+      VERIFY(sv.size() == NumElems, caseLabel);
+      VERIFY(sv.capacity() == Cap, caseLabel);
+      VERIFY(sv.inBuffer(), caseLabel);
+      VERIFY(Instrumented::defaultCtorCalls == 0, caseLabel);
+      // Constructing assigned element.
+      VERIFY(Instrumented::ctorCalls == 1, caseLabel);
+      // Populated elements.
+      VERIFY(Instrumented::copyCtorCalls == NumElems, caseLabel);
+      VERIFY(Instrumented::moveCtorCalls == 0, caseLabel);
+      VERIFY(Instrumented::assignmentCalls == 0, caseLabel);
+      VERIFY(Instrumented::moveAssignmentCalls == 0, caseLabel);
+      // Destruct original elements plus the assigned element.
+      VERIFY(Instrumented::dtorCalls == NumOrigElems + 1, caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i].i == 10, caseLabel);
+   }
+   {
+      const std::string caseLabel{"SboVector assign element value n-times. Assigned "
+                                  "values require heap allocation. "
+                                  "SboVector was a buffer instance."};
+
+      constexpr std::size_t Cap = 5;
+      constexpr std::size_t NumElems = 7;
+      constexpr std::size_t NumOrigElems = 3;
+
+      SboVector<Instrumented, Cap> sv(NumOrigElems, {1});
+
+      // Preconditions.
+      VERIFY(NumElems > Cap, caseLabel);
+      VERIFY(NumOrigElems < Cap, caseLabel);
+      VERIFY(sv.inBuffer(), caseLabel);
+
+      Instrumented::resetCallCount();
+      sv.assign(NumElems, {10});
+
+      VERIFY(sv.size() == NumElems, caseLabel);
+      VERIFY(sv.capacity() == NumElems, caseLabel);
+      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(Instrumented::defaultCtorCalls == 0, caseLabel);
+      // Constructing assigned element.
+      VERIFY(Instrumented::ctorCalls == 1, caseLabel);
+      // Populated elements.
+      VERIFY(Instrumented::copyCtorCalls == NumElems, caseLabel);
+      VERIFY(Instrumented::moveCtorCalls == 0, caseLabel);
+      VERIFY(Instrumented::assignmentCalls == 0, caseLabel);
+      VERIFY(Instrumented::moveAssignmentCalls == 0, caseLabel);
+      // Destruct original elements plus the assigned element.
+      VERIFY(Instrumented::dtorCalls == NumOrigElems + 1, caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i].i == 10, caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "SboVector assign element value n-times. Assigned "
+         "values fit into buffer. SboVector was a heap instance."};
+
+      constexpr std::size_t Cap = 5;
+      constexpr std::size_t NumElems = 3;
+      constexpr std::size_t NumOrigElems = 7;
+
+      SboVector<Instrumented, Cap> sv(NumOrigElems, {1});
+
+      // Preconditions.
+      VERIFY(NumElems < Cap, caseLabel);
+      VERIFY(NumOrigElems > Cap, caseLabel);
+      VERIFY(sv.onHeap(), caseLabel);
+
+      Instrumented::resetCallCount();
+      sv.assign(NumElems, {10});
+
+      VERIFY(sv.size() == NumElems, caseLabel);
+      VERIFY(sv.capacity() == Cap, caseLabel);
+      VERIFY(sv.inBuffer(), caseLabel);
+      VERIFY(Instrumented::defaultCtorCalls == 0, caseLabel);
+      // Constructing assigned element.
+      VERIFY(Instrumented::ctorCalls == 1, caseLabel);
+      // Populated elements.
+      VERIFY(Instrumented::copyCtorCalls == NumElems, caseLabel);
+      VERIFY(Instrumented::moveCtorCalls == 0, caseLabel);
+      VERIFY(Instrumented::assignmentCalls == 0, caseLabel);
+      VERIFY(Instrumented::moveAssignmentCalls == 0, caseLabel);
+      // Destruct original elements plus the assigned element.
+      VERIFY(Instrumented::dtorCalls == NumOrigElems + 1, caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i].i == 10, caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "SboVector assign element value n-times. Assigned values require heap "
+         "allocation. SboVector was a smaller heap instance."};
+
+      constexpr std::size_t Cap = 5;
+      constexpr std::size_t NumElems = 10;
+      constexpr std::size_t NumOrigElems = 7;
+
+      SboVector<Instrumented, Cap> sv(NumOrigElems, {1});
+
+      // Preconditions.
+      VERIFY(NumElems > Cap, caseLabel);
+      VERIFY(NumOrigElems > Cap, caseLabel);
+      VERIFY(NumOrigElems < NumElems, caseLabel);
+      VERIFY(sv.onHeap(), caseLabel);
+
+      Instrumented::resetCallCount();
+      sv.assign(NumElems, {10});
+
+      VERIFY(sv.size() == NumElems, caseLabel);
+      VERIFY(sv.capacity() == NumElems, caseLabel);
+      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(Instrumented::defaultCtorCalls == 0, caseLabel);
+      // Constructing assigned element.
+      VERIFY(Instrumented::ctorCalls == 1, caseLabel);
+      // Populated elements.
+      VERIFY(Instrumented::copyCtorCalls == NumElems, caseLabel);
+      VERIFY(Instrumented::moveCtorCalls == 0, caseLabel);
+      VERIFY(Instrumented::assignmentCalls == 0, caseLabel);
+      VERIFY(Instrumented::moveAssignmentCalls == 0, caseLabel);
+      // Destruct original elements plus the assigned element.
+      VERIFY(Instrumented::dtorCalls == NumOrigElems + 1, caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i].i == 10, caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "SboVector assign element value n-times. Assigned values require heap "
+         "allocation. SboVector was a larger heap instance."};
+
+      constexpr std::size_t Cap = 5;
+      constexpr std::size_t NumElems = 7;
+      constexpr std::size_t NumOrigElems = 10;
+
+      SboVector<Instrumented, Cap> sv(NumOrigElems, {1});
+
+      // Preconditions.
+      VERIFY(NumElems > Cap, caseLabel);
+      VERIFY(NumOrigElems > Cap, caseLabel);
+      VERIFY(NumOrigElems > NumElems, caseLabel);
+      VERIFY(sv.onHeap(), caseLabel);
+
+      Instrumented::resetCallCount();
+      sv.assign(NumElems, {10});
+
+      VERIFY(sv.size() == NumElems, caseLabel);
+      // Reused heap stays at larger size.
+      VERIFY(sv.capacity() == NumOrigElems, caseLabel);
+      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(Instrumented::defaultCtorCalls == 0, caseLabel);
+      // Constructing assigned element.
+      VERIFY(Instrumented::ctorCalls == 1, caseLabel);
+      // Populated elements.
+      VERIFY(Instrumented::copyCtorCalls == NumElems, caseLabel);
+      VERIFY(Instrumented::moveCtorCalls == 0, caseLabel);
+      VERIFY(Instrumented::assignmentCalls == 0, caseLabel);
+      VERIFY(Instrumented::moveAssignmentCalls == 0, caseLabel);
+      // Destruct original elements plus the assigned element.
+      VERIFY(Instrumented::dtorCalls == NumOrigElems + 1, caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i].i == 10, caseLabel);
+   }
+}
+
 } // namespace
 
 
@@ -987,4 +1170,5 @@ void TestSboVector()
    TestSboVectorCopyAssignment();
    TestSboVectorMoveAssignment();
    TestSboVectorInitializerListAssignment();
+   TestSboVectorAssignElementValue();
 }

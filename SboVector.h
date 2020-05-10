@@ -370,31 +370,41 @@ SboVector<T, N>& SboVector<T, N>::operator=(std::initializer_list<T> ilist)
 template <typename T, std::size_t N>
 void SboVector<T, N>::assign(size_type count, const T& value)
 {
-   // Perform allocation up front.
-   T* newData = allocate_or_reuse_mem(count, m_capacity);
-   const bool dealloc = newData != nullptr;
+   // Available strategies are to use the buffer, to reuse an existing heap
+   // allocation, or make a new heap allocation.
 
-   // Clean up old data.
-   std::destroy_n(m_data, size());
-   if (onHeap() && dealloc)
-      deallocateMem(m_data);
+   const bool fitsBuffer = fitsIntoBuffer(count);
+   const bool canReuseHeap = onHeap() && m_capacity >= count;
+   const bool allocHeap = !fitsBuffer && !canReuseHeap;
+
+   // Perform allocation up front to prevent inconsistencies if allocation
+   // fails.
+   T* newData = nullptr;
+   if (allocHeap)
+      newData = allocateMem(count);
+
+   // Clean up existing data.
+   destroyElements();
+   if (fitsBuffer || allocHeap)
+      deallocate();
 
    // Set up new data.
-   const bool fitsIntoBuffer = count <= BufferCapacity;
-   if (fitsIntoBuffer)
+   if (fitsBuffer)
    {
-      m_data = buffer();
       m_capacity = BufferCapacity;
+   }
+   else if (canReuseHeap)
+   {
+      // Capacity stays the same.
    }
    else
    {
-      if (newData)
-      {
-         m_data = newData;
-         m_capacity = count;
-      }
+      assert(allocHeap && newData);
+      m_data = newData;
+      m_capacity = count;
    }
-   std::uninitialized_fill_n(m_data, count, value);
+
+   fillElements(count, value);
    m_size = count;
 }
 
