@@ -260,24 +260,21 @@ SboVector<T, N>& SboVector<T, N>::operator=(const SboVector& other)
    // Set up new data.
    if (fitsBuffer)
    {
-      copy_elements(other, other.m_data);
       m_capacity = BufferCapacity;
-      m_size = srcSize;
    }
    else if (canReuseHeap)
    {
-      copy_elements(other, other.m_data);
       // Capacity stays the same.
-      m_size = srcSize;
    }
    else
    {
       assert(allocHeap && newData);
       m_data = newData;
-      copy_elements(other, other.m_data);
       m_capacity = srcSize;
-      m_size = srcSize;
    }
+
+   copy_elements(other, other.m_data);
+   m_size = srcSize;
 
    return *this;
 }
@@ -328,7 +325,44 @@ SboVector<T, N>& SboVector<T, N>::operator=(SboVector&& other)
 template <typename T, std::size_t N>
 SboVector<T, N>& SboVector<T, N>::operator=(std::initializer_list<T> ilist)
 {
-   copy_from(ilist, ilist.begin());
+   // Available strategies are to use the buffer, to reuse an existing heap
+   // allocation, or make a new heap allocation.
+
+   const auto srcSize = ilist.size();
+   const bool fitsBuffer = fitsIntoBuffer(srcSize);
+   const bool canReuseHeap = on_heap() && m_capacity >= srcSize;
+   const bool allocHeap = !fitsBuffer && !canReuseHeap;
+
+   // Perform allocation up front to prevent inconsistencies if allocation
+   // fails.
+   T* newData = nullptr;
+   if (allocHeap)
+      newData = allocate_mem(srcSize);
+
+   // Clean up existing data.
+   destroy_elements();
+   if (fitsBuffer || allocHeap)
+      deallocate();
+
+   // Set up new data.
+   if (fitsBuffer)
+   {
+      m_capacity = BufferCapacity;
+   }
+   else if (canReuseHeap)
+   {
+      // Capacity stays the same.
+   }
+   else
+   {
+      assert(allocHeap && newData);
+      m_data = newData;
+      m_capacity = srcSize;
+   }
+
+   copy_elements(ilist, ilist.begin());
+   m_size = srcSize;
+
    return *this;
 }
 

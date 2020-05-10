@@ -383,7 +383,7 @@ void TestSboVectorCopyAssignment()
 {
    {
       const std::string caseLabel{
-         "SboVector copy assignment from buffer instance to buffer instance."};
+         "SboVector copy assignment of buffer instance to buffer instance."};
 
       constexpr std::size_t Cap = 10;
       constexpr std::size_t NumElems = 5;
@@ -420,7 +420,7 @@ void TestSboVectorCopyAssignment()
    }
    {
       const std::string caseLabel{
-         "SboVector copy assignment from heap instance to buffer instance."};
+         "SboVector copy assignment of heap instance to buffer instance."};
 
       constexpr std::size_t Cap = 10;
       constexpr std::size_t NumElems = 20;
@@ -457,7 +457,7 @@ void TestSboVectorCopyAssignment()
    }
    {
       const std::string caseLabel{
-         "SboVector copy assignment from buffer instance to heap instance."};
+         "SboVector copy assignment of buffer instance to heap instance."};
 
       constexpr std::size_t Cap = 10;
       constexpr std::size_t NumElems = 5;
@@ -494,7 +494,7 @@ void TestSboVectorCopyAssignment()
    }
    {
       const std::string caseLabel{
-         "SboVector copy assignment from larger heap instance to smaller heap instance."};
+         "SboVector copy assignment of larger heap instance to smaller heap instance."};
 
       constexpr std::size_t Cap = 10;
       constexpr std::size_t NumElems = 20;
@@ -534,7 +534,7 @@ void TestSboVectorCopyAssignment()
    }
    {
       const std::string caseLabel{
-         "SboVector copy assignment from smaller heap instance to larger heap instance."};
+         "SboVector copy assignment of smaller heap instance to larger heap instance."};
 
       constexpr std::size_t Cap = 10;
       constexpr std::size_t NumElems = 15;
@@ -778,126 +778,174 @@ void TestSboVectorMoveAssignment()
 void TestSboVectorInitializerListAssignment()
 {
    {
-      const std::string caseLabel{"SboVector initializer list assignment for pod-type "
-                                  "from buffer instance to buffer instance."};
+      const std::string caseLabel{
+         "SboVector initializer list assignment that fits in buffer to buffer instance."};
 
-      SboVector<Instrumented, 10> sv{3, {1}};
+      constexpr std::size_t Cap = 10;
+      constexpr std::size_t NumElems = 2;
+      constexpr std::size_t NumOrigElems = 3;
+
+      SboVector<Instrumented, Cap> sv(NumOrigElems, {1});
+
+      // Preconditions.
+      VERIFY(NumElems < Cap, caseLabel);
+      VERIFY(NumOrigElems < Cap, caseLabel);
       VERIFY(sv.in_buffer(), caseLabel);
 
       Instrumented::resetCallCount();
       sv = {{1}, {2}};
 
-      VERIFY(sv.size() == 2, caseLabel);
-      VERIFY(sv.capacity() == 10, caseLabel);
+      VERIFY(sv.size() == NumElems, caseLabel);
+      VERIFY(sv.capacity() == Cap, caseLabel);
       VERIFY(sv.in_buffer(), caseLabel);
-      // Ctor calls are for constructing items in ilist.
-      VERIFY(Instrumented::ctorCalls == 2, caseLabel);
-      // Copy ctor calls are for assigning items into SboVector.
-      VERIFY(Instrumented::copyCtorCalls == 2, caseLabel);
+      VERIFY(Instrumented::defaultCtorCalls == 0, caseLabel);
+      // Constructing initializer list elements.
+      VERIFY(Instrumented::ctorCalls == NumElems, caseLabel);
+      // Copied elements.
+      VERIFY(Instrumented::copyCtorCalls == NumElems, caseLabel);
       VERIFY(Instrumented::moveCtorCalls == 0, caseLabel);
       VERIFY(Instrumented::assignmentCalls == 0, caseLabel);
+      VERIFY(Instrumented::moveAssignmentCalls == 0, caseLabel);
       // Dtor calls are for original item in SboVector and for items in ilist.
-      VERIFY(Instrumented::dtorCalls == 5, caseLabel);
+      VERIFY(Instrumented::dtorCalls == NumOrigElems + NumElems, caseLabel);
       for (int i = 0; i < sv.size(); ++i)
          VERIFY(sv[i].i == i + 1, caseLabel);
    }
    {
-      const std::string caseLabel{"SboVector initializer list assignment for pod-type "
-                                  "from heap instance to buffer instance."};
+      const std::string caseLabel{"SboVector initializer list assignment that requires "
+                                  "heap to buffer instance."};
 
-      SboVector<Instrumented, 10> sv{20, {1}};
-      VERIFY(sv.on_heap(), caseLabel);
+      constexpr std::size_t Cap = 5;
+      constexpr std::size_t NumElems = 7;
+      constexpr std::size_t NumOrigElems = 3;
 
-      Instrumented::resetCallCount();
-      sv = {{1}, {2}};
+      SboVector<Instrumented, Cap> sv(NumOrigElems, {1});
 
-      VERIFY(sv.size() == 2, caseLabel);
-      VERIFY(sv.capacity() == 10, caseLabel);
-      VERIFY(sv.in_buffer(), caseLabel);
-      // Ctor calls are for constructing items in ilist.
-      VERIFY(Instrumented::ctorCalls == 2, caseLabel);
-      // Copy ctor calls are for assigning items into SboVector.
-      VERIFY(Instrumented::copyCtorCalls == 2, caseLabel);
-      VERIFY(Instrumented::moveCtorCalls == 0, caseLabel);
-      VERIFY(Instrumented::assignmentCalls == 0, caseLabel);
-      // Dtor calls are for original item in SboVector and for items in ilist.
-      VERIFY(Instrumented::dtorCalls == 22, caseLabel);
-      for (int i = 0; i < sv.size(); ++i)
-         VERIFY(sv[i].i == i + 1, caseLabel);
-   }
-   {
-      const std::string caseLabel{"SboVector initializer list assignment for pod-type "
-                                  "from buffer instance to heap instance."};
-
-      SboVector<Instrumented, 5> sv{3, {1}};
+      // Preconditions.
+      VERIFY(NumElems > Cap, caseLabel);
+      VERIFY(NumOrigElems < Cap, caseLabel);
       VERIFY(sv.in_buffer(), caseLabel);
 
       Instrumented::resetCallCount();
       sv = {{1}, {2}, {3}, {4}, {5}, {6}, {7}};
 
-      VERIFY(sv.size() == 7, caseLabel);
-      VERIFY(sv.capacity() == 7, caseLabel);
+      VERIFY(sv.size() == NumElems, caseLabel);
+      VERIFY(sv.capacity() == NumElems, caseLabel);
       VERIFY(sv.on_heap(), caseLabel);
-      // Ctor calls are for constructing items in ilist.
-      VERIFY(Instrumented::ctorCalls == 7, caseLabel);
-      // Copy ctor calls are for assigning items into SboVector.
-      VERIFY(Instrumented::copyCtorCalls == 7, caseLabel);
+      VERIFY(Instrumented::defaultCtorCalls == 0, caseLabel);
+      // Constructing initializer list elements.
+      VERIFY(Instrumented::ctorCalls == NumElems, caseLabel);
+      // Copied elements.
+      VERIFY(Instrumented::copyCtorCalls == NumElems, caseLabel);
       VERIFY(Instrumented::moveCtorCalls == 0, caseLabel);
       VERIFY(Instrumented::assignmentCalls == 0, caseLabel);
+      VERIFY(Instrumented::moveAssignmentCalls == 0, caseLabel);
       // Dtor calls are for original item in SboVector and for items in ilist.
-      VERIFY(Instrumented::dtorCalls == 10, caseLabel);
+      VERIFY(Instrumented::dtorCalls == NumOrigElems + NumElems, caseLabel);
       for (int i = 0; i < sv.size(); ++i)
          VERIFY(sv[i].i == i + 1, caseLabel);
    }
    {
-      const std::string caseLabel{"SboVector initializer list assignment for pod-type "
-                                  "from smaller heap instance to larger heap instance."};
+      const std::string caseLabel{"SboVector initializer list assignment  "
+                                  "that fits in buffer to heap instance."};
 
-      SboVector<Instrumented, 5> sv{7, {1}};
+      constexpr std::size_t Cap = 5;
+      constexpr std::size_t NumElems = 3;
+      constexpr std::size_t NumOrigElems = 7;
+
+      SboVector<Instrumented, Cap> sv(NumOrigElems, {1});
+
+      // Preconditions.
+      VERIFY(NumElems < Cap, caseLabel);
+      VERIFY(NumOrigElems > Cap, caseLabel);
       VERIFY(sv.on_heap(), caseLabel);
 
       Instrumented::resetCallCount();
-      sv = {{1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}};
+      sv = {{1}, {2}, {3}};
 
-      VERIFY(sv.size() == 9, caseLabel);
-      // Assigning data that needs a larger heap allocation will trigger a new
-      // allocation. Capacity will increase to larger size.
-      VERIFY(sv.capacity() == 9, caseLabel);
-      VERIFY(sv.on_heap(), caseLabel);
-      // Ctor calls are for constructing items in ilist.
-      VERIFY(Instrumented::ctorCalls == 9, caseLabel);
-      // Copy ctor calls are for assigning items into SboVector.
-      VERIFY(Instrumented::copyCtorCalls == 9, caseLabel);
+      VERIFY(sv.size() == NumElems, caseLabel);
+      VERIFY(sv.capacity() == Cap, caseLabel);
+      VERIFY(sv.in_buffer(), caseLabel);
+      VERIFY(Instrumented::defaultCtorCalls == 0, caseLabel);
+      // Constructing initializer list elements.
+      VERIFY(Instrumented::ctorCalls == NumElems, caseLabel);
+      // Copied elements.
+      VERIFY(Instrumented::copyCtorCalls == NumElems, caseLabel);
       VERIFY(Instrumented::moveCtorCalls == 0, caseLabel);
       VERIFY(Instrumented::assignmentCalls == 0, caseLabel);
+      VERIFY(Instrumented::moveAssignmentCalls == 0, caseLabel);
       // Dtor calls are for original item in SboVector and for items in ilist.
-      VERIFY(Instrumented::dtorCalls == 16, caseLabel);
+      VERIFY(Instrumented::dtorCalls == NumOrigElems + NumElems, caseLabel);
       for (int i = 0; i < sv.size(); ++i)
          VERIFY(sv[i].i == i + 1, caseLabel);
    }
    {
-      const std::string caseLabel{"SboVector initializer list assignment for pod-type "
-                                  "from larger heap instance to smaller heap instance."};
+      const std::string caseLabel{"SboVector initializer list assignment that needs heap "
+                                  "but can reuse the heap of the target instance."};
 
-      SboVector<Instrumented, 5> sv{9, {2}};
+      constexpr std::size_t Cap = 5;
+      constexpr std::size_t NumElems = 7;
+      constexpr std::size_t NumOrigElems = 10;
+
+      SboVector<Instrumented, Cap> sv(NumOrigElems, {1});
+
+      // Preconditions.
+      VERIFY(NumElems > Cap, caseLabel);
+      VERIFY(NumOrigElems > Cap, caseLabel);
+      VERIFY(NumOrigElems > NumElems, caseLabel);
       VERIFY(sv.on_heap(), caseLabel);
 
       Instrumented::resetCallCount();
       sv = {{1}, {2}, {3}, {4}, {5}, {6}, {7}};
 
-      VERIFY(sv.size() == 7, caseLabel);
-      // Assigning data that needs a smaller heap allocation will reuse the existing
-      // heap memory. Capacity will remain at previous (larger) size.
-      VERIFY(sv.capacity() == 9, caseLabel);
+      VERIFY(sv.size() == NumElems, caseLabel);
+      VERIFY(sv.capacity() == NumOrigElems, caseLabel);
       VERIFY(sv.on_heap(), caseLabel);
-      // Ctor calls are for constructing items in ilist.
-      VERIFY(Instrumented::ctorCalls == 7, caseLabel);
-      // Copy ctor calls are for assigning items into SboVector.
-      VERIFY(Instrumented::copyCtorCalls == 7, caseLabel);
+      VERIFY(Instrumented::defaultCtorCalls == 0, caseLabel);
+      // Constructing initializer list elements.
+      VERIFY(Instrumented::ctorCalls == NumElems, caseLabel);
+      // Copied elements.
+      VERIFY(Instrumented::copyCtorCalls == NumElems, caseLabel);
       VERIFY(Instrumented::moveCtorCalls == 0, caseLabel);
       VERIFY(Instrumented::assignmentCalls == 0, caseLabel);
+      VERIFY(Instrumented::moveAssignmentCalls == 0, caseLabel);
       // Dtor calls are for original item in SboVector and for items in ilist.
-      VERIFY(Instrumented::dtorCalls == 16, caseLabel);
+      VERIFY(Instrumented::dtorCalls == NumOrigElems + NumElems, caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i].i == i + 1, caseLabel);
+   }
+   {
+      const std::string caseLabel{"SboVector initializer list assignment that needs heap "
+                                  "and cannot reuse the heap of the target instance."};
+
+      constexpr std::size_t Cap = 5;
+      constexpr std::size_t NumElems = 10;
+      constexpr std::size_t NumOrigElems = 7;
+
+      SboVector<Instrumented, Cap> sv(NumOrigElems, {1});
+
+      // Preconditions.
+      VERIFY(NumElems > Cap, caseLabel);
+      VERIFY(NumOrigElems > Cap, caseLabel);
+      VERIFY(NumOrigElems < NumElems, caseLabel);
+      VERIFY(sv.on_heap(), caseLabel);
+
+      Instrumented::resetCallCount();
+      sv = {{1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}};
+
+      VERIFY(sv.size() == NumElems, caseLabel);
+      VERIFY(sv.capacity() == NumElems, caseLabel);
+      VERIFY(sv.on_heap(), caseLabel);
+      VERIFY(Instrumented::defaultCtorCalls == 0, caseLabel);
+      // Constructing initializer list elements.
+      VERIFY(Instrumented::ctorCalls == NumElems, caseLabel);
+      // Copied elements.
+      VERIFY(Instrumented::copyCtorCalls == NumElems, caseLabel);
+      VERIFY(Instrumented::moveCtorCalls == 0, caseLabel);
+      VERIFY(Instrumented::assignmentCalls == 0, caseLabel);
+      VERIFY(Instrumented::moveAssignmentCalls == 0, caseLabel);
+      // Dtor calls are for original item in SboVector and for items in ilist.
+      VERIFY(Instrumented::dtorCalls == NumOrigElems + NumElems, caseLabel);
       for (int i = 0; i < sv.size(); ++i)
          VERIFY(sv[i].i == i + 1, caseLabel);
    }
@@ -918,5 +966,5 @@ void TestSboVector()
    TestSboVectorDtor();
    TestSboVectorCopyAssignment();
    TestSboVectorMoveAssignment();
-   // TestSboVectorInitializerListAssignment();
+   TestSboVectorInitializerListAssignment();
 }
