@@ -1,6 +1,7 @@
 #include "SboVector.h"
 #include "TestUtil.h"
 #include <iostream>
+#include <list>
 #include <string>
 #include <vector>
 
@@ -991,7 +992,7 @@ void TestSboVectorAssignElementValue()
       VERIFY(sv.inBuffer(), caseLabel);
 
       Instrumented::resetCallCount();
-      sv.assign(NumElems, {10});
+      sv.assign(NumElems, Instrumented{10});
 
       VERIFY(sv.size() == NumElems, caseLabel);
       VERIFY(sv.capacity() == Cap, caseLabel);
@@ -1026,7 +1027,7 @@ void TestSboVectorAssignElementValue()
       VERIFY(sv.inBuffer(), caseLabel);
 
       Instrumented::resetCallCount();
-      sv.assign(NumElems, {10});
+      sv.assign(NumElems, Instrumented{10});
 
       VERIFY(sv.size() == NumElems, caseLabel);
       VERIFY(sv.capacity() == NumElems, caseLabel);
@@ -1061,7 +1062,7 @@ void TestSboVectorAssignElementValue()
       VERIFY(sv.onHeap(), caseLabel);
 
       Instrumented::resetCallCount();
-      sv.assign(NumElems, {10});
+      sv.assign(NumElems, Instrumented{10});
 
       VERIFY(sv.size() == NumElems, caseLabel);
       VERIFY(sv.capacity() == Cap, caseLabel);
@@ -1097,7 +1098,7 @@ void TestSboVectorAssignElementValue()
       VERIFY(sv.onHeap(), caseLabel);
 
       Instrumented::resetCallCount();
-      sv.assign(NumElems, {10});
+      sv.assign(NumElems, Instrumented{10});
 
       VERIFY(sv.size() == NumElems, caseLabel);
       VERIFY(sv.capacity() == NumElems, caseLabel);
@@ -1133,7 +1134,7 @@ void TestSboVectorAssignElementValue()
       VERIFY(sv.onHeap(), caseLabel);
 
       Instrumented::resetCallCount();
-      sv.assign(NumElems, {10});
+      sv.assign(NumElems, Instrumented{10});
 
       VERIFY(sv.size() == NumElems, caseLabel);
       // Reused heap stays at larger size.
@@ -1154,6 +1155,189 @@ void TestSboVectorAssignElementValue()
    }
 }
 
+
+void TestSboVectorAssignIteratorRange()
+{
+   {
+      const std::string caseLabel{
+         "SboVector assign iterator range. Assigned values fit in buffer. "
+         "SboVector was a buffer instance."};
+
+      constexpr std::size_t Cap = 10;
+      constexpr std::size_t NumElems = 2;
+      constexpr std::size_t NumOrigElems = 3;
+
+      std::list<Instrumented> src{{1}, {2}};
+      SboVector<Instrumented, Cap> sv(NumOrigElems, {1});
+
+      // Preconditions.
+      VERIFY(NumElems < Cap, caseLabel);
+      VERIFY(NumOrigElems < Cap, caseLabel);
+      VERIFY(sv.inBuffer(), caseLabel);
+
+      Instrumented::resetCallCount();
+      sv.assign(src.begin(), src.end());
+
+      VERIFY(sv.size() == NumElems, caseLabel);
+      VERIFY(sv.capacity() == Cap, caseLabel);
+      VERIFY(sv.inBuffer(), caseLabel);
+      VERIFY(Instrumented::defaultCtorCalls == 0, caseLabel);
+      VERIFY(Instrumented::ctorCalls == 0, caseLabel);
+      // Assigned elements.
+      VERIFY(Instrumented::copyCtorCalls == NumElems, caseLabel);
+      VERIFY(Instrumented::moveCtorCalls == 0, caseLabel);
+      VERIFY(Instrumented::assignmentCalls == 0, caseLabel);
+      VERIFY(Instrumented::moveAssignmentCalls == 0, caseLabel);
+      // Destruct original elements.
+      VERIFY(Instrumented::dtorCalls == NumOrigElems, caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i].i == i + 1, caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "SboVector assign iterator range. Assigned values require heap. "
+         "SboVector was a buffer instance."};
+
+      constexpr std::size_t Cap = 5;
+      constexpr std::size_t NumElems = 7;
+      constexpr std::size_t NumOrigElems = 3;
+
+      std::list<Instrumented> src{{1}, {2}, {3}, {4}, {5}, {6}, {7}};
+      SboVector<Instrumented, Cap> sv(NumOrigElems, {1});
+
+      // Preconditions.
+      VERIFY(NumElems > Cap, caseLabel);
+      VERIFY(NumOrigElems < Cap, caseLabel);
+      VERIFY(sv.inBuffer(), caseLabel);
+
+      Instrumented::resetCallCount();
+      sv.assign(src.begin(), src.end());
+
+      VERIFY(sv.size() == NumElems, caseLabel);
+      VERIFY(sv.capacity() == NumElems, caseLabel);
+      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(Instrumented::defaultCtorCalls == 0, caseLabel);
+      VERIFY(Instrumented::ctorCalls == 0, caseLabel);
+      // Assigned elements.
+      VERIFY(Instrumented::copyCtorCalls == NumElems, caseLabel);
+      VERIFY(Instrumented::moveCtorCalls == 0, caseLabel);
+      VERIFY(Instrumented::assignmentCalls == 0, caseLabel);
+      VERIFY(Instrumented::moveAssignmentCalls == 0, caseLabel);
+      // Destruct original elements.
+      VERIFY(Instrumented::dtorCalls == NumOrigElems, caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i].i == i + 1, caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "SboVector assign iterator range. Assigned fit into buffer. "
+         "SboVector was a heap instance."};
+
+      constexpr std::size_t Cap = 5;
+      constexpr std::size_t NumElems = 3;
+      constexpr std::size_t NumOrigElems = 7;
+
+      std::list<Instrumented> src{{1}, {2}, {3}};
+      SboVector<Instrumented, Cap> sv(NumOrigElems, {1});
+
+      // Preconditions.
+      VERIFY(NumElems < Cap, caseLabel);
+      VERIFY(NumOrigElems > Cap, caseLabel);
+      VERIFY(sv.onHeap(), caseLabel);
+
+      Instrumented::resetCallCount();
+      sv.assign(src.begin(), src.end());
+
+      VERIFY(sv.size() == NumElems, caseLabel);
+      VERIFY(sv.capacity() == Cap, caseLabel);
+      VERIFY(sv.inBuffer(), caseLabel);
+      VERIFY(Instrumented::defaultCtorCalls == 0, caseLabel);
+      VERIFY(Instrumented::ctorCalls == 0, caseLabel);
+      // Assigned elements.
+      VERIFY(Instrumented::copyCtorCalls == NumElems, caseLabel);
+      VERIFY(Instrumented::moveCtorCalls == 0, caseLabel);
+      VERIFY(Instrumented::assignmentCalls == 0, caseLabel);
+      VERIFY(Instrumented::moveAssignmentCalls == 0, caseLabel);
+      // Destruct original elements.
+      VERIFY(Instrumented::dtorCalls == NumOrigElems, caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i].i == i + 1, caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "SboVector assign iterator range. Assigned require heap. "
+         "SboVector was a smaller heap instance."};
+
+      constexpr std::size_t Cap = 5;
+      constexpr std::size_t NumElems = 8;
+      constexpr std::size_t NumOrigElems = 7;
+
+      std::list<Instrumented> src{{1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}};
+      SboVector<Instrumented, Cap> sv(NumOrigElems, {1});
+
+      // Preconditions.
+      VERIFY(NumElems > Cap, caseLabel);
+      VERIFY(NumOrigElems > Cap, caseLabel);
+      VERIFY(NumOrigElems < NumElems, caseLabel);
+      VERIFY(sv.onHeap(), caseLabel);
+
+      Instrumented::resetCallCount();
+      sv.assign(src.begin(), src.end());
+
+      VERIFY(sv.size() == NumElems, caseLabel);
+      VERIFY(sv.capacity() == NumElems, caseLabel);
+      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(Instrumented::defaultCtorCalls == 0, caseLabel);
+      VERIFY(Instrumented::ctorCalls == 0, caseLabel);
+      // Assigned elements.
+      VERIFY(Instrumented::copyCtorCalls == NumElems, caseLabel);
+      VERIFY(Instrumented::moveCtorCalls == 0, caseLabel);
+      VERIFY(Instrumented::assignmentCalls == 0, caseLabel);
+      VERIFY(Instrumented::moveAssignmentCalls == 0, caseLabel);
+      // Destruct original elements.
+      VERIFY(Instrumented::dtorCalls == NumOrigElems, caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i].i == i + 1, caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "SboVector assign iterator range. Assigned require heap. "
+         "SboVector was a larger heap instance."};
+
+      constexpr std::size_t Cap = 5;
+      constexpr std::size_t NumElems = 7;
+      constexpr std::size_t NumOrigElems = 8;
+
+      std::list<Instrumented> src{{1}, {2}, {3}, {4}, {5}, {6}, {7}};
+      SboVector<Instrumented, Cap> sv(NumOrigElems, {1});
+
+      // Preconditions.
+      VERIFY(NumElems > Cap, caseLabel);
+      VERIFY(NumOrigElems > Cap, caseLabel);
+      VERIFY(NumOrigElems > NumElems, caseLabel);
+      VERIFY(sv.onHeap(), caseLabel);
+
+      Instrumented::resetCallCount();
+      sv.assign(src.begin(), src.end());
+
+      VERIFY(sv.size() == NumElems, caseLabel);
+      // Capacity remains at larger, reused size.
+      VERIFY(sv.capacity() == NumOrigElems, caseLabel);
+      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(Instrumented::defaultCtorCalls == 0, caseLabel);
+      VERIFY(Instrumented::ctorCalls == 0, caseLabel);
+      // Assigned elements.
+      VERIFY(Instrumented::copyCtorCalls == NumElems, caseLabel);
+      VERIFY(Instrumented::moveCtorCalls == 0, caseLabel);
+      VERIFY(Instrumented::assignmentCalls == 0, caseLabel);
+      VERIFY(Instrumented::moveAssignmentCalls == 0, caseLabel);
+      // Destruct original elements.
+      VERIFY(Instrumented::dtorCalls == NumOrigElems, caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i].i == i + 1, caseLabel);
+   }
+}
+
 } // namespace
 
 
@@ -1171,4 +1355,5 @@ void TestSboVector()
    TestSboVectorMoveAssignment();
    TestSboVectorInitializerListAssignment();
    TestSboVectorAssignElementValue();
+   TestSboVectorAssignIteratorRange();
 }

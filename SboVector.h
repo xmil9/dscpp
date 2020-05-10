@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cstdlib>
+#include <iterator>
 #ifdef VS_COMPILER
 #include <malloc.h>
 #endif
@@ -83,6 +84,7 @@ template <typename T, std::size_t N> class SboVector
    SboVector& operator=(std::initializer_list<T> ilist);
 
    void assign(size_type count, const T& value);
+   template <typename Iter> void assign(Iter first, Iter last);
 
    T& operator[](std::size_t pos);
    const T& operator[](std::size_t pos) const;
@@ -112,8 +114,8 @@ template <typename T, std::size_t N> class SboVector
 
    template <typename ElemIter>
    void copyElements(ElemIter first, std::size_t count);
-   template <typename U, typename ElemIter>
-   void moveElements(const U& other, ElemIter first);
+   template <typename ElemIter>
+   void moveElements(ElemIter first, std::size_t count);
    void fillElements(size_type count, const T& value);
    void destroyElements();
 
@@ -196,7 +198,7 @@ template <typename T, std::size_t N> SboVector<T, N>::SboVector(SboVector&& othe
    {
       // Elements must fit into the buffer.
       assert(fitsIntoBuffer(srcSize));
-      moveElements(other, other.m_data);
+      moveElements(other.m_data, srcSize);
       m_capacity = BufferCapacity;
    }
 
@@ -307,7 +309,7 @@ SboVector<T, N>& SboVector<T, N>::operator=(SboVector&& other)
    {
       // Elements must fit into the buffer.
       assert(fitsIntoBuffer(srcSize));
-      moveElements(other, other.m_data);
+      moveElements(other.m_data, srcSize);
       m_capacity = BufferCapacity;
    }
 
@@ -405,6 +407,54 @@ void SboVector<T, N>::assign(size_type count, const T& value)
    }
 
    fillElements(count, value);
+   m_size = count;
+}
+
+
+template <typename T, std::size_t N>
+template <typename Iter>
+void SboVector<T, N>::assign(Iter first, Iter last)
+{
+   // The accepted iterator type for std::vector is an input iterator. Input iterators
+   // permit only a single pass over the elements. The accepted iterator type here is
+   // more relaxed, it is a forward iterator that allows multiple passes.
+
+   // Available strategies are to use the buffer, to reuse an existing heap
+   // allocation, or make a new heap allocation.
+
+   const std::size_t count = std::distance(first, last);
+   const bool fitsBuffer = fitsIntoBuffer(count);
+   const bool canReuseHeap = onHeap() && m_capacity >= count;
+   const bool allocHeap = !fitsBuffer && !canReuseHeap;
+
+   // Perform allocation up front to prevent inconsistencies if allocation
+   // fails.
+   T* newData = nullptr;
+   if (allocHeap)
+      newData = allocateMem(count);
+
+   // Clean up existing data.
+   destroyElements();
+   if (fitsBuffer || allocHeap)
+      deallocate();
+
+   // Set up new data.
+   if (fitsBuffer)
+   {
+      m_capacity = BufferCapacity;
+   }
+   else if (canReuseHeap)
+   {
+      // Capacity stays the same.
+   }
+   else
+   {
+      assert(allocHeap && newData);
+      m_data = newData;
+      m_capacity = count;
+   }
+
+   copyElements(first, count);
    m_size = count;
 }
 
@@ -573,10 +623,10 @@ void SboVector<T, N>::copyElements(ElemIter first, std::size_t count)
 
 
 template <typename T, std::size_t N>
-template <typename U, typename ElemIter>
-void SboVector<T, N>::moveElements(const U& other, ElemIter first)
+template <typename ElemIter>
+void SboVector<T, N>::moveElements(ElemIter first, std::size_t count)
 {
-   std::uninitialized_move_n(first, other.size(), m_data);
+   std::uninitialized_move_n(first, count, m_data);
 }
 
 
