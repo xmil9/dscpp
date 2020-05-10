@@ -176,6 +176,7 @@ void TestSboVectorCopyCtor()
       VERIFY(sv.capacity() == Cap, caseLabel);
       VERIFY(sv.in_buffer(), caseLabel);
       VERIFY(Instrumented::defaultCtorCalls == 0, caseLabel);
+      VERIFY(Instrumented::ctorCalls == 0, caseLabel);
       // Copied elements.
       VERIFY(Instrumented::copyCtorCalls == NumElems, caseLabel);
       VERIFY(Instrumented::moveCtorCalls == 0, caseLabel);
@@ -206,6 +207,7 @@ void TestSboVectorCopyCtor()
       VERIFY(sv.capacity() == NumElems, caseLabel);
       VERIFY(sv.on_heap(), caseLabel);
       VERIFY(Instrumented::defaultCtorCalls == 0, caseLabel);
+      VERIFY(Instrumented::ctorCalls == 0, caseLabel);
       // Copied elements.
       VERIFY(Instrumented::copyCtorCalls == NumElems, caseLabel);
       VERIFY(Instrumented::moveCtorCalls == 0, caseLabel);
@@ -241,6 +243,7 @@ void TestSboVectorMoveCtor()
       VERIFY(sv.capacity() == Cap, caseLabel);
       VERIFY(sv.in_buffer(), caseLabel);
       VERIFY(Instrumented::defaultCtorCalls == 0, caseLabel);
+      VERIFY(Instrumented::ctorCalls == 0, caseLabel);
       VERIFY(Instrumented::copyCtorCalls == 0, caseLabel);
       // Moved elements.
       VERIFY(Instrumented::moveCtorCalls == NumElems, caseLabel);
@@ -273,6 +276,7 @@ void TestSboVectorMoveCtor()
       VERIFY(sv.capacity() == NumElems, caseLabel);
       VERIFY(sv.on_heap(), caseLabel);
       VERIFY(Instrumented::defaultCtorCalls == 0, caseLabel);
+      VERIFY(Instrumented::ctorCalls == 0, caseLabel);
       VERIFY(Instrumented::copyCtorCalls == 0, caseLabel);
       // None of the elements move ctors executed because the SboVector simply
       // stole the pointer to the heap memory.
@@ -304,6 +308,9 @@ void TestSboVectorInitializerListCtor()
       VERIFY(sv.capacity() == Cap, caseLabel);
       VERIFY(sv.in_buffer(), caseLabel);
       VERIFY(Instrumented::defaultCtorCalls == 0, caseLabel);
+      // Constructing initializer list element.
+      VERIFY(Instrumented::ctorCalls == NumElems, caseLabel);
+      // Copied elements.
       VERIFY(Instrumented::copyCtorCalls == NumElems, caseLabel);
       VERIFY(Instrumented::moveCtorCalls == 0, caseLabel);
       VERIFY(Instrumented::assignmentCalls == 0, caseLabel);
@@ -328,6 +335,9 @@ void TestSboVectorInitializerListCtor()
       VERIFY(sv.capacity() == NumElems, caseLabel);
       VERIFY(sv.on_heap(), caseLabel);
       VERIFY(Instrumented::defaultCtorCalls == 0, caseLabel);
+      // Constructing initializer list element.
+      VERIFY(Instrumented::ctorCalls == NumElems, caseLabel);
+      // Copied elements.
       VERIFY(Instrumented::copyCtorCalls == NumElems, caseLabel);
       VERIFY(Instrumented::moveCtorCalls == 0, caseLabel);
       VERIFY(Instrumented::assignmentCalls == 0, caseLabel);
@@ -408,6 +418,7 @@ void TestSboVectorCopyAssignment()
       VERIFY(sv.capacity() == Cap, caseLabel);
       VERIFY(sv.in_buffer(), caseLabel);
       VERIFY(Instrumented::defaultCtorCalls == 0, caseLabel);
+      VERIFY(Instrumented::ctorCalls == 0, caseLabel);
       // Copied elements.
       VERIFY(Instrumented::copyCtorCalls == NumElems, caseLabel);
       VERIFY(Instrumented::moveCtorCalls == 0, caseLabel);
@@ -445,6 +456,7 @@ void TestSboVectorCopyAssignment()
       VERIFY(sv.capacity() == NumElems, caseLabel);
       VERIFY(sv.on_heap(), caseLabel);
       VERIFY(Instrumented::defaultCtorCalls == 0, caseLabel);
+      VERIFY(Instrumented::ctorCalls == 0, caseLabel);
       // Copied elements.
       VERIFY(Instrumented::copyCtorCalls == NumElems, caseLabel);
       VERIFY(Instrumented::moveCtorCalls == 0, caseLabel);
@@ -482,6 +494,7 @@ void TestSboVectorCopyAssignment()
       VERIFY(sv.capacity() == Cap, caseLabel);
       VERIFY(sv.in_buffer(), caseLabel);
       VERIFY(Instrumented::defaultCtorCalls == 0, caseLabel);
+      VERIFY(Instrumented::ctorCalls == 0, caseLabel);
       // Copied elements.
       VERIFY(Instrumented::copyCtorCalls == NumElems, caseLabel);
       VERIFY(Instrumented::moveCtorCalls == 0, caseLabel);
@@ -522,6 +535,7 @@ void TestSboVectorCopyAssignment()
       VERIFY(sv.capacity() == NumElems, caseLabel);
       VERIFY(sv.on_heap(), caseLabel);
       VERIFY(Instrumented::defaultCtorCalls == 0, caseLabel);
+      VERIFY(Instrumented::ctorCalls == 0, caseLabel);
       // Copied elements.
       VERIFY(Instrumented::copyCtorCalls == NumElems, caseLabel);
       VERIFY(Instrumented::moveCtorCalls == 0, caseLabel);
@@ -562,6 +576,7 @@ void TestSboVectorCopyAssignment()
       VERIFY(sv.capacity() == NumOrigElems, caseLabel);
       VERIFY(sv.on_heap(), caseLabel);
       VERIFY(Instrumented::defaultCtorCalls == 0, caseLabel);
+      VERIFY(Instrumented::ctorCalls == 0, caseLabel);
       // Copied elements.
       VERIFY(Instrumented::copyCtorCalls == NumElems, caseLabel);
       VERIFY(Instrumented::moveCtorCalls == 0, caseLabel);
@@ -605,6 +620,7 @@ void TestSboVectorMoveAssignment()
       VERIFY(sv.capacity() == Cap, caseLabel);
       VERIFY(sv.in_buffer(), caseLabel);
       VERIFY(Instrumented::defaultCtorCalls == 0, caseLabel);
+      VERIFY(Instrumented::ctorCalls == 0, caseLabel);
       VERIFY(Instrumented::copyCtorCalls == 0, caseLabel);
       // Moved elements.
       VERIFY(Instrumented::moveCtorCalls == NumElems, caseLabel);
@@ -643,6 +659,7 @@ void TestSboVectorMoveAssignment()
       VERIFY(sv.capacity() == NumElems, caseLabel);
       VERIFY(sv.on_heap(), caseLabel);
       VERIFY(Instrumented::defaultCtorCalls == 0, caseLabel);
+      VERIFY(Instrumented::ctorCalls == 0, caseLabel);
       VERIFY(Instrumented::copyCtorCalls == 0, caseLabel);
       // None of the elements move ctors executed because the SboVector simply
       // stole the pointer to the heap memory.
@@ -682,6 +699,7 @@ void TestSboVectorMoveAssignment()
       VERIFY(sv.capacity() == Cap, caseLabel);
       VERIFY(sv.in_buffer(), caseLabel);
       VERIFY(Instrumented::defaultCtorCalls == 0, caseLabel);
+      VERIFY(Instrumented::ctorCalls == 0, caseLabel);
       VERIFY(Instrumented::copyCtorCalls == 0, caseLabel);
       // Moved source elements.
       VERIFY(Instrumented::moveCtorCalls == NumElems, caseLabel);
@@ -721,6 +739,7 @@ void TestSboVectorMoveAssignment()
       VERIFY(sv.capacity() == NumElems, caseLabel);
       VERIFY(sv.on_heap(), caseLabel);
       VERIFY(Instrumented::defaultCtorCalls == 0, caseLabel);
+      VERIFY(Instrumented::ctorCalls == 0, caseLabel);
       VERIFY(Instrumented::copyCtorCalls == 0, caseLabel);
       // None of the elements move ctors executed because the SboVector simply
       // stole the pointer to the heap memory.
@@ -761,6 +780,7 @@ void TestSboVectorMoveAssignment()
       VERIFY(sv.capacity() == NumElems, caseLabel);
       VERIFY(sv.on_heap(), caseLabel);
       VERIFY(Instrumented::defaultCtorCalls == 0, caseLabel);
+      VERIFY(Instrumented::ctorCalls == 0, caseLabel);
       VERIFY(Instrumented::copyCtorCalls == 0, caseLabel);
       // None of the elements move ctors executed because the SboVector simply
       // stole the pointer to the heap memory.
