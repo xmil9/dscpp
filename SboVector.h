@@ -84,7 +84,7 @@ template <typename T, std::size_t N> class SboVector
    SboVector& operator=(std::initializer_list<T> ilist);
 
    void assign(size_type count, const T& value);
-   template <typename Iter> void assign(Iter first, Iter last);
+   template <typename FwdIter> void assign(FwdIter first, FwdIter last);
 
    T& operator[](std::size_t pos);
    const T& operator[](std::size_t pos) const;
@@ -412,8 +412,8 @@ void SboVector<T, N>::assign(size_type count, const T& value)
 
 
 template <typename T, std::size_t N>
-template <typename Iter>
-void SboVector<T, N>::assign(Iter first, Iter last)
+template <typename FwdIter>
+void SboVector<T, N>::assign(FwdIter first, FwdIter last)
 {
    // The accepted iterator type for std::vector is an input iterator. Input iterators
    // permit only a single pass over the elements. The accepted iterator type here is
