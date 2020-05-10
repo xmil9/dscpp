@@ -93,6 +93,8 @@ template <typename T, std::size_t N> class SboVector
    const T& operator[](std::size_t pos) const;
    T& front();
    const T& front() const;
+   T& back();
+   const T& back() const;
 
    std::size_t size() const noexcept;
    constexpr std::size_t max_size() const noexcept;
@@ -543,6 +545,18 @@ template <typename T, std::size_t N> T& SboVector<T, N>::front()
 template <typename T, std::size_t N> const T& SboVector<T, N>::front() const
 {
    return m_data[0];
+}
+
+
+template <typename T, std::size_t N> T& SboVector<T, N>::back()
+{
+   return m_data[m_size - 1];
+}
+
+
+template <typename T, std::size_t N> const T& SboVector<T, N>::back() const
+{
+   return m_data[m_size - 1];
 }
 
 

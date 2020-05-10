@@ -1842,6 +1842,90 @@ void TestSboVectorFrontConst()
    }
 }
 
+
+void TestSboVectorBack()
+{
+   {
+      const std::string caseLabel{
+         "SvoVector::back for reading from buffer instance."};
+
+      constexpr std::size_t Cap = 10;
+      SboVector<int, Cap> sv{{1}, {2}, {3}, {4}};
+
+      // Precondition.
+      VERIFY(sv.size() < Cap, caseLabel);
+
+      VERIFY(sv.back() == 4, caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "SvoVector::back for writing to buffer instance."};
+
+      constexpr std::size_t Cap = 10;
+      SboVector<int, Cap> sv{{1}, {2}, {3}, {4}};
+
+      // Precondition.
+      VERIFY(sv.size() < Cap, caseLabel);
+
+      sv.back() = 100;
+      VERIFY(sv[sv.size() - 1] == 100, caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "SvoVector::back for reading from heap instance."};
+
+      constexpr std::size_t Cap = 5;
+      SboVector<int, Cap> sv{{1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}};
+
+      // Precondition.
+      VERIFY(sv.size() > Cap, caseLabel);
+
+      VERIFY(sv.back() == 8, caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "SvoVector::back for writing to valid index into heap instance."};
+
+      constexpr std::size_t Cap = 5;
+      SboVector<int, Cap> sv{{1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}};
+
+      // Precondition.
+      VERIFY(sv.size() > Cap, caseLabel);
+
+      sv.back() = 100;
+      VERIFY(sv[sv.size() - 1] == 100, caseLabel);
+   }
+}
+
+
+void TestSboVectorBackConst()
+{
+   {
+      const std::string caseLabel{
+         "SvoVector::back const for buffer instance."};
+
+      constexpr std::size_t Cap = 10;
+      const SboVector<int, Cap> sv{{1}, {2}, {3}, {4}};
+
+      // Precondition.
+      VERIFY(sv.size() < Cap, caseLabel);
+
+      VERIFY(sv.back() == 4, caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "SvoVector::back const for heap instance."};
+
+      constexpr std::size_t Cap = 5;
+      const SboVector<int, Cap> sv{{1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}};
+
+      // Precondition.
+      VERIFY(sv.size() > Cap, caseLabel);
+
+      VERIFY(sv.back() == 8, caseLabel);
+   }
+}
+
 } // namespace
 
 
@@ -1867,4 +1951,6 @@ void TestSboVector()
    TestSboVectorSubscriptOperatorConst();
    TestSboVectorFront();
    TestSboVectorFrontConst();
+   TestSboVectorBack();
+   TestSboVectorBackConst();
 }
