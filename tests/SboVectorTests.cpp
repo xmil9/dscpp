@@ -1520,6 +1520,115 @@ void TestSboVectorAssignInitializerList()
    }
 }
 
+
+void TestSboVectorAt()
+{
+   {
+      const std::string caseLabel{"SvoVector::at for valid index into buffer instance."};
+
+      constexpr std::size_t Cap = 10;
+      SboVector<int, Cap> sv{{1}, {2}, {3}, {4}};
+
+      // Precondition.
+      VERIFY(sv.size() < Cap, caseLabel);
+
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv.at(i) == i + 1, caseLabel);
+   }
+   {
+      const std::string caseLabel{"SvoVector::at for valid index into heap instance."};
+
+      constexpr std::size_t Cap = 5;
+      SboVector<int, Cap> sv{{1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}};
+
+      // Precondition.
+      VERIFY(sv.size() > Cap, caseLabel);
+
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv.at(i) == i + 1, caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "SvoVector::at for invalid index into buffer instance."};
+
+      constexpr std::size_t Cap = 10;
+      SboVector<int, Cap> sv{{1}, {2}, {3}, {4}};
+
+      // Precondition.
+      VERIFY(sv.size() < Cap, caseLabel);
+
+      VERIFY_THROW(([&sv]() { sv.at(sv.size()); }), std::out_of_range, caseLabel);
+      VERIFY_THROW(([&sv, Cap]() { sv.at(Cap); }), std::out_of_range, caseLabel);
+   }
+   {
+      const std::string caseLabel{"SvoVector::at for invalid index into heap instance."};
+
+      constexpr std::size_t Cap = 5;
+      SboVector<int, Cap> sv{{1}, {2}, {3}, {4}, {5}, {6}};
+
+      // Precondition.
+      VERIFY(sv.size() > Cap, caseLabel);
+
+      VERIFY_THROW(([&sv]() { sv.at(sv.size()); }), std::out_of_range, caseLabel);
+   }
+}
+
+
+void TestSboVectorAtConst()
+{
+   {
+      const std::string caseLabel{
+         "SvoVector::at const for valid index into buffer instance."};
+
+      constexpr std::size_t Cap = 10;
+      const SboVector<int, Cap> sv{{1}, {2}, {3}, {4}};
+
+      // Precondition.
+      VERIFY(sv.size() < Cap, caseLabel);
+
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv.at(i) == i + 1, caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "SvoVector::at const for valid index into heap instance."};
+
+      constexpr std::size_t Cap = 5;
+      const SboVector<int, Cap> sv{{1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}};
+
+      // Precondition.
+      VERIFY(sv.size() > Cap, caseLabel);
+
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv.at(i) == i + 1, caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "SvoVector::at const for invalid index into buffer instance."};
+
+      constexpr std::size_t Cap = 10;
+      const SboVector<int, Cap> sv{{1}, {2}, {3}, {4}};
+
+      // Precondition.
+      VERIFY(sv.size() < Cap, caseLabel);
+
+      VERIFY_THROW(([&sv]() { sv.at(sv.size()); }), std::out_of_range, caseLabel);
+      VERIFY_THROW(([&sv, Cap]() { sv.at(Cap); }), std::out_of_range, caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "SvoVector::at const for invalid index into heap instance."};
+
+      constexpr std::size_t Cap = 5;
+      const SboVector<int, Cap> sv{{1}, {2}, {3}, {4}, {5}, {6}};
+
+      // Precondition.
+      VERIFY(sv.size() > Cap, caseLabel);
+
+      VERIFY_THROW(([&sv]() { sv.at(sv.size()); }), std::out_of_range, caseLabel);
+   }
+}
+
 } // namespace
 
 
@@ -1539,4 +1648,6 @@ void TestSboVector()
    TestSboVectorAssignElementValue();
    TestSboVectorAssignIteratorRange();
    TestSboVectorAssignInitializerList();
+   TestSboVectorAt();
+   TestSboVectorAtConst();
 }

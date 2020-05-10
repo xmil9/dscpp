@@ -87,6 +87,8 @@ template <typename T, std::size_t N> class SboVector
    template <typename FwdIter> void assign(FwdIter first, FwdIter last);
    void assign(std::initializer_list<T> ilist);
 
+   T& at(std::size_t pos);
+   const T& at(std::size_t pos) const;
    T& operator[](std::size_t pos);
    const T& operator[](std::size_t pos) const;
 
@@ -498,6 +500,22 @@ void SboVector<T, N>::assign(std::initializer_list<T> ilist)
 
    copyElements(ilist.begin(), count);
    m_size = count;
+}
+
+
+template <typename T, std::size_t N> T& SboVector<T, N>::at(std::size_t pos)
+{
+   if (pos >= m_size)
+      throw std::out_of_range("SboVector - Accessing invalid element.");
+   return operator[](pos);
+}
+
+
+template <typename T, std::size_t N> const T& SboVector<T, N>::at(std::size_t pos) const
+{
+   if (pos >= m_size)
+      throw std::out_of_range("SboVector - Accessing invalid element.");
+   return operator[](pos);
 }
 
 
