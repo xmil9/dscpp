@@ -97,8 +97,8 @@ template <typename T, std::size_t N> class SboVector
    void clear() noexcept;
    void push_back(T val);
 
-   bool in_buffer() const;
-   bool on_heap() const;
+   bool inBuffer() const;
+   bool onHeap() const;
 
  private:
    constexpr T* buffer();
@@ -111,11 +111,11 @@ template <typename T, std::size_t N> class SboVector
    void move_from(SboVector&& other);
 
    template <typename U, typename ElemIter>
-   void copy_elements(const U& other, ElemIter first);
+   void copyElements(const U& other, ElemIter first);
    template <typename U, typename ElemIter>
-   void move_elements(const U& other, ElemIter first);
-   void fill_elements(size_type count, const T& value);
-   void destroy_elements();
+   void moveElements(const U& other, ElemIter first);
+   void fillElements(size_type count, const T& value);
+   void destroyElements();
 
    static constexpr bool fitsIntoBuffer(std::size_t size);
    void allocate_or_reuse(std::size_t cap);
@@ -123,8 +123,8 @@ template <typename T, std::size_t N> class SboVector
    void deallocate();
 
    static T* allocate_or_reuse_mem(std::size_t cap, std::size_t availCap);
-   static T* allocate_mem(std::size_t cap);
-   static void deallocate_mem(T* mem);
+   static T* allocateMem(std::size_t cap);
+   static void deallocateMem(T* mem);
 
    void reallocate(std::size_t newCap);
    std::size_t recalc_capacity(std::size_t minCap) const;
@@ -154,7 +154,7 @@ SboVector<T, N>::SboVector(std::size_t count, const T& value)
       m_capacity = count;
    }
 
-   fill_elements(count, value);
+   fillElements(count, value);
    m_size = count;
 }
 
@@ -172,7 +172,7 @@ template <typename T, std::size_t N> SboVector<T, N>::SboVector(const SboVector&
       m_capacity = srcSize;
    }
 
-   copy_elements(other, other.m_data);
+   copyElements(other, other.m_data);
    m_size = srcSize;
 }
 
@@ -183,7 +183,7 @@ template <typename T, std::size_t N> SboVector<T, N>::SboVector(SboVector&& othe
    // A heap allocations does't make sense as strategys since stealing is faster.
 
    const auto srcSize = other.size();
-   const bool canSteal = other.on_heap();
+   const bool canSteal = other.onHeap();
 
    if (canSteal)
    {
@@ -196,7 +196,7 @@ template <typename T, std::size_t N> SboVector<T, N>::SboVector(SboVector&& othe
    {
       // Elements must fit into the buffer.
       assert(fitsIntoBuffer(srcSize));
-      move_elements(other, other.m_data);
+      moveElements(other, other.m_data);
       m_capacity = BufferCapacity;
    }
 
@@ -223,14 +223,14 @@ SboVector<T, N>::SboVector(std::initializer_list<T> ilist)
       m_capacity = srcSize;
    }
 
-   copy_elements(ilist, ilist.begin());
+   copyElements(ilist, ilist.begin());
    m_size = srcSize;
 }
 
 
 template <typename T, std::size_t N> SboVector<T, N>::~SboVector()
 {
-   destroy_elements();
+   destroyElements();
    deallocate();
 }
 
@@ -243,17 +243,17 @@ SboVector<T, N>& SboVector<T, N>::operator=(const SboVector& other)
 
    const auto srcSize = other.size();
    const bool fitsBuffer = fitsIntoBuffer(srcSize);
-   const bool canReuseHeap = on_heap() && m_capacity >= srcSize;
+   const bool canReuseHeap = onHeap() && m_capacity >= srcSize;
    const bool allocHeap = !fitsBuffer && !canReuseHeap;
 
    // Perform allocation up front to prevent inconsistencies if allocation
    // fails.
    T* newData = nullptr;
    if (allocHeap)
-      newData = allocate_mem(srcSize);
+      newData = allocateMem(srcSize);
 
    // Clean up existing data.
-   destroy_elements();
+   destroyElements();
    if (fitsBuffer || allocHeap)
       deallocate();
 
@@ -273,7 +273,7 @@ SboVector<T, N>& SboVector<T, N>::operator=(const SboVector& other)
       m_capacity = srcSize;
    }
 
-   copy_elements(other, other.m_data);
+   copyElements(other, other.m_data);
    m_size = srcSize;
 
    return *this;
@@ -288,10 +288,10 @@ SboVector<T, N>& SboVector<T, N>::operator=(SboVector&& other)
    // is faster.
 
    const auto srcSize = other.size();
-   const bool canSteal = other.on_heap();
+   const bool canSteal = other.onHeap();
 
    // Clean up existing data.
-   destroy_elements();
+   destroyElements();
    deallocate();
 
    // Set up new data.
@@ -307,7 +307,7 @@ SboVector<T, N>& SboVector<T, N>::operator=(SboVector&& other)
    {
       // Elements must fit into the buffer.
       assert(fitsIntoBuffer(srcSize));
-      move_elements(other, other.m_data);
+      moveElements(other, other.m_data);
       m_capacity = BufferCapacity;
    }
 
@@ -330,17 +330,17 @@ SboVector<T, N>& SboVector<T, N>::operator=(std::initializer_list<T> ilist)
 
    const auto srcSize = ilist.size();
    const bool fitsBuffer = fitsIntoBuffer(srcSize);
-   const bool canReuseHeap = on_heap() && m_capacity >= srcSize;
+   const bool canReuseHeap = onHeap() && m_capacity >= srcSize;
    const bool allocHeap = !fitsBuffer && !canReuseHeap;
 
    // Perform allocation up front to prevent inconsistencies if allocation
    // fails.
    T* newData = nullptr;
    if (allocHeap)
-      newData = allocate_mem(srcSize);
+      newData = allocateMem(srcSize);
 
    // Clean up existing data.
-   destroy_elements();
+   destroyElements();
    if (fitsBuffer || allocHeap)
       deallocate();
 
@@ -360,7 +360,7 @@ SboVector<T, N>& SboVector<T, N>::operator=(std::initializer_list<T> ilist)
       m_capacity = srcSize;
    }
 
-   copy_elements(ilist, ilist.begin());
+   copyElements(ilist, ilist.begin());
    m_size = srcSize;
 
    return *this;
@@ -376,8 +376,8 @@ void SboVector<T, N>::assign(size_type count, const T& value)
 
    // Clean up old data.
    std::destroy_n(m_data, size());
-   if (on_heap() && dealloc)
-      deallocate_mem(m_data);
+   if (onHeap() && dealloc)
+      deallocateMem(m_data);
 
    // Set up new data.
    const bool fitsIntoBuffer = count <= BufferCapacity;
@@ -446,7 +446,7 @@ template <typename T, std::size_t N> void SboVector<T, N>::reserve(std::size_t c
 
 template <typename T, std::size_t N> void SboVector<T, N>::shrink_to_fit()
 {
-   if (on_heap() && m_size < m_capacity)
+   if (onHeap() && m_size < m_capacity)
       reallocate(m_size);
 }
 
@@ -465,15 +465,15 @@ template <typename T, std::size_t N> void SboVector<T, N>::push_back(T val)
 }
 
 
-template <typename T, std::size_t N> bool SboVector<T, N>::in_buffer() const
+template <typename T, std::size_t N> bool SboVector<T, N>::inBuffer() const
 {
    return (m_data == buffer());
 }
 
 
-template <typename T, std::size_t N> bool SboVector<T, N>::on_heap() const
+template <typename T, std::size_t N> bool SboVector<T, N>::onHeap() const
 {
-   return !in_buffer();
+   return !inBuffer();
 }
 
 
@@ -510,8 +510,8 @@ void SboVector<T, N>::copy_from(const U& other, ElemIter first)
 
    // Clean up old data.
    std::destroy_n(m_data, size());
-   if (on_heap() && dealloc)
-      deallocate_mem(m_data);
+   if (onHeap() && dealloc)
+      deallocateMem(m_data);
 
    // Set up new data.
    const bool fitsIntoBuffer = other.size() <= BufferCapacity;
@@ -535,7 +535,7 @@ void SboVector<T, N>::copy_from(const U& other, ElemIter first)
 
 template <typename T, std::size_t N> void SboVector<T, N>::move_from(SboVector&& other)
 {
-   if (other.on_heap())
+   if (other.onHeap())
    {
       // Steal heap memory.
       m_data = other.m_data;
@@ -556,7 +556,7 @@ template <typename T, std::size_t N> void SboVector<T, N>::move_from(SboVector&&
 
 template <typename T, std::size_t N>
 template <typename U, typename ElemIter>
-void SboVector<T, N>::copy_elements(const U& other, ElemIter first)
+void SboVector<T, N>::copyElements(const U& other, ElemIter first)
 {
    std::uninitialized_copy_n(first, other.size(), m_data);
 }
@@ -564,20 +564,20 @@ void SboVector<T, N>::copy_elements(const U& other, ElemIter first)
 
 template <typename T, std::size_t N>
 template <typename U, typename ElemIter>
-void SboVector<T, N>::move_elements(const U& other, ElemIter first)
+void SboVector<T, N>::moveElements(const U& other, ElemIter first)
 {
    std::uninitialized_move_n(first, other.size(), m_data);
 }
 
 
 template <typename T, std::size_t N>
-void SboVector<T, N>::fill_elements(size_type count, const T& value)
+void SboVector<T, N>::fillElements(size_type count, const T& value)
 {
    std::uninitialized_fill_n(m_data, count, value);
 }
 
 
-template <typename T, std::size_t N> void SboVector<T, N>::destroy_elements()
+template <typename T, std::size_t N> void SboVector<T, N>::destroyElements()
 {
    std::destroy_n(m_data, size());
 }
@@ -599,15 +599,15 @@ void SboVector<T, N>::allocate_or_reuse(std::size_t cap)
 
 template <typename T, std::size_t N> void SboVector<T, N>::allocate(std::size_t cap)
 {
-   m_data = allocate_mem(cap);
+   m_data = allocateMem(cap);
 }
 
 
 template <typename T, std::size_t N> void SboVector<T, N>::deallocate()
 {
-   if (on_heap())
+   if (onHeap())
    {
-      deallocate_mem(m_data);
+      deallocateMem(m_data);
       m_data = buffer();
    }
 }
@@ -623,11 +623,11 @@ T* SboVector<T, N>::allocate_or_reuse_mem(std::size_t cap, std::size_t availCap)
    if (fitsIntoExistingMem)
       return nullptr;
 
-   return allocate_mem(cap);
+   return allocateMem(cap);
 }
 
 
-template <typename T, std::size_t N> T* SboVector<T, N>::allocate_mem(std::size_t cap)
+template <typename T, std::size_t N> T* SboVector<T, N>::allocateMem(std::size_t cap)
 {
 #ifdef VS_COMPILER
    // Visual Studio does not support std::aligned_alloc.
@@ -641,7 +641,7 @@ template <typename T, std::size_t N> T* SboVector<T, N>::allocate_mem(std::size_
 }
 
 
-template <typename T, std::size_t N> void SboVector<T, N>::deallocate_mem(T* mem)
+template <typename T, std::size_t N> void SboVector<T, N>::deallocateMem(T* mem)
 {
 #ifdef VS_COMPILER
    _aligned_free(mem);
@@ -661,7 +661,7 @@ template <typename T, std::size_t N> void SboVector<T, N>::reallocate(std::size_
          std::uninitialized_move_n(m_data, m_size, newData);
       else
          std::uninitialized_copy_n(m_data, m_size, newData);
-      destroy_elements();
+      destroyElements();
       m_data = newData;
       m_capacity = newCap;
    }
