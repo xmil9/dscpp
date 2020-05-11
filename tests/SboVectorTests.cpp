@@ -2112,6 +2112,47 @@ void TestSboVectorSize()
    }
 }
 
+
+void TestSboVectorMaxSize()
+{
+   {
+      const std::string caseLabel{
+         "SvoVector::max_size for buffer instance."};
+
+      constexpr std::size_t Cap = 10;
+      const SboVector<int, Cap> sv{{1}, {2}};
+
+      // Precondition.
+      VERIFY(sv.inBuffer(), caseLabel);
+
+      VERIFY(sv.max_size() > 0, caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "SvoVector::max_size for heap instance."};
+
+      constexpr std::size_t Cap = 5;
+      const SboVector<int, Cap> sv{{1}, {2}, {3}, {4}, {5}, {6}};
+
+      // Precondition.
+      VERIFY(sv.onHeap(), caseLabel);
+
+      VERIFY(sv.max_size() > 0, caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "SvoVector::max_size for empty instance."};
+
+      constexpr std::size_t Cap = 5;
+      const SboVector<int, Cap> sv;
+
+      // Precondition.
+      VERIFY(sv.empty(), caseLabel);
+
+      VERIFY(sv.max_size() > 0, caseLabel);
+   }
+}
+
 } // namespace
 
 
@@ -2143,4 +2184,5 @@ void TestSboVector()
    TestSboVectorDataConst();
    TestSboVectorEmpty();
    TestSboVectorSize();
+   TestSboVectorMaxSize();
 }
