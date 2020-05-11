@@ -2026,6 +2026,7 @@ void TestSboVectorDataConst()
    }
 }
 
+
 void TestSboVectorEmpty()
 {
    {
@@ -2036,23 +2037,78 @@ void TestSboVectorEmpty()
       const SboVector<int, Cap> sv;
 
       // Precondition.
-      VERIFY(sv.size() < Cap, caseLabel);
       VERIFY(sv.size() == 0, caseLabel);
 
       VERIFY(sv.empty(), caseLabel);
    }
    {
       const std::string caseLabel{
-         "SvoVector::empty for non-empty heap instance."};
+         "SvoVector::empty for non-empty buffer instance."};
 
       constexpr std::size_t Cap = 10;
       const SboVector<int, Cap> sv{{1}, {2}};
 
       // Precondition.
-      VERIFY(sv.size() < Cap, caseLabel);
+      VERIFY(sv.inBuffer(), caseLabel);
       VERIFY(sv.size() > 0, caseLabel);
 
       VERIFY(!sv.empty(), caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "SvoVector::empty for non-empty heap instance."};
+
+      constexpr std::size_t Cap = 5;
+      const SboVector<int, Cap> sv{{1}, {2}, {3}, {4}, {5}, {6}};
+
+      // Precondition.
+      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(sv.size() > 0, caseLabel);
+
+      VERIFY(!sv.empty(), caseLabel);
+   }
+}
+
+
+void TestSboVectorSize()
+{
+   {
+      const std::string caseLabel{
+         "SvoVector::size for empty instance."};
+
+      constexpr std::size_t Cap = 10;
+      const SboVector<int, Cap> sv;
+
+      // Precondition.
+      VERIFY(sv.empty(), caseLabel);
+
+      VERIFY(sv.size() == 0, caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "SvoVector::empty for non-empty buffer instance."};
+
+      constexpr std::size_t Cap = 10;
+      const SboVector<int, Cap> sv{{1}, {2}};
+
+      // Precondition.
+      VERIFY(sv.inBuffer(), caseLabel);
+      VERIFY(!sv.empty(), caseLabel);
+
+      VERIFY(sv.size() == 2, caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "SvoVector::empty for non-empty buffer instance."};
+
+      constexpr std::size_t Cap = 5;
+      const SboVector<int, Cap> sv{{1}, {2}, {3}, {4}, {5}, {6}};
+
+      // Precondition.
+      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(!sv.empty(), caseLabel);
+
+      VERIFY(sv.size() == 6, caseLabel);
    }
 }
 
@@ -2086,4 +2142,5 @@ void TestSboVector()
    TestSboVectorData();
    TestSboVectorDataConst();
    TestSboVectorEmpty();
+   TestSboVectorSize();
 }

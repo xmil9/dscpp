@@ -574,6 +574,12 @@ template <typename T, std::size_t N> const T* SboVector<T, N>::data() const noex
 }
 
 
+template <typename T, std::size_t N> bool SboVector<T, N>::empty() const noexcept
+{
+   return (m_size == 0);
+}
+
+
 template <typename T, std::size_t N> std::size_t SboVector<T, N>::size() const noexcept
 {
    return m_size;
@@ -590,12 +596,6 @@ template <typename T, std::size_t N>
 std::size_t SboVector<T, N>::capacity() const noexcept
 {
    return m_capacity;
-}
-
-
-template <typename T, std::size_t N> bool SboVector<T, N>::empty() const noexcept
-{
-   return (m_size == 0);
 }
 
 
