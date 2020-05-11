@@ -98,10 +98,10 @@ template <typename T, std::size_t N> class SboVector
    T* data() noexcept;
    const T* data() const noexcept;
 
+   bool empty() const noexcept;
    std::size_t size() const noexcept;
    constexpr std::size_t max_size() const noexcept;
    std::size_t capacity() const noexcept;
-   bool empty() const noexcept;
    void reserve(std::size_t capacity);
    void shrink_to_fit();
 

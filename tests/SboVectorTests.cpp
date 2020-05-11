@@ -2025,6 +2025,37 @@ void TestSboVectorDataConst()
          VERIFY(data[i] == i + 1, caseLabel);
    }
 }
+
+void TestSboVectorEmpty()
+{
+   {
+      const std::string caseLabel{
+         "SvoVector::empty for empty instance."};
+
+      constexpr std::size_t Cap = 10;
+      const SboVector<int, Cap> sv;
+
+      // Precondition.
+      VERIFY(sv.size() < Cap, caseLabel);
+      VERIFY(sv.size() == 0, caseLabel);
+
+      VERIFY(sv.empty(), caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "SvoVector::empty for non-empty heap instance."};
+
+      constexpr std::size_t Cap = 10;
+      const SboVector<int, Cap> sv{{1}, {2}};
+
+      // Precondition.
+      VERIFY(sv.size() < Cap, caseLabel);
+      VERIFY(sv.size() > 0, caseLabel);
+
+      VERIFY(!sv.empty(), caseLabel);
+   }
+}
+
 } // namespace
 
 
@@ -2054,4 +2085,5 @@ void TestSboVector()
    TestSboVectorBackConst();
    TestSboVectorData();
    TestSboVectorDataConst();
+   TestSboVectorEmpty();
 }
