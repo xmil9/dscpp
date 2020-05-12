@@ -868,6 +868,8 @@ template <typename SV> class SboVectorIterator
    value_type* operator->();
    SboVectorIterator& operator++();
    SboVectorIterator operator++(int);
+   SboVectorIterator& operator--();
+   SboVectorIterator operator--(int);
 
    friend void swap(SboVectorIterator<SV>& a, SboVectorIterator<SV>& b)
    {
@@ -953,5 +955,22 @@ template <typename SV> SboVectorIterator<SV> SboVectorIterator<SV>::operator++(i
 {
    auto before = *this;
    ++(*this);
+   return before;
+}
+
+
+template <typename SV>
+SboVectorIterator<SV>& SboVectorIterator<SV>::operator--()
+{
+   --m_idx;
+   return *this;
+}
+
+
+template <typename SV>
+SboVectorIterator<SV> SboVectorIterator<SV>::operator--(int)
+{
+   auto before = *this;
+   --(*this);
    return before;
 }

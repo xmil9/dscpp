@@ -2366,6 +2366,40 @@ void TestSboVectorIteratorPostfixIncrementOperator()
 }
 
 
+void TestSboVectorIteratorPrefixDecrementOperator()
+{
+   {
+      const std::string caseLabel{"SboVectorIterator prefix decrement operator."};
+
+      using SV = SboVector<int, 10>;
+      SV sv{{1}, {2}, {3}};
+
+      SboVectorIterator<SV> it{&sv, 1};
+      auto same = --it;
+
+      VERIFY(*it == 1, caseLabel);
+      VERIFY(*same == 1, caseLabel);
+   }
+}
+
+
+void TestSboVectorIteratorPostfixDecrementOperator()
+{
+   {
+      const std::string caseLabel{"SboVectorIterator prefix increment operator."};
+
+      using SV = SboVector<int, 10>;
+      SV sv{{1}, {2}, {3}};
+
+      SboVectorIterator<SV> it{&sv, 1};
+      auto prev = it--;
+
+      VERIFY(*it == 1, caseLabel);
+      VERIFY(*prev == 2, caseLabel);
+   }
+}
+
+
 void TestSboVectorIteratorSwap()
 {
    {
@@ -2507,6 +2541,8 @@ void TestSboVector()
    TestSboVectorIteratorDereferenceOperatorConst();
    TestSboVectorIteratorPrefixIncrementOperator();
    TestSboVectorIteratorPostfixIncrementOperator();
+   TestSboVectorIteratorPrefixDecrementOperator();
+   TestSboVectorIteratorPostfixDecrementOperator();
    TestSboVectorIteratorSwap();
    TestSboVectorIteratorEquality();
    TestSboVectorIteratorInequality();
