@@ -838,3 +838,106 @@ std::size_t SboVector<T, N>::recalc_capacity(std::size_t minCap) const
       return maxCap;
    return std::max(2 * m_capacity, minCap);
 }
+
+
+///////////////////
+
+// Iterator for SboVector.
+template <typename SV> class SboVectorIterator
+{
+ public:
+   using iterator_category = std::random_access_iterator_tag;
+   using value_type = typename SV::value_type;
+   using difference_type = typename SV::difference_type;
+   using pointer = typename SV::pointer;
+   using reference = typename SV::reference;
+
+ public:
+   SboVectorIterator() = default;
+   SboVectorIterator(SV* sv, std::size_t idx);
+   ~SboVectorIterator() = default;
+   SboVectorIterator(const SboVectorIterator&) = default;
+   SboVectorIterator(SboVectorIterator&& other);
+
+   SboVectorIterator& operator=(const SboVectorIterator&) = default;
+   SboVectorIterator& operator=(SboVectorIterator&& other);
+
+   const value_type& operator*() const;
+   value_type& operator*();
+   SboVectorIterator& operator++();
+   SboVectorIterator operator++(int);
+
+   friend void swap(SboVectorIterator<SV>& a, SboVectorIterator<SV>& b)
+   {
+      std::swap(a.m_sv, b.m_sv);
+      std::swap(a.m_idx, b.m_idx);
+   }
+
+   friend bool operator==(const SboVectorIterator<SV>& a, const SboVectorIterator<SV>& b)
+   {
+      return a.m_sv == b.m_sv && a.m_idx == b.m_idx;
+   }
+
+   friend bool operator!=(const SboVectorIterator<SV>& a, const SboVectorIterator<SV>& b)
+   {
+      return !(a == b);
+   }
+
+ private:
+   SV* m_sv = nullptr;
+   std::size_t m_idx = 0;
+};
+
+
+template <typename SV>
+SboVectorIterator<SV>::SboVectorIterator(SV* sv, std::size_t idx) : m_sv{sv}, m_idx{idx}
+{
+}
+
+template <typename SV>
+SboVectorIterator<SV>::SboVectorIterator(SboVectorIterator&& other)
+{
+   swap(*this, other);
+}
+
+
+template <typename SV>
+SboVectorIterator<SV>& SboVectorIterator<SV>::operator=(SboVectorIterator&& other)
+{
+   m_sv = other.m_sv;
+   m_idx = other.m_idx;
+   other.m_sv = nullptr;
+   other.m_idx = 0;
+   return *this;
+}
+
+
+template <typename SV>
+SboVectorIterator<SV>& SboVectorIterator<SV>::operator++()
+{
+   ++m_idx;
+   return *this;
+}
+
+
+template <typename SV>
+SboVectorIterator<SV> SboVectorIterator<SV>::operator++(int)
+{
+   auto before = *this;
+   ++(*this);
+   return before;
+}
+
+
+template <typename SV>
+const typename SboVectorIterator<SV>::value_type& SboVectorIterator<SV>::operator*() const
+{
+   return (*m_sv)[m_idx];
+}
+
+
+template <typename SV>
+typename SboVectorIterator<SV>::value_type& SboVectorIterator<SV>::operator*()
+{
+   return (*m_sv)[m_idx];
+}
