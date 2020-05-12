@@ -2269,6 +2269,69 @@ void TestSboVectorIteratorIndirectionOperatorConst()
 }
 
 
+void TestSboVectorIteratorDereferenceOperator()
+{
+   {
+      const std::string caseLabel{"SboVectorIterator dereference operator for reading."};
+
+      struct A
+      {
+         int i = 0;
+         double d = 0;
+      };
+
+      using SV = SboVector<A, 10>;
+      SV sv{{1, 2}, {3, 4}};
+
+      SboVectorIterator<SV> it{&sv, 1};
+
+      VERIFY(it->i == 3, caseLabel);
+      VERIFY(it->d == 4, caseLabel);
+   }
+   {
+      const std::string caseLabel{"SboVectorIterator dereference operator for writing."};
+
+      struct A
+      {
+         int i = 0;
+         double d = 0;
+      };
+
+      using SV = SboVector<A, 10>;
+      SV sv{{1, 2}, {3, 4}};
+
+      SboVectorIterator<SV> it{&sv, 1};
+      it->i = 100;
+      it->d = 0.001;
+
+      VERIFY(it->i == 100, caseLabel);
+      VERIFY(it->d == 0.001, caseLabel);
+   }
+}
+
+
+void TestSboVectorIteratorDereferenceOperatorConst()
+{
+   {
+      const std::string caseLabel{"SboVectorIterator const dereference operator."};
+
+      struct A
+      {
+         int i = 0;
+         double d = 0;
+      };
+
+      using SV = SboVector<A, 10>;
+      SV sv{{1, 2}, {3, 4}};
+
+      const SboVectorIterator<SV> it{&sv, 1};
+
+      VERIFY(it->i == 3, caseLabel);
+      VERIFY(it->d == 4, caseLabel);
+   }
+}
+
+
 void TestSboVectorIteratorPrefixIncrementOperator()
 {
    {
@@ -2440,6 +2503,8 @@ void TestSboVector()
    TestSboVectorIteratorMoveAssignment();
    TestSboVectorIteratorIndirectionOperator();
    TestSboVectorIteratorIndirectionOperatorConst();
+   TestSboVectorIteratorDereferenceOperator();
+   TestSboVectorIteratorDereferenceOperatorConst();
    TestSboVectorIteratorPrefixIncrementOperator();
    TestSboVectorIteratorPostfixIncrementOperator();
    TestSboVectorIteratorSwap();

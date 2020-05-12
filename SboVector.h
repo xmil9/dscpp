@@ -864,6 +864,8 @@ template <typename SV> class SboVectorIterator
 
    const value_type& operator*() const;
    value_type& operator*();
+   const value_type* operator->() const;
+   value_type* operator->();
    SboVectorIterator& operator++();
    SboVectorIterator operator++(int);
 
@@ -894,8 +896,7 @@ SboVectorIterator<SV>::SboVectorIterator(SV* sv, std::size_t idx) : m_sv{sv}, m_
 {
 }
 
-template <typename SV>
-SboVectorIterator<SV>::SboVectorIterator(SboVectorIterator&& other)
+template <typename SV> SboVectorIterator<SV>::SboVectorIterator(SboVectorIterator&& other)
 {
    swap(*this, other);
 }
@@ -913,23 +914,6 @@ SboVectorIterator<SV>& SboVectorIterator<SV>::operator=(SboVectorIterator&& othe
 
 
 template <typename SV>
-SboVectorIterator<SV>& SboVectorIterator<SV>::operator++()
-{
-   ++m_idx;
-   return *this;
-}
-
-
-template <typename SV>
-SboVectorIterator<SV> SboVectorIterator<SV>::operator++(int)
-{
-   auto before = *this;
-   ++(*this);
-   return before;
-}
-
-
-template <typename SV>
 const typename SboVectorIterator<SV>::value_type& SboVectorIterator<SV>::operator*() const
 {
    return (*m_sv)[m_idx];
@@ -940,4 +924,34 @@ template <typename SV>
 typename SboVectorIterator<SV>::value_type& SboVectorIterator<SV>::operator*()
 {
    return (*m_sv)[m_idx];
+}
+
+
+template <typename SV>
+const typename SboVectorIterator<SV>::value_type*
+   SboVectorIterator<SV>::operator->() const
+{
+   return &(*m_sv)[m_idx];
+}
+
+
+template <typename SV>
+typename SboVectorIterator<SV>::value_type* SboVectorIterator<SV>::operator->()
+{
+   return &(*m_sv)[m_idx];
+}
+
+
+template <typename SV> SboVectorIterator<SV>& SboVectorIterator<SV>::operator++()
+{
+   ++m_idx;
+   return *this;
+}
+
+
+template <typename SV> SboVectorIterator<SV> SboVectorIterator<SV>::operator++(int)
+{
+   auto before = *this;
+   ++(*this);
+   return before;
 }
