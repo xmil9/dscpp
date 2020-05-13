@@ -2496,6 +2496,33 @@ void TestSboVectorIteratorInequality()
    }
 }
 
+
+void TestSboVectorIteratorAdditionAssignment()
+{
+   {
+      const std::string caseLabel{"SboVectorIterator operator+= for positive offset."};
+
+      using SV = SboVector<int, 10>;
+      SV sv{{1}, {2}, {3}};
+
+      SboVectorIterator<SV> it{&sv, 0};
+      it += 2;
+
+      VERIFY(*it == 3, caseLabel);
+   }
+   {
+      const std::string caseLabel{"SboVectorIterator operator+= for negative offset."};
+
+      using SV = SboVector<int, 10>;
+      SV sv{{1}, {2}, {3}};
+
+      SboVectorIterator<SV> it{&sv, 2};
+      it += -1;
+
+      VERIFY(*it == 2, caseLabel);
+   }
+}
+
 } // namespace
 
 
@@ -2546,4 +2573,5 @@ void TestSboVector()
    TestSboVectorIteratorSwap();
    TestSboVectorIteratorEquality();
    TestSboVectorIteratorInequality();
+   TestSboVectorIteratorAdditionAssignment();
 }
