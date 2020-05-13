@@ -871,6 +871,7 @@ template <typename SV> class SboVectorIterator
    SboVectorIterator& operator--();
    SboVectorIterator operator--(int);
    SboVectorIterator& operator+=(difference_type offset);
+   SboVectorIterator& operator-=(difference_type offset);
 
    friend void swap(SboVectorIterator<SV>& a, SboVectorIterator<SV>& b)
    {
@@ -979,5 +980,13 @@ template <typename SV>
 SboVectorIterator<SV>& SboVectorIterator<SV>::operator+=(difference_type offset)
 {
    m_idx += offset;
+   return *this;
+}
+
+
+template <typename SV>
+SboVectorIterator<SV>& SboVectorIterator<SV>::operator-=(difference_type offset)
+{
+   m_idx -= offset;
    return *this;
 }
