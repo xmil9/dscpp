@@ -917,6 +917,26 @@ template <typename SV> class SboVectorIterator
       return a.m_idx - b.m_idx;
    }
 
+   friend bool operator<(const SboVectorIterator<SV>& a, const SboVectorIterator<SV>& b)
+   {
+      return a.m_idx < b.m_idx;
+   }
+
+   friend bool operator>(const SboVectorIterator<SV>& a, const SboVectorIterator<SV>& b)
+   {
+      return a.m_idx > b.m_idx;
+   }
+
+   friend bool operator<=(const SboVectorIterator<SV>& a, const SboVectorIterator<SV>& b)
+   {
+      return a.m_idx <= b.m_idx;
+   }
+
+   friend bool operator>=(const SboVectorIterator<SV>& a, const SboVectorIterator<SV>& b)
+   {
+      return a.m_idx >= b.m_idx;
+   }
+
  private:
    SV* m_sv = nullptr;
    std::size_t m_idx = 0;

@@ -2451,7 +2451,7 @@ void TestSboVectorIteratorSwap()
 
       SboVectorIterator<SV> a{&sv, 1};
       SboVectorIterator<SV> b{&sv, 2};
-      
+
       swap(a, b);
 
       VERIFY(*a == 3, caseLabel);
@@ -2470,7 +2470,7 @@ void TestSboVectorIteratorEquality()
 
       SboVectorIterator<SV> a{&sv, 1};
       SboVectorIterator<SV> b{&sv, 1};
-      
+
       VERIFY(a == b, caseLabel);
    }
    {
@@ -2481,7 +2481,7 @@ void TestSboVectorIteratorEquality()
 
       SboVectorIterator<SV> a{&sv, 1};
       SboVectorIterator<SV> b{&sv, 2};
-      
+
       VERIFY(!(a == b), caseLabel);
    }
    {
@@ -2493,7 +2493,7 @@ void TestSboVectorIteratorEquality()
 
       SboVectorIterator<SV> a{&sv, 1};
       SboVectorIterator<SV> b{&other, 1};
-      
+
       VERIFY(!(a == b), caseLabel);
    }
 }
@@ -2509,7 +2509,7 @@ void TestSboVectorIteratorInequality()
 
       SboVectorIterator<SV> a{&sv, 1};
       SboVectorIterator<SV> b{&sv, 1};
-      
+
       VERIFY(!(a != b), caseLabel);
    }
    {
@@ -2520,7 +2520,7 @@ void TestSboVectorIteratorInequality()
 
       SboVectorIterator<SV> a{&sv, 1};
       SboVectorIterator<SV> b{&sv, 2};
-      
+
       VERIFY(a != b, caseLabel);
    }
    {
@@ -2532,7 +2532,7 @@ void TestSboVectorIteratorInequality()
 
       SboVectorIterator<SV> a{&sv, 1};
       SboVectorIterator<SV> b{&other, 1};
-      
+
       VERIFY(a != b, caseLabel);
    }
 }
@@ -2595,7 +2595,8 @@ void TestSboVectorIteratorSubtractionAssignment()
 void TestSboVectorIteratorAdditionOfIteratorAndOffset()
 {
    {
-      const std::string caseLabel{"SboVectorIterator iterator plus offset for positive offset."};
+      const std::string caseLabel{
+         "SboVectorIterator iterator plus offset for positive offset."};
 
       using SV = SboVector<int, 10>;
       SV sv{{1}, {2}, {3}};
@@ -2606,7 +2607,8 @@ void TestSboVectorIteratorAdditionOfIteratorAndOffset()
       VERIFY(*res == 3, caseLabel);
    }
    {
-      const std::string caseLabel{"SboVectorIterator iterator plus offset for negative offset."};
+      const std::string caseLabel{
+         "SboVectorIterator iterator plus offset for negative offset."};
 
       using SV = SboVector<int, 10>;
       SV sv{{1}, {2}, {3}};
@@ -2622,7 +2624,8 @@ void TestSboVectorIteratorAdditionOfIteratorAndOffset()
 void TestSboVectorIteratorAdditionOfOffsetAndIterator()
 {
    {
-      const std::string caseLabel{"SboVectorIterator offset plus iterator for positive offset."};
+      const std::string caseLabel{
+         "SboVectorIterator offset plus iterator for positive offset."};
 
       using SV = SboVector<int, 10>;
       SV sv{{1}, {2}, {3}};
@@ -2633,7 +2636,8 @@ void TestSboVectorIteratorAdditionOfOffsetAndIterator()
       VERIFY(*res == 3, caseLabel);
    }
    {
-      const std::string caseLabel{"SboVectorIterator offset plus iterator for negative offset."};
+      const std::string caseLabel{
+         "SboVectorIterator offset plus iterator for negative offset."};
 
       using SV = SboVector<int, 10>;
       SV sv{{1}, {2}, {3}};
@@ -2649,7 +2653,8 @@ void TestSboVectorIteratorAdditionOfOffsetAndIterator()
 void TestSboVectorIteratorSubtractionOfIteratorAndOffset()
 {
    {
-      const std::string caseLabel{"SboVectorIterator iterator minus offset for positive offset."};
+      const std::string caseLabel{
+         "SboVectorIterator iterator minus offset for positive offset."};
 
       using SV = SboVector<int, 10>;
       SV sv{{1}, {2}, {3}};
@@ -2660,7 +2665,8 @@ void TestSboVectorIteratorSubtractionOfIteratorAndOffset()
       VERIFY(*res == 1, caseLabel);
    }
    {
-      const std::string caseLabel{"SboVectorIterator iterator minus offset for negative offset."};
+      const std::string caseLabel{
+         "SboVectorIterator iterator minus offset for negative offset."};
 
       using SV = SboVector<int, 10>;
       SV sv{{1}, {2}, {3}};
@@ -2686,6 +2692,158 @@ void TestSboVectorIteratorSubtractionOfIterators()
       const std::size_t diff = a - b;
 
       VERIFY(diff == 2, caseLabel);
+   }
+}
+
+
+void TestSboVectorIteratorLessThan()
+{
+   {
+      const std::string caseLabel{"SboVectorIterator operator< for less-than iterators."};
+
+      using SV = SboVector<int, 10>;
+      SV sv{{1}, {2}, {20}};
+
+      SboVectorIterator<SV> a{&sv, 0};
+      SboVectorIterator<SV> b{&sv, 2};
+
+      VERIFY(a < b, caseLabel);
+   }
+   {
+      const std::string caseLabel{"SboVectorIterator operator< for greater-than iterators."};
+
+      using SV = SboVector<int, 10>;
+      SV sv{{1}, {2}, {20}};
+
+      SboVectorIterator<SV> a{&sv, 2};
+      SboVectorIterator<SV> b{&sv, 0};
+
+      VERIFY(!(a < b), caseLabel);
+   }
+   {
+      const std::string caseLabel{"SboVectorIterator operator< for equal iterators."};
+
+      using SV = SboVector<int, 10>;
+      SV sv{{1}, {2}, {20}};
+
+      SboVectorIterator<SV> a{&sv, 2};
+      SboVectorIterator<SV> b{&sv, 2};
+
+      VERIFY(!(a < b), caseLabel);
+   }
+}
+
+
+void TestSboVectorIteratorLessOrEqualThan()
+{
+   {
+      const std::string caseLabel{"SboVectorIterator operator<= for less-than iterators."};
+
+      using SV = SboVector<int, 10>;
+      SV sv{{1}, {2}, {20}};
+
+      SboVectorIterator<SV> a{&sv, 0};
+      SboVectorIterator<SV> b{&sv, 2};
+
+      VERIFY(a <= b, caseLabel);
+   }
+   {
+      const std::string caseLabel{"SboVectorIterator operator<= for greater-than iterators."};
+
+      using SV = SboVector<int, 10>;
+      SV sv{{1}, {2}, {20}};
+
+      SboVectorIterator<SV> a{&sv, 2};
+      SboVectorIterator<SV> b{&sv, 0};
+
+      VERIFY(!(a <= b), caseLabel);
+   }
+   {
+      const std::string caseLabel{"SboVectorIterator operator<= for equal iterators."};
+
+      using SV = SboVector<int, 10>;
+      SV sv{{1}, {2}, {20}};
+
+      SboVectorIterator<SV> a{&sv, 2};
+      SboVectorIterator<SV> b{&sv, 2};
+
+      VERIFY(a <= b, caseLabel);
+   }
+}
+
+
+void TestSboVectorIteratorGreaterThan()
+{
+   {
+      const std::string caseLabel{"SboVectorIterator operator> for less-than iterators."};
+
+      using SV = SboVector<int, 10>;
+      SV sv{{1}, {2}, {20}};
+
+      SboVectorIterator<SV> a{&sv, 0};
+      SboVectorIterator<SV> b{&sv, 2};
+
+      VERIFY(!(a > b), caseLabel);
+   }
+   {
+      const std::string caseLabel{"SboVectorIterator operator> for greater-than iterators."};
+
+      using SV = SboVector<int, 10>;
+      SV sv{{1}, {2}, {20}};
+
+      SboVectorIterator<SV> a{&sv, 2};
+      SboVectorIterator<SV> b{&sv, 0};
+
+      VERIFY(a > b, caseLabel);
+   }
+   {
+      const std::string caseLabel{"SboVectorIterator operator> for equal iterators."};
+
+      using SV = SboVector<int, 10>;
+      SV sv{{1}, {2}, {20}};
+
+      SboVectorIterator<SV> a{&sv, 2};
+      SboVectorIterator<SV> b{&sv, 2};
+
+      VERIFY(!(a > b), caseLabel);
+   }
+}
+
+
+void TestSboVectorIteratorGreaterOrEqualThan()
+{
+   {
+      const std::string caseLabel{"SboVectorIterator operator>= for less-than iterators."};
+
+      using SV = SboVector<int, 10>;
+      SV sv{{1}, {2}, {20}};
+
+      SboVectorIterator<SV> a{&sv, 0};
+      SboVectorIterator<SV> b{&sv, 2};
+
+      VERIFY(!(a >= b), caseLabel);
+   }
+   {
+      const std::string caseLabel{"SboVectorIterator operator>= for greater-than iterators."};
+
+      using SV = SboVector<int, 10>;
+      SV sv{{1}, {2}, {20}};
+
+      SboVectorIterator<SV> a{&sv, 2};
+      SboVectorIterator<SV> b{&sv, 0};
+
+      VERIFY(a >= b, caseLabel);
+   }
+   {
+      const std::string caseLabel{"SboVectorIterator operator>= for equal iterators."};
+
+      using SV = SboVector<int, 10>;
+      SV sv{{1}, {2}, {20}};
+
+      SboVectorIterator<SV> a{&sv, 2};
+      SboVectorIterator<SV> b{&sv, 2};
+
+      VERIFY(a >= b, caseLabel);
    }
 }
 
@@ -2747,4 +2905,8 @@ void TestSboVector()
    TestSboVectorIteratorAdditionOfOffsetAndIterator();
    TestSboVectorIteratorSubtractionOfIteratorAndOffset();
    TestSboVectorIteratorSubtractionOfIterators();
+   TestSboVectorIteratorLessThan();
+   TestSboVectorIteratorLessOrEqualThan();
+   TestSboVectorIteratorGreaterThan();
+   TestSboVectorIteratorGreaterOrEqualThan();
 }
