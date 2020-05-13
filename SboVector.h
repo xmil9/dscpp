@@ -866,6 +866,8 @@ template <typename SV> class SboVectorIterator
    value_type& operator*();
    const value_type* operator->() const;
    value_type* operator->();
+   const value_type& operator[](difference_type offset) const;
+   value_type& operator[](difference_type offset);
    SboVectorIterator& operator++();
    SboVectorIterator operator++(int);
    SboVectorIterator& operator--();
@@ -902,13 +904,15 @@ template <typename SV> class SboVectorIterator
       return (it + offset);
    }
 
-   friend SboVectorIterator<SV> operator-(const SboVectorIterator<SV>& it, difference_type offset)
+   friend SboVectorIterator<SV> operator-(const SboVectorIterator<SV>& it,
+                                          difference_type offset)
    {
       auto res = it;
       return (res -= offset);
    }
 
-   friend difference_type operator-(const SboVectorIterator<SV>& a, const SboVectorIterator<SV>& b)
+   friend difference_type operator-(const SboVectorIterator<SV>& a,
+                                    const SboVectorIterator<SV>& b)
    {
       return a.m_idx - b.m_idx;
    }
@@ -960,6 +964,22 @@ const typename SboVectorIterator<SV>::value_type*
    SboVectorIterator<SV>::operator->() const
 {
    return &(*m_sv)[m_idx];
+}
+
+
+template <typename SV>
+const typename SboVectorIterator<SV>::value_type&
+   SboVectorIterator<SV>::operator[](difference_type offset) const
+{
+   return (*m_sv)[m_idx + offset];
+}
+
+
+template <typename SV>
+typename SboVectorIterator<SV>::value_type&
+   SboVectorIterator<SV>::operator[](difference_type offset)
+{
+   return (*m_sv)[m_idx + offset];
 }
 
 
