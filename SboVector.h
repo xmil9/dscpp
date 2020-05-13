@@ -902,6 +902,17 @@ template <typename SV> class SboVectorIterator
       return (it + offset);
    }
 
+   friend SboVectorIterator<SV> operator-(const SboVectorIterator<SV>& it, difference_type offset)
+   {
+      auto res = it;
+      return (res -= offset);
+   }
+
+   friend difference_type operator-(const SboVectorIterator<SV>& a, const SboVectorIterator<SV>& b)
+   {
+      return a.m_idx - b.m_idx;
+   }
+
  private:
    SV* m_sv = nullptr;
    std::size_t m_idx = 0;

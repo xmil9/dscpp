@@ -2554,7 +2554,7 @@ void TestSboVectorIteratorSubtractionAssignment()
 void TestSboVectorIteratorAdditionOfIteratorAndOffset()
 {
    {
-      const std::string caseLabel{"SboVectorIterator iterator + offset for positive offset."};
+      const std::string caseLabel{"SboVectorIterator iterator plus offset for positive offset."};
 
       using SV = SboVector<int, 10>;
       SV sv{{1}, {2}, {3}};
@@ -2565,7 +2565,7 @@ void TestSboVectorIteratorAdditionOfIteratorAndOffset()
       VERIFY(*res == 3, caseLabel);
    }
    {
-      const std::string caseLabel{"SboVectorIterator iterator + offset for negative offset."};
+      const std::string caseLabel{"SboVectorIterator iterator plus offset for negative offset."};
 
       using SV = SboVector<int, 10>;
       SV sv{{1}, {2}, {3}};
@@ -2581,7 +2581,7 @@ void TestSboVectorIteratorAdditionOfIteratorAndOffset()
 void TestSboVectorIteratorAdditionOfOffsetAndIterator()
 {
    {
-      const std::string caseLabel{"SboVectorIterator offset + iterator for positive offset."};
+      const std::string caseLabel{"SboVectorIterator offset plus iterator for positive offset."};
 
       using SV = SboVector<int, 10>;
       SV sv{{1}, {2}, {3}};
@@ -2592,7 +2592,7 @@ void TestSboVectorIteratorAdditionOfOffsetAndIterator()
       VERIFY(*res == 3, caseLabel);
    }
    {
-      const std::string caseLabel{"SboVectorIterator offset + iterator for negative offset."};
+      const std::string caseLabel{"SboVectorIterator offset plus iterator for negative offset."};
 
       using SV = SboVector<int, 10>;
       SV sv{{1}, {2}, {3}};
@@ -2601,6 +2601,50 @@ void TestSboVectorIteratorAdditionOfOffsetAndIterator()
       SboVectorIterator<SV> res = -1 + it;
 
       VERIFY(*res == 2, caseLabel);
+   }
+}
+
+
+void TestSboVectorIteratorSubtractionOfIteratorAndOffset()
+{
+   {
+      const std::string caseLabel{"SboVectorIterator iterator minus offset for positive offset."};
+
+      using SV = SboVector<int, 10>;
+      SV sv{{1}, {2}, {3}};
+
+      SboVectorIterator<SV> it{&sv, 2};
+      SboVectorIterator<SV> res = it - 2;
+
+      VERIFY(*res == 1, caseLabel);
+   }
+   {
+      const std::string caseLabel{"SboVectorIterator iterator minus offset for negative offset."};
+
+      using SV = SboVector<int, 10>;
+      SV sv{{1}, {2}, {3}};
+
+      SboVectorIterator<SV> it{&sv, 0};
+      SboVectorIterator<SV> res = it - -1;
+
+      VERIFY(*res == 2, caseLabel);
+   }
+}
+
+
+void TestSboVectorIteratorSubtractionOfIterators()
+{
+   {
+      const std::string caseLabel{"SboVectorIterator iterator minus iterator."};
+
+      using SV = SboVector<int, 10>;
+      SV sv{{1}, {2}, {20}};
+
+      SboVectorIterator<SV> a{&sv, 2};
+      SboVectorIterator<SV> b{&sv, 0};
+      const std::size_t diff = a - b;
+
+      VERIFY(diff == 2, caseLabel);
    }
 }
 
@@ -2658,4 +2702,6 @@ void TestSboVector()
    TestSboVectorIteratorSubtractionAssignment();
    TestSboVectorIteratorAdditionOfIteratorAndOffset();
    TestSboVectorIteratorAdditionOfOffsetAndIterator();
+   TestSboVectorIteratorSubtractionOfIteratorAndOffset();
+   TestSboVectorIteratorSubtractionOfIterators();
 }
