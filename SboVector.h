@@ -889,6 +889,19 @@ template <typename SV> class SboVectorIterator
       return !(a == b);
    }
 
+   friend SboVectorIterator<SV> operator+(const SboVectorIterator<SV>& it,
+                                          difference_type offset)
+   {
+      auto res = it;
+      return (res += offset);
+   }
+
+   friend SboVectorIterator<SV> operator+(difference_type offset,
+                                          const SboVectorIterator<SV>& it)
+   {
+      return (it + offset);
+   }
+
  private:
    SV* m_sv = nullptr;
    std::size_t m_idx = 0;

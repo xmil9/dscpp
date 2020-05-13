@@ -2550,6 +2550,60 @@ void TestSboVectorIteratorSubtractionAssignment()
    }
 }
 
+
+void TestSboVectorIteratorAdditionOfIteratorAndOffset()
+{
+   {
+      const std::string caseLabel{"SboVectorIterator iterator + offset for positive offset."};
+
+      using SV = SboVector<int, 10>;
+      SV sv{{1}, {2}, {3}};
+
+      SboVectorIterator<SV> it{&sv, 0};
+      SboVectorIterator<SV> res = it + 2;
+
+      VERIFY(*res == 3, caseLabel);
+   }
+   {
+      const std::string caseLabel{"SboVectorIterator iterator + offset for negative offset."};
+
+      using SV = SboVector<int, 10>;
+      SV sv{{1}, {2}, {3}};
+
+      SboVectorIterator<SV> it{&sv, 2};
+      SboVectorIterator<SV> res = it + -1;
+
+      VERIFY(*res == 2, caseLabel);
+   }
+}
+
+
+void TestSboVectorIteratorAdditionOfOffsetAndIterator()
+{
+   {
+      const std::string caseLabel{"SboVectorIterator offset + iterator for positive offset."};
+
+      using SV = SboVector<int, 10>;
+      SV sv{{1}, {2}, {3}};
+
+      SboVectorIterator<SV> it{&sv, 0};
+      SboVectorIterator<SV> res = 2 + it;
+
+      VERIFY(*res == 3, caseLabel);
+   }
+   {
+      const std::string caseLabel{"SboVectorIterator offset + iterator for negative offset."};
+
+      using SV = SboVector<int, 10>;
+      SV sv{{1}, {2}, {3}};
+
+      SboVectorIterator<SV> it{&sv, 2};
+      SboVectorIterator<SV> res = -1 + it;
+
+      VERIFY(*res == 2, caseLabel);
+   }
+}
+
 } // namespace
 
 
@@ -2602,4 +2656,6 @@ void TestSboVector()
    TestSboVectorIteratorInequality();
    TestSboVectorIteratorAdditionAssignment();
    TestSboVectorIteratorSubtractionAssignment();
+   TestSboVectorIteratorAdditionOfIteratorAndOffset();
+   TestSboVectorIteratorAdditionOfOffsetAndIterator();
 }
