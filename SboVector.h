@@ -988,6 +988,13 @@ const typename SboVectorIterator<SV>::value_type*
 
 
 template <typename SV>
+typename SboVectorIterator<SV>::value_type* SboVectorIterator<SV>::operator->()
+{
+   return &(*m_sv)[m_idx];
+}
+
+
+template <typename SV>
 const typename SboVectorIterator<SV>::value_type&
    SboVectorIterator<SV>::operator[](difference_type offset) const
 {
@@ -1000,13 +1007,6 @@ typename SboVectorIterator<SV>::value_type&
    SboVectorIterator<SV>::operator[](difference_type offset)
 {
    return (*m_sv)[m_idx + offset];
-}
-
-
-template <typename SV>
-typename SboVectorIterator<SV>::value_type* SboVectorIterator<SV>::operator->()
-{
-   return &(*m_sv)[m_idx];
 }
 
 
@@ -1050,6 +1050,211 @@ SboVectorIterator<SV>& SboVectorIterator<SV>::operator+=(difference_type offset)
 
 template <typename SV>
 SboVectorIterator<SV>& SboVectorIterator<SV>::operator-=(difference_type offset)
+{
+   m_idx -= offset;
+   return *this;
+}
+
+
+///////////////////
+
+// Const iterator for SboVector.
+template <typename SV> class SboVectorConstIterator
+{
+ public:
+   using iterator_category = std::random_access_iterator_tag;
+   using value_type = typename SV::value_type;
+   using difference_type = typename SV::difference_type;
+   using pointer = typename SV::pointer;
+   using reference = typename SV::reference;
+
+ public:
+   SboVectorConstIterator() = default;
+   SboVectorConstIterator(SV* sv, std::size_t idx);
+   ~SboVectorConstIterator() = default;
+   SboVectorConstIterator(const SboVectorConstIterator&) = default;
+   SboVectorConstIterator(SboVectorConstIterator&& other);
+
+   SboVectorConstIterator& operator=(const SboVectorConstIterator&) = default;
+   SboVectorConstIterator& operator=(SboVectorConstIterator&& other);
+
+   const value_type& operator*() const;
+   const value_type* operator->() const;
+   const value_type& operator[](difference_type offset) const;
+   SboVectorConstIterator& operator++();
+   SboVectorConstIterator operator++(int);
+   SboVectorConstIterator& operator--();
+   SboVectorConstIterator operator--(int);
+   SboVectorConstIterator& operator+=(difference_type offset);
+   SboVectorConstIterator& operator-=(difference_type offset);
+
+   friend void swap(SboVectorConstIterator<SV>& a, SboVectorConstIterator<SV>& b)
+   {
+      std::swap(a.m_sv, b.m_sv);
+      std::swap(a.m_idx, b.m_idx);
+   }
+
+   friend bool operator==(const SboVectorConstIterator<SV>& a,
+                          const SboVectorConstIterator<SV>& b)
+   {
+      return a.m_sv == b.m_sv && a.m_idx == b.m_idx;
+   }
+
+   friend bool operator!=(const SboVectorConstIterator<SV>& a,
+                          const SboVectorConstIterator<SV>& b)
+   {
+      return !(a == b);
+   }
+
+   friend SboVectorConstIterator<SV> operator+(const SboVectorConstIterator<SV>& it,
+                                               difference_type offset)
+   {
+      auto res = it;
+      return (res += offset);
+   }
+
+   friend SboVectorConstIterator<SV> operator+(difference_type offset,
+                                               const SboVectorConstIterator<SV>& it)
+   {
+      return (it + offset);
+   }
+
+   friend SboVectorConstIterator<SV> operator-(const SboVectorConstIterator<SV>& it,
+                                               difference_type offset)
+   {
+      auto res = it;
+      return (res -= offset);
+   }
+
+   friend difference_type operator-(const SboVectorConstIterator<SV>& a,
+                                    const SboVectorConstIterator<SV>& b)
+   {
+      return a.m_idx - b.m_idx;
+   }
+
+   friend bool operator<(const SboVectorConstIterator<SV>& a,
+                         const SboVectorConstIterator<SV>& b)
+   {
+      return a.m_idx < b.m_idx;
+   }
+
+   friend bool operator>(const SboVectorConstIterator<SV>& a,
+                         const SboVectorConstIterator<SV>& b)
+   {
+      return a.m_idx > b.m_idx;
+   }
+
+   friend bool operator<=(const SboVectorConstIterator<SV>& a,
+                          const SboVectorConstIterator<SV>& b)
+   {
+      return a.m_idx <= b.m_idx;
+   }
+
+   friend bool operator>=(const SboVectorConstIterator<SV>& a,
+                          const SboVectorConstIterator<SV>& b)
+   {
+      return a.m_idx >= b.m_idx;
+   }
+
+ private:
+   SV* m_sv = nullptr;
+   std::size_t m_idx = 0;
+};
+
+
+template <typename SV>
+SboVectorConstIterator<SV>::SboVectorConstIterator(SV* sv, std::size_t idx)
+: m_sv{sv}, m_idx{idx}
+{
+}
+
+template <typename SV>
+SboVectorConstIterator<SV>::SboVectorConstIterator(SboVectorConstIterator&& other)
+{
+   swap(*this, other);
+}
+
+
+template <typename SV>
+SboVectorConstIterator<SV>&
+SboVectorConstIterator<SV>::operator=(SboVectorConstIterator&& other)
+{
+   m_sv = other.m_sv;
+   m_idx = other.m_idx;
+   other.m_sv = nullptr;
+   other.m_idx = 0;
+   return *this;
+}
+
+
+template <typename SV>
+const typename SboVectorConstIterator<SV>::value_type&
+   SboVectorConstIterator<SV>::operator*() const
+{
+   return (*m_sv)[m_idx];
+}
+
+
+template <typename SV>
+const typename SboVectorConstIterator<SV>::value_type*
+   SboVectorConstIterator<SV>::operator->() const
+{
+   return &(*m_sv)[m_idx];
+}
+
+
+template <typename SV>
+const typename SboVectorConstIterator<SV>::value_type&
+   SboVectorConstIterator<SV>::operator[](difference_type offset) const
+{
+   return (*m_sv)[m_idx + offset];
+}
+
+
+template <typename SV>
+SboVectorConstIterator<SV>& SboVectorConstIterator<SV>::operator++()
+{
+   ++m_idx;
+   return *this;
+}
+
+
+template <typename SV>
+SboVectorConstIterator<SV> SboVectorConstIterator<SV>::operator++(int)
+{
+   auto before = *this;
+   ++(*this);
+   return before;
+}
+
+
+template <typename SV>
+SboVectorConstIterator<SV>& SboVectorConstIterator<SV>::operator--()
+{
+   --m_idx;
+   return *this;
+}
+
+
+template <typename SV>
+SboVectorConstIterator<SV> SboVectorConstIterator<SV>::operator--(int)
+{
+   auto before = *this;
+   --(*this);
+   return before;
+}
+
+
+template <typename SV>
+SboVectorConstIterator<SV>& SboVectorConstIterator<SV>::operator+=(difference_type offset)
+{
+   m_idx += offset;
+   return *this;
+}
+
+
+template <typename SV>
+SboVectorConstIterator<SV>& SboVectorConstIterator<SV>::operator-=(difference_type offset)
 {
    m_idx -= offset;
    return *this;
