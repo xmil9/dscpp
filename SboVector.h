@@ -1065,8 +1065,8 @@ template <typename SV> class SboVectorConstIterator
    using iterator_category = std::random_access_iterator_tag;
    using value_type = typename SV::value_type;
    using difference_type = typename SV::difference_type;
-   using pointer = typename SV::pointer;
-   using reference = typename SV::reference;
+   using pointer = typename SV::const_pointer;
+   using reference = typename SV::const_reference;
 
  public:
    SboVectorConstIterator() = default;
