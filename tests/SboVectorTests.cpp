@@ -3472,6 +3472,195 @@ void TestSboVectorConstIteratorGreaterOrEqualThan()
    }
 }
 
+
+void TestSboVectorBegin()
+{
+   {
+      const std::string caseLabel{"SboVector::begin for populated vector."};
+
+      using SV = SboVector<int, 10>;
+      SV sv{{1}, {2}, {20}};
+
+      // Preconditions.
+      VERIFY(!sv.empty(), caseLabel);
+
+      SV::iterator first = sv.begin();
+
+      VERIFY(*first == 1, caseLabel);
+   }
+   {
+      const std::string caseLabel{"SboVector::begin for empty vector."};
+
+      using SV = SboVector<int, 10>;
+      SV sv;
+
+      // Preconditions.
+      VERIFY(sv.empty(), caseLabel);
+
+      SV::iterator first = sv.begin();
+
+      VERIFY(first == sv.end(), caseLabel);
+   }
+}
+
+
+void TestSboVectorEnd()
+{
+   {
+      const std::string caseLabel{"SboVector::end for populated vector."};
+
+      using SV = SboVector<int, 10>;
+      SV sv{{1}, {2}};
+
+      // Preconditions.
+      VERIFY(!sv.empty(), caseLabel);
+
+      SV::iterator last = sv.end();
+
+      VERIFY(last != sv.begin(), caseLabel);
+      VERIFY(last == sv.begin() + sv.size(), caseLabel);
+   }
+   {
+      const std::string caseLabel{"SboVector::end for empty vector."};
+
+      using SV = SboVector<int, 10>;
+      SV sv;
+
+      // Preconditions.
+      VERIFY(sv.empty(), caseLabel);
+
+      SV::iterator last = sv.end();
+
+      VERIFY(last == sv.begin(), caseLabel);
+   }
+}
+
+
+void TestSboVectorBeginConst()
+{
+   {
+      const std::string caseLabel{"SboVector::begin const for populated vector."};
+
+      using SV = SboVector<int, 10>;
+      const SV sv{{1}, {2}, {20}};
+
+      // Preconditions.
+      VERIFY(!sv.empty(), caseLabel);
+
+      SV::const_iterator first = sv.begin();
+
+      VERIFY(*first == 1, caseLabel);
+   }
+   {
+      const std::string caseLabel{"SboVector::begin const for empty vector."};
+
+      using SV = SboVector<int, 10>;
+      const SV sv;
+
+      // Preconditions.
+      VERIFY(sv.empty(), caseLabel);
+
+      SV::const_iterator first = sv.begin();
+
+      VERIFY(first == sv.end(), caseLabel);
+   }
+}
+
+
+void TestSboVectorEndConst()
+{
+   {
+      const std::string caseLabel{"SboVector::end const for populated vector."};
+
+      using SV = SboVector<int, 10>;
+      const SV sv{{1}, {2}};
+
+      // Preconditions.
+      VERIFY(!sv.empty(), caseLabel);
+
+      SV::const_iterator last = sv.end();
+
+      VERIFY(last != sv.begin(), caseLabel);
+      VERIFY(last == sv.begin() + sv.size(), caseLabel);
+   }
+   {
+      const std::string caseLabel{"SboVector::end const for empty vector."};
+
+      using SV = SboVector<int, 10>;
+      const SV sv;
+
+      // Preconditions.
+      VERIFY(sv.empty(), caseLabel);
+
+      SV::const_iterator last = sv.end();
+
+      VERIFY(last == sv.begin(), caseLabel);
+   }
+}
+
+
+void TestSboVectorCBegin()
+{
+   {
+      const std::string caseLabel{"SboVector::cbegin const for populated vector."};
+
+      using SV = SboVector<int, 10>;
+      SV sv{{1}, {2}, {20}};
+
+      // Preconditions.
+      VERIFY(!sv.empty(), caseLabel);
+
+      SV::const_iterator first = sv.cbegin();
+
+      VERIFY(*first == 1, caseLabel);
+   }
+   {
+      const std::string caseLabel{"SboVector::cbegin const for empty vector."};
+
+      using SV = SboVector<int, 10>;
+      SV sv;
+
+      // Preconditions.
+      VERIFY(sv.empty(), caseLabel);
+
+      SV::const_iterator first = sv.cbegin();
+
+      VERIFY(first == sv.cend(), caseLabel);
+   }
+}
+
+
+void TestSboVectorCEnd()
+{
+   {
+      const std::string caseLabel{"SboVector::cend const for populated vector."};
+
+      using SV = SboVector<int, 10>;
+      const SV sv{{1}, {2}};
+
+      // Preconditions.
+      VERIFY(!sv.empty(), caseLabel);
+
+      SV::const_iterator last = sv.cend();
+
+      VERIFY(last != sv.cbegin(), caseLabel);
+      VERIFY(last == sv.cbegin() + sv.size(), caseLabel);
+   }
+   {
+      const std::string caseLabel{"SboVector::cend const for empty vector."};
+
+      using SV = SboVector<int, 10>;
+      const SV sv;
+
+      // Preconditions.
+      VERIFY(sv.empty(), caseLabel);
+
+      SV::const_iterator last = sv.cend();
+
+      VERIFY(last == sv.cbegin(), caseLabel);
+   }
+}
+
 } // namespace
 
 
@@ -3504,6 +3693,12 @@ void TestSboVector()
    TestSboVectorEmpty();
    TestSboVectorSize();
    TestSboVectorMaxSize();
+   TestSboVectorBegin();
+   TestSboVectorEnd();
+   TestSboVectorBeginConst();
+   TestSboVectorEndConst();
+   TestSboVectorCBegin();
+   TestSboVectorCEnd();
 
    TestSboVectorIteratorDefaultCtor();
    TestSboVectorIteratorVectorAndIndexCtor();

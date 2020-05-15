@@ -60,6 +60,9 @@ template <typename T, std::size_t N> class SboVector
    // Requirements for N.
    static_assert(N > 0, "Zero-sized buffer is not supported. Use std::vector.");
 
+   template <typename SV> friend class SboVectorConstIterator;
+   template <typename SV> friend class SboVectorIterator;
+
  public:
    using value_type = T;
    using reference = T&;
@@ -68,6 +71,10 @@ template <typename T, std::size_t N> class SboVector
    using const_pointer = const T*;
    using size_type = std::size_t;
    using difference_type = std::ptrdiff_t;
+   using iterator = SboVectorIterator<SboVector<T, N>>;
+   using const_iterator = SboVectorConstIterator<SboVector<T, N>>;
+   using reverse_iterator = std::reverse_iterator<iterator>;
+   using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
    static constexpr std::size_t BufferCapacity = N;
 
@@ -97,6 +104,13 @@ template <typename T, std::size_t N> class SboVector
    const T& back() const;
    T* data() noexcept;
    const T* data() const noexcept;
+
+   iterator begin() noexcept;
+   iterator end() noexcept;
+   const_iterator begin() const noexcept;
+   const_iterator end() const noexcept;
+   const_iterator cbegin() const noexcept;
+   const_iterator cend() const noexcept;
 
    bool empty() const noexcept;
    std::size_t size() const noexcept;
@@ -574,6 +588,48 @@ template <typename T, std::size_t N> const T* SboVector<T, N>::data() const noex
 }
 
 
+template <typename T, std::size_t N>
+typename SboVector<T, N>::iterator SboVector<T, N>::begin() noexcept
+{
+   return iterator(this, 0);
+}
+
+
+template <typename T, std::size_t N>
+typename SboVector<T, N>::iterator SboVector<T, N>::end() noexcept
+{
+   return iterator(this, size());
+}
+
+
+template <typename T, std::size_t N>
+typename SboVector<T, N>::const_iterator SboVector<T, N>::begin() const noexcept
+{
+   return cbegin();
+}
+
+
+template <typename T, std::size_t N>
+typename SboVector<T, N>::const_iterator SboVector<T, N>::end() const noexcept
+{
+   return cend();
+}
+
+
+template <typename T, std::size_t N>
+typename SboVector<T, N>::const_iterator SboVector<T, N>::cbegin() const noexcept
+{
+   return const_iterator(this, 0);
+}
+
+
+template <typename T, std::size_t N>
+typename SboVector<T, N>::const_iterator SboVector<T, N>::cend() const noexcept
+{
+   return const_iterator(this, size());
+}
+
+
 template <typename T, std::size_t N> bool SboVector<T, N>::empty() const noexcept
 {
    return (m_size == 0);
@@ -854,7 +910,7 @@ template <typename SV> class SboVectorIterator
 
  public:
    SboVectorIterator() = default;
-   SboVectorIterator(SV* sv, std::size_t idx);
+   SboVectorIterator(SV* sv, std::size_t idx) noexcept;
    ~SboVectorIterator() = default;
    SboVectorIterator(const SboVectorIterator&) = default;
    SboVectorIterator(SboVectorIterator&& other);
@@ -944,7 +1000,8 @@ template <typename SV> class SboVectorIterator
 
 
 template <typename SV>
-SboVectorIterator<SV>::SboVectorIterator(SV* sv, std::size_t idx) : m_sv{sv}, m_idx{idx}
+SboVectorIterator<SV>::SboVectorIterator(SV* sv, std::size_t idx) noexcept
+: m_sv{sv}, m_idx{idx}
 {
 }
 
@@ -1070,7 +1127,7 @@ template <typename SV> class SboVectorConstIterator
 
  public:
    SboVectorConstIterator() = default;
-   SboVectorConstIterator(SV* sv, std::size_t idx);
+   SboVectorConstIterator(const SV* sv, std::size_t idx) noexcept;
    ~SboVectorConstIterator() = default;
    SboVectorConstIterator(const SboVectorConstIterator&) = default;
    SboVectorConstIterator(SboVectorConstIterator&& other);
@@ -1157,13 +1214,13 @@ template <typename SV> class SboVectorConstIterator
    }
 
  private:
-   SV* m_sv = nullptr;
+   const SV* m_sv = nullptr;
    std::size_t m_idx = 0;
 };
 
 
 template <typename SV>
-SboVectorConstIterator<SV>::SboVectorConstIterator(SV* sv, std::size_t idx)
+SboVectorConstIterator<SV>::SboVectorConstIterator(const SV* sv, std::size_t idx) noexcept
 : m_sv{sv}, m_idx{idx}
 {
 }
