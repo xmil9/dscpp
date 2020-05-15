@@ -111,6 +111,12 @@ template <typename T, std::size_t N> class SboVector
    const_iterator end() const noexcept;
    const_iterator cbegin() const noexcept;
    const_iterator cend() const noexcept;
+   reverse_iterator rbegin() noexcept;
+   reverse_iterator rend() noexcept;
+   const_reverse_iterator rbegin() const noexcept;
+   const_reverse_iterator rend() const noexcept;
+   const_reverse_iterator crbegin() const noexcept;
+   const_reverse_iterator crend() const noexcept;
 
    bool empty() const noexcept;
    std::size_t size() const noexcept;
@@ -627,6 +633,48 @@ template <typename T, std::size_t N>
 typename SboVector<T, N>::const_iterator SboVector<T, N>::cend() const noexcept
 {
    return const_iterator(this, size());
+}
+
+
+template <typename T, std::size_t N>
+typename SboVector<T, N>::reverse_iterator SboVector<T, N>::rbegin() noexcept
+{
+   return reverse_iterator(end());
+}
+
+
+template <typename T, std::size_t N>
+typename SboVector<T, N>::reverse_iterator SboVector<T, N>::rend() noexcept
+{
+   return reverse_iterator(begin());
+}
+
+
+template <typename T, std::size_t N>
+typename SboVector<T, N>::const_reverse_iterator SboVector<T, N>::rbegin() const noexcept
+{
+   return crbegin();
+}
+
+
+template <typename T, std::size_t N>
+typename SboVector<T, N>::const_reverse_iterator SboVector<T, N>::rend() const noexcept
+{
+   return crend();
+}
+
+
+template <typename T, std::size_t N>
+typename SboVector<T, N>::const_reverse_iterator SboVector<T, N>::crbegin() const noexcept
+{
+   return const_reverse_iterator(cend());
+}
+
+
+template <typename T, std::size_t N>
+typename SboVector<T, N>::const_reverse_iterator SboVector<T, N>::crend() const noexcept
+{
+   return const_reverse_iterator(cbegin());
 }
 
 

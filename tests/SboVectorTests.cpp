@@ -3661,6 +3661,195 @@ void TestSboVectorCEnd()
    }
 }
 
+
+void TestSboVectorRBegin()
+{
+   {
+      const std::string caseLabel{"SboVector::rbegin for populated vector."};
+
+      using SV = SboVector<int, 10>;
+      SV sv{{1}, {2}, {20}};
+
+      // Preconditions.
+      VERIFY(!sv.empty(), caseLabel);
+
+      SV::reverse_iterator rfirst = sv.rbegin();
+
+      VERIFY(*rfirst == 20, caseLabel);
+   }
+   {
+      const std::string caseLabel{"SboVector::rbegin for empty vector."};
+
+      using SV = SboVector<int, 10>;
+      SV sv;
+
+      // Preconditions.
+      VERIFY(sv.empty(), caseLabel);
+
+      SV::reverse_iterator rfirst = sv.rbegin();
+
+      VERIFY(rfirst == sv.rend(), caseLabel);
+   }
+}
+
+
+void TestSboVectorREnd()
+{
+   {
+      const std::string caseLabel{"SboVector::rend for populated vector."};
+
+      using SV = SboVector<int, 10>;
+      SV sv{{1}, {2}};
+
+      // Preconditions.
+      VERIFY(!sv.empty(), caseLabel);
+
+      SV::reverse_iterator rlast = sv.rend();
+
+      VERIFY(rlast != sv.rbegin(), caseLabel);
+      VERIFY(rlast == sv.rbegin() + sv.size(), caseLabel);
+   }
+   {
+      const std::string caseLabel{"SboVector::rend for empty vector."};
+
+      using SV = SboVector<int, 10>;
+      SV sv;
+
+      // Preconditions.
+      VERIFY(sv.empty(), caseLabel);
+
+      SV::reverse_iterator rlast = sv.rend();
+
+      VERIFY(rlast == sv.rbegin(), caseLabel);
+   }
+}
+
+
+void TestSboVectorRBeginConst()
+{
+   {
+      const std::string caseLabel{"SboVector::rbegin const for populated vector."};
+
+      using SV = SboVector<int, 10>;
+      const SV sv{{1}, {2}, {20}};
+
+      // Preconditions.
+      VERIFY(!sv.empty(), caseLabel);
+
+      SV::const_reverse_iterator rfirst = sv.rbegin();
+
+      VERIFY(*rfirst == 20, caseLabel);
+   }
+   {
+      const std::string caseLabel{"SboVector::rbegin const for empty vector."};
+
+      using SV = SboVector<int, 10>;
+      const SV sv;
+
+      // Preconditions.
+      VERIFY(sv.empty(), caseLabel);
+
+      SV::const_reverse_iterator rfirst = sv.rbegin();
+
+      VERIFY(rfirst == sv.rend(), caseLabel);
+   }
+}
+
+
+void TestSboVectorREndConst()
+{
+   {
+      const std::string caseLabel{"SboVector::rend const for populated vector."};
+
+      using SV = SboVector<int, 10>;
+      const SV sv{{1}, {2}};
+
+      // Preconditions.
+      VERIFY(!sv.empty(), caseLabel);
+
+      SV::const_reverse_iterator rlast = sv.rend();
+
+      VERIFY(rlast != sv.rbegin(), caseLabel);
+      VERIFY(rlast == sv.rbegin() + sv.size(), caseLabel);
+   }
+   {
+      const std::string caseLabel{"SboVector::rend const for empty vector."};
+
+      using SV = SboVector<int, 10>;
+      const SV sv;
+
+      // Preconditions.
+      VERIFY(sv.empty(), caseLabel);
+
+      SV::const_reverse_iterator rlast = sv.rend();
+
+      VERIFY(rlast == sv.rbegin(), caseLabel);
+   }
+}
+
+
+void TestSboVectorCRBegin()
+{
+   {
+      const std::string caseLabel{"SboVector::crbegin const for populated vector."};
+
+      using SV = SboVector<int, 10>;
+      SV sv{{1}, {2}, {20}};
+
+      // Preconditions.
+      VERIFY(!sv.empty(), caseLabel);
+
+      SV::const_reverse_iterator rfirst = sv.crbegin();
+
+      VERIFY(*rfirst == 20, caseLabel);
+   }
+   {
+      const std::string caseLabel{"SboVector::crbegin const for empty vector."};
+
+      using SV = SboVector<int, 10>;
+      SV sv;
+
+      // Preconditions.
+      VERIFY(sv.empty(), caseLabel);
+
+      SV::const_reverse_iterator rfirst = sv.crbegin();
+
+      VERIFY(rfirst == sv.crend(), caseLabel);
+   }
+}
+
+
+void TestSboVectorCREnd()
+{
+   {
+      const std::string caseLabel{"SboVector::crend const for populated vector."};
+
+      using SV = SboVector<int, 10>;
+      const SV sv{{1}, {2}};
+
+      // Preconditions.
+      VERIFY(!sv.empty(), caseLabel);
+
+      SV::const_reverse_iterator rlast = sv.crend();
+
+      VERIFY(rlast != sv.crbegin(), caseLabel);
+      VERIFY(rlast == sv.crbegin() + sv.size(), caseLabel);
+   }
+   {
+      const std::string caseLabel{"SboVector::crend const for empty vector."};
+
+      using SV = SboVector<int, 10>;
+      const SV sv;
+
+      // Preconditions.
+      VERIFY(sv.empty(), caseLabel);
+
+      SV::const_reverse_iterator rlast = sv.crend();
+
+      VERIFY(rlast == sv.crbegin(), caseLabel);
+   }
+}
+
 } // namespace
 
 
@@ -3699,6 +3888,12 @@ void TestSboVector()
    TestSboVectorEndConst();
    TestSboVectorCBegin();
    TestSboVectorCEnd();
+   TestSboVectorRBegin();
+   TestSboVectorREnd();
+   TestSboVectorRBeginConst();
+   TestSboVectorREndConst();
+   TestSboVectorCRBegin();
+   TestSboVectorCREnd();
 
    TestSboVectorIteratorDefaultCtor();
    TestSboVectorIteratorVectorAndIndexCtor();
