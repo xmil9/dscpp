@@ -1023,7 +1023,7 @@ template <typename T, std::size_t N> void SboVector<T, N>::deallocateMem(T* mem,
 #endif
 
 #ifdef SBOVEC_MEM_INSTR
-   m_allocatedCap += cap;
+   m_allocatedCap -= cap;
 #endif // SBOVEC_MEM_INSTR
 }
 
