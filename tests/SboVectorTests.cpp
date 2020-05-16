@@ -195,9 +195,9 @@ void TestSboVectorDefaultCtor()
    {
       const std::string caseLabel{"SboVector default ctor."};
 
-      constexpr std::size_t Cap = 10;
+      constexpr std::size_t BufCap = 10;
       using Elem = Element;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Instrumentation.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -210,7 +210,7 @@ void TestSboVectorDefaultCtor()
 
          // Verify vector state.
          VERIFY(sv.empty(), caseLabel);
-         VERIFY(sv.capacity() == Cap, caseLabel);
+         VERIFY(sv.capacity() == BufCap, caseLabel);
          VERIFY(sv.inBuffer(), caseLabel);
       }
    }
@@ -222,16 +222,16 @@ void TestSboVectorCtorForElementCountAndValue()
    {
       const std::string caseLabel{"SboVector count-and-value ctor for buffer instance."};
 
-      constexpr std::size_t Cap = 10;
+      constexpr std::size_t BufCap = 10;
       constexpr std::size_t NumElems = 5;
       using Elem = Element;
-      using SV = SboVector<Element, Cap>;
+      using SV = SboVector<Element, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
 
       // Preconditions.
-      VERIFY(Cap >= NumElems, caseLabel);
+      VERIFY(BufCap >= NumElems, caseLabel);
 
       {
          // Element instrumentation for tested call only.
@@ -249,7 +249,7 @@ void TestSboVectorCtorForElementCountAndValue()
 
          // Verify vector state.
          VERIFY(sv.size() == NumElems, caseLabel);
-         VERIFY(sv.capacity() == Cap, caseLabel);
+         VERIFY(sv.capacity() == BufCap, caseLabel);
          VERIFY(sv.inBuffer(), caseLabel);
          for (int i = 0; i < sv.size(); ++i)
             VERIFY(sv[i].i == 2, caseLabel);
@@ -258,16 +258,16 @@ void TestSboVectorCtorForElementCountAndValue()
    {
       const std::string caseLabel{"SboVector count-and-value ctor for heap instance."};
 
-      constexpr std::size_t Cap = 10;
+      constexpr std::size_t BufCap = 10;
       constexpr std::size_t NumElems = 20;
       using Elem = Element;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
 
       // Preconditions.
-      VERIFY(Cap < NumElems, caseLabel);
+      VERIFY(BufCap < NumElems, caseLabel);
 
       {
          // Element instrumentation for tested call only.
@@ -299,10 +299,10 @@ void TestSboVectorCopyCtor()
    {
       const std::string caseLabel{"SboVector copy ctor for buffer instance."};
 
-      constexpr std::size_t Cap = 10;
+      constexpr std::size_t BufCap = 10;
       constexpr std::size_t NumElems = 5;
       using Elem = Element;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -328,7 +328,7 @@ void TestSboVectorCopyCtor()
 
          // Verify vector state.
          VERIFY(sv.size() == NumElems, caseLabel);
-         VERIFY(sv.capacity() == Cap, caseLabel);
+         VERIFY(sv.capacity() == BufCap, caseLabel);
          VERIFY(sv.inBuffer(), caseLabel);
          for (int i = 0; i < sv.size(); ++i)
             VERIFY(sv[i].i == i, caseLabel);
@@ -337,10 +337,10 @@ void TestSboVectorCopyCtor()
    {
       const std::string caseLabel{"SboVector copy ctor for heap instance."};
 
-      constexpr std::size_t Cap = 10;
+      constexpr std::size_t BufCap = 10;
       constexpr std::size_t NumElems = 20;
       using Elem = Element;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -380,10 +380,10 @@ void TestSboVectorMoveCtor()
    {
       const std::string caseLabel{"SboVector move ctor for buffer instance."};
 
-      constexpr std::size_t Cap = 10;
+      constexpr std::size_t BufCap = 10;
       constexpr std::size_t NumElems = 5;
       using Elem = Element;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -409,7 +409,7 @@ void TestSboVectorMoveCtor()
 
          // Verify vector state.
          VERIFY(sv.size() == NumElems, caseLabel);
-         VERIFY(sv.capacity() == Cap, caseLabel);
+         VERIFY(sv.capacity() == BufCap, caseLabel);
          VERIFY(sv.inBuffer(), caseLabel);
          for (int i = 0; i < sv.size(); ++i)
             VERIFY(sv[i].i == i, caseLabel);
@@ -420,10 +420,10 @@ void TestSboVectorMoveCtor()
    {
       const std::string caseLabel{"SboVector move ctor for heap instance."};
 
-      constexpr std::size_t Cap = 10;
+      constexpr std::size_t BufCap = 10;
       constexpr std::size_t NumElems = 20;
       using Elem = Element;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -465,16 +465,16 @@ void TestSboVectorInitializerListCtor()
    {
       const std::string caseLabel{"SboVector initializer list ctor for buffer instance."};
 
-      constexpr std::size_t Cap = 10;
+      constexpr std::size_t BufCap = 10;
       constexpr std::size_t NumElems = 4;
       using Elem = Element;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
 
       // Precondition.
-      VERIFY(NumElems < Cap, caseLabel);
+      VERIFY(NumElems < BufCap, caseLabel);
 
       {
          // Element instrumentation for tested call only.
@@ -492,7 +492,7 @@ void TestSboVectorInitializerListCtor()
 
          // Verify vector state.
          VERIFY(sv.size() == NumElems, caseLabel);
-         VERIFY(sv.capacity() == Cap, caseLabel);
+         VERIFY(sv.capacity() == BufCap, caseLabel);
          VERIFY(sv.inBuffer(), caseLabel);
          for (int i = 0; i < sv.size(); ++i)
             VERIFY(sv[i].i == i + 1, caseLabel);
@@ -501,16 +501,16 @@ void TestSboVectorInitializerListCtor()
    {
       const std::string caseLabel{"SboVector initializer list ctor for heap instance."};
 
-      constexpr std::size_t Cap = 10;
+      constexpr std::size_t BufCap = 10;
       constexpr std::size_t NumElems = 12;
       using Elem = Element;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
 
       // Precondition.
-      VERIFY(NumElems > Cap, caseLabel);
+      VERIFY(NumElems > BufCap, caseLabel);
 
       {
          // Element instrumentation for tested call only.
@@ -544,16 +544,16 @@ void TestSboVectorDtor()
    {
       const std::string caseLabel{"SboVector dtor for buffer instance."};
 
-      constexpr std::size_t Cap = 10;
+      constexpr std::size_t BufCap = 10;
       constexpr std::size_t NumElems = 3;
       using Elem = Element;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation.
       const MemVerifier<SV> memCheck{caseLabel};
 
       // Precondition.
-      VERIFY(NumElems < Cap, caseLabel);
+      VERIFY(NumElems < BufCap, caseLabel);
 
       {
          SV sv{{1}, {2}, {3}};
@@ -571,16 +571,16 @@ void TestSboVectorDtor()
    {
       const std::string caseLabel{"SboVector dtor for heap instance."};
 
-      constexpr std::size_t Cap = 3;
+      constexpr std::size_t BufCap = 3;
       constexpr std::size_t NumElems = 5;
       using Elem = Element;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation.
       const MemVerifier<SV> memCheck{caseLabel};
 
       // Precondition.
-      VERIFY(NumElems > Cap, caseLabel);
+      VERIFY(NumElems > BufCap, caseLabel);
 
       {
          SV sv{{1}, {2}, {3}, {4}, {5}};
@@ -601,11 +601,11 @@ void TestSboVectorCopyAssignment()
       const std::string caseLabel{
          "SboVector copy assignment of buffer instance to buffer instance."};
 
-      constexpr std::size_t Cap = 10;
+      constexpr std::size_t BufCap = 10;
       constexpr std::size_t NumElems = 5;
       constexpr std::size_t NumOrigElems = 3;
       using Elem = Element;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -617,8 +617,8 @@ void TestSboVectorCopyAssignment()
       SV sv(NumOrigElems, {1});
 
       // Preconditions.
-      VERIFY(NumElems < Cap, caseLabel);
-      VERIFY(NumOrigElems < Cap, caseLabel);
+      VERIFY(NumElems < BufCap, caseLabel);
+      VERIFY(NumOrigElems < BufCap, caseLabel);
       VERIFY(src.inBuffer(), caseLabel);
       VERIFY(sv.inBuffer(), caseLabel);
 
@@ -637,7 +637,7 @@ void TestSboVectorCopyAssignment()
 
       // Verify vector state.
       VERIFY(sv.size() == NumElems, caseLabel);
-      VERIFY(sv.capacity() == Cap, caseLabel);
+      VERIFY(sv.capacity() == BufCap, caseLabel);
       VERIFY(sv.inBuffer(), caseLabel);
       for (int i = 0; i < sv.size(); ++i)
          VERIFY(sv[i].i == i, caseLabel);
@@ -646,11 +646,11 @@ void TestSboVectorCopyAssignment()
       const std::string caseLabel{
          "SboVector copy assignment of heap instance to buffer instance."};
 
-      constexpr std::size_t Cap = 10;
+      constexpr std::size_t BufCap = 10;
       constexpr std::size_t NumElems = 20;
       constexpr std::size_t NumOrigElems = 3;
       using Elem = Element;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -662,8 +662,8 @@ void TestSboVectorCopyAssignment()
       SV sv(NumOrigElems, {1});
 
       // Preconditions.
-      VERIFY(NumElems > Cap, caseLabel);
-      VERIFY(NumOrigElems < Cap, caseLabel);
+      VERIFY(NumElems > BufCap, caseLabel);
+      VERIFY(NumOrigElems < BufCap, caseLabel);
       VERIFY(src.onHeap(), caseLabel);
       VERIFY(sv.inBuffer(), caseLabel);
 
@@ -691,11 +691,11 @@ void TestSboVectorCopyAssignment()
       const std::string caseLabel{
          "SboVector copy assignment of buffer instance to heap instance."};
 
-      constexpr std::size_t Cap = 10;
+      constexpr std::size_t BufCap = 10;
       constexpr std::size_t NumElems = 5;
       constexpr std::size_t NumOrigElems = 20;
       using Elem = Element;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -707,8 +707,8 @@ void TestSboVectorCopyAssignment()
       SV sv(NumOrigElems, {1});
 
       // Preconditions.
-      VERIFY(NumElems < Cap, caseLabel);
-      VERIFY(NumOrigElems > Cap, caseLabel);
+      VERIFY(NumElems < BufCap, caseLabel);
+      VERIFY(NumOrigElems > BufCap, caseLabel);
       VERIFY(src.inBuffer(), caseLabel);
       VERIFY(sv.onHeap(), caseLabel);
 
@@ -727,7 +727,7 @@ void TestSboVectorCopyAssignment()
 
       // Verify vector state.
       VERIFY(sv.size() == NumElems, caseLabel);
-      VERIFY(sv.capacity() == Cap, caseLabel);
+      VERIFY(sv.capacity() == BufCap, caseLabel);
       VERIFY(sv.inBuffer(), caseLabel);
       for (int i = 0; i < sv.size(); ++i)
          VERIFY(sv[i].i == i, caseLabel);
@@ -736,11 +736,11 @@ void TestSboVectorCopyAssignment()
       const std::string caseLabel{
          "SboVector copy assignment of larger heap instance to smaller heap instance."};
 
-      constexpr std::size_t Cap = 10;
+      constexpr std::size_t BufCap = 10;
       constexpr std::size_t NumElems = 20;
       constexpr std::size_t NumOrigElems = 15;
       using Elem = Element;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -752,8 +752,8 @@ void TestSboVectorCopyAssignment()
       SV sv(NumOrigElems, {1});
 
       // Preconditions.
-      VERIFY(NumElems > Cap, caseLabel);
-      VERIFY(NumOrigElems > Cap, caseLabel);
+      VERIFY(NumElems > BufCap, caseLabel);
+      VERIFY(NumOrigElems > BufCap, caseLabel);
       VERIFY(NumElems > NumOrigElems, caseLabel);
       VERIFY(src.onHeap(), caseLabel);
       VERIFY(sv.onHeap(), caseLabel);
@@ -784,11 +784,11 @@ void TestSboVectorCopyAssignment()
       const std::string caseLabel{
          "SboVector copy assignment of smaller heap instance to larger heap instance."};
 
-      constexpr std::size_t Cap = 10;
+      constexpr std::size_t BufCap = 10;
       constexpr std::size_t NumElems = 15;
       constexpr std::size_t NumOrigElems = 20;
       using Elem = Element;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -800,8 +800,8 @@ void TestSboVectorCopyAssignment()
       SV sv(NumOrigElems, {1});
 
       // Preconditions.
-      VERIFY(NumElems > Cap, caseLabel);
-      VERIFY(NumOrigElems > Cap, caseLabel);
+      VERIFY(NumElems > BufCap, caseLabel);
+      VERIFY(NumOrigElems > BufCap, caseLabel);
       VERIFY(NumElems < NumOrigElems, caseLabel);
       VERIFY(src.onHeap(), caseLabel);
       VERIFY(sv.onHeap(), caseLabel);
@@ -837,11 +837,11 @@ void TestSboVectorMoveAssignment()
       const std::string caseLabel{"SboVector move assignment of buffer "
                                   "instance to buffer instance."};
 
-      constexpr std::size_t Cap = 10;
+      constexpr std::size_t BufCap = 10;
       constexpr std::size_t NumElems = 5;
       constexpr std::size_t NumOrigElems = 3;
       using Elem = Element;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -853,8 +853,8 @@ void TestSboVectorMoveAssignment()
       SV sv(NumOrigElems, {1});
 
       // Preconditions.
-      VERIFY(NumElems < Cap, caseLabel);
-      VERIFY(NumOrigElems < Cap, caseLabel);
+      VERIFY(NumElems < BufCap, caseLabel);
+      VERIFY(NumOrigElems < BufCap, caseLabel);
       VERIFY(src.inBuffer(), caseLabel);
       VERIFY(sv.inBuffer(), caseLabel);
 
@@ -874,7 +874,7 @@ void TestSboVectorMoveAssignment()
       // Verify vector state.
       VERIFY(sv.size() == NumElems, caseLabel);
       // Capacity of buffer.
-      VERIFY(sv.capacity() == Cap, caseLabel);
+      VERIFY(sv.capacity() == BufCap, caseLabel);
       VERIFY(sv.inBuffer(), caseLabel);
       for (int i = 0; i < sv.size(); ++i)
          VERIFY(sv[i].i == i, caseLabel);
@@ -883,11 +883,11 @@ void TestSboVectorMoveAssignment()
       const std::string caseLabel{"SboVector move assignment of heap "
                                   "instance to buffer instance."};
 
-      constexpr std::size_t Cap = 10;
+      constexpr std::size_t BufCap = 10;
       constexpr std::size_t NumElems = 20;
       constexpr std::size_t NumOrigElems = 3;
       using Elem = Element;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -899,8 +899,8 @@ void TestSboVectorMoveAssignment()
       SV sv(NumOrigElems, {1});
 
       // Preconditions.
-      VERIFY(NumElems > Cap, caseLabel);
-      VERIFY(NumOrigElems < Cap, caseLabel);
+      VERIFY(NumElems > BufCap, caseLabel);
+      VERIFY(NumOrigElems < BufCap, caseLabel);
       VERIFY(src.onHeap(), caseLabel);
       VERIFY(sv.inBuffer(), caseLabel);
 
@@ -929,11 +929,11 @@ void TestSboVectorMoveAssignment()
       const std::string caseLabel{"SboVector move assignment of buffer "
                                   "instance to heap instance."};
 
-      constexpr std::size_t Cap = 10;
+      constexpr std::size_t BufCap = 10;
       constexpr std::size_t NumElems = 5;
       constexpr std::size_t NumOrigElems = 20;
       using Elem = Element;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -945,8 +945,8 @@ void TestSboVectorMoveAssignment()
       SV sv(NumOrigElems, {1});
 
       // Preconditions.
-      VERIFY(NumElems < Cap, caseLabel);
-      VERIFY(NumOrigElems > Cap, caseLabel);
+      VERIFY(NumElems < BufCap, caseLabel);
+      VERIFY(NumOrigElems > BufCap, caseLabel);
       VERIFY(src.inBuffer(), caseLabel);
       VERIFY(sv.onHeap(), caseLabel);
 
@@ -966,7 +966,7 @@ void TestSboVectorMoveAssignment()
       // Verify vector state.
       VERIFY(sv.size() == NumElems, caseLabel);
       // Elements fit into buffer.
-      VERIFY(sv.capacity() == Cap, caseLabel);
+      VERIFY(sv.capacity() == BufCap, caseLabel);
       VERIFY(sv.inBuffer(), caseLabel);
       for (int i = 0; i < sv.size(); ++i)
          VERIFY(sv[i].i == i, caseLabel);
@@ -975,11 +975,11 @@ void TestSboVectorMoveAssignment()
       const std::string caseLabel{"SboVector move assignment of smaller heap "
                                   "instance to larger heap instance."};
 
-      constexpr std::size_t Cap = 10;
+      constexpr std::size_t BufCap = 10;
       constexpr std::size_t NumElems = 15;
       constexpr std::size_t NumOrigElems = 20;
       using Elem = Element;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -991,8 +991,8 @@ void TestSboVectorMoveAssignment()
       SV sv(NumOrigElems, {1});
 
       // Preconditions.
-      VERIFY(NumElems > Cap, caseLabel);
-      VERIFY(NumOrigElems > Cap, caseLabel);
+      VERIFY(NumElems > BufCap, caseLabel);
+      VERIFY(NumOrigElems > BufCap, caseLabel);
       VERIFY(NumElems < NumOrigElems, caseLabel);
       VERIFY(src.onHeap(), caseLabel);
       VERIFY(sv.onHeap(), caseLabel);
@@ -1022,11 +1022,11 @@ void TestSboVectorMoveAssignment()
       const std::string caseLabel{"SboVector move assignment of larger heap "
                                   "instance to smaller heap instance."};
 
-      constexpr std::size_t Cap = 10;
+      constexpr std::size_t BufCap = 10;
       constexpr std::size_t NumElems = 20;
       constexpr std::size_t NumOrigElems = 15;
       using Elem = Element;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -1038,8 +1038,8 @@ void TestSboVectorMoveAssignment()
       SV sv(NumOrigElems, {1});
 
       // Preconditions.
-      VERIFY(NumElems > Cap, caseLabel);
-      VERIFY(NumOrigElems > Cap, caseLabel);
+      VERIFY(NumElems > BufCap, caseLabel);
+      VERIFY(NumOrigElems > BufCap, caseLabel);
       VERIFY(NumElems > NumOrigElems, caseLabel);
       VERIFY(src.onHeap(), caseLabel);
       VERIFY(sv.onHeap(), caseLabel);
@@ -1074,11 +1074,11 @@ void TestSboVectorInitializerListAssignment()
       const std::string caseLabel{
          "SboVector initializer list assignment that fits in buffer to buffer instance."};
 
-      constexpr std::size_t Cap = 10;
+      constexpr std::size_t BufCap = 10;
       constexpr std::size_t NumElems = 2;
       constexpr std::size_t NumOrigElems = 3;
       using Elem = Element;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -1086,8 +1086,8 @@ void TestSboVectorInitializerListAssignment()
       SV sv(NumOrigElems, {1});
 
       // Preconditions.
-      VERIFY(NumElems < Cap, caseLabel);
-      VERIFY(NumOrigElems < Cap, caseLabel);
+      VERIFY(NumElems < BufCap, caseLabel);
+      VERIFY(NumOrigElems < BufCap, caseLabel);
       VERIFY(sv.inBuffer(), caseLabel);
 
       {
@@ -1107,7 +1107,7 @@ void TestSboVectorInitializerListAssignment()
 
       // Verify vector state.
       VERIFY(sv.size() == NumElems, caseLabel);
-      VERIFY(sv.capacity() == Cap, caseLabel);
+      VERIFY(sv.capacity() == BufCap, caseLabel);
       VERIFY(sv.inBuffer(), caseLabel);
       for (int i = 0; i < sv.size(); ++i)
          VERIFY(sv[i].i == i + 1, caseLabel);
@@ -1116,11 +1116,11 @@ void TestSboVectorInitializerListAssignment()
       const std::string caseLabel{"SboVector initializer list assignment that requires "
                                   "heap to buffer instance."};
 
-      constexpr std::size_t Cap = 5;
+      constexpr std::size_t BufCap = 5;
       constexpr std::size_t NumElems = 7;
       constexpr std::size_t NumOrigElems = 3;
       using Elem = Element;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -1128,8 +1128,8 @@ void TestSboVectorInitializerListAssignment()
       SV sv(NumOrigElems, {1});
 
       // Preconditions.
-      VERIFY(NumElems > Cap, caseLabel);
-      VERIFY(NumOrigElems < Cap, caseLabel);
+      VERIFY(NumElems > BufCap, caseLabel);
+      VERIFY(NumOrigElems < BufCap, caseLabel);
       VERIFY(sv.inBuffer(), caseLabel);
 
       {
@@ -1158,11 +1158,11 @@ void TestSboVectorInitializerListAssignment()
       const std::string caseLabel{"SboVector initializer list assignment  "
                                   "that fits in buffer to heap instance."};
 
-      constexpr std::size_t Cap = 5;
+      constexpr std::size_t BufCap = 5;
       constexpr std::size_t NumElems = 3;
       constexpr std::size_t NumOrigElems = 7;
       using Elem = Element;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -1170,8 +1170,8 @@ void TestSboVectorInitializerListAssignment()
       SV sv(NumOrigElems, {1});
 
       // Preconditions.
-      VERIFY(NumElems < Cap, caseLabel);
-      VERIFY(NumOrigElems > Cap, caseLabel);
+      VERIFY(NumElems < BufCap, caseLabel);
+      VERIFY(NumOrigElems > BufCap, caseLabel);
       VERIFY(sv.onHeap(), caseLabel);
 
       {
@@ -1191,7 +1191,7 @@ void TestSboVectorInitializerListAssignment()
 
       // Verify vector state.
       VERIFY(sv.size() == NumElems, caseLabel);
-      VERIFY(sv.capacity() == Cap, caseLabel);
+      VERIFY(sv.capacity() == BufCap, caseLabel);
       VERIFY(sv.inBuffer(), caseLabel);
       for (int i = 0; i < sv.size(); ++i)
          VERIFY(sv[i].i == i + 1, caseLabel);
@@ -1200,11 +1200,11 @@ void TestSboVectorInitializerListAssignment()
       const std::string caseLabel{"SboVector initializer list assignment that needs heap "
                                   "but can reuse the heap of the target instance."};
 
-      constexpr std::size_t Cap = 5;
+      constexpr std::size_t BufCap = 5;
       constexpr std::size_t NumElems = 7;
       constexpr std::size_t NumOrigElems = 10;
       using Elem = Element;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -1212,8 +1212,8 @@ void TestSboVectorInitializerListAssignment()
       SV sv(NumOrigElems, {1});
 
       // Preconditions.
-      VERIFY(NumElems > Cap, caseLabel);
-      VERIFY(NumOrigElems > Cap, caseLabel);
+      VERIFY(NumElems > BufCap, caseLabel);
+      VERIFY(NumOrigElems > BufCap, caseLabel);
       VERIFY(NumOrigElems > NumElems, caseLabel);
       VERIFY(sv.onHeap(), caseLabel);
 
@@ -1243,11 +1243,11 @@ void TestSboVectorInitializerListAssignment()
       const std::string caseLabel{"SboVector initializer list assignment that needs heap "
                                   "and cannot reuse the heap of the target instance."};
 
-      constexpr std::size_t Cap = 5;
+      constexpr std::size_t BufCap = 5;
       constexpr std::size_t NumElems = 10;
       constexpr std::size_t NumOrigElems = 7;
       using Elem = Element;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -1255,8 +1255,8 @@ void TestSboVectorInitializerListAssignment()
       SV sv(NumOrigElems, {1});
 
       // Preconditions.
-      VERIFY(NumElems > Cap, caseLabel);
-      VERIFY(NumOrigElems > Cap, caseLabel);
+      VERIFY(NumElems > BufCap, caseLabel);
+      VERIFY(NumOrigElems > BufCap, caseLabel);
       VERIFY(NumOrigElems < NumElems, caseLabel);
       VERIFY(sv.onHeap(), caseLabel);
 
@@ -1292,11 +1292,11 @@ void TestSboVectorAssignElementValue()
          "SboVector assign element value n-times. Assigned values fit in buffer. "
          "SboVector was a buffer instance."};
 
-      constexpr std::size_t Cap = 10;
+      constexpr std::size_t BufCap = 10;
       constexpr std::size_t NumElems = 2;
       constexpr std::size_t NumOrigElems = 3;
       using Elem = Element;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -1304,8 +1304,8 @@ void TestSboVectorAssignElementValue()
       SV sv(NumOrigElems, {1});
 
       // Preconditions.
-      VERIFY(NumElems < Cap, caseLabel);
-      VERIFY(NumOrigElems < Cap, caseLabel);
+      VERIFY(NumElems < BufCap, caseLabel);
+      VERIFY(NumOrigElems < BufCap, caseLabel);
       VERIFY(sv.inBuffer(), caseLabel);
 
       {
@@ -1326,7 +1326,7 @@ void TestSboVectorAssignElementValue()
 
       // Verify vector state.
       VERIFY(sv.size() == NumElems, caseLabel);
-      VERIFY(sv.capacity() == Cap, caseLabel);
+      VERIFY(sv.capacity() == BufCap, caseLabel);
       VERIFY(sv.inBuffer(), caseLabel);
       for (int i = 0; i < sv.size(); ++i)
          VERIFY(sv[i].i == 10, caseLabel);
@@ -1336,11 +1336,11 @@ void TestSboVectorAssignElementValue()
                                   "values require heap allocation. "
                                   "SboVector was a buffer instance."};
 
-      constexpr std::size_t Cap = 5;
+      constexpr std::size_t BufCap = 5;
       constexpr std::size_t NumElems = 7;
       constexpr std::size_t NumOrigElems = 3;
       using Elem = Element;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -1348,8 +1348,8 @@ void TestSboVectorAssignElementValue()
       SV sv(NumOrigElems, {1});
 
       // Preconditions.
-      VERIFY(NumElems > Cap, caseLabel);
-      VERIFY(NumOrigElems < Cap, caseLabel);
+      VERIFY(NumElems > BufCap, caseLabel);
+      VERIFY(NumOrigElems < BufCap, caseLabel);
       VERIFY(sv.inBuffer(), caseLabel);
 
       {
@@ -1379,11 +1379,11 @@ void TestSboVectorAssignElementValue()
          "SboVector assign element value n-times. Assigned "
          "values fit into buffer. SboVector was a heap instance."};
 
-      constexpr std::size_t Cap = 5;
+      constexpr std::size_t BufCap = 5;
       constexpr std::size_t NumElems = 3;
       constexpr std::size_t NumOrigElems = 7;
       using Elem = Element;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -1391,8 +1391,8 @@ void TestSboVectorAssignElementValue()
       SV sv(NumOrigElems, {1});
 
       // Preconditions.
-      VERIFY(NumElems < Cap, caseLabel);
-      VERIFY(NumOrigElems > Cap, caseLabel);
+      VERIFY(NumElems < BufCap, caseLabel);
+      VERIFY(NumOrigElems > BufCap, caseLabel);
       VERIFY(sv.onHeap(), caseLabel);
 
       {
@@ -1412,7 +1412,7 @@ void TestSboVectorAssignElementValue()
 
       // Verify vector state.
       VERIFY(sv.size() == NumElems, caseLabel);
-      VERIFY(sv.capacity() == Cap, caseLabel);
+      VERIFY(sv.capacity() == BufCap, caseLabel);
       VERIFY(sv.inBuffer(), caseLabel);
       for (int i = 0; i < sv.size(); ++i)
          VERIFY(sv[i].i == 10, caseLabel);
@@ -1422,11 +1422,11 @@ void TestSboVectorAssignElementValue()
          "SboVector assign element value n-times. Assigned values require heap "
          "allocation. SboVector was a smaller heap instance."};
 
-      constexpr std::size_t Cap = 5;
+      constexpr std::size_t BufCap = 5;
       constexpr std::size_t NumElems = 10;
       constexpr std::size_t NumOrigElems = 7;
       using Elem = Element;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -1434,8 +1434,8 @@ void TestSboVectorAssignElementValue()
       SV sv(NumOrigElems, {1});
 
       // Preconditions.
-      VERIFY(NumElems > Cap, caseLabel);
-      VERIFY(NumOrigElems > Cap, caseLabel);
+      VERIFY(NumElems > BufCap, caseLabel);
+      VERIFY(NumOrigElems > BufCap, caseLabel);
       VERIFY(NumOrigElems < NumElems, caseLabel);
       VERIFY(sv.onHeap(), caseLabel);
 
@@ -1466,11 +1466,11 @@ void TestSboVectorAssignElementValue()
          "SboVector assign element value n-times. Assigned values require heap "
          "allocation. SboVector was a larger heap instance."};
 
-      constexpr std::size_t Cap = 5;
+      constexpr std::size_t BufCap = 5;
       constexpr std::size_t NumElems = 7;
       constexpr std::size_t NumOrigElems = 10;
       using Elem = Element;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -1478,8 +1478,8 @@ void TestSboVectorAssignElementValue()
       SV sv(NumOrigElems, {1});
 
       // Preconditions.
-      VERIFY(NumElems > Cap, caseLabel);
-      VERIFY(NumOrigElems > Cap, caseLabel);
+      VERIFY(NumElems > BufCap, caseLabel);
+      VERIFY(NumOrigElems > BufCap, caseLabel);
       VERIFY(NumOrigElems > NumElems, caseLabel);
       VERIFY(sv.onHeap(), caseLabel);
 
@@ -1516,11 +1516,11 @@ void TestSboVectorAssignIteratorRange()
          "SboVector assign iterator range. Assigned values fit in buffer. "
          "SboVector was a buffer instance."};
 
-      constexpr std::size_t Cap = 10;
+      constexpr std::size_t BufCap = 10;
       constexpr std::size_t NumElems = 2;
       constexpr std::size_t NumOrigElems = 3;
       using Elem = Element;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -1529,8 +1529,8 @@ void TestSboVectorAssignIteratorRange()
       SV sv(NumOrigElems, {1});
 
       // Preconditions.
-      VERIFY(NumElems < Cap, caseLabel);
-      VERIFY(NumOrigElems < Cap, caseLabel);
+      VERIFY(NumElems < BufCap, caseLabel);
+      VERIFY(NumOrigElems < BufCap, caseLabel);
       VERIFY(sv.inBuffer(), caseLabel);
 
       {
@@ -1548,7 +1548,7 @@ void TestSboVectorAssignIteratorRange()
 
       // Verify vector state.
       VERIFY(sv.size() == NumElems, caseLabel);
-      VERIFY(sv.capacity() == Cap, caseLabel);
+      VERIFY(sv.capacity() == BufCap, caseLabel);
       VERIFY(sv.inBuffer(), caseLabel);
       for (int i = 0; i < sv.size(); ++i)
          VERIFY(sv[i].i == i + 1, caseLabel);
@@ -1558,11 +1558,11 @@ void TestSboVectorAssignIteratorRange()
          "SboVector assign iterator range. Assigned values require heap. "
          "SboVector was a buffer instance."};
 
-      constexpr std::size_t Cap = 5;
+      constexpr std::size_t BufCap = 5;
       constexpr std::size_t NumElems = 7;
       constexpr std::size_t NumOrigElems = 3;
       using Elem = Element;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -1571,8 +1571,8 @@ void TestSboVectorAssignIteratorRange()
       SV sv(NumOrigElems, {1});
 
       // Preconditions.
-      VERIFY(NumElems > Cap, caseLabel);
-      VERIFY(NumOrigElems < Cap, caseLabel);
+      VERIFY(NumElems > BufCap, caseLabel);
+      VERIFY(NumOrigElems < BufCap, caseLabel);
       VERIFY(sv.inBuffer(), caseLabel);
 
       {
@@ -1600,11 +1600,11 @@ void TestSboVectorAssignIteratorRange()
          "SboVector assign iterator range. Assigned fit into buffer. "
          "SboVector was a heap instance."};
 
-      constexpr std::size_t Cap = 5;
+      constexpr std::size_t BufCap = 5;
       constexpr std::size_t NumElems = 3;
       constexpr std::size_t NumOrigElems = 7;
       using Elem = Element;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -1613,8 +1613,8 @@ void TestSboVectorAssignIteratorRange()
       SV sv(NumOrigElems, {1});
 
       // Preconditions.
-      VERIFY(NumElems < Cap, caseLabel);
-      VERIFY(NumOrigElems > Cap, caseLabel);
+      VERIFY(NumElems < BufCap, caseLabel);
+      VERIFY(NumOrigElems > BufCap, caseLabel);
       VERIFY(sv.onHeap(), caseLabel);
 
       {
@@ -1632,7 +1632,7 @@ void TestSboVectorAssignIteratorRange()
 
       // Verify vector state.
       VERIFY(sv.size() == NumElems, caseLabel);
-      VERIFY(sv.capacity() == Cap, caseLabel);
+      VERIFY(sv.capacity() == BufCap, caseLabel);
       VERIFY(sv.inBuffer(), caseLabel);
       for (int i = 0; i < sv.size(); ++i)
          VERIFY(sv[i].i == i + 1, caseLabel);
@@ -1642,11 +1642,11 @@ void TestSboVectorAssignIteratorRange()
          "SboVector assign iterator range. Assigned require heap. "
          "SboVector was a smaller heap instance."};
 
-      constexpr std::size_t Cap = 5;
+      constexpr std::size_t BufCap = 5;
       constexpr std::size_t NumElems = 8;
       constexpr std::size_t NumOrigElems = 7;
       using Elem = Element;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -1655,8 +1655,8 @@ void TestSboVectorAssignIteratorRange()
       SV sv(NumOrigElems, {1});
 
       // Preconditions.
-      VERIFY(NumElems > Cap, caseLabel);
-      VERIFY(NumOrigElems > Cap, caseLabel);
+      VERIFY(NumElems > BufCap, caseLabel);
+      VERIFY(NumOrigElems > BufCap, caseLabel);
       VERIFY(NumOrigElems < NumElems, caseLabel);
       VERIFY(sv.onHeap(), caseLabel);
 
@@ -1685,11 +1685,11 @@ void TestSboVectorAssignIteratorRange()
          "SboVector assign iterator range. Assigned require heap. "
          "SboVector was a larger heap instance."};
 
-      constexpr std::size_t Cap = 5;
+      constexpr std::size_t BufCap = 5;
       constexpr std::size_t NumElems = 7;
       constexpr std::size_t NumOrigElems = 8;
       using Elem = Element;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -1698,8 +1698,8 @@ void TestSboVectorAssignIteratorRange()
       SV sv(NumOrigElems, {1});
 
       // Preconditions.
-      VERIFY(NumElems > Cap, caseLabel);
-      VERIFY(NumOrigElems > Cap, caseLabel);
+      VERIFY(NumElems > BufCap, caseLabel);
+      VERIFY(NumOrigElems > BufCap, caseLabel);
       VERIFY(NumOrigElems > NumElems, caseLabel);
       VERIFY(sv.onHeap(), caseLabel);
 
@@ -1734,11 +1734,11 @@ void TestSboVectorAssignInitializerList()
          "SboVector assign initializer list. Assigned values fit in buffer. "
          "SboVector was a buffer instance."};
 
-      constexpr std::size_t Cap = 10;
+      constexpr std::size_t BufCap = 10;
       constexpr std::size_t NumElems = 2;
       constexpr std::size_t NumOrigElems = 3;
       using Elem = Element;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -1746,8 +1746,8 @@ void TestSboVectorAssignInitializerList()
       SV sv(NumOrigElems, {1});
 
       // Preconditions.
-      VERIFY(NumElems < Cap, caseLabel);
-      VERIFY(NumOrigElems < Cap, caseLabel);
+      VERIFY(NumElems < BufCap, caseLabel);
+      VERIFY(NumOrigElems < BufCap, caseLabel);
       VERIFY(sv.inBuffer(), caseLabel);
 
       {
@@ -1767,7 +1767,7 @@ void TestSboVectorAssignInitializerList()
 
       // Verify vector state.
       VERIFY(sv.size() == NumElems, caseLabel);
-      VERIFY(sv.capacity() == Cap, caseLabel);
+      VERIFY(sv.capacity() == BufCap, caseLabel);
       VERIFY(sv.inBuffer(), caseLabel);
       for (int i = 0; i < sv.size(); ++i)
          VERIFY(sv[i].i == i + 1, caseLabel);
@@ -1777,11 +1777,11 @@ void TestSboVectorAssignInitializerList()
          "SboVector assign initializer list. Assigned values require heap. "
          "SboVector was a buffer instance."};
 
-      constexpr std::size_t Cap = 5;
+      constexpr std::size_t BufCap = 5;
       constexpr std::size_t NumElems = 7;
       constexpr std::size_t NumOrigElems = 3;
       using Elem = Element;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -1789,8 +1789,8 @@ void TestSboVectorAssignInitializerList()
       SV sv(NumOrigElems, {1});
 
       // Preconditions.
-      VERIFY(NumElems > Cap, caseLabel);
-      VERIFY(NumOrigElems < Cap, caseLabel);
+      VERIFY(NumElems > BufCap, caseLabel);
+      VERIFY(NumOrigElems < BufCap, caseLabel);
       VERIFY(sv.inBuffer(), caseLabel);
 
       {
@@ -1820,11 +1820,11 @@ void TestSboVectorAssignInitializerList()
          "SboVector assign initializer list. Assigned values fit into buffer. "
          "SboVector was a heap instance."};
 
-      constexpr std::size_t Cap = 5;
+      constexpr std::size_t BufCap = 5;
       constexpr std::size_t NumElems = 3;
       constexpr std::size_t NumOrigElems = 7;
       using Elem = Element;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -1832,8 +1832,8 @@ void TestSboVectorAssignInitializerList()
       SV sv(NumOrigElems, {1});
 
       // Preconditions.
-      VERIFY(NumElems < Cap, caseLabel);
-      VERIFY(NumOrigElems > Cap, caseLabel);
+      VERIFY(NumElems < BufCap, caseLabel);
+      VERIFY(NumOrigElems > BufCap, caseLabel);
       VERIFY(sv.onHeap(), caseLabel);
 
       {
@@ -1853,7 +1853,7 @@ void TestSboVectorAssignInitializerList()
 
       // Verify vector state.
       VERIFY(sv.size() == NumElems, caseLabel);
-      VERIFY(sv.capacity() == Cap, caseLabel);
+      VERIFY(sv.capacity() == BufCap, caseLabel);
       VERIFY(sv.inBuffer(), caseLabel);
       for (int i = 0; i < sv.size(); ++i)
          VERIFY(sv[i].i == i + 1, caseLabel);
@@ -1863,11 +1863,11 @@ void TestSboVectorAssignInitializerList()
          "SboVector assign initializer list. Assigned values require heap. "
          "SboVector was a smaller heap instance."};
 
-      constexpr std::size_t Cap = 5;
+      constexpr std::size_t BufCap = 5;
       constexpr std::size_t NumElems = 8;
       constexpr std::size_t NumOrigElems = 7;
       using Elem = Element;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -1875,8 +1875,8 @@ void TestSboVectorAssignInitializerList()
       SV sv(NumOrigElems, {1});
 
       // Preconditions.
-      VERIFY(NumElems > Cap, caseLabel);
-      VERIFY(NumOrigElems > Cap, caseLabel);
+      VERIFY(NumElems > BufCap, caseLabel);
+      VERIFY(NumOrigElems > BufCap, caseLabel);
       VERIFY(NumOrigElems < NumElems, caseLabel);
       VERIFY(sv.onHeap(), caseLabel);
 
@@ -1907,11 +1907,11 @@ void TestSboVectorAssignInitializerList()
          "SboVector assign initializer list. Assigned values require heap. "
          "SboVector was a larger heap instance."};
 
-      constexpr std::size_t Cap = 5;
+      constexpr std::size_t BufCap = 5;
       constexpr std::size_t NumElems = 7;
       constexpr std::size_t NumOrigElems = 8;
       using Elem = Element;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -1919,8 +1919,8 @@ void TestSboVectorAssignInitializerList()
       SV sv(NumOrigElems, {1});
 
       // Preconditions.
-      VERIFY(NumElems > Cap, caseLabel);
-      VERIFY(NumOrigElems > Cap, caseLabel);
+      VERIFY(NumElems > BufCap, caseLabel);
+      VERIFY(NumOrigElems > BufCap, caseLabel);
       VERIFY(NumOrigElems > NumElems, caseLabel);
       VERIFY(sv.onHeap(), caseLabel);
 
@@ -1955,9 +1955,9 @@ void TestSboVectorAt()
       const std::string caseLabel{
          "SvoVector::at for reading from valid index into buffer instance."};
 
-      constexpr std::size_t Cap = 10;
+      constexpr std::size_t BufCap = 10;
       using Elem = int;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -1965,7 +1965,7 @@ void TestSboVectorAt()
       SV sv{{1}, {2}, {3}, {4}};
 
       // Precondition.
-      VERIFY(sv.size() < Cap, caseLabel);
+      VERIFY(sv.size() < BufCap, caseLabel);
 
       // Test.
       for (int i = 0; i < sv.size(); ++i)
@@ -1975,9 +1975,9 @@ void TestSboVectorAt()
       const std::string caseLabel{
          "SvoVector::at for writing to valid index into buffer instance."};
 
-      constexpr std::size_t Cap = 10;
+      constexpr std::size_t BufCap = 10;
       using Elem = int;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -1985,7 +1985,7 @@ void TestSboVectorAt()
       SV sv{{1}, {2}, {3}, {4}};
 
       // Precondition.
-      VERIFY(sv.size() < Cap, caseLabel);
+      VERIFY(sv.size() < BufCap, caseLabel);
 
       // Test.
       for (int i = 0; i < sv.size(); ++i)
@@ -1998,9 +1998,9 @@ void TestSboVectorAt()
       const std::string caseLabel{
          "SvoVector::at for reading from valid index into heap instance."};
 
-      constexpr std::size_t Cap = 5;
+      constexpr std::size_t BufCap = 5;
             using Elem = int;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -2008,7 +2008,7 @@ void TestSboVectorAt()
       SV sv{{1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}};
 
       // Precondition.
-      VERIFY(sv.size() > Cap, caseLabel);
+      VERIFY(sv.size() > BufCap, caseLabel);
 
       // Test.
       for (int i = 0; i < sv.size(); ++i)
@@ -2018,9 +2018,9 @@ void TestSboVectorAt()
       const std::string caseLabel{
          "SvoVector::at for writing to valid index into heap instance."};
 
-      constexpr std::size_t Cap = 5;
+      constexpr std::size_t BufCap = 5;
       using Elem = int;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -2028,7 +2028,7 @@ void TestSboVectorAt()
       SV sv{{1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}};
 
       // Precondition.
-      VERIFY(sv.size() > Cap, caseLabel);
+      VERIFY(sv.size() > BufCap, caseLabel);
 
       // Test.
       for (int i = 0; i < sv.size(); ++i)
@@ -2041,9 +2041,9 @@ void TestSboVectorAt()
       const std::string caseLabel{
          "SvoVector::at for accessing invalid index into buffer instance."};
 
-      constexpr std::size_t Cap = 10;
+      constexpr std::size_t BufCap = 10;
       using Elem = int;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -2051,19 +2051,19 @@ void TestSboVectorAt()
       SV sv{{1}, {2}, {3}, {4}};
 
       // Precondition.
-      VERIFY(sv.size() < Cap, caseLabel);
+      VERIFY(sv.size() < BufCap, caseLabel);
 
       // Test.
       VERIFY_THROW(([&sv]() { sv.at(sv.size()); }), std::out_of_range, caseLabel);
-      VERIFY_THROW(([&sv, Cap]() { sv.at(Cap); }), std::out_of_range, caseLabel);
+      VERIFY_THROW(([&sv, BufCap]() { sv.at(BufCap); }), std::out_of_range, caseLabel);
    }
    {
       const std::string caseLabel{
          "SvoVector::at for accessing invalid index into heap instance."};
 
-      constexpr std::size_t Cap = 5;
+      constexpr std::size_t BufCap = 5;
       using Elem = int;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -2071,7 +2071,7 @@ void TestSboVectorAt()
       SV sv{{1}, {2}, {3}, {4}, {5}, {6}};
 
       // Precondition.
-      VERIFY(sv.size() > Cap, caseLabel);
+      VERIFY(sv.size() > BufCap, caseLabel);
 
       // Test.
       VERIFY_THROW(([&sv]() { sv.at(sv.size()); }), std::out_of_range, caseLabel);
@@ -2085,9 +2085,9 @@ void TestSboVectorAtConst()
       const std::string caseLabel{
          "SvoVector::at const for reading from valid index into buffer instance."};
 
-      constexpr std::size_t Cap = 10;
+      constexpr std::size_t BufCap = 10;
       using Elem = int;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -2095,7 +2095,7 @@ void TestSboVectorAtConst()
       const SV sv{{1}, {2}, {3}, {4}};
 
       // Precondition.
-      VERIFY(sv.size() < Cap, caseLabel);
+      VERIFY(sv.size() < BufCap, caseLabel);
 
       // Test.
       for (int i = 0; i < sv.size(); ++i)
@@ -2105,9 +2105,9 @@ void TestSboVectorAtConst()
       const std::string caseLabel{
          "SvoVector::at const for reading from valid index into heap instance."};
 
-      constexpr std::size_t Cap = 5;
+      constexpr std::size_t BufCap = 5;
       using Elem = int;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -2115,7 +2115,7 @@ void TestSboVectorAtConst()
       const SV sv{{1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}};
 
       // Precondition.
-      VERIFY(sv.size() > Cap, caseLabel);
+      VERIFY(sv.size() > BufCap, caseLabel);
 
       // Test.
       for (int i = 0; i < sv.size(); ++i)
@@ -2125,9 +2125,9 @@ void TestSboVectorAtConst()
       const std::string caseLabel{
          "SvoVector::at const for accessing invalid index into buffer instance."};
 
-      constexpr std::size_t Cap = 10;
+      constexpr std::size_t BufCap = 10;
       using Elem = int;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -2135,19 +2135,19 @@ void TestSboVectorAtConst()
       const SV sv{{1}, {2}, {3}, {4}};
 
       // Precondition.
-      VERIFY(sv.size() < Cap, caseLabel);
+      VERIFY(sv.size() < BufCap, caseLabel);
 
       // Test.
       VERIFY_THROW(([&sv]() { sv.at(sv.size()); }), std::out_of_range, caseLabel);
-      VERIFY_THROW(([&sv, Cap]() { sv.at(Cap); }), std::out_of_range, caseLabel);
+      VERIFY_THROW(([&sv, BufCap]() { sv.at(BufCap); }), std::out_of_range, caseLabel);
    }
    {
       const std::string caseLabel{
          "SvoVector::at const for accessing invalid index into heap instance."};
 
-      constexpr std::size_t Cap = 5;
+      constexpr std::size_t BufCap = 5;
       using Elem = int;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -2155,7 +2155,7 @@ void TestSboVectorAtConst()
       const SV sv{{1}, {2}, {3}, {4}, {5}, {6}};
 
       // Precondition.
-      VERIFY(sv.size() > Cap, caseLabel);
+      VERIFY(sv.size() > BufCap, caseLabel);
 
       // Test.
       VERIFY_THROW(([&sv]() { sv.at(sv.size()); }), std::out_of_range, caseLabel);
@@ -2169,9 +2169,9 @@ void TestSboVectorSubscriptOperator()
       const std::string caseLabel{
          "SvoVector::operator[] for reading from valid index into buffer instance."};
 
-      constexpr std::size_t Cap = 10;
+      constexpr std::size_t BufCap = 10;
       using Elem = int;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -2179,7 +2179,7 @@ void TestSboVectorSubscriptOperator()
       SV sv{{1}, {2}, {3}, {4}};
 
       // Precondition.
-      VERIFY(sv.size() < Cap, caseLabel);
+      VERIFY(sv.size() < BufCap, caseLabel);
 
       // Test.
       for (int i = 0; i < sv.size(); ++i)
@@ -2189,9 +2189,9 @@ void TestSboVectorSubscriptOperator()
       const std::string caseLabel{
          "SvoVector::operator[] for writing to valid index into buffer instance."};
 
-      constexpr std::size_t Cap = 10;
+      constexpr std::size_t BufCap = 10;
       using Elem = int;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -2199,7 +2199,7 @@ void TestSboVectorSubscriptOperator()
       SV sv{{1}, {2}, {3}, {4}};
 
       // Precondition.
-      VERIFY(sv.size() < Cap, caseLabel);
+      VERIFY(sv.size() < BufCap, caseLabel);
 
       // Test.
       for (int i = 0; i < sv.size(); ++i)
@@ -2212,9 +2212,9 @@ void TestSboVectorSubscriptOperator()
       const std::string caseLabel{
          "SvoVector::operator[] for reading from valid index into heap instance."};
 
-      constexpr std::size_t Cap = 5;
+      constexpr std::size_t BufCap = 5;
       using Elem = int;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -2222,7 +2222,7 @@ void TestSboVectorSubscriptOperator()
       SV sv{{1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}};
 
       // Precondition.
-      VERIFY(sv.size() > Cap, caseLabel);
+      VERIFY(sv.size() > BufCap, caseLabel);
 
       // Test.
       for (int i = 0; i < sv.size(); ++i)
@@ -2232,9 +2232,9 @@ void TestSboVectorSubscriptOperator()
       const std::string caseLabel{
          "SvoVector::operator[] for writing to valid index into heap instance."};
 
-      constexpr std::size_t Cap = 5;
+      constexpr std::size_t BufCap = 5;
       using Elem = int;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -2242,7 +2242,7 @@ void TestSboVectorSubscriptOperator()
       SV sv{{1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}};
 
       // Precondition.
-      VERIFY(sv.size() > Cap, caseLabel);
+      VERIFY(sv.size() > BufCap, caseLabel);
 
       // Test.
       for (int i = 0; i < sv.size(); ++i)
@@ -2260,9 +2260,9 @@ void TestSboVectorSubscriptOperatorConst()
       const std::string caseLabel{
          "SvoVector::operator[] const for accessing valid index into buffer instance."};
 
-      constexpr std::size_t Cap = 10;
+      constexpr std::size_t BufCap = 10;
       using Elem = int;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -2270,7 +2270,7 @@ void TestSboVectorSubscriptOperatorConst()
       const SV sv{{1}, {2}, {3}, {4}};
 
       // Precondition.
-      VERIFY(sv.size() < Cap, caseLabel);
+      VERIFY(sv.size() < BufCap, caseLabel);
 
       // Test.
       for (int i = 0; i < sv.size(); ++i)
@@ -2280,9 +2280,9 @@ void TestSboVectorSubscriptOperatorConst()
       const std::string caseLabel{
          "SvoVector::operator[] const for accessing valid index into heap instance."};
 
-      constexpr std::size_t Cap = 5;
+      constexpr std::size_t BufCap = 5;
       using Elem = int;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -2290,7 +2290,7 @@ void TestSboVectorSubscriptOperatorConst()
       const SV sv{{1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}};
 
       // Precondition.
-      VERIFY(sv.size() > Cap, caseLabel);
+      VERIFY(sv.size() > BufCap, caseLabel);
 
       // Test.
       for (int i = 0; i < sv.size(); ++i)
@@ -2304,9 +2304,9 @@ void TestSboVectorFront()
    {
       const std::string caseLabel{"SvoVector::front for reading from buffer instance."};
 
-      constexpr std::size_t Cap = 10;
+      constexpr std::size_t BufCap = 10;
       using Elem = int;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -2314,7 +2314,7 @@ void TestSboVectorFront()
       SV sv{{1}, {2}, {3}, {4}};
 
       // Precondition.
-      VERIFY(sv.size() < Cap, caseLabel);
+      VERIFY(sv.size() < BufCap, caseLabel);
 
       // Test.
       VERIFY(sv.front() == 1, caseLabel);
@@ -2322,9 +2322,9 @@ void TestSboVectorFront()
    {
       const std::string caseLabel{"SvoVector::front for writing to buffer instance."};
 
-      constexpr std::size_t Cap = 10;
+      constexpr std::size_t BufCap = 10;
       using Elem = int;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -2332,7 +2332,7 @@ void TestSboVectorFront()
       SV sv{{1}, {2}, {3}, {4}};
 
       // Precondition.
-      VERIFY(sv.size() < Cap, caseLabel);
+      VERIFY(sv.size() < BufCap, caseLabel);
 
       // Test.
       sv.front() = 100;
@@ -2341,9 +2341,9 @@ void TestSboVectorFront()
    {
       const std::string caseLabel{"SvoVector::front for reading from heap instance."};
 
-      constexpr std::size_t Cap = 5;
+      constexpr std::size_t BufCap = 5;
       using Elem = int;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -2351,7 +2351,7 @@ void TestSboVectorFront()
       SV sv{{1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}};
 
       // Precondition.
-      VERIFY(sv.size() > Cap, caseLabel);
+      VERIFY(sv.size() > BufCap, caseLabel);
 
       // Test.
       VERIFY(sv.front() == 1, caseLabel);
@@ -2360,9 +2360,9 @@ void TestSboVectorFront()
       const std::string caseLabel{
          "SvoVector::front for writing to valid index into heap instance."};
 
-      constexpr std::size_t Cap = 5;
+      constexpr std::size_t BufCap = 5;
       using Elem = int;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -2370,7 +2370,7 @@ void TestSboVectorFront()
       SV sv{{1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}};
 
       // Precondition.
-      VERIFY(sv.size() > Cap, caseLabel);
+      VERIFY(sv.size() > BufCap, caseLabel);
 
       // Test.
       sv.front() = 100;
@@ -2384,9 +2384,9 @@ void TestSboVectorFrontConst()
    {
       const std::string caseLabel{"SvoVector::front const for buffer instance."};
 
-      constexpr std::size_t Cap = 10;
+      constexpr std::size_t BufCap = 10;
       using Elem = int;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -2394,7 +2394,7 @@ void TestSboVectorFrontConst()
       const SV sv{{1}, {2}, {3}, {4}};
 
       // Precondition.
-      VERIFY(sv.size() < Cap, caseLabel);
+      VERIFY(sv.size() < BufCap, caseLabel);
 
       // Test.
       VERIFY(sv.front() == 1, caseLabel);
@@ -2402,9 +2402,9 @@ void TestSboVectorFrontConst()
    {
       const std::string caseLabel{"SvoVector::front const for heap instance."};
 
-      constexpr std::size_t Cap = 5;
+      constexpr std::size_t BufCap = 5;
       using Elem = int;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -2412,7 +2412,7 @@ void TestSboVectorFrontConst()
       const SV sv{{1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}};
 
       // Precondition.
-      VERIFY(sv.size() > Cap, caseLabel);
+      VERIFY(sv.size() > BufCap, caseLabel);
 
       // Test.
       VERIFY(sv.front() == 1, caseLabel);
@@ -2425,9 +2425,9 @@ void TestSboVectorBack()
    {
       const std::string caseLabel{"SvoVector::back for reading from buffer instance."};
 
-      constexpr std::size_t Cap = 10;
+      constexpr std::size_t BufCap = 10;
       using Elem = int;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -2435,16 +2435,16 @@ void TestSboVectorBack()
       SV sv{{1}, {2}, {3}, {4}};
 
       // Precondition.
-      VERIFY(sv.size() < Cap, caseLabel);
+      VERIFY(sv.size() < BufCap, caseLabel);
 
       VERIFY(sv.back() == 4, caseLabel);
    }
    {
       const std::string caseLabel{"SvoVector::back for writing to buffer instance."};
 
-      constexpr std::size_t Cap = 10;
+      constexpr std::size_t BufCap = 10;
       using Elem = int;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -2452,7 +2452,7 @@ void TestSboVectorBack()
       SV sv{{1}, {2}, {3}, {4}};
 
       // Precondition.
-      VERIFY(sv.size() < Cap, caseLabel);
+      VERIFY(sv.size() < BufCap, caseLabel);
 
       // Test.
       sv.back() = 100;
@@ -2461,9 +2461,9 @@ void TestSboVectorBack()
    {
       const std::string caseLabel{"SvoVector::back for reading from heap instance."};
 
-      constexpr std::size_t Cap = 5;
+      constexpr std::size_t BufCap = 5;
       using Elem = int;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -2471,7 +2471,7 @@ void TestSboVectorBack()
       SV sv{{1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}};
 
       // Precondition.
-      VERIFY(sv.size() > Cap, caseLabel);
+      VERIFY(sv.size() > BufCap, caseLabel);
 
       VERIFY(sv.back() == 8, caseLabel);
    }
@@ -2479,9 +2479,9 @@ void TestSboVectorBack()
       const std::string caseLabel{
          "SvoVector::back for writing to valid index into heap instance."};
 
-      constexpr std::size_t Cap = 5;
+      constexpr std::size_t BufCap = 5;
       using Elem = int;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -2489,7 +2489,7 @@ void TestSboVectorBack()
       SV sv{{1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}};
 
       // Precondition.
-      VERIFY(sv.size() > Cap, caseLabel);
+      VERIFY(sv.size() > BufCap, caseLabel);
 
       // Test.
       sv.back() = 100;
@@ -2503,9 +2503,9 @@ void TestSboVectorBackConst()
    {
       const std::string caseLabel{"SvoVector::back const for buffer instance."};
 
-      constexpr std::size_t Cap = 10;
+      constexpr std::size_t BufCap = 10;
       using Elem = int;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -2513,7 +2513,7 @@ void TestSboVectorBackConst()
       const SV sv{{1}, {2}, {3}, {4}};
 
       // Precondition.
-      VERIFY(sv.size() < Cap, caseLabel);
+      VERIFY(sv.size() < BufCap, caseLabel);
 
       // Test.
       VERIFY(sv.back() == 4, caseLabel);
@@ -2521,9 +2521,9 @@ void TestSboVectorBackConst()
    {
       const std::string caseLabel{"SvoVector::back const for heap instance."};
 
-      constexpr std::size_t Cap = 5;
+      constexpr std::size_t BufCap = 5;
       using Elem = int;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -2531,7 +2531,7 @@ void TestSboVectorBackConst()
       const SV sv{{1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}};
 
       // Precondition.
-      VERIFY(sv.size() > Cap, caseLabel);
+      VERIFY(sv.size() > BufCap, caseLabel);
 
       // Test.
       VERIFY(sv.back() == 8, caseLabel);
@@ -2544,9 +2544,9 @@ void TestSboVectorData()
    {
       const std::string caseLabel{"SvoVector::data for reading from buffer instance."};
 
-      constexpr std::size_t Cap = 10;
+      constexpr std::size_t BufCap = 10;
       using Elem = int;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -2554,7 +2554,7 @@ void TestSboVectorData()
       SV sv{{1}, {2}, {3}, {4}};
 
       // Precondition.
-      VERIFY(sv.size() < Cap, caseLabel);
+      VERIFY(sv.size() < BufCap, caseLabel);
 
       // Test.
       int* data = sv.data();
@@ -2564,9 +2564,9 @@ void TestSboVectorData()
    {
       const std::string caseLabel{"SvoVector::data for writing to buffer instance."};
 
-      constexpr std::size_t Cap = 10;
+      constexpr std::size_t BufCap = 10;
       using Elem = int;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -2574,7 +2574,7 @@ void TestSboVectorData()
       SV sv{{1}, {2}, {3}, {4}};
 
       // Precondition.
-      VERIFY(sv.size() < Cap, caseLabel);
+      VERIFY(sv.size() < BufCap, caseLabel);
 
       // Test.
       int* data = sv.data();
@@ -2587,9 +2587,9 @@ void TestSboVectorData()
    {
       const std::string caseLabel{"SvoVector::data for reading from heap instance."};
 
-      constexpr std::size_t Cap = 5;
+      constexpr std::size_t BufCap = 5;
       using Elem = int;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -2597,7 +2597,7 @@ void TestSboVectorData()
       SV sv{{1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}};
 
       // Precondition.
-      VERIFY(sv.size() > Cap, caseLabel);
+      VERIFY(sv.size() > BufCap, caseLabel);
 
       // Test.
       int* data = sv.data();
@@ -2608,9 +2608,9 @@ void TestSboVectorData()
       const std::string caseLabel{
          "SvoVector::data for writing to valid index into heap instance."};
 
-      constexpr std::size_t Cap = 5;
+      constexpr std::size_t BufCap = 5;
       using Elem = int;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -2618,7 +2618,7 @@ void TestSboVectorData()
       SV sv{{1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}};
 
       // Precondition.
-      VERIFY(sv.size() > Cap, caseLabel);
+      VERIFY(sv.size() > BufCap, caseLabel);
 
       // Test.
       int* data = sv.data();
@@ -2636,9 +2636,9 @@ void TestSboVectorDataConst()
    {
       const std::string caseLabel{"SvoVector::data const for buffer instance."};
 
-      constexpr std::size_t Cap = 10;
+      constexpr std::size_t BufCap = 10;
       using Elem = int;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -2646,7 +2646,7 @@ void TestSboVectorDataConst()
       const SV sv{{1}, {2}, {3}, {4}};
 
       // Precondition.
-      VERIFY(sv.size() < Cap, caseLabel);
+      VERIFY(sv.size() < BufCap, caseLabel);
 
       // Test.
       const int* data = sv.data();
@@ -2656,9 +2656,9 @@ void TestSboVectorDataConst()
    {
       const std::string caseLabel{"SvoVector::back const for heap instance."};
 
-      constexpr std::size_t Cap = 5;
+      constexpr std::size_t BufCap = 5;
       using Elem = int;
-      using SV = SboVector<Elem, Cap>;
+      using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -2666,7 +2666,7 @@ void TestSboVectorDataConst()
       const SV sv{{1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}};
 
       // Precondition.
-      VERIFY(sv.size() > Cap, caseLabel);
+      VERIFY(sv.size() > BufCap, caseLabel);
 
       // Test.
       const int* data = sv.data();
@@ -2681,8 +2681,8 @@ void TestSboVectorBegin()
    {
       const std::string caseLabel{"SboVector::begin for populated vector."};
 
-      constexpr std::size_t Cap = 10;
-      using SV = SboVector<int, Cap>;
+      constexpr std::size_t BufCap = 10;
+      using SV = SboVector<int, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -2700,8 +2700,8 @@ void TestSboVectorBegin()
    {
       const std::string caseLabel{"SboVector::begin for empty vector."};
 
-      constexpr std::size_t Cap = 10;
-      using SV = SboVector<int, Cap>;
+      constexpr std::size_t BufCap = 10;
+      using SV = SboVector<int, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -2724,8 +2724,8 @@ void TestSboVectorEnd()
    {
       const std::string caseLabel{"SboVector::end for populated vector."};
 
-      constexpr std::size_t Cap = 10;
-      using SV = SboVector<int, Cap>;
+      constexpr std::size_t BufCap = 10;
+      using SV = SboVector<int, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -2744,8 +2744,8 @@ void TestSboVectorEnd()
    {
       const std::string caseLabel{"SboVector::end for empty vector."};
 
-      constexpr std::size_t Cap = 10;
-      using SV = SboVector<int, Cap>;
+      constexpr std::size_t BufCap = 10;
+      using SV = SboVector<int, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -2768,8 +2768,8 @@ void TestSboVectorBeginConst()
    {
       const std::string caseLabel{"SboVector::begin const for populated vector."};
 
-      constexpr std::size_t Cap = 10;
-      using SV = SboVector<int, Cap>;
+      constexpr std::size_t BufCap = 10;
+      using SV = SboVector<int, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -2787,8 +2787,8 @@ void TestSboVectorBeginConst()
    {
       const std::string caseLabel{"SboVector::begin const for empty vector."};
 
-      constexpr std::size_t Cap = 10;
-      using SV = SboVector<int, Cap>;
+      constexpr std::size_t BufCap = 10;
+      using SV = SboVector<int, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -2811,8 +2811,8 @@ void TestSboVectorEndConst()
    {
       const std::string caseLabel{"SboVector::end const for populated vector."};
 
-      constexpr std::size_t Cap = 10;
-      using SV = SboVector<int, Cap>;
+      constexpr std::size_t BufCap = 10;
+      using SV = SboVector<int, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -2831,8 +2831,8 @@ void TestSboVectorEndConst()
    {
       const std::string caseLabel{"SboVector::end const for empty vector."};
 
-      constexpr std::size_t Cap = 10;
-      using SV = SboVector<int, Cap>;
+      constexpr std::size_t BufCap = 10;
+      using SV = SboVector<int, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -2855,8 +2855,8 @@ void TestSboVectorCBegin()
    {
       const std::string caseLabel{"SboVector::cbegin const for populated vector."};
 
-      constexpr std::size_t Cap = 10;
-      using SV = SboVector<int, Cap>;
+      constexpr std::size_t BufCap = 10;
+      using SV = SboVector<int, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -2874,8 +2874,8 @@ void TestSboVectorCBegin()
    {
       const std::string caseLabel{"SboVector::cbegin const for empty vector."};
 
-      constexpr std::size_t Cap = 10;
-      using SV = SboVector<int, Cap>;
+      constexpr std::size_t BufCap = 10;
+      using SV = SboVector<int, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -2898,8 +2898,8 @@ void TestSboVectorCEnd()
    {
       const std::string caseLabel{"SboVector::cend const for populated vector."};
 
-      constexpr std::size_t Cap = 10;
-      using SV = SboVector<int, Cap>;
+      constexpr std::size_t BufCap = 10;
+      using SV = SboVector<int, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -2918,8 +2918,8 @@ void TestSboVectorCEnd()
    {
       const std::string caseLabel{"SboVector::cend const for empty vector."};
 
-      constexpr std::size_t Cap = 10;
-      using SV = SboVector<int, Cap>;
+      constexpr std::size_t BufCap = 10;
+      using SV = SboVector<int, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -2942,8 +2942,8 @@ void TestSboVectorRBegin()
    {
       const std::string caseLabel{"SboVector::rbegin for populated vector."};
 
-      constexpr std::size_t Cap = 10;
-      using SV = SboVector<int, Cap>;
+      constexpr std::size_t BufCap = 10;
+      using SV = SboVector<int, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -2961,8 +2961,8 @@ void TestSboVectorRBegin()
    {
       const std::string caseLabel{"SboVector::rbegin for empty vector."};
 
-      constexpr std::size_t Cap = 10;
-      using SV = SboVector<int, Cap>;
+      constexpr std::size_t BufCap = 10;
+      using SV = SboVector<int, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -2985,8 +2985,8 @@ void TestSboVectorREnd()
    {
       const std::string caseLabel{"SboVector::rend for populated vector."};
 
-      constexpr std::size_t Cap = 10;
-      using SV = SboVector<int, Cap>;
+      constexpr std::size_t BufCap = 10;
+      using SV = SboVector<int, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -3005,8 +3005,8 @@ void TestSboVectorREnd()
    {
       const std::string caseLabel{"SboVector::rend for empty vector."};
 
-      constexpr std::size_t Cap = 10;
-      using SV = SboVector<int, Cap>;
+      constexpr std::size_t BufCap = 10;
+      using SV = SboVector<int, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -3029,8 +3029,8 @@ void TestSboVectorRBeginConst()
    {
       const std::string caseLabel{"SboVector::rbegin const for populated vector."};
 
-      constexpr std::size_t Cap = 10;
-      using SV = SboVector<int, Cap>;
+      constexpr std::size_t BufCap = 10;
+      using SV = SboVector<int, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -3048,8 +3048,8 @@ void TestSboVectorRBeginConst()
    {
       const std::string caseLabel{"SboVector::rbegin const for empty vector."};
 
-      constexpr std::size_t Cap = 10;
-      using SV = SboVector<int, Cap>;
+      constexpr std::size_t BufCap = 10;
+      using SV = SboVector<int, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -3072,8 +3072,8 @@ void TestSboVectorREndConst()
    {
       const std::string caseLabel{"SboVector::rend const for populated vector."};
 
-      constexpr std::size_t Cap = 10;
-      using SV = SboVector<int, Cap>;
+      constexpr std::size_t BufCap = 10;
+      using SV = SboVector<int, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -3092,8 +3092,8 @@ void TestSboVectorREndConst()
    {
       const std::string caseLabel{"SboVector::rend const for empty vector."};
 
-      constexpr std::size_t Cap = 10;
-      using SV = SboVector<int, Cap>;
+      constexpr std::size_t BufCap = 10;
+      using SV = SboVector<int, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -3116,8 +3116,8 @@ void TestSboVectorCRBegin()
    {
       const std::string caseLabel{"SboVector::crbegin const for populated vector."};
 
-      constexpr std::size_t Cap = 10;
-      using SV = SboVector<int, Cap>;
+      constexpr std::size_t BufCap = 10;
+      using SV = SboVector<int, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -3135,8 +3135,8 @@ void TestSboVectorCRBegin()
    {
       const std::string caseLabel{"SboVector::crbegin const for empty vector."};
 
-      constexpr std::size_t Cap = 10;
-      using SV = SboVector<int, Cap>;
+      constexpr std::size_t BufCap = 10;
+      using SV = SboVector<int, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -3159,8 +3159,8 @@ void TestSboVectorCREnd()
    {
       const std::string caseLabel{"SboVector::crend const for populated vector."};
 
-      constexpr std::size_t Cap = 10;
-      using SV = SboVector<int, Cap>;
+      constexpr std::size_t BufCap = 10;
+      using SV = SboVector<int, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -3179,8 +3179,8 @@ void TestSboVectorCREnd()
    {
       const std::string caseLabel{"SboVector::crend const for empty vector."};
 
-      constexpr std::size_t Cap = 10;
-      using SV = SboVector<int, Cap>;
+      constexpr std::size_t BufCap = 10;
+      using SV = SboVector<int, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -3203,8 +3203,8 @@ void TestSboVectorEmpty()
    {
       const std::string caseLabel{"SvoVector::empty for empty instance."};
 
-      constexpr std::size_t Cap = 10;
-      using SV = SboVector<int, Cap>;
+      constexpr std::size_t BufCap = 10;
+      using SV = SboVector<int, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -3220,8 +3220,8 @@ void TestSboVectorEmpty()
    {
       const std::string caseLabel{"SvoVector::empty for non-empty buffer instance."};
 
-      constexpr std::size_t Cap = 10;
-      using SV = SboVector<int, Cap>;
+      constexpr std::size_t BufCap = 10;
+      using SV = SboVector<int, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -3238,8 +3238,8 @@ void TestSboVectorEmpty()
    {
       const std::string caseLabel{"SvoVector::empty for non-empty heap instance."};
 
-      constexpr std::size_t Cap = 5;
-      using SV = SboVector<int, Cap>;
+      constexpr std::size_t BufCap = 5;
+      using SV = SboVector<int, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -3261,8 +3261,8 @@ void TestSboVectorSize()
    {
       const std::string caseLabel{"SvoVector::size for empty instance."};
 
-      constexpr std::size_t Cap = 10;
-      using SV = SboVector<int, Cap>;
+      constexpr std::size_t BufCap = 10;
+      using SV = SboVector<int, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -3278,8 +3278,8 @@ void TestSboVectorSize()
    {
       const std::string caseLabel{"SvoVector::empty for non-empty buffer instance."};
 
-      constexpr std::size_t Cap = 10;
-      using SV = SboVector<int, Cap>;
+      constexpr std::size_t BufCap = 10;
+      using SV = SboVector<int, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -3296,8 +3296,8 @@ void TestSboVectorSize()
    {
       const std::string caseLabel{"SvoVector::empty for non-empty buffer instance."};
 
-      constexpr std::size_t Cap = 5;
-      using SV = SboVector<int, Cap>;
+      constexpr std::size_t BufCap = 5;
+      using SV = SboVector<int, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -3319,8 +3319,8 @@ void TestSboVectorMaxSize()
    {
       const std::string caseLabel{"SvoVector::max_size for buffer instance."};
 
-      constexpr std::size_t Cap = 10;
-      using SV = SboVector<int, Cap>;
+      constexpr std::size_t BufCap = 10;
+      using SV = SboVector<int, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -3336,8 +3336,8 @@ void TestSboVectorMaxSize()
    {
       const std::string caseLabel{"SvoVector::max_size for heap instance."};
 
-      constexpr std::size_t Cap = 5;
-      using SV = SboVector<int, Cap>;
+      constexpr std::size_t BufCap = 5;
+      using SV = SboVector<int, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
@@ -3353,8 +3353,8 @@ void TestSboVectorMaxSize()
    {
       const std::string caseLabel{"SvoVector::max_size for empty instance."};
 
-      constexpr std::size_t Cap = 5;
-      using SV = SboVector<int, Cap>;
+      constexpr std::size_t BufCap = 5;
+      using SV = SboVector<int, BufCap>;
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
