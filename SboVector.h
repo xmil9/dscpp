@@ -156,7 +156,7 @@ template <typename T, std::size_t N> class SboVector
 
    static T* allocate_or_reuse_mem(std::size_t cap, std::size_t availCap);
    static T* allocateMem(std::size_t cap);
-   static void deallocateMem(T* mem);
+   static void deallocateMem(T* mem, std::size_t cap);
 
    std::size_t recalc_capacity(std::size_t minCap) const;
 
@@ -169,6 +169,16 @@ template <typename T, std::size_t N> class SboVector
    std::size_t m_size = 0;
    // Number of allocated elements.
    std::size_t m_capacity = BufferCapacity;
+
+   // Memory instrumentation.
+#ifdef SBOVEC_MEM_INSTR
+ public:
+   static int64_t allocatedCapacity() { return m_allocatedCap; }
+   static void resetAllocatedCapacity() { m_allocatedCap = 0; }
+
+ private:
+   inline static int64_t m_allocatedCap = 0;
+#endif // SBOVEC_MEM_INSTR
 };
 
 
@@ -784,7 +794,7 @@ void SboVector<T, N>::copy_from(const U& other, ElemIter first)
    // Clean up old data.
    std::destroy_n(m_data, size());
    if (onHeap() && dealloc)
-      deallocateMem(m_data);
+      deallocate();
 
    // Set up new data.
    const bool fitsIntoBuffer = other.size() <= BufferCapacity;
@@ -880,7 +890,7 @@ template <typename T, std::size_t N> void SboVector<T, N>::deallocate()
 {
    if (onHeap())
    {
-      deallocateMem(m_data);
+      deallocateMem(m_data, m_capacity);
       m_data = buffer();
    }
 }
@@ -888,7 +898,7 @@ template <typename T, std::size_t N> void SboVector<T, N>::deallocate()
 
 template <typename T, std::size_t N> void SboVector<T, N>::reallocate(std::size_t newCap)
 {
-  // Cannot reallocate to less than what the current elements occupy.
+   // Cannot reallocate to less than what the current elements occupy.
    assert(newCap >= m_size);
    if (newCap < m_size)
       return;
@@ -995,17 +1005,26 @@ template <typename T, std::size_t N> T* SboVector<T, N>::allocateMem(std::size_t
 #endif
    if (!mem)
       throw std::runtime_error("SboVector - Failed to allocate memory.");
+
+#ifdef SBOVEC_MEM_INSTR
+   m_allocatedCap += cap;
+#endif // SBOVEC_MEM_INSTR
+   
    return mem;
 }
 
 
-template <typename T, std::size_t N> void SboVector<T, N>::deallocateMem(T* mem)
+template <typename T, std::size_t N> void SboVector<T, N>::deallocateMem(T* mem, std::size_t cap)
 {
 #ifdef VS_COMPILER
    _aligned_free(mem);
 #else
    std::free(mem);
 #endif
+
+#ifdef SBOVEC_MEM_INSTR
+   m_allocatedCap += cap;
+#endif // SBOVEC_MEM_INSTR
 }
 
 

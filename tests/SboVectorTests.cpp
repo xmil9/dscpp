@@ -1,3 +1,5 @@
+// Turn on memory instrumentation for SboVector.
+#define SBOVEC_MEM_INSTR
 #include "SboVector.h"
 #include "TestUtil.h"
 #include <iostream>
