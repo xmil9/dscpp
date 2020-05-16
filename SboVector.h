@@ -150,12 +150,14 @@ template <typename T, std::size_t N> class SboVector
    void allocate_or_reuse(std::size_t cap);
    void allocate(std::size_t cap);
    void deallocate();
+   void reallocate(std::size_t newCap);
+   void reallocateMore(std::size_t newCap);
+   void reallocateLess(std::size_t newCap);
 
    static T* allocate_or_reuse_mem(std::size_t cap, std::size_t availCap);
    static T* allocateMem(std::size_t cap);
    static void deallocateMem(T* mem);
 
-   void reallocate(std::size_t newCap);
    std::size_t recalc_capacity(std::size_t minCap) const;
 
  private:
@@ -705,8 +707,13 @@ std::size_t SboVector<T, N>::capacity() const noexcept
 
 template <typename T, std::size_t N> void SboVector<T, N>::reserve(std::size_t capacity)
 {
-   if (capacity > m_capacity)
-      reallocate(capacity);
+   if (capacity > max_size())
+      throw std::length_error("SboVector - Exceeding max size.");
+   // Does nothing when requested capacity is less than the current capacity.
+   if (capacity <= this->capacity())
+      return;
+
+   reallocate(capacity);
 }
 
 
@@ -879,6 +886,91 @@ template <typename T, std::size_t N> void SboVector<T, N>::deallocate()
 }
 
 
+template <typename T, std::size_t N> void SboVector<T, N>::reallocate(std::size_t newCap)
+{
+  // Cannot reallocate to less than what the current elements occupy.
+   assert(newCap >= m_size);
+   if (newCap < m_size)
+      return;
+
+   if (newCap > capacity())
+      reallocateMore(newCap);
+   else if (newCap < capacity())
+      reallocateLess(newCap);
+}
+
+
+template <typename T, std::size_t N>
+void SboVector<T, N>::reallocateMore(std::size_t newCap)
+{
+   assert(newCap > capacity());
+
+   // This case requires no work and should be caught earlier.
+   assert(newCap > BufferCapacity);
+   if (newCap <= BufferCapacity)
+      return;
+
+   T* newData = allocateMem(newCap);
+
+   if constexpr (std::is_move_constructible_v<T>)
+   {
+      std::uninitialized_move_n(data(), size(), newData);
+   }
+   else
+   {
+      std::uninitialized_copy_n(data(), size(), newData);
+      destroyElements();
+   }
+
+   // Will only dealloc if current data is on heap.
+   deallocate();
+
+   m_data = newData;
+   m_capacity = newCap;
+}
+
+
+template <typename T, std::size_t N>
+void SboVector<T, N>::reallocateLess(std::size_t newCap)
+{
+   assert(newCap < capacity());
+
+   // Possible situations are:
+   // 1. New capacity is larger than buffer capacity. We need to allocate heap
+   //    memory and relocate the data into it.
+   // 2. New capacity is less than buffer capacity but current data is on heap.
+   //    We need to relocate the data into the buffer and deallocate the heap.
+   // 3. New capacity is less than buffer capacity and current data is in the
+   //    buffer. Nothing to do.
+
+   if (newCap <= BufferCapacity && inBuffer())
+      return;
+
+   // Only cases 1. and 2. left.
+
+   const bool allocHeap = newCap > BufferCapacity;
+   const bool relocateDataIntoBuffer = (newCap <= BufferCapacity) && onHeap();
+
+   T* newData = allocHeap ? allocateMem(newCap) : buffer();
+
+   if constexpr (std::is_move_constructible_v<T>)
+   {
+      std::uninitialized_move_n(data(), size(), newData);
+   }
+   else
+   {
+      std::uninitialized_copy_n(data(), size(), newData);
+      destroyElements();
+   }
+
+   // Will only dealloc if current data is on heap.
+   deallocate();
+
+   m_data = newData;
+   m_capacity = newCap;
+}
+
+
 template <typename T, std::size_t N>
 T* SboVector<T, N>::allocate_or_reuse_mem(std::size_t cap, std::size_t availCap)
 {
@@ -914,23 +1006,6 @@ template <typename T, std::size_t N> void SboVector<T, N>::deallocateMem(T* mem)
 #else
    std::free(mem);
 #endif
-}
-
-
-template <typename T, std::size_t N> void SboVector<T, N>::reallocate(std::size_t newCap)
-{
-   assert(newCap >= m_size);
-   if (newCap >= m_size)
-   {
-      T* newData = new T[newCap];
-      if constexpr (std::is_move_constructible_v<T>)
-         std::uninitialized_move_n(m_data, m_size, newData);
-      else
-         std::uninitialized_copy_n(m_data, m_size, newData);
-      destroyElements();
-      m_data = newData;
-      m_capacity = newCap;
-   }
 }
 
 

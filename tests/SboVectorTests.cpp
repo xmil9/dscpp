@@ -66,6 +66,46 @@ struct Instrumented
 };
 
 
+struct NotMoveable
+{
+   NotMoveable() { ++defaultCtorCalls; }
+   NotMoveable(int i_) : i{i_} { ++ctorCalls; }
+   NotMoveable(const NotMoveable& other) : d{other.d}, i{other.i}, b{other.b}
+   {
+      ++copyCtorCalls;
+   }
+   NotMoveable(NotMoveable&& other) = delete;
+   ~NotMoveable() { ++dtorCalls; }
+   NotMoveable& operator=(const NotMoveable& other)
+   {
+      d = other.d;
+      i = other.i;
+      b = other.b;
+      ++assignmentCalls;
+   }
+   Instrumented& operator=(Instrumented&& other) = delete;
+
+   double d = 1.0;
+   int i = 1;
+   bool b = true;
+
+   inline static std::size_t defaultCtorCalls = 0;
+   inline static std::size_t ctorCalls = 0;
+   inline static std::size_t copyCtorCalls = 0;
+   inline static std::size_t assignmentCalls = 0;
+   inline static std::size_t dtorCalls = 0;
+
+   inline static void resetCallCount()
+   {
+      defaultCtorCalls = 0;
+      ctorCalls = 0;
+      copyCtorCalls = 0;
+      assignmentCalls = 0;
+      dtorCalls = 0;
+   }
+};
+
+
 ///////////////////
 
 void TestSboVectorDefaultCtor()
@@ -2508,6 +2548,217 @@ void TestSboVectorMaxSize()
 }
 
 
+void TestSboVectorReserve()
+{
+   {
+      const std::string caseLabel{"SvoVector::reserve for capacity less than current."};
+
+      constexpr std::size_t BufCap = 5;
+      constexpr std::size_t OrigCap = 10;
+      constexpr std::size_t NewCap = 9;
+
+      SboVector<Instrumented, BufCap> sv(OrigCap, {5});
+
+      // Preconditions.
+      VERIFY(NewCap < sv.capacity(), caseLabel);
+
+      Instrumented::resetCallCount();
+      sv.reserve(NewCap);
+
+      VERIFY(sv.capacity() == OrigCap, caseLabel);
+      VERIFY(sv.size() == OrigCap, caseLabel);
+      VERIFY(Instrumented::defaultCtorCalls == 0, caseLabel);
+      VERIFY(Instrumented::ctorCalls == 0, caseLabel);
+      VERIFY(Instrumented::copyCtorCalls == 0, caseLabel);
+      VERIFY(Instrumented::moveCtorCalls == 0, caseLabel);
+      VERIFY(Instrumented::assignmentCalls == 0, caseLabel);
+      VERIFY(Instrumented::moveAssignmentCalls == 0, caseLabel);
+      VERIFY(Instrumented::dtorCalls == 0, caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i].i == 5, caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "SvoVector::reserve for capacity larger than max size."};
+
+      constexpr std::size_t BufCap = 5;
+      constexpr std::size_t OrigCap = 10;
+
+      SboVector<Instrumented, BufCap> sv(OrigCap, {5});
+
+      Instrumented::resetCallCount();
+      VERIFY_THROW(([&sv]() { sv.reserve(sv.max_size() + 1); }), std::length_error,
+                   caseLabel);
+      VERIFY(Instrumented::defaultCtorCalls == 0, caseLabel);
+      VERIFY(Instrumented::ctorCalls == 0, caseLabel);
+      VERIFY(Instrumented::copyCtorCalls == 0, caseLabel);
+      VERIFY(Instrumented::moveCtorCalls == 0, caseLabel);
+      VERIFY(Instrumented::assignmentCalls == 0, caseLabel);
+      VERIFY(Instrumented::moveAssignmentCalls == 0, caseLabel);
+      VERIFY(Instrumented::dtorCalls == 0, caseLabel);
+   }
+   {
+      const std::string caseLabel{"SvoVector::reserve for capacity larger than current."};
+
+      constexpr std::size_t BufCap = 5;
+      constexpr std::size_t OrigCap = 10;
+      constexpr std::size_t NewCap = 15;
+
+      SboVector<Instrumented, BufCap> sv(OrigCap, 5);
+
+      // Preconditions.
+      VERIFY(OrigCap > BufCap, caseLabel);
+      VERIFY(NewCap > sv.capacity(), caseLabel);
+
+      Instrumented::resetCallCount();
+      sv.reserve(NewCap);
+
+      VERIFY(sv.capacity() == NewCap, caseLabel);
+      VERIFY(sv.size() == OrigCap, caseLabel);
+      VERIFY(Instrumented::defaultCtorCalls == 0, caseLabel);
+      VERIFY(Instrumented::ctorCalls == 0, caseLabel);
+      VERIFY(Instrumented::copyCtorCalls == 0, caseLabel);
+      // Elements are moved.
+      VERIFY(Instrumented::moveCtorCalls == OrigCap, caseLabel);
+      VERIFY(Instrumented::assignmentCalls == 0, caseLabel);
+      VERIFY(Instrumented::moveAssignmentCalls == 0, caseLabel);
+      VERIFY(Instrumented::dtorCalls == 0, caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i].i == 5, caseLabel);
+   }
+   {
+      const std::string caseLabel{"SvoVector::reserve for capacity larger than current "
+                                  "with type that is not moveable."};
+
+      constexpr std::size_t BufCap = 5;
+      constexpr std::size_t OrigCap = 10;
+      constexpr std::size_t NewCap = 15;
+
+      SboVector<NotMoveable, BufCap> sv(OrigCap, 5);
+
+      // Preconditions.
+      VERIFY(OrigCap > BufCap, caseLabel);
+      VERIFY(NewCap > sv.capacity(), caseLabel);
+      VERIFY(sv.onHeap(), caseLabel);
+
+      NotMoveable::resetCallCount();
+      sv.reserve(NewCap);
+
+      VERIFY(sv.capacity() == NewCap, caseLabel);
+      VERIFY(sv.size() == OrigCap, caseLabel);
+      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(NotMoveable::defaultCtorCalls == 0, caseLabel);
+      VERIFY(NotMoveable::ctorCalls == 0, caseLabel);
+      // Copy elements to larger allocation.
+      VERIFY(NotMoveable::copyCtorCalls == OrigCap, caseLabel);
+      VERIFY(NotMoveable::assignmentCalls == 0, caseLabel);
+      // Destroy previous elements.
+      VERIFY(NotMoveable::dtorCalls == OrigCap, caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i].i == 5, caseLabel);
+   }
+   {
+      const std::string caseLabel{"SvoVector::reserve for capacity larger than current "
+                                  "where current data is in buffer."};
+
+      constexpr std::size_t BufCap = 10;
+      constexpr std::size_t OrigCap = 5;
+      constexpr std::size_t NewCap = 15;
+
+      SboVector<Instrumented, BufCap> sv(OrigCap, 5);
+
+      // Preconditions.
+      VERIFY(OrigCap < BufCap, caseLabel);
+      VERIFY(NewCap > BufCap, caseLabel);
+      VERIFY(NewCap > sv.capacity(), caseLabel);
+      VERIFY(sv.inBuffer(), caseLabel);
+
+      Instrumented::resetCallCount();
+      sv.reserve(NewCap);
+
+      VERIFY(sv.capacity() == NewCap, caseLabel);
+      VERIFY(sv.size() == OrigCap, caseLabel);
+      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(Instrumented::defaultCtorCalls == 0, caseLabel);
+      VERIFY(Instrumented::ctorCalls == 0, caseLabel);
+      VERIFY(Instrumented::copyCtorCalls == 0, caseLabel);
+      // Elements are moved.
+      VERIFY(Instrumented::moveCtorCalls == OrigCap, caseLabel);
+      VERIFY(Instrumented::assignmentCalls == 0, caseLabel);
+      VERIFY(Instrumented::moveAssignmentCalls == 0, caseLabel);
+      VERIFY(Instrumented::dtorCalls == 0, caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i].i == 5, caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "SvoVector::reserve for capacity larger than current "
+         "where current data is in buffer with type that is not moveable."};
+
+      constexpr std::size_t BufCap = 10;
+      constexpr std::size_t OrigCap = 5;
+      constexpr std::size_t NewCap = 15;
+
+      SboVector<NotMoveable, BufCap> sv(OrigCap, 5);
+
+      // Preconditions.
+      VERIFY(OrigCap < BufCap, caseLabel);
+      VERIFY(NewCap > BufCap, caseLabel);
+      VERIFY(NewCap > sv.capacity(), caseLabel);
+      VERIFY(sv.inBuffer(), caseLabel);
+
+      NotMoveable::resetCallCount();
+      sv.reserve(NewCap);
+
+      VERIFY(sv.capacity() == NewCap, caseLabel);
+      VERIFY(sv.size() == OrigCap, caseLabel);
+      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(NotMoveable::defaultCtorCalls == 0, caseLabel);
+      VERIFY(NotMoveable::ctorCalls == 0, caseLabel);
+      // Copy elements to larger allocation.
+      VERIFY(NotMoveable::copyCtorCalls == OrigCap, caseLabel);
+      VERIFY(NotMoveable::assignmentCalls == 0, caseLabel);
+      // Destroy previous elements.
+      VERIFY(NotMoveable::dtorCalls == OrigCap, caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i].i == 5, caseLabel);
+   }
+   {
+      const std::string caseLabel{"SvoVector::reserve for capacity larger than current "
+                                  "but smaller than buffer."};
+
+      constexpr std::size_t BufCap = 10;
+      constexpr std::size_t OrigCap = 5;
+      constexpr std::size_t NewCap = 8;
+
+      SboVector<Instrumented, BufCap> sv(OrigCap, 5);
+
+      // Preconditions.
+      VERIFY(OrigCap < BufCap, caseLabel);
+      VERIFY(NewCap < BufCap, caseLabel);
+      VERIFY(NewCap > OrigCap, caseLabel);
+      VERIFY(sv.inBuffer(), caseLabel);
+
+      Instrumented::resetCallCount();
+      sv.reserve(NewCap);
+
+      // It's a no-op.
+      VERIFY(sv.capacity() == BufCap, caseLabel);
+      VERIFY(sv.size() == OrigCap, caseLabel);
+      VERIFY(sv.inBuffer(), caseLabel);
+      VERIFY(Instrumented::defaultCtorCalls == 0, caseLabel);
+      VERIFY(Instrumented::ctorCalls == 0, caseLabel);
+      VERIFY(Instrumented::copyCtorCalls == 0, caseLabel);
+      VERIFY(Instrumented::moveCtorCalls == 0, caseLabel);
+      VERIFY(Instrumented::assignmentCalls == 0, caseLabel);
+      VERIFY(Instrumented::moveAssignmentCalls == 0, caseLabel);
+      VERIFY(Instrumented::dtorCalls == 0, caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i].i == 5, caseLabel);
+   }
+}
+
+
 ///////////////////
 
 void TestSboVectorIteratorDefaultCtor()
@@ -3088,7 +3339,8 @@ void TestSboVectorIteratorLessThan()
       VERIFY(a < b, caseLabel);
    }
    {
-      const std::string caseLabel{"SboVectorIterator operator< for greater-than iterators."};
+      const std::string caseLabel{
+         "SboVectorIterator operator< for greater-than iterators."};
 
       using SV = SboVector<int, 10>;
       SV sv{{1}, {2}, {20}};
@@ -3115,7 +3367,8 @@ void TestSboVectorIteratorLessThan()
 void TestSboVectorIteratorLessOrEqualThan()
 {
    {
-      const std::string caseLabel{"SboVectorIterator operator<= for less-than iterators."};
+      const std::string caseLabel{
+         "SboVectorIterator operator<= for less-than iterators."};
 
       using SV = SboVector<int, 10>;
       SV sv{{1}, {2}, {20}};
@@ -3126,7 +3379,8 @@ void TestSboVectorIteratorLessOrEqualThan()
       VERIFY(a <= b, caseLabel);
    }
    {
-      const std::string caseLabel{"SboVectorIterator operator<= for greater-than iterators."};
+      const std::string caseLabel{
+         "SboVectorIterator operator<= for greater-than iterators."};
 
       using SV = SboVector<int, 10>;
       SV sv{{1}, {2}, {20}};
@@ -3164,7 +3418,8 @@ void TestSboVectorIteratorGreaterThan()
       VERIFY(!(a > b), caseLabel);
    }
    {
-      const std::string caseLabel{"SboVectorIterator operator> for greater-than iterators."};
+      const std::string caseLabel{
+         "SboVectorIterator operator> for greater-than iterators."};
 
       using SV = SboVector<int, 10>;
       SV sv{{1}, {2}, {20}};
@@ -3191,7 +3446,8 @@ void TestSboVectorIteratorGreaterThan()
 void TestSboVectorIteratorGreaterOrEqualThan()
 {
    {
-      const std::string caseLabel{"SboVectorIterator operator>= for less-than iterators."};
+      const std::string caseLabel{
+         "SboVectorIterator operator>= for less-than iterators."};
 
       using SV = SboVector<int, 10>;
       SV sv{{1}, {2}, {20}};
@@ -3202,7 +3458,8 @@ void TestSboVectorIteratorGreaterOrEqualThan()
       VERIFY(!(a >= b), caseLabel);
    }
    {
-      const std::string caseLabel{"SboVectorIterator operator>= for greater-than iterators."};
+      const std::string caseLabel{
+         "SboVectorIterator operator>= for greater-than iterators."};
 
       using SV = SboVector<int, 10>;
       SV sv{{1}, {2}, {20}};
@@ -3477,7 +3734,8 @@ void TestSboVectorConstIteratorEquality()
       VERIFY(a == b, caseLabel);
    }
    {
-      const std::string caseLabel{"SboVectorConstIterator equality for different indices."};
+      const std::string caseLabel{
+         "SboVectorConstIterator equality for different indices."};
 
       using SV = SboVector<int, 10>;
       SV sv{{1}, {2}, {3}};
@@ -3488,7 +3746,8 @@ void TestSboVectorConstIteratorEquality()
       VERIFY(!(a == b), caseLabel);
    }
    {
-      const std::string caseLabel{"SboVectorConstIterator equality for different vectors."};
+      const std::string caseLabel{
+         "SboVectorConstIterator equality for different vectors."};
 
       using SV = SboVector<int, 10>;
       SV sv{{1}, {2}, {3}};
@@ -3516,7 +3775,8 @@ void TestSboVectorConstIteratorInequality()
       VERIFY(!(a != b), caseLabel);
    }
    {
-      const std::string caseLabel{"SboVectorConstIterator inequality for different indices."};
+      const std::string caseLabel{
+         "SboVectorConstIterator inequality for different indices."};
 
       using SV = SboVector<int, 10>;
       SV sv{{1}, {2}, {3}};
@@ -3527,7 +3787,8 @@ void TestSboVectorConstIteratorInequality()
       VERIFY(a != b, caseLabel);
    }
    {
-      const std::string caseLabel{"SboVectorConstIterator inequality for different vectors."};
+      const std::string caseLabel{
+         "SboVectorConstIterator inequality for different vectors."};
 
       using SV = SboVector<int, 10>;
       SV sv{{1}, {2}, {3}};
@@ -3544,7 +3805,8 @@ void TestSboVectorConstIteratorInequality()
 void TestSboVectorConstIteratorAdditionAssignment()
 {
    {
-      const std::string caseLabel{"SboVectorConstIterator operator+= for positive offset."};
+      const std::string caseLabel{
+         "SboVectorConstIterator operator+= for positive offset."};
 
       using SV = SboVector<int, 10>;
       SV sv{{1}, {2}, {3}};
@@ -3555,7 +3817,8 @@ void TestSboVectorConstIteratorAdditionAssignment()
       VERIFY(*it == 3, caseLabel);
    }
    {
-      const std::string caseLabel{"SboVectorConstIterator operator+= for negative offset."};
+      const std::string caseLabel{
+         "SboVectorConstIterator operator+= for negative offset."};
 
       using SV = SboVector<int, 10>;
       SV sv{{1}, {2}, {3}};
@@ -3571,7 +3834,8 @@ void TestSboVectorConstIteratorAdditionAssignment()
 void TestSboVectorConstIteratorSubtractionAssignment()
 {
    {
-      const std::string caseLabel{"SboVectorConstIterator operator-= for positive offset."};
+      const std::string caseLabel{
+         "SboVectorConstIterator operator-= for positive offset."};
 
       using SV = SboVector<int, 10>;
       SV sv{{1}, {2}, {3}};
@@ -3582,7 +3846,8 @@ void TestSboVectorConstIteratorSubtractionAssignment()
       VERIFY(*it == 1, caseLabel);
    }
    {
-      const std::string caseLabel{"SboVectorConstIterator operator-= for negative offset."};
+      const std::string caseLabel{
+         "SboVectorConstIterator operator-= for negative offset."};
 
       using SV = SboVector<int, 10>;
       SV sv{{1}, {2}, {3}};
@@ -3702,7 +3967,8 @@ void TestSboVectorConstIteratorSubtractionOfIterators()
 void TestSboVectorConstIteratorLessThan()
 {
    {
-      const std::string caseLabel{"SboVectorConstIterator operator< for less-than iterators."};
+      const std::string caseLabel{
+         "SboVectorConstIterator operator< for less-than iterators."};
 
       using SV = SboVector<int, 10>;
       SV sv{{1}, {2}, {20}};
@@ -3713,7 +3979,8 @@ void TestSboVectorConstIteratorLessThan()
       VERIFY(a < b, caseLabel);
    }
    {
-      const std::string caseLabel{"SboVectorConstIterator operator< for greater-than iterators."};
+      const std::string caseLabel{
+         "SboVectorConstIterator operator< for greater-than iterators."};
 
       using SV = SboVector<int, 10>;
       SV sv{{1}, {2}, {20}};
@@ -3724,7 +3991,8 @@ void TestSboVectorConstIteratorLessThan()
       VERIFY(!(a < b), caseLabel);
    }
    {
-      const std::string caseLabel{"SboVectorConstIterator operator< for equal iterators."};
+      const std::string caseLabel{
+         "SboVectorConstIterator operator< for equal iterators."};
 
       using SV = SboVector<int, 10>;
       SV sv{{1}, {2}, {20}};
@@ -3740,7 +4008,8 @@ void TestSboVectorConstIteratorLessThan()
 void TestSboVectorConstIteratorLessOrEqualThan()
 {
    {
-      const std::string caseLabel{"SboVectorConstIterator operator<= for less-than iterators."};
+      const std::string caseLabel{
+         "SboVectorConstIterator operator<= for less-than iterators."};
 
       using SV = SboVector<int, 10>;
       SV sv{{1}, {2}, {20}};
@@ -3751,7 +4020,8 @@ void TestSboVectorConstIteratorLessOrEqualThan()
       VERIFY(a <= b, caseLabel);
    }
    {
-      const std::string caseLabel{"SboVectorConstIterator operator<= for greater-than iterators."};
+      const std::string caseLabel{
+         "SboVectorConstIterator operator<= for greater-than iterators."};
 
       using SV = SboVector<int, 10>;
       SV sv{{1}, {2}, {20}};
@@ -3762,7 +4032,8 @@ void TestSboVectorConstIteratorLessOrEqualThan()
       VERIFY(!(a <= b), caseLabel);
    }
    {
-      const std::string caseLabel{"SboVectorConstIterator operator<= for equal iterators."};
+      const std::string caseLabel{
+         "SboVectorConstIterator operator<= for equal iterators."};
 
       using SV = SboVector<int, 10>;
       SV sv{{1}, {2}, {20}};
@@ -3778,7 +4049,8 @@ void TestSboVectorConstIteratorLessOrEqualThan()
 void TestSboVectorConstIteratorGreaterThan()
 {
    {
-      const std::string caseLabel{"SboVectorConstIterator operator> for less-than iterators."};
+      const std::string caseLabel{
+         "SboVectorConstIterator operator> for less-than iterators."};
 
       using SV = SboVector<int, 10>;
       SV sv{{1}, {2}, {20}};
@@ -3789,7 +4061,8 @@ void TestSboVectorConstIteratorGreaterThan()
       VERIFY(!(a > b), caseLabel);
    }
    {
-      const std::string caseLabel{"SboVectorConstIterator operator> for greater-than iterators."};
+      const std::string caseLabel{
+         "SboVectorConstIterator operator> for greater-than iterators."};
 
       using SV = SboVector<int, 10>;
       SV sv{{1}, {2}, {20}};
@@ -3800,7 +4073,8 @@ void TestSboVectorConstIteratorGreaterThan()
       VERIFY(a > b, caseLabel);
    }
    {
-      const std::string caseLabel{"SboVectorConstIterator operator> for equal iterators."};
+      const std::string caseLabel{
+         "SboVectorConstIterator operator> for equal iterators."};
 
       using SV = SboVector<int, 10>;
       SV sv{{1}, {2}, {20}};
@@ -3816,7 +4090,8 @@ void TestSboVectorConstIteratorGreaterThan()
 void TestSboVectorConstIteratorGreaterOrEqualThan()
 {
    {
-      const std::string caseLabel{"SboVectorConstIterator operator>= for less-than iterators."};
+      const std::string caseLabel{
+         "SboVectorConstIterator operator>= for less-than iterators."};
 
       using SV = SboVector<int, 10>;
       SV sv{{1}, {2}, {20}};
@@ -3827,7 +4102,8 @@ void TestSboVectorConstIteratorGreaterOrEqualThan()
       VERIFY(!(a >= b), caseLabel);
    }
    {
-      const std::string caseLabel{"SboVectorConstIterator operator>= for greater-than iterators."};
+      const std::string caseLabel{
+         "SboVectorConstIterator operator>= for greater-than iterators."};
 
       using SV = SboVector<int, 10>;
       SV sv{{1}, {2}, {20}};
@@ -3838,7 +4114,8 @@ void TestSboVectorConstIteratorGreaterOrEqualThan()
       VERIFY(a >= b, caseLabel);
    }
    {
-      const std::string caseLabel{"SboVectorConstIterator operator>= for equal iterators."};
+      const std::string caseLabel{
+         "SboVectorConstIterator operator>= for equal iterators."};
 
       using SV = SboVector<int, 10>;
       SV sv{{1}, {2}, {20}};
@@ -3894,6 +4171,7 @@ void TestSboVector()
    TestSboVectorEmpty();
    TestSboVectorSize();
    TestSboVectorMaxSize();
+   TestSboVectorReserve();
 
    TestSboVectorIteratorDefaultCtor();
    TestSboVectorIteratorVectorAndIndexCtor();
