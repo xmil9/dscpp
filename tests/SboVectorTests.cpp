@@ -1961,7 +1961,7 @@ void TestSboVectorAt()
 
       // Memory instrumentation for entire scope.
       const MemVerifier<SV> memCheck{caseLabel};
-      
+
       SV sv{{1}, {2}, {3}, {4}};
 
       // Precondition.
@@ -1999,7 +1999,7 @@ void TestSboVectorAt()
          "SvoVector::at for reading from valid index into heap instance."};
 
       constexpr std::size_t BufCap = 5;
-            using Elem = int;
+      using Elem = int;
       using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation for entire scope.
@@ -3432,7 +3432,8 @@ void TestSboVectorReserve()
       }
    }
    {
-      const std::string caseLabel{"SvoVector::reserve for capacity larger than current."};
+      const std::string caseLabel{"SvoVector::reserve for capacity larger than current "
+                                  "with type that is moveable."};
 
       constexpr std::size_t BufCap = 5;
       constexpr std::size_t OrigCap = 10;
@@ -3448,6 +3449,7 @@ void TestSboVectorReserve()
       // Preconditions.
       VERIFY(OrigCap > BufCap, caseLabel);
       VERIFY(NewCap > sv.capacity(), caseLabel);
+      VERIFY(std::is_move_constructible_v<Elem>, caseLabel);
 
       {
          // Element instrumentation for tested call only.
@@ -3485,6 +3487,7 @@ void TestSboVectorReserve()
       VERIFY(OrigCap > BufCap, caseLabel);
       VERIFY(NewCap > sv.capacity(), caseLabel);
       VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(!std::is_move_constructible_v<Elem>, caseLabel);
 
       {
          // Element instrumentation for tested call only.
@@ -3621,6 +3624,260 @@ void TestSboVectorReserve()
       // Verify vector state.
       VERIFY(sv.capacity() == BufCap, caseLabel);
       VERIFY(sv.size() == OrigCap, caseLabel);
+      VERIFY(sv.inBuffer(), caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i].i == 5, caseLabel);
+   }
+}
+
+
+void TestSboVectorShrinkToFit()
+{
+   {
+      const std::string caseLabel{"SvoVector::shrink_to_fit for buffer instance."};
+
+      constexpr std::size_t BufCap = 10;
+      constexpr std::size_t NumElems = 7;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      // Memory instrumentation for entire scope.
+      const MemVerifier<SV> memCheck{caseLabel};
+
+      SV sv(NumElems, {5});
+
+      // Preconditions.
+      VERIFY(sv.inBuffer(), caseLabel);
+
+      {
+         // Element instrumentation for tested call only.
+         Elem::Measures expected;
+         // All expected values are zero because the call is a no-op.
+         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+
+         // Test.
+         sv.shrink_to_fit();
+      }
+
+      // Verify vector state.
+      // Nothing changed.
+      VERIFY(sv.capacity() == BufCap, caseLabel);
+      VERIFY(sv.size() == NumElems, caseLabel);
+      VERIFY(sv.inBuffer(), caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i].i == 5, caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "SvoVector::shrink_to_fit for heap instance with capacity fully occupied."};
+
+      constexpr std::size_t BufCap = 10;
+      constexpr std::size_t NumElems = 15;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      // Memory instrumentation for entire scope.
+      const MemVerifier<SV> memCheck{caseLabel};
+
+      SV sv(NumElems, {5});
+
+      // Preconditions.
+      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(sv.size() == sv.capacity(), caseLabel);
+
+      {
+         // Element instrumentation for tested call only.
+         Elem::Measures expected;
+         // All expected values are zero because the call is a no-op.
+         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+
+         // Test.
+         sv.shrink_to_fit();
+      }
+
+      // Verify vector state.
+      // Nothing changed.
+      VERIFY(sv.capacity() == NumElems, caseLabel);
+      VERIFY(sv.size() == NumElems, caseLabel);
+      VERIFY(sv.onHeap(), caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i].i == 5, caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "SvoVector::shrink_to_fit for heap instance with "
+         "shrunken size still on the heap using a moveable element type."};
+
+      constexpr std::size_t BufCap = 10;
+      constexpr std::size_t Cap = 15;
+      constexpr std::size_t NumElems = 12;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      // Memory instrumentation for entire scope.
+      const MemVerifier<SV> memCheck{caseLabel};
+
+      // Cause vector to allocate Cap elements.
+      SV sv(Cap, {5});
+      // Reduce to NumElems elements.
+      sv.assign(NumElems, Elem{6});
+
+      // Preconditions.
+      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(sv.size() == NumElems, caseLabel);
+      VERIFY(sv.capacity() == Cap, caseLabel);
+      static_assert(std::is_move_constructible_v<Elem>);
+
+      {
+         // Element instrumentation for tested call only.
+         Elem::Measures expected;
+         // Elements are moved.
+         expected.moveCtorCalls = NumElems;
+         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+
+         // Test.
+         sv.shrink_to_fit();
+      }
+
+      // Verify vector state.
+      VERIFY(sv.capacity() == NumElems, caseLabel);
+      VERIFY(sv.size() == NumElems, caseLabel);
+      VERIFY(sv.onHeap(), caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i].i == 6, caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "SvoVector::shrink_to_fit for heap instance with "
+         "shrunken size still on the heap using a not moveable element type."};
+
+      constexpr std::size_t BufCap = 10;
+      constexpr std::size_t Cap = 15;
+      constexpr std::size_t NumElems = 12;
+      using Elem = NotMoveableElement;
+      using SV = SboVector<Elem, BufCap>;
+
+      // Memory instrumentation for entire scope.
+      const MemVerifier<SV> memCheck{caseLabel};
+
+      // Cause vector to allocate Cap elements.
+      SV sv(Cap, {5});
+      // Reduce to NumElems elements.
+      sv.assign(NumElems, Elem{6});
+
+      // Preconditions.
+      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(sv.size() == NumElems, caseLabel);
+      VERIFY(sv.capacity() == Cap, caseLabel);
+      static_assert(!std::is_move_constructible_v<Elem>);
+
+      {
+         // Element instrumentation for tested call only.
+         Elem::Measures expected;
+         // Copy elements to larger allocation.
+         expected.copyCtorCalls = NumElems;
+         // Destroy previous elements.
+         expected.dtorCalls = NumElems;
+         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+
+         // Test.
+         sv.shrink_to_fit();
+      }
+
+      // Verify vector state.
+      VERIFY(sv.capacity() == NumElems, caseLabel);
+      VERIFY(sv.size() == NumElems, caseLabel);
+      VERIFY(sv.onHeap(), caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i].i == 6, caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "SvoVector::shrink_to_fit for heap instance with "
+         "shrunken size fitting into the buffer using a moveable element type."};
+
+      constexpr std::size_t BufCap = 10;
+      constexpr std::size_t Cap = 12;
+      constexpr std::size_t NumElems = 8;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      // Memory instrumentation for entire scope.
+      const MemVerifier<SV> memCheck{caseLabel};
+
+      // Cause vector to allocate Cap elements.
+      SV sv(Cap, {5});
+      // Reduce to NumElems elements.
+      while (sv.size() > NumElems)
+         sv.erase(sv.cbegin() + sv.size() - 1);
+
+      // Preconditions.
+      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(sv.size() == NumElems, caseLabel);
+      VERIFY(sv.capacity() == Cap, caseLabel);
+      static_assert(std::is_move_constructible_v<Elem>);
+
+      {
+         // Element instrumentation for tested call only.
+         Elem::Measures expected;
+         // Elements are moved.
+         expected.moveCtorCalls = NumElems;
+         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+
+         // Test.
+         sv.shrink_to_fit();
+      }
+
+      // Verify vector state.
+      VERIFY(sv.capacity() == NumElems, caseLabel);
+      VERIFY(sv.size() == NumElems, caseLabel);
+      VERIFY(sv.inBuffer(), caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i].i == 5, caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "SvoVector::shrink_to_fit for heap instance with "
+         "shrunken size fitting into the buffer using a not moveable element type."};
+
+      constexpr std::size_t BufCap = 10;
+      constexpr std::size_t Cap = 12;
+      constexpr std::size_t NumElems = 8;
+      using Elem = NotMoveableElement;
+      using SV = SboVector<Elem, BufCap>;
+
+      // Memory instrumentation for entire scope.
+      const MemVerifier<SV> memCheck{caseLabel};
+
+      // Cause vector to allocate Cap elements.
+      SV sv(Cap, {5});
+      // Reduce to NumElems elements.
+      while (sv.size() > NumElems)
+         sv.erase(sv.cbegin() + sv.size() - 1);
+
+      // Preconditions.
+      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(sv.size() == NumElems, caseLabel);
+      VERIFY(sv.capacity() == Cap, caseLabel);
+      static_assert(!std::is_move_constructible_v<Elem>);
+
+      {
+         // Element instrumentation for tested call only.
+         Elem::Measures expected;
+         // Elements are moved.
+         // Copy elements to larger allocation.
+         expected.copyCtorCalls = NumElems;
+         // Destroy previous elements.
+         expected.dtorCalls = NumElems;
+         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+
+         // Test.
+         sv.shrink_to_fit();
+      }
+
+      // Verify vector state.
+      VERIFY(sv.capacity() == NumElems, caseLabel);
+      VERIFY(sv.size() == NumElems, caseLabel);
       VERIFY(sv.inBuffer(), caseLabel);
       for (int i = 0; i < sv.size(); ++i)
          VERIFY(sv[i].i == 5, caseLabel);
@@ -5041,6 +5298,7 @@ void TestSboVector()
    TestSboVectorSize();
    TestSboVectorMaxSize();
    TestSboVectorReserve();
+   TestSboVectorShrinkToFit();
 
    TestSboVectorIteratorDefaultCtor();
    TestSboVectorIteratorVectorAndIndexCtor();

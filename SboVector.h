@@ -122,10 +122,12 @@ template <typename T, std::size_t N> class SboVector
    std::size_t size() const noexcept;
    constexpr std::size_t max_size() const noexcept;
    std::size_t capacity() const noexcept;
-   void reserve(std::size_t capacity);
+   void reserve(std::size_t cap);
    void shrink_to_fit();
 
    void clear() noexcept;
+   iterator erase(const_iterator pos);
+   iterator erase(const_iterator first, const_iterator last);
    void push_back(T val);
 
    bool inBuffer() const;
@@ -715,28 +717,55 @@ std::size_t SboVector<T, N>::capacity() const noexcept
 }
 
 
-template <typename T, std::size_t N> void SboVector<T, N>::reserve(std::size_t capacity)
+template <typename T, std::size_t N> void SboVector<T, N>::reserve(std::size_t cap)
 {
-   if (capacity > max_size())
+   // Vector spec calls for exception when request exceeds the max size.
+   if (cap > max_size())
       throw std::length_error("SboVector - Exceeding max size.");
    // Does nothing when requested capacity is less than the current capacity.
-   if (capacity <= this->capacity())
+   if (cap <= capacity())
       return;
 
-   reallocate(capacity);
+   reallocate(cap);
 }
 
 
 template <typename T, std::size_t N> void SboVector<T, N>::shrink_to_fit()
 {
-   if (onHeap() && m_size < m_capacity)
-      reallocate(m_size);
+   if (onHeap() && size() < capacity())
+      reallocate(size());
 }
 
 
 template <typename T, std::size_t N> void SboVector<T, N>::clear() noexcept
 {
    // todo
+}
+
+
+template <typename T, std::size_t N>
+typename SboVector<T, N>::iterator SboVector<T, N>::erase(const_iterator pos)
+{
+   // todo
+
+   // only quick and dirty
+   // assume it's the last one
+   pos;
+   if (!empty())
+   {
+      std::destroy_at(m_data + size() - 1);
+      m_size -= 1;
+   }
+   return end();
+}
+
+
+template <typename T, std::size_t N>
+typename SboVector<T, N>::iterator SboVector<T, N>::erase(const_iterator first,
+                                                          const_iterator last)
+{
+   // todo
+   return end();
 }
 
 
@@ -899,8 +928,8 @@ template <typename T, std::size_t N> void SboVector<T, N>::deallocate()
 template <typename T, std::size_t N> void SboVector<T, N>::reallocate(std::size_t newCap)
 {
    // Cannot reallocate to less than what the current elements occupy.
-   assert(newCap >= m_size);
-   if (newCap < m_size)
+   assert(newCap >= size());
+   if (newCap < size())
       return;
 
    if (newCap > capacity())
@@ -1009,12 +1038,13 @@ template <typename T, std::size_t N> T* SboVector<T, N>::allocateMem(std::size_t
 #ifdef SBOVEC_MEM_INSTR
    m_allocatedCap += cap;
 #endif // SBOVEC_MEM_INSTR
-   
+
    return mem;
 }
 
 
-template <typename T, std::size_t N> void SboVector<T, N>::deallocateMem(T* mem, std::size_t cap)
+template <typename T, std::size_t N>
+void SboVector<T, N>::deallocateMem(T* mem, std::size_t cap)
 {
 #ifdef VS_COMPILER
    _aligned_free(mem);
