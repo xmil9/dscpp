@@ -198,7 +198,7 @@ template <typename SV> class MemVerifier
 void TestSboVectorDefaultCtor()
 {
    {
-      const std::string caseLabel{"SboVector default ctor."};
+      const std::string caseLabel{"SboVector default ctor"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = Element;
@@ -225,7 +225,7 @@ void TestSboVectorDefaultCtor()
 void TestSboVectorCtorForElementCountAndValue()
 {
    {
-      const std::string caseLabel{"SboVector count-and-value ctor for buffer instance."};
+      const std::string caseLabel{"SboVector count-and-value ctor for buffer instance"};
 
       constexpr std::size_t BufCap = 10;
       constexpr std::size_t NumElems = 5;
@@ -261,7 +261,7 @@ void TestSboVectorCtorForElementCountAndValue()
       }
    }
    {
-      const std::string caseLabel{"SboVector count-and-value ctor for heap instance."};
+      const std::string caseLabel{"SboVector count-and-value ctor for heap instance"};
 
       constexpr std::size_t BufCap = 10;
       constexpr std::size_t NumElems = 20;
@@ -302,7 +302,7 @@ void TestSboVectorCtorForElementCountAndValue()
 void TestSboVectorCopyCtor()
 {
    {
-      const std::string caseLabel{"SboVector copy ctor for buffer instance."};
+      const std::string caseLabel{"SboVector copy ctor for buffer instance"};
 
       constexpr std::size_t BufCap = 10;
       constexpr std::size_t NumElems = 5;
@@ -340,7 +340,7 @@ void TestSboVectorCopyCtor()
       }
    }
    {
-      const std::string caseLabel{"SboVector copy ctor for heap instance."};
+      const std::string caseLabel{"SboVector copy ctor for heap instance"};
 
       constexpr std::size_t BufCap = 10;
       constexpr std::size_t NumElems = 20;
@@ -383,7 +383,7 @@ void TestSboVectorCopyCtor()
 void TestSboVectorMoveCtor()
 {
    {
-      const std::string caseLabel{"SboVector move ctor for buffer instance."};
+      const std::string caseLabel{"SboVector move ctor for buffer instance"};
 
       constexpr std::size_t BufCap = 10;
       constexpr std::size_t NumElems = 5;
@@ -423,7 +423,7 @@ void TestSboVectorMoveCtor()
       }
    }
    {
-      const std::string caseLabel{"SboVector move ctor for heap instance."};
+      const std::string caseLabel{"SboVector move ctor for heap instance"};
 
       constexpr std::size_t BufCap = 10;
       constexpr std::size_t NumElems = 20;
@@ -468,7 +468,7 @@ void TestSboVectorMoveCtor()
 void TestSboVectorInitializerListCtor()
 {
    {
-      const std::string caseLabel{"SboVector initializer list ctor for buffer instance."};
+      const std::string caseLabel{"SboVector initializer list ctor for buffer instance"};
 
       constexpr std::size_t BufCap = 10;
       constexpr std::size_t NumElems = 4;
@@ -504,7 +504,7 @@ void TestSboVectorInitializerListCtor()
       }
    }
    {
-      const std::string caseLabel{"SboVector initializer list ctor for heap instance."};
+      const std::string caseLabel{"SboVector initializer list ctor for heap instance"};
 
       constexpr std::size_t BufCap = 10;
       constexpr std::size_t NumElems = 12;
@@ -547,7 +547,7 @@ void TestSboVectorInitializerListCtor()
 void TestSboVectorDtor()
 {
    {
-      const std::string caseLabel{"SboVector dtor for buffer instance."};
+      const std::string caseLabel{"SboVector dtor for buffer instance"};
 
       constexpr std::size_t BufCap = 10;
       constexpr std::size_t NumElems = 3;
@@ -574,7 +574,7 @@ void TestSboVectorDtor()
       VERIFY(Elem::m_instrumented.dtorCalls == NumElems, caseLabel);
    }
    {
-      const std::string caseLabel{"SboVector dtor for heap instance."};
+      const std::string caseLabel{"SboVector dtor for heap instance"};
 
       constexpr std::size_t BufCap = 3;
       constexpr std::size_t NumElems = 5;
@@ -604,7 +604,7 @@ void TestSboVectorCopyAssignment()
 {
    {
       const std::string caseLabel{
-         "SboVector copy assignment of buffer instance to buffer instance."};
+         "SboVector copy assignment of buffer instance to buffer instance"};
 
       constexpr std::size_t BufCap = 10;
       constexpr std::size_t NumElems = 5;
@@ -649,7 +649,7 @@ void TestSboVectorCopyAssignment()
    }
    {
       const std::string caseLabel{
-         "SboVector copy assignment of heap instance to buffer instance."};
+         "SboVector copy assignment of heap instance to buffer instance"};
 
       constexpr std::size_t BufCap = 10;
       constexpr std::size_t NumElems = 20;
@@ -694,7 +694,7 @@ void TestSboVectorCopyAssignment()
    }
    {
       const std::string caseLabel{
-         "SboVector copy assignment of buffer instance to heap instance."};
+         "SboVector copy assignment of buffer instance to heap instance"};
 
       constexpr std::size_t BufCap = 10;
       constexpr std::size_t NumElems = 5;
@@ -739,7 +739,7 @@ void TestSboVectorCopyAssignment()
    }
    {
       const std::string caseLabel{
-         "SboVector copy assignment of larger heap instance to smaller heap instance."};
+         "SboVector copy assignment of larger heap instance to smaller heap instance"};
 
       constexpr std::size_t BufCap = 10;
       constexpr std::size_t NumElems = 20;
@@ -787,7 +787,7 @@ void TestSboVectorCopyAssignment()
    }
    {
       const std::string caseLabel{
-         "SboVector copy assignment of smaller heap instance to larger heap instance."};
+         "SboVector copy assignment of smaller heap instance to larger heap instance"};
 
       constexpr std::size_t BufCap = 10;
       constexpr std::size_t NumElems = 15;
@@ -840,7 +840,7 @@ void TestSboVectorMoveAssignment()
 {
    {
       const std::string caseLabel{"SboVector move assignment of buffer "
-                                  "instance to buffer instance."};
+                                  "instance to buffer instance"};
 
       constexpr std::size_t BufCap = 10;
       constexpr std::size_t NumElems = 5;
@@ -886,7 +886,7 @@ void TestSboVectorMoveAssignment()
    }
    {
       const std::string caseLabel{"SboVector move assignment of heap "
-                                  "instance to buffer instance."};
+                                  "instance to buffer instance"};
 
       constexpr std::size_t BufCap = 10;
       constexpr std::size_t NumElems = 20;
@@ -932,7 +932,7 @@ void TestSboVectorMoveAssignment()
    }
    {
       const std::string caseLabel{"SboVector move assignment of buffer "
-                                  "instance to heap instance."};
+                                  "instance to heap instance"};
 
       constexpr std::size_t BufCap = 10;
       constexpr std::size_t NumElems = 5;
@@ -978,7 +978,7 @@ void TestSboVectorMoveAssignment()
    }
    {
       const std::string caseLabel{"SboVector move assignment of smaller heap "
-                                  "instance to larger heap instance."};
+                                  "instance to larger heap instance"};
 
       constexpr std::size_t BufCap = 10;
       constexpr std::size_t NumElems = 15;
@@ -1025,7 +1025,7 @@ void TestSboVectorMoveAssignment()
    }
    {
       const std::string caseLabel{"SboVector move assignment of larger heap "
-                                  "instance to smaller heap instance."};
+                                  "instance to smaller heap instance"};
 
       constexpr std::size_t BufCap = 10;
       constexpr std::size_t NumElems = 20;
@@ -1077,7 +1077,7 @@ void TestSboVectorInitializerListAssignment()
 {
    {
       const std::string caseLabel{
-         "SboVector initializer list assignment that fits in buffer to buffer instance."};
+         "SboVector initializer list assignment that fits in buffer to buffer instance"};
 
       constexpr std::size_t BufCap = 10;
       constexpr std::size_t NumElems = 2;
@@ -1119,7 +1119,7 @@ void TestSboVectorInitializerListAssignment()
    }
    {
       const std::string caseLabel{"SboVector initializer list assignment that requires "
-                                  "heap to buffer instance."};
+                                  "heap to buffer instance"};
 
       constexpr std::size_t BufCap = 5;
       constexpr std::size_t NumElems = 7;
@@ -1161,7 +1161,7 @@ void TestSboVectorInitializerListAssignment()
    }
    {
       const std::string caseLabel{"SboVector initializer list assignment  "
-                                  "that fits in buffer to heap instance."};
+                                  "that fits in buffer to heap instance"};
 
       constexpr std::size_t BufCap = 5;
       constexpr std::size_t NumElems = 3;
@@ -1203,7 +1203,7 @@ void TestSboVectorInitializerListAssignment()
    }
    {
       const std::string caseLabel{"SboVector initializer list assignment that needs heap "
-                                  "but can reuse the heap of the target instance."};
+                                  "but can reuse the heap of the target instance"};
 
       constexpr std::size_t BufCap = 5;
       constexpr std::size_t NumElems = 7;
@@ -1246,7 +1246,7 @@ void TestSboVectorInitializerListAssignment()
    }
    {
       const std::string caseLabel{"SboVector initializer list assignment that needs heap "
-                                  "and cannot reuse the heap of the target instance."};
+                                  "and cannot reuse the heap of the target instance"};
 
       constexpr std::size_t BufCap = 5;
       constexpr std::size_t NumElems = 10;
@@ -1295,7 +1295,7 @@ void TestSboVectorAssignElementValue()
    {
       const std::string caseLabel{
          "SboVector assign element value n-times. Assigned values fit in buffer. "
-         "SboVector was a buffer instance."};
+         "SboVector was a buffer instance"};
 
       constexpr std::size_t BufCap = 10;
       constexpr std::size_t NumElems = 2;
@@ -1339,7 +1339,7 @@ void TestSboVectorAssignElementValue()
    {
       const std::string caseLabel{"SboVector assign element value n-times. Assigned "
                                   "values require heap allocation. "
-                                  "SboVector was a buffer instance."};
+                                  "SboVector was a buffer instance"};
 
       constexpr std::size_t BufCap = 5;
       constexpr std::size_t NumElems = 7;
@@ -1382,7 +1382,7 @@ void TestSboVectorAssignElementValue()
    {
       const std::string caseLabel{
          "SboVector assign element value n-times. Assigned "
-         "values fit into buffer. SboVector was a heap instance."};
+         "values fit into buffer. SboVector was a heap instance"};
 
       constexpr std::size_t BufCap = 5;
       constexpr std::size_t NumElems = 3;
@@ -1425,7 +1425,7 @@ void TestSboVectorAssignElementValue()
    {
       const std::string caseLabel{
          "SboVector assign element value n-times. Assigned values require heap "
-         "allocation. SboVector was a smaller heap instance."};
+         "allocation. SboVector was a smaller heap instance"};
 
       constexpr std::size_t BufCap = 5;
       constexpr std::size_t NumElems = 10;
@@ -1469,7 +1469,7 @@ void TestSboVectorAssignElementValue()
    {
       const std::string caseLabel{
          "SboVector assign element value n-times. Assigned values require heap "
-         "allocation. SboVector was a larger heap instance."};
+         "allocation. SboVector was a larger heap instance"};
 
       constexpr std::size_t BufCap = 5;
       constexpr std::size_t NumElems = 7;
@@ -1519,7 +1519,7 @@ void TestSboVectorAssignIteratorRange()
    {
       const std::string caseLabel{
          "SboVector assign iterator range. Assigned values fit in buffer. "
-         "SboVector was a buffer instance."};
+         "SboVector was a buffer instance"};
 
       constexpr std::size_t BufCap = 10;
       constexpr std::size_t NumElems = 2;
@@ -1561,7 +1561,7 @@ void TestSboVectorAssignIteratorRange()
    {
       const std::string caseLabel{
          "SboVector assign iterator range. Assigned values require heap. "
-         "SboVector was a buffer instance."};
+         "SboVector was a buffer instance"};
 
       constexpr std::size_t BufCap = 5;
       constexpr std::size_t NumElems = 7;
@@ -1603,7 +1603,7 @@ void TestSboVectorAssignIteratorRange()
    {
       const std::string caseLabel{
          "SboVector assign iterator range. Assigned fit into buffer. "
-         "SboVector was a heap instance."};
+         "SboVector was a heap instance"};
 
       constexpr std::size_t BufCap = 5;
       constexpr std::size_t NumElems = 3;
@@ -1645,7 +1645,7 @@ void TestSboVectorAssignIteratorRange()
    {
       const std::string caseLabel{
          "SboVector assign iterator range. Assigned require heap. "
-         "SboVector was a smaller heap instance."};
+         "SboVector was a smaller heap instance"};
 
       constexpr std::size_t BufCap = 5;
       constexpr std::size_t NumElems = 8;
@@ -1688,7 +1688,7 @@ void TestSboVectorAssignIteratorRange()
    {
       const std::string caseLabel{
          "SboVector assign iterator range. Assigned require heap. "
-         "SboVector was a larger heap instance."};
+         "SboVector was a larger heap instance"};
 
       constexpr std::size_t BufCap = 5;
       constexpr std::size_t NumElems = 7;
@@ -1737,7 +1737,7 @@ void TestSboVectorAssignInitializerList()
    {
       const std::string caseLabel{
          "SboVector assign initializer list. Assigned values fit in buffer. "
-         "SboVector was a buffer instance."};
+         "SboVector was a buffer instance"};
 
       constexpr std::size_t BufCap = 10;
       constexpr std::size_t NumElems = 2;
@@ -1780,7 +1780,7 @@ void TestSboVectorAssignInitializerList()
    {
       const std::string caseLabel{
          "SboVector assign initializer list. Assigned values require heap. "
-         "SboVector was a buffer instance."};
+         "SboVector was a buffer instance"};
 
       constexpr std::size_t BufCap = 5;
       constexpr std::size_t NumElems = 7;
@@ -1823,7 +1823,7 @@ void TestSboVectorAssignInitializerList()
    {
       const std::string caseLabel{
          "SboVector assign initializer list. Assigned values fit into buffer. "
-         "SboVector was a heap instance."};
+         "SboVector was a heap instance"};
 
       constexpr std::size_t BufCap = 5;
       constexpr std::size_t NumElems = 3;
@@ -1866,7 +1866,7 @@ void TestSboVectorAssignInitializerList()
    {
       const std::string caseLabel{
          "SboVector assign initializer list. Assigned values require heap. "
-         "SboVector was a smaller heap instance."};
+         "SboVector was a smaller heap instance"};
 
       constexpr std::size_t BufCap = 5;
       constexpr std::size_t NumElems = 8;
@@ -1910,7 +1910,7 @@ void TestSboVectorAssignInitializerList()
    {
       const std::string caseLabel{
          "SboVector assign initializer list. Assigned values require heap. "
-         "SboVector was a larger heap instance."};
+         "SboVector was a larger heap instance"};
 
       constexpr std::size_t BufCap = 5;
       constexpr std::size_t NumElems = 7;
@@ -1958,7 +1958,7 @@ void TestSboVectorAt()
 {
    {
       const std::string caseLabel{
-         "SvoVector::at for reading from valid index into buffer instance."};
+         "SvoVector::at for reading from valid index into buffer instance"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -1978,7 +1978,7 @@ void TestSboVectorAt()
    }
    {
       const std::string caseLabel{
-         "SvoVector::at for writing to valid index into buffer instance."};
+         "SvoVector::at for writing to valid index into buffer instance"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -2001,7 +2001,7 @@ void TestSboVectorAt()
    }
    {
       const std::string caseLabel{
-         "SvoVector::at for reading from valid index into heap instance."};
+         "SvoVector::at for reading from valid index into heap instance"};
 
       constexpr std::size_t BufCap = 5;
       using Elem = int;
@@ -2021,7 +2021,7 @@ void TestSboVectorAt()
    }
    {
       const std::string caseLabel{
-         "SvoVector::at for writing to valid index into heap instance."};
+         "SvoVector::at for writing to valid index into heap instance"};
 
       constexpr std::size_t BufCap = 5;
       using Elem = int;
@@ -2044,7 +2044,7 @@ void TestSboVectorAt()
    }
    {
       const std::string caseLabel{
-         "SvoVector::at for accessing invalid index into buffer instance."};
+         "SvoVector::at for accessing invalid index into buffer instance"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -2064,7 +2064,7 @@ void TestSboVectorAt()
    }
    {
       const std::string caseLabel{
-         "SvoVector::at for accessing invalid index into heap instance."};
+         "SvoVector::at for accessing invalid index into heap instance"};
 
       constexpr std::size_t BufCap = 5;
       using Elem = int;
@@ -2088,7 +2088,7 @@ void TestSboVectorAtConst()
 {
    {
       const std::string caseLabel{
-         "SvoVector::at const for reading from valid index into buffer instance."};
+         "SvoVector::at const for reading from valid index into buffer instance"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -2108,7 +2108,7 @@ void TestSboVectorAtConst()
    }
    {
       const std::string caseLabel{
-         "SvoVector::at const for reading from valid index into heap instance."};
+         "SvoVector::at const for reading from valid index into heap instance"};
 
       constexpr std::size_t BufCap = 5;
       using Elem = int;
@@ -2128,7 +2128,7 @@ void TestSboVectorAtConst()
    }
    {
       const std::string caseLabel{
-         "SvoVector::at const for accessing invalid index into buffer instance."};
+         "SvoVector::at const for accessing invalid index into buffer instance"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -2148,7 +2148,7 @@ void TestSboVectorAtConst()
    }
    {
       const std::string caseLabel{
-         "SvoVector::at const for accessing invalid index into heap instance."};
+         "SvoVector::at const for accessing invalid index into heap instance"};
 
       constexpr std::size_t BufCap = 5;
       using Elem = int;
@@ -2172,7 +2172,7 @@ void TestSboVectorSubscriptOperator()
 {
    {
       const std::string caseLabel{
-         "SvoVector::operator[] for reading from valid index into buffer instance."};
+         "SvoVector::operator[] for reading from valid index into buffer instance"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -2192,7 +2192,7 @@ void TestSboVectorSubscriptOperator()
    }
    {
       const std::string caseLabel{
-         "SvoVector::operator[] for writing to valid index into buffer instance."};
+         "SvoVector::operator[] for writing to valid index into buffer instance"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -2215,7 +2215,7 @@ void TestSboVectorSubscriptOperator()
    }
    {
       const std::string caseLabel{
-         "SvoVector::operator[] for reading from valid index into heap instance."};
+         "SvoVector::operator[] for reading from valid index into heap instance"};
 
       constexpr std::size_t BufCap = 5;
       using Elem = int;
@@ -2235,7 +2235,7 @@ void TestSboVectorSubscriptOperator()
    }
    {
       const std::string caseLabel{
-         "SvoVector::operator[] for writing to valid index into heap instance."};
+         "SvoVector::operator[] for writing to valid index into heap instance"};
 
       constexpr std::size_t BufCap = 5;
       using Elem = int;
@@ -2263,7 +2263,7 @@ void TestSboVectorSubscriptOperatorConst()
 {
    {
       const std::string caseLabel{
-         "SvoVector::operator[] const for accessing valid index into buffer instance."};
+         "SvoVector::operator[] const for accessing valid index into buffer instance"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -2283,7 +2283,7 @@ void TestSboVectorSubscriptOperatorConst()
    }
    {
       const std::string caseLabel{
-         "SvoVector::operator[] const for accessing valid index into heap instance."};
+         "SvoVector::operator[] const for accessing valid index into heap instance"};
 
       constexpr std::size_t BufCap = 5;
       using Elem = int;
@@ -2307,7 +2307,7 @@ void TestSboVectorSubscriptOperatorConst()
 void TestSboVectorFront()
 {
    {
-      const std::string caseLabel{"SvoVector::front for reading from buffer instance."};
+      const std::string caseLabel{"SvoVector::front for reading from buffer instance"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -2325,7 +2325,7 @@ void TestSboVectorFront()
       VERIFY(sv.front() == 1, caseLabel);
    }
    {
-      const std::string caseLabel{"SvoVector::front for writing to buffer instance."};
+      const std::string caseLabel{"SvoVector::front for writing to buffer instance"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -2344,7 +2344,7 @@ void TestSboVectorFront()
       VERIFY(sv[0] == 100, caseLabel);
    }
    {
-      const std::string caseLabel{"SvoVector::front for reading from heap instance."};
+      const std::string caseLabel{"SvoVector::front for reading from heap instance"};
 
       constexpr std::size_t BufCap = 5;
       using Elem = int;
@@ -2363,7 +2363,7 @@ void TestSboVectorFront()
    }
    {
       const std::string caseLabel{
-         "SvoVector::front for writing to valid index into heap instance."};
+         "SvoVector::front for writing to valid index into heap instance"};
 
       constexpr std::size_t BufCap = 5;
       using Elem = int;
@@ -2387,7 +2387,7 @@ void TestSboVectorFront()
 void TestSboVectorFrontConst()
 {
    {
-      const std::string caseLabel{"SvoVector::front const for buffer instance."};
+      const std::string caseLabel{"SvoVector::front const for buffer instance"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -2405,7 +2405,7 @@ void TestSboVectorFrontConst()
       VERIFY(sv.front() == 1, caseLabel);
    }
    {
-      const std::string caseLabel{"SvoVector::front const for heap instance."};
+      const std::string caseLabel{"SvoVector::front const for heap instance"};
 
       constexpr std::size_t BufCap = 5;
       using Elem = int;
@@ -2428,7 +2428,7 @@ void TestSboVectorFrontConst()
 void TestSboVectorBack()
 {
    {
-      const std::string caseLabel{"SvoVector::back for reading from buffer instance."};
+      const std::string caseLabel{"SvoVector::back for reading from buffer instance"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -2445,7 +2445,7 @@ void TestSboVectorBack()
       VERIFY(sv.back() == 4, caseLabel);
    }
    {
-      const std::string caseLabel{"SvoVector::back for writing to buffer instance."};
+      const std::string caseLabel{"SvoVector::back for writing to buffer instance"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -2464,7 +2464,7 @@ void TestSboVectorBack()
       VERIFY(sv[sv.size() - 1] == 100, caseLabel);
    }
    {
-      const std::string caseLabel{"SvoVector::back for reading from heap instance."};
+      const std::string caseLabel{"SvoVector::back for reading from heap instance"};
 
       constexpr std::size_t BufCap = 5;
       using Elem = int;
@@ -2482,7 +2482,7 @@ void TestSboVectorBack()
    }
    {
       const std::string caseLabel{
-         "SvoVector::back for writing to valid index into heap instance."};
+         "SvoVector::back for writing to valid index into heap instance"};
 
       constexpr std::size_t BufCap = 5;
       using Elem = int;
@@ -2506,7 +2506,7 @@ void TestSboVectorBack()
 void TestSboVectorBackConst()
 {
    {
-      const std::string caseLabel{"SvoVector::back const for buffer instance."};
+      const std::string caseLabel{"SvoVector::back const for buffer instance"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -2524,7 +2524,7 @@ void TestSboVectorBackConst()
       VERIFY(sv.back() == 4, caseLabel);
    }
    {
-      const std::string caseLabel{"SvoVector::back const for heap instance."};
+      const std::string caseLabel{"SvoVector::back const for heap instance"};
 
       constexpr std::size_t BufCap = 5;
       using Elem = int;
@@ -2547,7 +2547,7 @@ void TestSboVectorBackConst()
 void TestSboVectorData()
 {
    {
-      const std::string caseLabel{"SvoVector::data for reading from buffer instance."};
+      const std::string caseLabel{"SvoVector::data for reading from buffer instance"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -2567,7 +2567,7 @@ void TestSboVectorData()
          VERIFY(data[i] == i + 1, caseLabel);
    }
    {
-      const std::string caseLabel{"SvoVector::data for writing to buffer instance."};
+      const std::string caseLabel{"SvoVector::data for writing to buffer instance"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -2590,7 +2590,7 @@ void TestSboVectorData()
       }
    }
    {
-      const std::string caseLabel{"SvoVector::data for reading from heap instance."};
+      const std::string caseLabel{"SvoVector::data for reading from heap instance"};
 
       constexpr std::size_t BufCap = 5;
       using Elem = int;
@@ -2611,7 +2611,7 @@ void TestSboVectorData()
    }
    {
       const std::string caseLabel{
-         "SvoVector::data for writing to valid index into heap instance."};
+         "SvoVector::data for writing to valid index into heap instance"};
 
       constexpr std::size_t BufCap = 5;
       using Elem = int;
@@ -2639,7 +2639,7 @@ void TestSboVectorData()
 void TestSboVectorDataConst()
 {
    {
-      const std::string caseLabel{"SvoVector::data const for buffer instance."};
+      const std::string caseLabel{"SvoVector::data const for buffer instance"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -2659,7 +2659,7 @@ void TestSboVectorDataConst()
          VERIFY(data[i] == i + 1, caseLabel);
    }
    {
-      const std::string caseLabel{"SvoVector::back const for heap instance."};
+      const std::string caseLabel{"SvoVector::back const for heap instance"};
 
       constexpr std::size_t BufCap = 5;
       using Elem = int;
@@ -2684,7 +2684,7 @@ void TestSboVectorDataConst()
 void TestSboVectorBegin()
 {
    {
-      const std::string caseLabel{"SboVector::begin for populated vector."};
+      const std::string caseLabel{"SboVector::begin for populated vector"};
 
       constexpr std::size_t BufCap = 10;
       using SV = SboVector<int, BufCap>;
@@ -2703,7 +2703,7 @@ void TestSboVectorBegin()
       VERIFY(*first == 1, caseLabel);
    }
    {
-      const std::string caseLabel{"SboVector::begin for empty vector."};
+      const std::string caseLabel{"SboVector::begin for empty vector"};
 
       constexpr std::size_t BufCap = 10;
       using SV = SboVector<int, BufCap>;
@@ -2727,7 +2727,7 @@ void TestSboVectorBegin()
 void TestSboVectorEnd()
 {
    {
-      const std::string caseLabel{"SboVector::end for populated vector."};
+      const std::string caseLabel{"SboVector::end for populated vector"};
 
       constexpr std::size_t BufCap = 10;
       using SV = SboVector<int, BufCap>;
@@ -2747,7 +2747,7 @@ void TestSboVectorEnd()
       VERIFY(last == sv.begin() + sv.size(), caseLabel);
    }
    {
-      const std::string caseLabel{"SboVector::end for empty vector."};
+      const std::string caseLabel{"SboVector::end for empty vector"};
 
       constexpr std::size_t BufCap = 10;
       using SV = SboVector<int, BufCap>;
@@ -2771,7 +2771,7 @@ void TestSboVectorEnd()
 void TestSboVectorBeginConst()
 {
    {
-      const std::string caseLabel{"SboVector::begin const for populated vector."};
+      const std::string caseLabel{"SboVector::begin const for populated vector"};
 
       constexpr std::size_t BufCap = 10;
       using SV = SboVector<int, BufCap>;
@@ -2790,7 +2790,7 @@ void TestSboVectorBeginConst()
       VERIFY(*first == 1, caseLabel);
    }
    {
-      const std::string caseLabel{"SboVector::begin const for empty vector."};
+      const std::string caseLabel{"SboVector::begin const for empty vector"};
 
       constexpr std::size_t BufCap = 10;
       using SV = SboVector<int, BufCap>;
@@ -2814,7 +2814,7 @@ void TestSboVectorBeginConst()
 void TestSboVectorEndConst()
 {
    {
-      const std::string caseLabel{"SboVector::end const for populated vector."};
+      const std::string caseLabel{"SboVector::end const for populated vector"};
 
       constexpr std::size_t BufCap = 10;
       using SV = SboVector<int, BufCap>;
@@ -2834,7 +2834,7 @@ void TestSboVectorEndConst()
       VERIFY(last == sv.begin() + sv.size(), caseLabel);
    }
    {
-      const std::string caseLabel{"SboVector::end const for empty vector."};
+      const std::string caseLabel{"SboVector::end const for empty vector"};
 
       constexpr std::size_t BufCap = 10;
       using SV = SboVector<int, BufCap>;
@@ -2858,7 +2858,7 @@ void TestSboVectorEndConst()
 void TestSboVectorCBegin()
 {
    {
-      const std::string caseLabel{"SboVector::cbegin const for populated vector."};
+      const std::string caseLabel{"SboVector::cbegin const for populated vector"};
 
       constexpr std::size_t BufCap = 10;
       using SV = SboVector<int, BufCap>;
@@ -2877,7 +2877,7 @@ void TestSboVectorCBegin()
       VERIFY(*first == 1, caseLabel);
    }
    {
-      const std::string caseLabel{"SboVector::cbegin const for empty vector."};
+      const std::string caseLabel{"SboVector::cbegin const for empty vector"};
 
       constexpr std::size_t BufCap = 10;
       using SV = SboVector<int, BufCap>;
@@ -2901,7 +2901,7 @@ void TestSboVectorCBegin()
 void TestSboVectorCEnd()
 {
    {
-      const std::string caseLabel{"SboVector::cend const for populated vector."};
+      const std::string caseLabel{"SboVector::cend const for populated vector"};
 
       constexpr std::size_t BufCap = 10;
       using SV = SboVector<int, BufCap>;
@@ -2921,7 +2921,7 @@ void TestSboVectorCEnd()
       VERIFY(last == sv.cbegin() + sv.size(), caseLabel);
    }
    {
-      const std::string caseLabel{"SboVector::cend const for empty vector."};
+      const std::string caseLabel{"SboVector::cend const for empty vector"};
 
       constexpr std::size_t BufCap = 10;
       using SV = SboVector<int, BufCap>;
@@ -2945,7 +2945,7 @@ void TestSboVectorCEnd()
 void TestSboVectorRBegin()
 {
    {
-      const std::string caseLabel{"SboVector::rbegin for populated vector."};
+      const std::string caseLabel{"SboVector::rbegin for populated vector"};
 
       constexpr std::size_t BufCap = 10;
       using SV = SboVector<int, BufCap>;
@@ -2964,7 +2964,7 @@ void TestSboVectorRBegin()
       VERIFY(*rfirst == 20, caseLabel);
    }
    {
-      const std::string caseLabel{"SboVector::rbegin for empty vector."};
+      const std::string caseLabel{"SboVector::rbegin for empty vector"};
 
       constexpr std::size_t BufCap = 10;
       using SV = SboVector<int, BufCap>;
@@ -2988,7 +2988,7 @@ void TestSboVectorRBegin()
 void TestSboVectorREnd()
 {
    {
-      const std::string caseLabel{"SboVector::rend for populated vector."};
+      const std::string caseLabel{"SboVector::rend for populated vector"};
 
       constexpr std::size_t BufCap = 10;
       using SV = SboVector<int, BufCap>;
@@ -3008,7 +3008,7 @@ void TestSboVectorREnd()
       VERIFY(rlast == sv.rbegin() + sv.size(), caseLabel);
    }
    {
-      const std::string caseLabel{"SboVector::rend for empty vector."};
+      const std::string caseLabel{"SboVector::rend for empty vector"};
 
       constexpr std::size_t BufCap = 10;
       using SV = SboVector<int, BufCap>;
@@ -3032,7 +3032,7 @@ void TestSboVectorREnd()
 void TestSboVectorRBeginConst()
 {
    {
-      const std::string caseLabel{"SboVector::rbegin const for populated vector."};
+      const std::string caseLabel{"SboVector::rbegin const for populated vector"};
 
       constexpr std::size_t BufCap = 10;
       using SV = SboVector<int, BufCap>;
@@ -3051,7 +3051,7 @@ void TestSboVectorRBeginConst()
       VERIFY(*rfirst == 20, caseLabel);
    }
    {
-      const std::string caseLabel{"SboVector::rbegin const for empty vector."};
+      const std::string caseLabel{"SboVector::rbegin const for empty vector"};
 
       constexpr std::size_t BufCap = 10;
       using SV = SboVector<int, BufCap>;
@@ -3075,7 +3075,7 @@ void TestSboVectorRBeginConst()
 void TestSboVectorREndConst()
 {
    {
-      const std::string caseLabel{"SboVector::rend const for populated vector."};
+      const std::string caseLabel{"SboVector::rend const for populated vector"};
 
       constexpr std::size_t BufCap = 10;
       using SV = SboVector<int, BufCap>;
@@ -3095,7 +3095,7 @@ void TestSboVectorREndConst()
       VERIFY(rlast == sv.rbegin() + sv.size(), caseLabel);
    }
    {
-      const std::string caseLabel{"SboVector::rend const for empty vector."};
+      const std::string caseLabel{"SboVector::rend const for empty vector"};
 
       constexpr std::size_t BufCap = 10;
       using SV = SboVector<int, BufCap>;
@@ -3119,7 +3119,7 @@ void TestSboVectorREndConst()
 void TestSboVectorCRBegin()
 {
    {
-      const std::string caseLabel{"SboVector::crbegin const for populated vector."};
+      const std::string caseLabel{"SboVector::crbegin const for populated vector"};
 
       constexpr std::size_t BufCap = 10;
       using SV = SboVector<int, BufCap>;
@@ -3138,7 +3138,7 @@ void TestSboVectorCRBegin()
       VERIFY(*rfirst == 20, caseLabel);
    }
    {
-      const std::string caseLabel{"SboVector::crbegin const for empty vector."};
+      const std::string caseLabel{"SboVector::crbegin const for empty vector"};
 
       constexpr std::size_t BufCap = 10;
       using SV = SboVector<int, BufCap>;
@@ -3162,7 +3162,7 @@ void TestSboVectorCRBegin()
 void TestSboVectorCREnd()
 {
    {
-      const std::string caseLabel{"SboVector::crend const for populated vector."};
+      const std::string caseLabel{"SboVector::crend const for populated vector"};
 
       constexpr std::size_t BufCap = 10;
       using SV = SboVector<int, BufCap>;
@@ -3182,7 +3182,7 @@ void TestSboVectorCREnd()
       VERIFY(rlast == sv.crbegin() + sv.size(), caseLabel);
    }
    {
-      const std::string caseLabel{"SboVector::crend const for empty vector."};
+      const std::string caseLabel{"SboVector::crend const for empty vector"};
 
       constexpr std::size_t BufCap = 10;
       using SV = SboVector<int, BufCap>;
@@ -3206,7 +3206,7 @@ void TestSboVectorCREnd()
 void TestSboVectorEmpty()
 {
    {
-      const std::string caseLabel{"SvoVector::empty for empty instance."};
+      const std::string caseLabel{"SvoVector::empty for empty instance"};
 
       constexpr std::size_t BufCap = 10;
       using SV = SboVector<int, BufCap>;
@@ -3223,7 +3223,7 @@ void TestSboVectorEmpty()
       VERIFY(sv.empty(), caseLabel);
    }
    {
-      const std::string caseLabel{"SvoVector::empty for non-empty buffer instance."};
+      const std::string caseLabel{"SvoVector::empty for non-empty buffer instance"};
 
       constexpr std::size_t BufCap = 10;
       using SV = SboVector<int, BufCap>;
@@ -3241,7 +3241,7 @@ void TestSboVectorEmpty()
       VERIFY(!sv.empty(), caseLabel);
    }
    {
-      const std::string caseLabel{"SvoVector::empty for non-empty heap instance."};
+      const std::string caseLabel{"SvoVector::empty for non-empty heap instance"};
 
       constexpr std::size_t BufCap = 5;
       using SV = SboVector<int, BufCap>;
@@ -3264,7 +3264,7 @@ void TestSboVectorEmpty()
 void TestSboVectorSize()
 {
    {
-      const std::string caseLabel{"SvoVector::size for empty instance."};
+      const std::string caseLabel{"SvoVector::size for empty instance"};
 
       constexpr std::size_t BufCap = 10;
       using SV = SboVector<int, BufCap>;
@@ -3281,7 +3281,7 @@ void TestSboVectorSize()
       VERIFY(sv.size() == 0, caseLabel);
    }
    {
-      const std::string caseLabel{"SvoVector::empty for non-empty buffer instance."};
+      const std::string caseLabel{"SvoVector::empty for non-empty buffer instance"};
 
       constexpr std::size_t BufCap = 10;
       using SV = SboVector<int, BufCap>;
@@ -3299,7 +3299,7 @@ void TestSboVectorSize()
       VERIFY(sv.size() == 2, caseLabel);
    }
    {
-      const std::string caseLabel{"SvoVector::empty for non-empty buffer instance."};
+      const std::string caseLabel{"SvoVector::empty for non-empty buffer instance"};
 
       constexpr std::size_t BufCap = 5;
       using SV = SboVector<int, BufCap>;
@@ -3322,7 +3322,7 @@ void TestSboVectorSize()
 void TestSboVectorMaxSize()
 {
    {
-      const std::string caseLabel{"SvoVector::max_size for buffer instance."};
+      const std::string caseLabel{"SvoVector::max_size for buffer instance"};
 
       constexpr std::size_t BufCap = 10;
       using SV = SboVector<int, BufCap>;
@@ -3339,7 +3339,7 @@ void TestSboVectorMaxSize()
       VERIFY(sv.max_size() > 0, caseLabel);
    }
    {
-      const std::string caseLabel{"SvoVector::max_size for heap instance."};
+      const std::string caseLabel{"SvoVector::max_size for heap instance"};
 
       constexpr std::size_t BufCap = 5;
       using SV = SboVector<int, BufCap>;
@@ -3356,7 +3356,7 @@ void TestSboVectorMaxSize()
       VERIFY(sv.max_size() > 0, caseLabel);
    }
    {
-      const std::string caseLabel{"SvoVector::max_size for empty instance."};
+      const std::string caseLabel{"SvoVector::max_size for empty instance"};
 
       constexpr std::size_t BufCap = 5;
       using SV = SboVector<int, BufCap>;
@@ -3378,7 +3378,7 @@ void TestSboVectorMaxSize()
 void TestSboVectorReserve()
 {
    {
-      const std::string caseLabel{"SvoVector::reserve for capacity less than current."};
+      const std::string caseLabel{"SvoVector::reserve for capacity less than current"};
 
       constexpr std::size_t BufCap = 5;
       constexpr std::size_t OrigCap = 10;
@@ -3412,7 +3412,7 @@ void TestSboVectorReserve()
    }
    {
       const std::string caseLabel{
-         "SvoVector::reserve for capacity larger than max size."};
+         "SvoVector::reserve for capacity larger than max size"};
 
       constexpr std::size_t BufCap = 5;
       constexpr std::size_t OrigCap = 10;
@@ -3438,7 +3438,7 @@ void TestSboVectorReserve()
    }
    {
       const std::string caseLabel{"SvoVector::reserve for capacity larger than current "
-                                  "with type that is moveable."};
+                                  "with type that is moveable"};
 
       constexpr std::size_t BufCap = 5;
       constexpr std::size_t OrigCap = 10;
@@ -3475,7 +3475,7 @@ void TestSboVectorReserve()
    }
    {
       const std::string caseLabel{"SvoVector::reserve for capacity larger than current "
-                                  "with type that is not moveable."};
+                                  "with type that is not moveable"};
 
       constexpr std::size_t BufCap = 5;
       constexpr std::size_t OrigCap = 10;
@@ -3516,7 +3516,7 @@ void TestSboVectorReserve()
    }
    {
       const std::string caseLabel{"SvoVector::reserve for capacity larger than current "
-                                  "where current data is in buffer."};
+                                  "where current data is in buffer"};
 
       constexpr std::size_t BufCap = 10;
       constexpr std::size_t OrigCap = 5;
@@ -3556,7 +3556,7 @@ void TestSboVectorReserve()
    {
       const std::string caseLabel{
          "SvoVector::reserve for capacity larger than current "
-         "where current data is in buffer with type that is not moveable."};
+         "where current data is in buffer with type that is not moveable"};
 
       constexpr std::size_t BufCap = 10;
       constexpr std::size_t OrigCap = 5;
@@ -3597,7 +3597,7 @@ void TestSboVectorReserve()
    }
    {
       const std::string caseLabel{"SvoVector::reserve for capacity larger than current "
-                                  "but smaller than buffer."};
+                                  "but smaller than buffer"};
 
       constexpr std::size_t BufCap = 10;
       constexpr std::size_t OrigCap = 5;
@@ -3639,7 +3639,7 @@ void TestSboVectorReserve()
 void TestSboVectorShrinkToFit()
 {
    {
-      const std::string caseLabel{"SvoVector::shrink_to_fit for buffer instance."};
+      const std::string caseLabel{"SvoVector::shrink_to_fit for buffer instance"};
 
       constexpr std::size_t BufCap = 10;
       constexpr std::size_t NumElems = 7;
@@ -3674,7 +3674,7 @@ void TestSboVectorShrinkToFit()
    }
    {
       const std::string caseLabel{
-         "SvoVector::shrink_to_fit for heap instance with capacity fully occupied."};
+         "SvoVector::shrink_to_fit for heap instance with capacity fully occupied"};
 
       constexpr std::size_t BufCap = 10;
       constexpr std::size_t NumElems = 15;
@@ -3711,7 +3711,7 @@ void TestSboVectorShrinkToFit()
    {
       const std::string caseLabel{
          "SvoVector::shrink_to_fit for heap instance with "
-         "shrunken size still on the heap using a moveable element type."};
+         "shrunken size still on the heap using a moveable element type"};
 
       constexpr std::size_t BufCap = 10;
       constexpr std::size_t Cap = 15;
@@ -3754,7 +3754,7 @@ void TestSboVectorShrinkToFit()
    {
       const std::string caseLabel{
          "SvoVector::shrink_to_fit for heap instance with "
-         "shrunken size still on the heap using a not moveable element type."};
+         "shrunken size still on the heap using a not moveable element type"};
 
       constexpr std::size_t BufCap = 10;
       constexpr std::size_t Cap = 15;
@@ -3799,7 +3799,7 @@ void TestSboVectorShrinkToFit()
    {
       const std::string caseLabel{
          "SvoVector::shrink_to_fit for heap instance with "
-         "shrunken size fitting into the buffer using a moveable element type."};
+         "shrunken size fitting into the buffer using a moveable element type"};
 
       constexpr std::size_t BufCap = 10;
       constexpr std::size_t Cap = 12;
@@ -3843,7 +3843,7 @@ void TestSboVectorShrinkToFit()
    {
       const std::string caseLabel{
          "SvoVector::shrink_to_fit for heap instance with "
-         "shrunken size fitting into the buffer using a not moveable element type."};
+         "shrunken size fitting into the buffer using a not moveable element type"};
 
       constexpr std::size_t BufCap = 10;
       constexpr std::size_t Cap = 12;
@@ -3893,7 +3893,7 @@ void TestSboVectorShrinkToFit()
 void TestSboVectorClear()
 {
    {
-      const std::string caseLabel{"SvoVector::clear for empty vector."};
+      const std::string caseLabel{"SvoVector::clear for empty vector"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = Element;
@@ -3923,7 +3923,7 @@ void TestSboVectorClear()
       VERIFY(sv.size() == 0, caseLabel);
    }
    {
-      const std::string caseLabel{"SvoVector::clear for buffer instance."};
+      const std::string caseLabel{"SvoVector::clear for buffer instance"};
 
       constexpr std::size_t BufCap = 10;
       constexpr std::size_t NumElems = 5;
@@ -3955,7 +3955,7 @@ void TestSboVectorClear()
       VERIFY(sv.size() == 0, caseLabel);
    }
    {
-      const std::string caseLabel{"SvoVector::clear for heap instance."};
+      const std::string caseLabel{"SvoVector::clear for heap instance"};
 
       constexpr std::size_t BufCap = 10;
       constexpr std::size_t NumElems = 15;
@@ -3994,7 +3994,7 @@ void TestSboVectorClear()
 void TestSboVectorIteratorCopyCtor()
 {
    {
-      const std::string caseLabel{"SboVectorIterator copy ctor."};
+      const std::string caseLabel{"SboVectorIterator copy ctor"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -4014,7 +4014,7 @@ void TestSboVectorIteratorCopyCtor()
 void TestSboVectorIteratorMoveCtor()
 {
    {
-      const std::string caseLabel{"SboVectorIterator move ctor."};
+      const std::string caseLabel{"SboVectorIterator move ctor"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -4034,7 +4034,7 @@ void TestSboVectorIteratorMoveCtor()
 void TestSboVectorIteratorCopyAssignment()
 {
    {
-      const std::string caseLabel{"SboVectorIterator copy assignment."};
+      const std::string caseLabel{"SboVectorIterator copy assignment"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -4055,7 +4055,7 @@ void TestSboVectorIteratorCopyAssignment()
 void TestSboVectorIteratorMoveAssignment()
 {
    {
-      const std::string caseLabel{"SboVectorIterator move assignment."};
+      const std::string caseLabel{"SboVectorIterator move assignment"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -4076,7 +4076,7 @@ void TestSboVectorIteratorMoveAssignment()
 void TestSboVectorIteratorIndirectionOperator()
 {
    {
-      const std::string caseLabel{"SboVectorIterator indirection operator for reading."};
+      const std::string caseLabel{"SboVectorIterator indirection operator for reading"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -4090,7 +4090,7 @@ void TestSboVectorIteratorIndirectionOperator()
       VERIFY(*it == 1, caseLabel);
    }
    {
-      const std::string caseLabel{"SboVectorIterator indirection operator for writing."};
+      const std::string caseLabel{"SboVectorIterator indirection operator for writing"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -4110,7 +4110,7 @@ void TestSboVectorIteratorIndirectionOperator()
 void TestSboVectorIteratorIndirectionOperatorConst()
 {
    {
-      const std::string caseLabel{"SboVectorIterator const indirection operator."};
+      const std::string caseLabel{"SboVectorIterator const indirection operator"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -4129,7 +4129,7 @@ void TestSboVectorIteratorIndirectionOperatorConst()
 void TestSboVectorIteratorDereferenceOperator()
 {
    {
-      const std::string caseLabel{"SboVectorIterator dereference operator for reading."};
+      const std::string caseLabel{"SboVectorIterator dereference operator for reading"};
 
       struct A
       {
@@ -4150,7 +4150,7 @@ void TestSboVectorIteratorDereferenceOperator()
       VERIFY(it->d == 4, caseLabel);
    }
    {
-      const std::string caseLabel{"SboVectorIterator dereference operator for writing."};
+      const std::string caseLabel{"SboVectorIterator dereference operator for writing"};
 
       struct A
       {
@@ -4178,7 +4178,7 @@ void TestSboVectorIteratorDereferenceOperator()
 void TestSboVectorIteratorDereferenceOperatorConst()
 {
    {
-      const std::string caseLabel{"SboVectorIterator const dereference operator."};
+      const std::string caseLabel{"SboVectorIterator const dereference operator"};
 
       struct A
       {
@@ -4204,7 +4204,7 @@ void TestSboVectorIteratorDereferenceOperatorConst()
 void TestSboVectorIteratorSubscriptOperator()
 {
    {
-      const std::string caseLabel{"SboVectorIterator operator[] for reading."};
+      const std::string caseLabel{"SboVectorIterator operator[] for reading"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -4218,7 +4218,7 @@ void TestSboVectorIteratorSubscriptOperator()
       VERIFY(it[2] == 4, caseLabel);
    }
    {
-      const std::string caseLabel{"SboVectorIterator operator[] for writing."};
+      const std::string caseLabel{"SboVectorIterator operator[] for writing"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -4238,7 +4238,7 @@ void TestSboVectorIteratorSubscriptOperator()
 void TestSboVectorIteratorSubscriptOperatorConst()
 {
    {
-      const std::string caseLabel{"SboVectorIterator const operator[] for reading."};
+      const std::string caseLabel{"SboVectorIterator const operator[] for reading"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -4257,7 +4257,7 @@ void TestSboVectorIteratorSubscriptOperatorConst()
 void TestSboVectorIteratorPrefixIncrementOperator()
 {
    {
-      const std::string caseLabel{"SboVectorIterator prefix increment operator."};
+      const std::string caseLabel{"SboVectorIterator prefix increment operator"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -4278,7 +4278,7 @@ void TestSboVectorIteratorPrefixIncrementOperator()
 void TestSboVectorIteratorPostfixIncrementOperator()
 {
    {
-      const std::string caseLabel{"SboVectorIterator prefix increment operator."};
+      const std::string caseLabel{"SboVectorIterator prefix increment operator"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -4299,7 +4299,7 @@ void TestSboVectorIteratorPostfixIncrementOperator()
 void TestSboVectorIteratorPrefixDecrementOperator()
 {
    {
-      const std::string caseLabel{"SboVectorIterator prefix decrement operator."};
+      const std::string caseLabel{"SboVectorIterator prefix decrement operator"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -4320,7 +4320,7 @@ void TestSboVectorIteratorPrefixDecrementOperator()
 void TestSboVectorIteratorPostfixDecrementOperator()
 {
    {
-      const std::string caseLabel{"SboVectorIterator prefix increment operator."};
+      const std::string caseLabel{"SboVectorIterator prefix increment operator"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -4341,7 +4341,7 @@ void TestSboVectorIteratorPostfixDecrementOperator()
 void TestSboVectorIteratorSwap()
 {
    {
-      const std::string caseLabel{"SboVectorIterator swap."};
+      const std::string caseLabel{"SboVectorIterator swap"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -4364,7 +4364,7 @@ void TestSboVectorIteratorSwap()
 void TestSboVectorIteratorEquality()
 {
    {
-      const std::string caseLabel{"SboVectorIterator equality for equal values."};
+      const std::string caseLabel{"SboVectorIterator equality for equal values"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -4379,7 +4379,7 @@ void TestSboVectorIteratorEquality()
       VERIFY(a == b, caseLabel);
    }
    {
-      const std::string caseLabel{"SboVectorIterator equality for different indices."};
+      const std::string caseLabel{"SboVectorIterator equality for different indices"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -4394,7 +4394,7 @@ void TestSboVectorIteratorEquality()
       VERIFY(!(a == b), caseLabel);
    }
    {
-      const std::string caseLabel{"SboVectorIterator equality for different vectors."};
+      const std::string caseLabel{"SboVectorIterator equality for different vectors"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -4415,7 +4415,7 @@ void TestSboVectorIteratorEquality()
 void TestSboVectorIteratorInequality()
 {
    {
-      const std::string caseLabel{"SboVectorIterator inequality for equal values."};
+      const std::string caseLabel{"SboVectorIterator inequality for equal values"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -4430,7 +4430,7 @@ void TestSboVectorIteratorInequality()
       VERIFY(!(a != b), caseLabel);
    }
    {
-      const std::string caseLabel{"SboVectorIterator inequality for different indices."};
+      const std::string caseLabel{"SboVectorIterator inequality for different indices"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -4445,7 +4445,7 @@ void TestSboVectorIteratorInequality()
       VERIFY(a != b, caseLabel);
    }
    {
-      const std::string caseLabel{"SboVectorIterator inequality for different vectors."};
+      const std::string caseLabel{"SboVectorIterator inequality for different vectors"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -4466,7 +4466,7 @@ void TestSboVectorIteratorInequality()
 void TestSboVectorIteratorAdditionAssignment()
 {
    {
-      const std::string caseLabel{"SboVectorIterator operator+= for positive offset."};
+      const std::string caseLabel{"SboVectorIterator operator+= for positive offset"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -4481,7 +4481,7 @@ void TestSboVectorIteratorAdditionAssignment()
       VERIFY(*it == 3, caseLabel);
    }
    {
-      const std::string caseLabel{"SboVectorIterator operator+= for negative offset."};
+      const std::string caseLabel{"SboVectorIterator operator+= for negative offset"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -4501,7 +4501,7 @@ void TestSboVectorIteratorAdditionAssignment()
 void TestSboVectorIteratorSubtractionAssignment()
 {
    {
-      const std::string caseLabel{"SboVectorIterator operator-= for positive offset."};
+      const std::string caseLabel{"SboVectorIterator operator-= for positive offset"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -4516,7 +4516,7 @@ void TestSboVectorIteratorSubtractionAssignment()
       VERIFY(*it == 1, caseLabel);
    }
    {
-      const std::string caseLabel{"SboVectorIterator operator-= for negative offset."};
+      const std::string caseLabel{"SboVectorIterator operator-= for negative offset"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -4537,7 +4537,7 @@ void TestSboVectorIteratorAdditionOfIteratorAndOffset()
 {
    {
       const std::string caseLabel{
-         "SboVectorIterator iterator plus offset for positive offset."};
+         "SboVectorIterator iterator plus offset for positive offset"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -4553,7 +4553,7 @@ void TestSboVectorIteratorAdditionOfIteratorAndOffset()
    }
    {
       const std::string caseLabel{
-         "SboVectorIterator iterator plus offset for negative offset."};
+         "SboVectorIterator iterator plus offset for negative offset"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -4574,7 +4574,7 @@ void TestSboVectorIteratorAdditionOfOffsetAndIterator()
 {
    {
       const std::string caseLabel{
-         "SboVectorIterator offset plus iterator for positive offset."};
+         "SboVectorIterator offset plus iterator for positive offset"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -4590,7 +4590,7 @@ void TestSboVectorIteratorAdditionOfOffsetAndIterator()
    }
    {
       const std::string caseLabel{
-         "SboVectorIterator offset plus iterator for negative offset."};
+         "SboVectorIterator offset plus iterator for negative offset"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -4611,7 +4611,7 @@ void TestSboVectorIteratorSubtractionOfIteratorAndOffset()
 {
    {
       const std::string caseLabel{
-         "SboVectorIterator iterator minus offset for positive offset."};
+         "SboVectorIterator iterator minus offset for positive offset"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -4627,7 +4627,7 @@ void TestSboVectorIteratorSubtractionOfIteratorAndOffset()
    }
    {
       const std::string caseLabel{
-         "SboVectorIterator iterator minus offset for negative offset."};
+         "SboVectorIterator iterator minus offset for negative offset"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -4647,7 +4647,7 @@ void TestSboVectorIteratorSubtractionOfIteratorAndOffset()
 void TestSboVectorIteratorSubtractionOfIterators()
 {
    {
-      const std::string caseLabel{"SboVectorIterator iterator minus iterator."};
+      const std::string caseLabel{"SboVectorIterator iterator minus iterator"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -4668,7 +4668,7 @@ void TestSboVectorIteratorSubtractionOfIterators()
 void TestSboVectorIteratorLessThan()
 {
    {
-      const std::string caseLabel{"SboVectorIterator operator< for less-than iterators."};
+      const std::string caseLabel{"SboVectorIterator operator< for less-than iterators"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -4684,7 +4684,7 @@ void TestSboVectorIteratorLessThan()
    }
    {
       const std::string caseLabel{
-         "SboVectorIterator operator< for greater-than iterators."};
+         "SboVectorIterator operator< for greater-than iterators"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -4699,7 +4699,7 @@ void TestSboVectorIteratorLessThan()
       VERIFY(!(a < b), caseLabel);
    }
    {
-      const std::string caseLabel{"SboVectorIterator operator< for equal iterators."};
+      const std::string caseLabel{"SboVectorIterator operator< for equal iterators"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -4720,7 +4720,7 @@ void TestSboVectorIteratorLessOrEqualThan()
 {
    {
       const std::string caseLabel{
-         "SboVectorIterator operator<= for less-than iterators."};
+         "SboVectorIterator operator<= for less-than iterators"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -4736,7 +4736,7 @@ void TestSboVectorIteratorLessOrEqualThan()
    }
    {
       const std::string caseLabel{
-         "SboVectorIterator operator<= for greater-than iterators."};
+         "SboVectorIterator operator<= for greater-than iterators"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -4751,7 +4751,7 @@ void TestSboVectorIteratorLessOrEqualThan()
       VERIFY(!(a <= b), caseLabel);
    }
    {
-      const std::string caseLabel{"SboVectorIterator operator<= for equal iterators."};
+      const std::string caseLabel{"SboVectorIterator operator<= for equal iterators"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -4771,7 +4771,7 @@ void TestSboVectorIteratorLessOrEqualThan()
 void TestSboVectorIteratorGreaterThan()
 {
    {
-      const std::string caseLabel{"SboVectorIterator operator> for less-than iterators."};
+      const std::string caseLabel{"SboVectorIterator operator> for less-than iterators"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -4787,7 +4787,7 @@ void TestSboVectorIteratorGreaterThan()
    }
    {
       const std::string caseLabel{
-         "SboVectorIterator operator> for greater-than iterators."};
+         "SboVectorIterator operator> for greater-than iterators"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -4802,7 +4802,7 @@ void TestSboVectorIteratorGreaterThan()
       VERIFY(a > b, caseLabel);
    }
    {
-      const std::string caseLabel{"SboVectorIterator operator> for equal iterators."};
+      const std::string caseLabel{"SboVectorIterator operator> for equal iterators"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -4823,7 +4823,7 @@ void TestSboVectorIteratorGreaterOrEqualThan()
 {
    {
       const std::string caseLabel{
-         "SboVectorIterator operator>= for less-than iterators."};
+         "SboVectorIterator operator>= for less-than iterators"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -4839,7 +4839,7 @@ void TestSboVectorIteratorGreaterOrEqualThan()
    }
    {
       const std::string caseLabel{
-         "SboVectorIterator operator>= for greater-than iterators."};
+         "SboVectorIterator operator>= for greater-than iterators"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -4854,7 +4854,7 @@ void TestSboVectorIteratorGreaterOrEqualThan()
       VERIFY(a >= b, caseLabel);
    }
    {
-      const std::string caseLabel{"SboVectorIterator operator>= for equal iterators."};
+      const std::string caseLabel{"SboVectorIterator operator>= for equal iterators"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -4876,7 +4876,7 @@ void TestSboVectorIteratorGreaterOrEqualThan()
 void TestSboVectorConstIteratorCopyCtor()
 {
    {
-      const std::string caseLabel{"SboVectorConstIterator copy ctor."};
+      const std::string caseLabel{"SboVectorConstIterator copy ctor"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -4896,7 +4896,7 @@ void TestSboVectorConstIteratorCopyCtor()
 void TestSboVectorConstIteratorMoveCtor()
 {
    {
-      const std::string caseLabel{"SboVectorConstIterator move ctor."};
+      const std::string caseLabel{"SboVectorConstIterator move ctor"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -4916,7 +4916,7 @@ void TestSboVectorConstIteratorMoveCtor()
 void TestSboVectorConstIteratorCopyAssignment()
 {
    {
-      const std::string caseLabel{"SboVectorConstIterator copy assignment."};
+      const std::string caseLabel{"SboVectorConstIterator copy assignment"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -4937,7 +4937,7 @@ void TestSboVectorConstIteratorCopyAssignment()
 void TestSboVectorConstIteratorMoveAssignment()
 {
    {
-      const std::string caseLabel{"SboVectorConstIterator move assignment."};
+      const std::string caseLabel{"SboVectorConstIterator move assignment"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -4958,7 +4958,7 @@ void TestSboVectorConstIteratorMoveAssignment()
 void TestSboVectorConstIteratorIndirectionOperatorConst()
 {
    {
-      const std::string caseLabel{"SboVectorConstIterator const indirection operator."};
+      const std::string caseLabel{"SboVectorConstIterator const indirection operator"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -4977,7 +4977,7 @@ void TestSboVectorConstIteratorIndirectionOperatorConst()
 void TestSboVectorConstIteratorDereferenceOperatorConst()
 {
    {
-      const std::string caseLabel{"SboVectorConstIterator const dereference operator."};
+      const std::string caseLabel{"SboVectorConstIterator const dereference operator"};
 
       struct A
       {
@@ -5003,7 +5003,7 @@ void TestSboVectorConstIteratorDereferenceOperatorConst()
 void TestSboVectorConstIteratorSubscriptOperatorConst()
 {
    {
-      const std::string caseLabel{"SboVectorConstIterator const operator[] for reading."};
+      const std::string caseLabel{"SboVectorConstIterator const operator[] for reading"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -5022,7 +5022,7 @@ void TestSboVectorConstIteratorSubscriptOperatorConst()
 void TestSboVectorConstIteratorPrefixIncrementOperator()
 {
    {
-      const std::string caseLabel{"SboVectorConstIterator prefix increment operator."};
+      const std::string caseLabel{"SboVectorConstIterator prefix increment operator"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -5043,7 +5043,7 @@ void TestSboVectorConstIteratorPrefixIncrementOperator()
 void TestSboVectorConstIteratorPostfixIncrementOperator()
 {
    {
-      const std::string caseLabel{"SboVectorConstIterator prefix increment operator."};
+      const std::string caseLabel{"SboVectorConstIterator prefix increment operator"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -5064,7 +5064,7 @@ void TestSboVectorConstIteratorPostfixIncrementOperator()
 void TestSboVectorConstIteratorPrefixDecrementOperator()
 {
    {
-      const std::string caseLabel{"SboVectorConstIterator prefix decrement operator."};
+      const std::string caseLabel{"SboVectorConstIterator prefix decrement operator"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -5085,7 +5085,7 @@ void TestSboVectorConstIteratorPrefixDecrementOperator()
 void TestSboVectorConstIteratorPostfixDecrementOperator()
 {
    {
-      const std::string caseLabel{"SboVectorConstIterator prefix increment operator."};
+      const std::string caseLabel{"SboVectorConstIterator prefix increment operator"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -5106,7 +5106,7 @@ void TestSboVectorConstIteratorPostfixDecrementOperator()
 void TestSboVectorConstIteratorSwap()
 {
    {
-      const std::string caseLabel{"SboVectorConstIterator swap."};
+      const std::string caseLabel{"SboVectorConstIterator swap"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -5129,7 +5129,7 @@ void TestSboVectorConstIteratorSwap()
 void TestSboVectorConstIteratorEquality()
 {
    {
-      const std::string caseLabel{"SboVectorConstIterator equality for equal values."};
+      const std::string caseLabel{"SboVectorConstIterator equality for equal values"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -5145,7 +5145,7 @@ void TestSboVectorConstIteratorEquality()
    }
    {
       const std::string caseLabel{
-         "SboVectorConstIterator equality for different indices."};
+         "SboVectorConstIterator equality for different indices"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -5161,7 +5161,7 @@ void TestSboVectorConstIteratorEquality()
    }
    {
       const std::string caseLabel{
-         "SboVectorConstIterator equality for different vectors."};
+         "SboVectorConstIterator equality for different vectors"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -5182,7 +5182,7 @@ void TestSboVectorConstIteratorEquality()
 void TestSboVectorConstIteratorInequality()
 {
    {
-      const std::string caseLabel{"SboVectorConstIterator inequality for equal values."};
+      const std::string caseLabel{"SboVectorConstIterator inequality for equal values"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -5198,7 +5198,7 @@ void TestSboVectorConstIteratorInequality()
    }
    {
       const std::string caseLabel{
-         "SboVectorConstIterator inequality for different indices."};
+         "SboVectorConstIterator inequality for different indices"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -5214,7 +5214,7 @@ void TestSboVectorConstIteratorInequality()
    }
    {
       const std::string caseLabel{
-         "SboVectorConstIterator inequality for different vectors."};
+         "SboVectorConstIterator inequality for different vectors"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -5236,7 +5236,7 @@ void TestSboVectorConstIteratorAdditionAssignment()
 {
    {
       const std::string caseLabel{
-         "SboVectorConstIterator operator+= for positive offset."};
+         "SboVectorConstIterator operator+= for positive offset"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -5252,7 +5252,7 @@ void TestSboVectorConstIteratorAdditionAssignment()
    }
    {
       const std::string caseLabel{
-         "SboVectorConstIterator operator+= for negative offset."};
+         "SboVectorConstIterator operator+= for negative offset"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -5273,7 +5273,7 @@ void TestSboVectorConstIteratorSubtractionAssignment()
 {
    {
       const std::string caseLabel{
-         "SboVectorConstIterator operator-= for positive offset."};
+         "SboVectorConstIterator operator-= for positive offset"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -5289,7 +5289,7 @@ void TestSboVectorConstIteratorSubtractionAssignment()
    }
    {
       const std::string caseLabel{
-         "SboVectorConstIterator operator-= for negative offset."};
+         "SboVectorConstIterator operator-= for negative offset"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -5310,7 +5310,7 @@ void TestSboVectorConstIteratorAdditionOfIteratorAndOffset()
 {
    {
       const std::string caseLabel{
-         "SboVectorConstIterator iterator plus offset for positive offset."};
+         "SboVectorConstIterator iterator plus offset for positive offset"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -5326,7 +5326,7 @@ void TestSboVectorConstIteratorAdditionOfIteratorAndOffset()
    }
    {
       const std::string caseLabel{
-         "SboVectorConstIterator iterator plus offset for negative offset."};
+         "SboVectorConstIterator iterator plus offset for negative offset"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -5347,7 +5347,7 @@ void TestSboVectorConstIteratorAdditionOfOffsetAndIterator()
 {
    {
       const std::string caseLabel{
-         "SboVectorConstIterator offset plus iterator for positive offset."};
+         "SboVectorConstIterator offset plus iterator for positive offset"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -5363,7 +5363,7 @@ void TestSboVectorConstIteratorAdditionOfOffsetAndIterator()
    }
    {
       const std::string caseLabel{
-         "SboVectorConstIterator offset plus iterator for negative offset."};
+         "SboVectorConstIterator offset plus iterator for negative offset"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -5384,7 +5384,7 @@ void TestSboVectorConstIteratorSubtractionOfIteratorAndOffset()
 {
    {
       const std::string caseLabel{
-         "SboVectorConstIterator iterator minus offset for positive offset."};
+         "SboVectorConstIterator iterator minus offset for positive offset"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -5400,7 +5400,7 @@ void TestSboVectorConstIteratorSubtractionOfIteratorAndOffset()
    }
    {
       const std::string caseLabel{
-         "SboVectorConstIterator iterator minus offset for negative offset."};
+         "SboVectorConstIterator iterator minus offset for negative offset"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -5420,7 +5420,7 @@ void TestSboVectorConstIteratorSubtractionOfIteratorAndOffset()
 void TestSboVectorConstIteratorSubtractionOfIterators()
 {
    {
-      const std::string caseLabel{"SboVectorConstIterator iterator minus iterator."};
+      const std::string caseLabel{"SboVectorConstIterator iterator minus iterator"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -5442,7 +5442,7 @@ void TestSboVectorConstIteratorLessThan()
 {
    {
       const std::string caseLabel{
-         "SboVectorConstIterator operator< for less-than iterators."};
+         "SboVectorConstIterator operator< for less-than iterators"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -5458,7 +5458,7 @@ void TestSboVectorConstIteratorLessThan()
    }
    {
       const std::string caseLabel{
-         "SboVectorConstIterator operator< for greater-than iterators."};
+         "SboVectorConstIterator operator< for greater-than iterators"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -5474,7 +5474,7 @@ void TestSboVectorConstIteratorLessThan()
    }
    {
       const std::string caseLabel{
-         "SboVectorConstIterator operator< for equal iterators."};
+         "SboVectorConstIterator operator< for equal iterators"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -5495,7 +5495,7 @@ void TestSboVectorConstIteratorLessOrEqualThan()
 {
    {
       const std::string caseLabel{
-         "SboVectorConstIterator operator<= for less-than iterators."};
+         "SboVectorConstIterator operator<= for less-than iterators"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -5511,7 +5511,7 @@ void TestSboVectorConstIteratorLessOrEqualThan()
    }
    {
       const std::string caseLabel{
-         "SboVectorConstIterator operator<= for greater-than iterators."};
+         "SboVectorConstIterator operator<= for greater-than iterators"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -5527,7 +5527,7 @@ void TestSboVectorConstIteratorLessOrEqualThan()
    }
    {
       const std::string caseLabel{
-         "SboVectorConstIterator operator<= for equal iterators."};
+         "SboVectorConstIterator operator<= for equal iterators"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -5548,7 +5548,7 @@ void TestSboVectorConstIteratorGreaterThan()
 {
    {
       const std::string caseLabel{
-         "SboVectorConstIterator operator> for less-than iterators."};
+         "SboVectorConstIterator operator> for less-than iterators"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -5564,7 +5564,7 @@ void TestSboVectorConstIteratorGreaterThan()
    }
    {
       const std::string caseLabel{
-         "SboVectorConstIterator operator> for greater-than iterators."};
+         "SboVectorConstIterator operator> for greater-than iterators"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -5580,7 +5580,7 @@ void TestSboVectorConstIteratorGreaterThan()
    }
    {
       const std::string caseLabel{
-         "SboVectorConstIterator operator> for equal iterators."};
+         "SboVectorConstIterator operator> for equal iterators"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -5601,7 +5601,7 @@ void TestSboVectorConstIteratorGreaterOrEqualThan()
 {
    {
       const std::string caseLabel{
-         "SboVectorConstIterator operator>= for less-than iterators."};
+         "SboVectorConstIterator operator>= for less-than iterators"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -5617,7 +5617,7 @@ void TestSboVectorConstIteratorGreaterOrEqualThan()
    }
    {
       const std::string caseLabel{
-         "SboVectorConstIterator operator>= for greater-than iterators."};
+         "SboVectorConstIterator operator>= for greater-than iterators"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
@@ -5633,7 +5633,7 @@ void TestSboVectorConstIteratorGreaterOrEqualThan()
    }
    {
       const std::string caseLabel{
-         "SboVectorConstIterator operator>= for equal iterators."};
+         "SboVectorConstIterator operator>= for equal iterators"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
