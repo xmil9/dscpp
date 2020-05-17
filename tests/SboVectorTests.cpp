@@ -3885,6 +3885,105 @@ void TestSboVectorShrinkToFit()
 }
 
 
+void TestSboVectorClear()
+{
+   {
+      const std::string caseLabel{"SvoVector::clear for empty vector."};
+
+      constexpr std::size_t BufCap = 10;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      // Memory instrumentation for entire scope.
+      const MemVerifier<SV> memCheck{caseLabel};
+
+      SV sv;
+      const auto origCap = sv.capacity();
+
+      // Preconditions.
+      VERIFY(sv.empty(), caseLabel);
+
+      {
+         // Element instrumentation for tested call only.
+         Elem::Measures expected;
+         // It's a no-op
+         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+
+         // Test.
+         sv.clear();
+      }
+
+      // Verify vector state.
+      VERIFY(sv.capacity() == origCap, caseLabel);
+      VERIFY(sv.size() == 0, caseLabel);
+   }
+   {
+      const std::string caseLabel{"SvoVector::clear for buffer instance."};
+
+      constexpr std::size_t BufCap = 10;
+      constexpr std::size_t NumElems = 5;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      // Memory instrumentation for entire scope.
+      const MemVerifier<SV> memCheck{caseLabel};
+
+      SV sv(NumElems, Elem{5});
+      const auto origCap = sv.capacity();
+
+      // Preconditions.
+      VERIFY(sv.inBuffer(), caseLabel);
+      VERIFY(!sv.empty(), caseLabel);
+
+      {
+         // Element instrumentation for tested call only.
+         Elem::Measures expected;
+         expected.dtorCalls = NumElems;
+         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+
+         // Test.
+         sv.clear();
+      }
+
+      // Verify vector state.
+      VERIFY(sv.capacity() == origCap, caseLabel);
+      VERIFY(sv.size() == 0, caseLabel);
+   }
+   {
+      const std::string caseLabel{"SvoVector::clear for heap instance."};
+
+      constexpr std::size_t BufCap = 10;
+      constexpr std::size_t NumElems = 15;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      // Memory instrumentation for entire scope.
+      const MemVerifier<SV> memCheck{caseLabel};
+
+      SV sv(NumElems, Elem{5});
+      const auto origCap = sv.capacity();
+
+      // Preconditions.
+      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(!sv.empty(), caseLabel);
+
+      {
+         // Element instrumentation for tested call only.
+         Elem::Measures expected;
+         expected.dtorCalls = NumElems;
+         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+
+         // Test.
+         sv.clear();
+      }
+
+      // Verify vector state.
+      VERIFY(sv.capacity() == origCap, caseLabel);
+      VERIFY(sv.size() == 0, caseLabel);
+   }
+}
+
+
 ///////////////////
 
 void TestSboVectorIteratorDefaultCtor()
@@ -5299,6 +5398,7 @@ void TestSboVector()
    TestSboVectorMaxSize();
    TestSboVectorReserve();
    TestSboVectorShrinkToFit();
+   TestSboVectorClear();
 
    TestSboVectorIteratorDefaultCtor();
    TestSboVectorIteratorVectorAndIndexCtor();

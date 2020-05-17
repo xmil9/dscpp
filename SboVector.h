@@ -739,7 +739,8 @@ template <typename T, std::size_t N> void SboVector<T, N>::shrink_to_fit()
 
 template <typename T, std::size_t N> void SboVector<T, N>::clear() noexcept
 {
-   // todo
+   destroyElements();
+   m_size = 0;
 }
 
 
