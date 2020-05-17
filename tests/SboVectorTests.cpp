@@ -13,6 +13,8 @@ namespace
 {
 ///////////////////
 
+// Used as element type for testing the SboVector class.
+// Ctors and dtor are instrumented with call counters.
 struct Element
 {
    Element() { ++m_instrumented.defaultCtorCalls; }
@@ -91,6 +93,9 @@ struct Element
 
 ///////////////////
 
+// Used as element type for testing the SboVector class.
+// Ctors and dtor are instrumented with call counters.
+// Does not support move semantics.
 struct NotMoveableElement
 {
    NotMoveableElement() { ++m_instrumented.defaultCtorCalls; }
