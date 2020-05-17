@@ -16,6 +16,11 @@
 #include <type_traits>
 
 
+// Forward declarations for iterator class templates.
+template <typename T, std::size_t N> class SboVectorIterator;
+template <typename T, std::size_t N> class SboVectorConstIterator;
+
+
 ///////////////////
 
 // Vector type that use the small buffer optimization to avoid heap usage for
@@ -60,9 +65,6 @@ template <typename T, std::size_t N> class SboVector
    // Requirements for N.
    static_assert(N > 0, "Zero-sized buffer is not supported. Use std::vector.");
 
-   template <typename SV> friend class SboVectorConstIterator;
-   template <typename SV> friend class SboVectorIterator;
-
  public:
    using value_type = T;
    using reference = T&;
@@ -71,8 +73,8 @@ template <typename T, std::size_t N> class SboVector
    using const_pointer = const T*;
    using size_type = std::size_t;
    using difference_type = std::ptrdiff_t;
-   using iterator = SboVectorIterator<SboVector<T, N>>;
-   using const_iterator = SboVectorConstIterator<SboVector<T, N>>;
+   using iterator = SboVectorIterator<T, N>;
+   using const_iterator = SboVectorConstIterator<T, N>;
    using reverse_iterator = std::reverse_iterator<iterator>;
    using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
@@ -611,42 +613,42 @@ template <typename T, std::size_t N> const T* SboVector<T, N>::data() const noex
 template <typename T, std::size_t N>
 typename SboVector<T, N>::iterator SboVector<T, N>::begin() noexcept
 {
-   return iterator(this, 0);
+   return iterator(m_data);
 }
 
 
 template <typename T, std::size_t N>
 typename SboVector<T, N>::iterator SboVector<T, N>::end() noexcept
 {
-   return iterator(this, size());
+   return iterator(m_data + size());
 }
 
 
 template <typename T, std::size_t N>
 typename SboVector<T, N>::const_iterator SboVector<T, N>::begin() const noexcept
 {
-   return cbegin();
+   return const_iterator(m_data);
 }
 
 
 template <typename T, std::size_t N>
 typename SboVector<T, N>::const_iterator SboVector<T, N>::end() const noexcept
 {
-   return cend();
+   return const_iterator(m_data + size());
 }
 
 
 template <typename T, std::size_t N>
 typename SboVector<T, N>::const_iterator SboVector<T, N>::cbegin() const noexcept
 {
-   return const_iterator(this, 0);
+   return begin();
 }
 
 
 template <typename T, std::size_t N>
 typename SboVector<T, N>::const_iterator SboVector<T, N>::cend() const noexcept
 {
-   return const_iterator(this, size());
+   return end();
 }
 
 
@@ -1071,242 +1073,29 @@ std::size_t SboVector<T, N>::recalc_capacity(std::size_t minCap) const
 
 ///////////////////
 
-// Iterator for SboVector.
-template <typename SV> class SboVectorIterator
-{
- public:
-   using iterator_category = std::random_access_iterator_tag;
-   using value_type = typename SV::value_type;
-   using difference_type = typename SV::difference_type;
-   using pointer = typename SV::pointer;
-   using reference = typename SV::reference;
-
- public:
-   SboVectorIterator() = default;
-   SboVectorIterator(SV* sv, std::size_t idx) noexcept;
-   ~SboVectorIterator() = default;
-   SboVectorIterator(const SboVectorIterator&) = default;
-   SboVectorIterator(SboVectorIterator&& other);
-
-   SboVectorIterator& operator=(const SboVectorIterator&) = default;
-   SboVectorIterator& operator=(SboVectorIterator&& other);
-
-   const value_type& operator*() const;
-   value_type& operator*();
-   const value_type* operator->() const;
-   value_type* operator->();
-   const value_type& operator[](difference_type offset) const;
-   value_type& operator[](difference_type offset);
-   SboVectorIterator& operator++();
-   SboVectorIterator operator++(int);
-   SboVectorIterator& operator--();
-   SboVectorIterator operator--(int);
-   SboVectorIterator& operator+=(difference_type offset);
-   SboVectorIterator& operator-=(difference_type offset);
-
-   friend void swap(SboVectorIterator<SV>& a, SboVectorIterator<SV>& b)
-   {
-      std::swap(a.m_sv, b.m_sv);
-      std::swap(a.m_idx, b.m_idx);
-   }
-
-   friend bool operator==(const SboVectorIterator<SV>& a, const SboVectorIterator<SV>& b)
-   {
-      return a.m_sv == b.m_sv && a.m_idx == b.m_idx;
-   }
-
-   friend bool operator!=(const SboVectorIterator<SV>& a, const SboVectorIterator<SV>& b)
-   {
-      return !(a == b);
-   }
-
-   friend SboVectorIterator<SV> operator+(const SboVectorIterator<SV>& it,
-                                          difference_type offset)
-   {
-      auto res = it;
-      return (res += offset);
-   }
-
-   friend SboVectorIterator<SV> operator+(difference_type offset,
-                                          const SboVectorIterator<SV>& it)
-   {
-      return (it + offset);
-   }
-
-   friend SboVectorIterator<SV> operator-(const SboVectorIterator<SV>& it,
-                                          difference_type offset)
-   {
-      auto res = it;
-      return (res -= offset);
-   }
-
-   friend difference_type operator-(const SboVectorIterator<SV>& a,
-                                    const SboVectorIterator<SV>& b)
-   {
-      return a.m_idx - b.m_idx;
-   }
-
-   friend bool operator<(const SboVectorIterator<SV>& a, const SboVectorIterator<SV>& b)
-   {
-      return a.m_idx < b.m_idx;
-   }
-
-   friend bool operator>(const SboVectorIterator<SV>& a, const SboVectorIterator<SV>& b)
-   {
-      return a.m_idx > b.m_idx;
-   }
-
-   friend bool operator<=(const SboVectorIterator<SV>& a, const SboVectorIterator<SV>& b)
-   {
-      return a.m_idx <= b.m_idx;
-   }
-
-   friend bool operator>=(const SboVectorIterator<SV>& a, const SboVectorIterator<SV>& b)
-   {
-      return a.m_idx >= b.m_idx;
-   }
-
- private:
-   SV* m_sv = nullptr;
-   std::size_t m_idx = 0;
-};
-
-
-template <typename SV>
-SboVectorIterator<SV>::SboVectorIterator(SV* sv, std::size_t idx) noexcept
-: m_sv{sv}, m_idx{idx}
-{
-}
-
-template <typename SV> SboVectorIterator<SV>::SboVectorIterator(SboVectorIterator&& other)
-{
-   swap(*this, other);
-}
-
-
-template <typename SV>
-SboVectorIterator<SV>& SboVectorIterator<SV>::operator=(SboVectorIterator&& other)
-{
-   m_sv = other.m_sv;
-   m_idx = other.m_idx;
-   other.m_sv = nullptr;
-   other.m_idx = 0;
-   return *this;
-}
-
-
-template <typename SV>
-const typename SboVectorIterator<SV>::value_type& SboVectorIterator<SV>::operator*() const
-{
-   return (*m_sv)[m_idx];
-}
-
-
-template <typename SV>
-typename SboVectorIterator<SV>::value_type& SboVectorIterator<SV>::operator*()
-{
-   return (*m_sv)[m_idx];
-}
-
-
-template <typename SV>
-const typename SboVectorIterator<SV>::value_type*
-   SboVectorIterator<SV>::operator->() const
-{
-   return &(*m_sv)[m_idx];
-}
-
-
-template <typename SV>
-typename SboVectorIterator<SV>::value_type* SboVectorIterator<SV>::operator->()
-{
-   return &(*m_sv)[m_idx];
-}
-
-
-template <typename SV>
-const typename SboVectorIterator<SV>::value_type&
-   SboVectorIterator<SV>::operator[](difference_type offset) const
-{
-   return (*m_sv)[m_idx + offset];
-}
-
-
-template <typename SV>
-typename SboVectorIterator<SV>::value_type&
-   SboVectorIterator<SV>::operator[](difference_type offset)
-{
-   return (*m_sv)[m_idx + offset];
-}
-
-
-template <typename SV> SboVectorIterator<SV>& SboVectorIterator<SV>::operator++()
-{
-   ++m_idx;
-   return *this;
-}
-
-
-template <typename SV> SboVectorIterator<SV> SboVectorIterator<SV>::operator++(int)
-{
-   auto before = *this;
-   ++(*this);
-   return before;
-}
-
-
-template <typename SV> SboVectorIterator<SV>& SboVectorIterator<SV>::operator--()
-{
-   --m_idx;
-   return *this;
-}
-
-
-template <typename SV> SboVectorIterator<SV> SboVectorIterator<SV>::operator--(int)
-{
-   auto before = *this;
-   --(*this);
-   return before;
-}
-
-
-template <typename SV>
-SboVectorIterator<SV>& SboVectorIterator<SV>::operator+=(difference_type offset)
-{
-   m_idx += offset;
-   return *this;
-}
-
-
-template <typename SV>
-SboVectorIterator<SV>& SboVectorIterator<SV>::operator-=(difference_type offset)
-{
-   m_idx -= offset;
-   return *this;
-}
-
-
-///////////////////
-
 // Const iterator for SboVector.
-template <typename SV> class SboVectorConstIterator
+template <typename T, std::size_t N> class SboVectorConstIterator
 {
+   template <typename T, std::size_t N> friend class SboVector;
+
  public:
+   using SV = SboVector<T, N>;
    using iterator_category = std::random_access_iterator_tag;
    using value_type = typename SV::value_type;
    using difference_type = typename SV::difference_type;
    using pointer = typename SV::const_pointer;
    using reference = typename SV::const_reference;
 
+ protected:
+   // Only the vector and non-const iterator classes need access to ctor.
+   explicit SboVectorConstIterator(T* elem) noexcept;
+
  public:
    SboVectorConstIterator() = default;
-   SboVectorConstIterator(const SV* sv, std::size_t idx) noexcept;
    ~SboVectorConstIterator() = default;
    SboVectorConstIterator(const SboVectorConstIterator&) = default;
-   SboVectorConstIterator(SboVectorConstIterator&& other);
 
    SboVectorConstIterator& operator=(const SboVectorConstIterator&) = default;
-   SboVectorConstIterator& operator=(SboVectorConstIterator&& other);
 
    const value_type& operator*() const;
    const value_type* operator->() const;
@@ -1318,139 +1107,118 @@ template <typename SV> class SboVectorConstIterator
    SboVectorConstIterator& operator+=(difference_type offset);
    SboVectorConstIterator& operator-=(difference_type offset);
 
-   friend void swap(SboVectorConstIterator<SV>& a, SboVectorConstIterator<SV>& b)
+   friend void swap(SboVectorConstIterator<T, N>& a, SboVectorConstIterator<T, N>& b)
    {
-      std::swap(a.m_sv, b.m_sv);
-      std::swap(a.m_idx, b.m_idx);
+      std::swap(a.m_elem, b.m_elem);
    }
 
-   friend bool operator==(const SboVectorConstIterator<SV>& a,
-                          const SboVectorConstIterator<SV>& b)
+   friend bool operator==(const SboVectorConstIterator<T, N>& a,
+                          const SboVectorConstIterator<T, N>& b)
    {
-      return a.m_sv == b.m_sv && a.m_idx == b.m_idx;
+      return a.m_elem == b.m_elem;
    }
 
-   friend bool operator!=(const SboVectorConstIterator<SV>& a,
-                          const SboVectorConstIterator<SV>& b)
+   friend bool operator!=(const SboVectorConstIterator<T, N>& a,
+                          const SboVectorConstIterator<T, N>& b)
    {
       return !(a == b);
    }
 
-   friend SboVectorConstIterator<SV> operator+(const SboVectorConstIterator<SV>& it,
-                                               difference_type offset)
+   friend SboVectorConstIterator<T, N> operator+(const SboVectorConstIterator<T, N>& it,
+                                                 difference_type offset)
    {
       auto res = it;
       return (res += offset);
    }
 
-   friend SboVectorConstIterator<SV> operator+(difference_type offset,
-                                               const SboVectorConstIterator<SV>& it)
+   friend SboVectorConstIterator<T, N> operator+(difference_type offset,
+                                                 const SboVectorConstIterator<T, N>& it)
    {
       return (it + offset);
    }
 
-   friend SboVectorConstIterator<SV> operator-(const SboVectorConstIterator<SV>& it,
-                                               difference_type offset)
+   friend SboVectorConstIterator<T, N> operator-(const SboVectorConstIterator<T, N>& it,
+                                                 difference_type offset)
    {
       auto res = it;
       return (res -= offset);
    }
 
-   friend difference_type operator-(const SboVectorConstIterator<SV>& a,
-                                    const SboVectorConstIterator<SV>& b)
+   friend difference_type operator-(const SboVectorConstIterator<T, N>& a,
+                                    const SboVectorConstIterator<T, N>& b)
    {
-      return a.m_idx - b.m_idx;
+      return a.m_elem - b.m_elem;
    }
 
-   friend bool operator<(const SboVectorConstIterator<SV>& a,
-                         const SboVectorConstIterator<SV>& b)
+   friend bool operator<(const SboVectorConstIterator<T, N>& a,
+                         const SboVectorConstIterator<T, N>& b)
    {
-      return a.m_idx < b.m_idx;
+      return a.m_elem < b.m_elem;
    }
 
-   friend bool operator>(const SboVectorConstIterator<SV>& a,
-                         const SboVectorConstIterator<SV>& b)
+   friend bool operator>(const SboVectorConstIterator<T, N>& a,
+                         const SboVectorConstIterator<T, N>& b)
    {
-      return a.m_idx > b.m_idx;
+      return a.m_elem > b.m_elem;
    }
 
-   friend bool operator<=(const SboVectorConstIterator<SV>& a,
-                          const SboVectorConstIterator<SV>& b)
+   friend bool operator<=(const SboVectorConstIterator<T, N>& a,
+                          const SboVectorConstIterator<T, N>& b)
    {
-      return a.m_idx <= b.m_idx;
+      return !(a > b);
    }
 
-   friend bool operator>=(const SboVectorConstIterator<SV>& a,
-                          const SboVectorConstIterator<SV>& b)
+   friend bool operator>=(const SboVectorConstIterator<T, N>& a,
+                          const SboVectorConstIterator<T, N>& b)
    {
-      return a.m_idx >= b.m_idx;
+      return !(a < b);
    }
 
- private:
-   const SV* m_sv = nullptr;
-   std::size_t m_idx = 0;
+ protected:
+   T* m_elem = nullptr;
 };
 
 
-template <typename SV>
-SboVectorConstIterator<SV>::SboVectorConstIterator(const SV* sv, std::size_t idx) noexcept
-: m_sv{sv}, m_idx{idx}
+template <typename T, std::size_t N>
+SboVectorConstIterator<T, N>::SboVectorConstIterator(T* elem) noexcept : m_elem{elem}
 {
 }
 
-template <typename SV>
-SboVectorConstIterator<SV>::SboVectorConstIterator(SboVectorConstIterator&& other)
+
+template <typename T, std::size_t N>
+const typename SboVectorConstIterator<T, N>::value_type&
+   SboVectorConstIterator<T, N>::operator*() const
 {
-   swap(*this, other);
+   return *m_elem;
 }
 
 
-template <typename SV>
-SboVectorConstIterator<SV>&
-SboVectorConstIterator<SV>::operator=(SboVectorConstIterator&& other)
+template <typename T, std::size_t N>
+const typename SboVectorConstIterator<T, N>::value_type*
+   SboVectorConstIterator<T, N>::operator->() const
 {
-   m_sv = other.m_sv;
-   m_idx = other.m_idx;
-   other.m_sv = nullptr;
-   other.m_idx = 0;
+   return m_elem;
+}
+
+
+template <typename T, std::size_t N>
+const typename SboVectorConstIterator<T, N>::value_type&
+   SboVectorConstIterator<T, N>::operator[](difference_type offset) const
+{
+   return *(m_elem + offset);
+}
+
+
+template <typename T, std::size_t N>
+SboVectorConstIterator<T, N>& SboVectorConstIterator<T, N>::operator++()
+{
+   ++m_elem;
    return *this;
 }
 
 
-template <typename SV>
-const typename SboVectorConstIterator<SV>::value_type&
-   SboVectorConstIterator<SV>::operator*() const
-{
-   return (*m_sv)[m_idx];
-}
-
-
-template <typename SV>
-const typename SboVectorConstIterator<SV>::value_type*
-   SboVectorConstIterator<SV>::operator->() const
-{
-   return &(*m_sv)[m_idx];
-}
-
-
-template <typename SV>
-const typename SboVectorConstIterator<SV>::value_type&
-   SboVectorConstIterator<SV>::operator[](difference_type offset) const
-{
-   return (*m_sv)[m_idx + offset];
-}
-
-
-template <typename SV>
-SboVectorConstIterator<SV>& SboVectorConstIterator<SV>::operator++()
-{
-   ++m_idx;
-   return *this;
-}
-
-
-template <typename SV>
-SboVectorConstIterator<SV> SboVectorConstIterator<SV>::operator++(int)
+template <typename T, std::size_t N>
+SboVectorConstIterator<T, N> SboVectorConstIterator<T, N>::operator++(int)
 {
    auto before = *this;
    ++(*this);
@@ -1458,16 +1226,16 @@ SboVectorConstIterator<SV> SboVectorConstIterator<SV>::operator++(int)
 }
 
 
-template <typename SV>
-SboVectorConstIterator<SV>& SboVectorConstIterator<SV>::operator--()
+template <typename T, std::size_t N>
+SboVectorConstIterator<T, N>& SboVectorConstIterator<T, N>::operator--()
 {
-   --m_idx;
+   --m_elem;
    return *this;
 }
 
 
-template <typename SV>
-SboVectorConstIterator<SV> SboVectorConstIterator<SV>::operator--(int)
+template <typename T, std::size_t N>
+SboVectorConstIterator<T, N> SboVectorConstIterator<T, N>::operator--(int)
 {
    auto before = *this;
    --(*this);
@@ -1475,17 +1243,231 @@ SboVectorConstIterator<SV> SboVectorConstIterator<SV>::operator--(int)
 }
 
 
-template <typename SV>
-SboVectorConstIterator<SV>& SboVectorConstIterator<SV>::operator+=(difference_type offset)
+template <typename T, std::size_t N>
+SboVectorConstIterator<T, N>&
+SboVectorConstIterator<T, N>::operator+=(difference_type offset)
 {
-   m_idx += offset;
+   m_elem += offset;
    return *this;
 }
 
 
-template <typename SV>
-SboVectorConstIterator<SV>& SboVectorConstIterator<SV>::operator-=(difference_type offset)
+template <typename T, std::size_t N>
+SboVectorConstIterator<T, N>&
+SboVectorConstIterator<T, N>::operator-=(difference_type offset)
 {
-   m_idx -= offset;
+   m_elem -= offset;
+   return *this;
+}
+
+
+///////////////////
+
+// Iterator for SboVector.
+// Needs to be derived from non-const iterator type, so that functions that take
+// const iterators can also be called with non-const iterators.
+template <typename T, std::size_t N>
+class SboVectorIterator : public SboVectorConstIterator<T, N>
+{
+   template <typename T, std::size_t N> friend class SboVector;
+
+ public:
+   using SboVectorConstIterator<T, N>::SV;
+   using iterator_category = std::random_access_iterator_tag;
+   using value_type = typename SV::value_type;
+   using difference_type = typename SV::difference_type;
+   using pointer = typename SV::pointer;
+   using reference = typename SV::reference;
+
+ private:
+   // Only the vector class need access to ctor.
+   explicit SboVectorIterator(T* elem) noexcept;
+
+ public:
+   SboVectorIterator() = default;
+   SboVectorIterator(const SboVectorIterator&) = default;
+   SboVectorIterator& operator=(const SboVectorIterator&) = default;
+
+   value_type& operator*();
+   const value_type& operator*() const;
+   value_type* operator->();
+   const value_type* operator->() const;
+   value_type& operator[](difference_type offset);
+   const value_type& operator[](difference_type offset) const;
+   SboVectorIterator& operator++();
+   SboVectorIterator operator++(int);
+   SboVectorIterator& operator--();
+   SboVectorIterator operator--(int);
+   SboVectorIterator& operator+=(difference_type offset);
+   SboVectorIterator& operator-=(difference_type offset);
+
+   friend void swap(SboVectorIterator<T, N>& a, SboVectorIterator<T, N>& b)
+   {
+      std::swap(a.m_elem, b.m_elem);
+   }
+
+   friend bool operator==(const SboVectorIterator<T, N>& a,
+                          const SboVectorIterator<T, N>& b)
+   {
+      return a.m_elem == b.m_elem;
+   }
+
+   friend bool operator!=(const SboVectorIterator<T, N>& a,
+                          const SboVectorIterator<T, N>& b)
+   {
+      return !(a == b);
+   }
+
+   friend SboVectorIterator<T, N> operator+(const SboVectorIterator<T, N>& it,
+                                            difference_type offset)
+   {
+      auto res = it;
+      return (res += offset);
+   }
+
+   friend SboVectorIterator<T, N> operator+(difference_type offset,
+                                            const SboVectorIterator<T, N>& it)
+   {
+      return (it + offset);
+   }
+
+   friend SboVectorIterator<T, N> operator-(const SboVectorIterator<T, N>& it,
+                                            difference_type offset)
+   {
+      auto res = it;
+      return (res -= offset);
+   }
+
+   friend difference_type operator-(const SboVectorIterator<T, N>& a,
+                                    const SboVectorIterator<T, N>& b)
+   {
+      return a.m_elem - b.m_elem;
+   }
+
+   friend bool operator<(const SboVectorIterator<T, N>& a,
+                         const SboVectorIterator<T, N>& b)
+   {
+      return a.m_elem < b.m_elem;
+   }
+
+   friend bool operator>(const SboVectorIterator<T, N>& a,
+                         const SboVectorIterator<T, N>& b)
+   {
+      return a.m_elem > b.m_elem;
+   }
+
+   friend bool operator<=(const SboVectorIterator<T, N>& a,
+                          const SboVectorIterator<T, N>& b)
+   {
+      return !(a > b);
+   }
+
+   friend bool operator>=(const SboVectorIterator<T, N>& a,
+                          const SboVectorIterator<T, N>& b)
+   {
+      return !(a < b);
+   }
+};
+
+
+template <typename T, std::size_t N>
+SboVectorIterator<T, N>::SboVectorIterator(T* elem) noexcept
+: SboVectorConstIterator<T, N>{elem}
+{
+}
+
+
+template <typename T, std::size_t N>
+typename SboVectorIterator<T, N>::value_type& SboVectorIterator<T, N>::operator*()
+{
+   return *this->m_elem;
+}
+
+
+template <typename T, std::size_t N>
+const typename SboVectorIterator<T, N>::value_type&
+   SboVectorIterator<T, N>::operator*() const
+{
+   return *this->m_elem;
+}
+
+
+template <typename T, std::size_t N>
+typename SboVectorIterator<T, N>::value_type* SboVectorIterator<T, N>::operator->()
+{
+   return this->m_elem;
+}
+
+
+template <typename T, std::size_t N>
+const typename SboVectorIterator<T, N>::value_type*
+   SboVectorIterator<T, N>::operator->() const
+{
+   return this->m_elem;
+}
+
+
+template <typename T, std::size_t N>
+typename SboVectorIterator<T, N>::value_type&
+   SboVectorIterator<T, N>::operator[](difference_type offset)
+{
+   return *(this->m_elem + offset);
+}
+
+
+template <typename T, std::size_t N>
+const typename SboVectorIterator<T, N>::value_type&
+   SboVectorIterator<T, N>::operator[](difference_type offset) const
+{
+   return *(this->m_elem + offset);
+}
+
+
+template <typename T, std::size_t N>
+SboVectorIterator<T, N>& SboVectorIterator<T, N>::operator++()
+{
+   ++this->m_elem;
+   return *this;
+}
+
+
+template <typename T, std::size_t N>
+SboVectorIterator<T, N> SboVectorIterator<T, N>::operator++(int)
+{
+   auto before = *this;
+   ++(*this);
+   return before;
+}
+
+
+template <typename T, std::size_t N>
+SboVectorIterator<T, N>& SboVectorIterator<T, N>::operator--()
+{
+   --this->m_elem;
+   return *this;
+}
+
+
+template <typename T, std::size_t N>
+SboVectorIterator<T, N> SboVectorIterator<T, N>::operator--(int)
+{
+   auto before = *this;
+   --(*this);
+   return before;
+}
+
+
+template <typename T, std::size_t N>
+SboVectorIterator<T, N>& SboVectorIterator<T, N>::operator+=(difference_type offset)
+{
+   this->m_elem += offset;
+   return *this;
+}
+
+
+template <typename T, std::size_t N>
+SboVectorIterator<T, N>& SboVectorIterator<T, N>::operator-=(difference_type offset)
+{
+   this->m_elem -= offset;
    return *this;
 }
