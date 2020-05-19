@@ -130,7 +130,8 @@ template <typename T, std::size_t N> class SboVector
    void clear() noexcept;
    iterator erase(const_iterator pos);
    iterator erase(const_iterator first, const_iterator last);
-   void push_back(T val);
+   void push_back(const T& value);
+   void push_back(T&& value);
 
    bool inBuffer() const;
    bool onHeap() const;
@@ -749,17 +750,18 @@ template <typename T, std::size_t N> void SboVector<T, N>::clear() noexcept
 template <typename T, std::size_t N>
 typename SboVector<T, N>::iterator SboVector<T, N>::erase(const_iterator pos)
 {
-   // todo
+   if (pos >= cend())
+      return end();
 
-   // only quick and dirty
-   // assume it's the last one
-   pos;
-   if (!empty())
-   {
-      std::destroy_at(m_data + size() - 1);
-      m_size -= 1;
-   }
-   return end();
+   std::destroy_at(pos.m_elem);
+
+   const auto diff = pos - cbegin();
+   iterator it = begin() + diff;
+   // Accoring to std::vector::erase spec T has to be moveable.
+   std::move(it + 1, end(), it);
+   --m_size;
+
+   return begin() + diff;
 }
 
 
@@ -772,11 +774,21 @@ typename SboVector<T, N>::iterator SboVector<T, N>::erase(const_iterator first,
 }
 
 
-template <typename T, std::size_t N> void SboVector<T, N>::push_back(T val)
+template <typename T, std::size_t N> void SboVector<T, N>::push_back(const T& value)
 {
-   if (m_size == m_capacity)
-      reallocate(recalc_capacity(m_size + 1));
-   m_data[m_size++] = std::move(val);
+   // todo
+
+   // assume it fits
+   *(m_data + m_size++) = value;
+}
+
+
+template <typename T, std::size_t N> void SboVector<T, N>::push_back(T&& value)
+{
+   // todo
+
+   // assume it fits
+   *(m_data + m_size++) = std::move(value);
 }
 
 
