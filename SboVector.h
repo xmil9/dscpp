@@ -755,13 +755,13 @@ typename SboVector<T, N>::iterator SboVector<T, N>::erase(const_iterator pos)
 
    std::destroy_at(pos.m_elem);
 
-   const auto diff = pos - cbegin();
-   iterator it = begin() + diff;
+   const auto offset = pos - cbegin();
+   iterator it = begin() + offset;
    // Accoring to std::vector::erase spec T has to be moveable.
    std::move(it + 1, end(), it);
    --m_size;
 
-   return begin() + diff;
+   return begin() + offset;
 }
 
 
@@ -769,8 +769,25 @@ template <typename T, std::size_t N>
 typename SboVector<T, N>::iterator SboVector<T, N>::erase(const_iterator first,
                                                           const_iterator last)
 {
-   // todo
-   return end();
+   if (first >= cend())
+      return end();
+   if (last >= cend())
+      last = cend();
+   
+   const auto offset = first - cbegin();
+   const auto size = last - first;
+   if (size == 0)
+      return last;
+
+   std::destroy_n(first.m_elem, size);
+
+   iterator firstIt = begin() + offset;
+   iterator lastIt = begin() + offset + size;
+   // Accoring to std::vector::erase spec T has to be moveable.
+   std::move(lastIt + 1, end(), firstIt);
+   m_size -= size;
+
+   return begin() + offset;
 }
 
 
