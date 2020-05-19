@@ -3414,8 +3414,7 @@ void TestSboVectorReserve()
          VERIFY(sv[i].i == 5, caseLabel);
    }
    {
-      const std::string caseLabel{
-         "SvoVector::reserve for capacity larger than max size"};
+      const std::string caseLabel{"SvoVector::reserve for capacity larger than max size"};
 
       constexpr std::size_t BufCap = 5;
       constexpr std::size_t OrigCap = 10;
@@ -4032,6 +4031,7 @@ void TestSboVectorEraseSingleElement()
       }
 
       // Verify vector state.
+      VERIFY(sv.inBuffer(), caseLabel);
       VERIFY(sv.size() == origSize - 1, caseLabel);
       for (int i = 0; i < sv.size(); ++i)
          VERIFY(sv[i].i == (i < erasedElemIdx) ? i + 1 : i + 2, caseLabel);
@@ -4071,6 +4071,7 @@ void TestSboVectorEraseSingleElement()
       }
 
       // Verify vector state.
+      VERIFY(sv.inBuffer(), caseLabel);
       VERIFY(sv.size() == origSize - 1, caseLabel);
       for (int i = 0; i < sv.size(); ++i)
          VERIFY(sv[i].i == i + 2, caseLabel);
@@ -4110,6 +4111,7 @@ void TestSboVectorEraseSingleElement()
       }
 
       // Verify vector state.
+      VERIFY(sv.inBuffer(), caseLabel);
       VERIFY(sv.size() == origSize - 1, caseLabel);
       for (int i = 0; i < sv.size(); ++i)
          VERIFY(sv[i].i == i + 1, caseLabel);
@@ -4146,6 +4148,7 @@ void TestSboVectorEraseSingleElement()
       }
 
       // Verify vector state.
+      VERIFY(sv.inBuffer(), caseLabel);
       VERIFY(sv.empty(), caseLabel);
    }
    {
@@ -4218,6 +4221,202 @@ void TestSboVectorEraseSingleElement()
       // Verify vector state.
       VERIFY(sv.empty(), caseLabel);
    }
+   {
+      const std::string caseLabel{"SvoVector::erase inner element of heap instance"};
+
+      constexpr std::size_t BufCap = 5;
+      constexpr std::size_t NumElems = 8;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      // Memory instrumentation for entire scope.
+      const MemVerifier<SV> memCheck{caseLabel};
+
+      SV sv{1, 2, 3, 4, 5, 6, 7, 8};
+      const std::size_t origSize = sv.size();
+      constexpr int erasedElemIdx = 3;
+
+      // Preconditions.
+      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(!sv.empty(), caseLabel);
+      VERIFY(erasedElemIdx > 0 && erasedElemIdx < sv.size() - 1, caseLabel);
+
+      {
+         // Element instrumentation for tested call only.
+         Elem::Measures expected;
+         expected.moveAssignmentCalls = sv.size() - erasedElemIdx - 1;
+         expected.dtorCalls = 1;
+         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+
+         // Test.
+         SV::iterator next = sv.erase(sv.begin() + erasedElemIdx);
+
+         // Verify returned value.
+         VERIFY(next == sv.begin() + erasedElemIdx, caseLabel);
+      }
+
+      // Verify vector state.
+      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(sv.size() == origSize - 1, caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i].i == (i < erasedElemIdx) ? i + 1 : i + 2, caseLabel);
+   }
+   {
+      const std::string caseLabel{"SvoVector::erase first element of heap instance"};
+
+      constexpr std::size_t BufCap = 5;
+      constexpr std::size_t NumElems = 8;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      // Memory instrumentation for entire scope.
+      const MemVerifier<SV> memCheck{caseLabel};
+
+      SV sv{1, 2, 3, 4, 5, 6, 7, 8};
+      const std::size_t origSize = sv.size();
+      constexpr int erasedElemIdx = 0;
+
+      // Preconditions.
+      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(!sv.empty(), caseLabel);
+      VERIFY(erasedElemIdx == 0, caseLabel);
+
+      {
+         // Element instrumentation for tested call only.
+         Elem::Measures expected;
+         expected.moveAssignmentCalls = sv.size() - 1;
+         expected.dtorCalls = 1;
+         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+
+         // Test.
+         SV::iterator next = sv.erase(sv.begin() + erasedElemIdx);
+
+         // Verify returned value.
+         VERIFY(next == sv.begin() + erasedElemIdx, caseLabel);
+      }
+
+      // Verify vector state.
+      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(sv.size() == origSize - 1, caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i].i == i + 2, caseLabel);
+   }
+   {
+      const std::string caseLabel{"SvoVector::erase last element of heap instance"};
+
+      constexpr std::size_t BufCap = 5;
+      constexpr std::size_t NumElems = 8;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      // Memory instrumentation for entire scope.
+      const MemVerifier<SV> memCheck{caseLabel};
+
+      SV sv{1, 2, 3, 4, 5, 6, 7, 8};
+      const std::size_t origSize = sv.size();
+      const std::size_t erasedElemIdx = sv.size() - 1;
+
+      // Preconditions.
+      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(!sv.empty(), caseLabel);
+      VERIFY(erasedElemIdx == sv.size() - 1, caseLabel);
+
+      {
+         // Element instrumentation for tested call only.
+         Elem::Measures expected;
+         expected.moveAssignmentCalls = 0;
+         expected.dtorCalls = 1;
+         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+
+         // Test.
+         SV::iterator next = sv.erase(sv.begin() + erasedElemIdx);
+
+         // Verify returned value.
+         VERIFY(next == sv.begin() + erasedElemIdx, caseLabel);
+      }
+
+      // Verify vector state.
+      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(sv.size() == origSize - 1, caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i].i == i + 1, caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "SvoVector::erase element of heap instance that makes elements fit into buffer"};
+
+      constexpr std::size_t BufCap = 5;
+      constexpr std::size_t NumElems = 6;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      // Memory instrumentation for entire scope.
+      const MemVerifier<SV> memCheck{caseLabel};
+
+      SV sv{1, 2, 3, 4, 5, 6};
+      const std::size_t origSize = sv.size();
+      const std::size_t erasedElemIdx = sv.size() - 1;
+
+      // Preconditions.
+      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(sv.size() == BufCap + 1, caseLabel);
+
+      {
+         // Element instrumentation for tested call only.
+         Elem::Measures expected;
+         expected.moveAssignmentCalls = 0;
+         expected.dtorCalls = 1;
+         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+
+         // Test.
+         SV::iterator next = sv.erase(sv.begin() + erasedElemIdx);
+
+         // Verify returned value.
+         VERIFY(next == sv.end(), caseLabel);
+      }
+
+      // Verify vector state.
+      // Data is still on heap even though it would fit into buffer.
+      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(sv.size() == origSize - 1, caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i].i == i + 1, caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "SvoVector::erase all elements of heap instance"};
+
+      constexpr std::size_t BufCap = 3;
+      constexpr std::size_t NumElems = 4;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      // Memory instrumentation for entire scope.
+      const MemVerifier<SV> memCheck{caseLabel};
+
+      SV sv{1, 2, 3, 4};
+      const std::size_t origSize = sv.size();
+
+      // Preconditions.
+      VERIFY(sv.onHeap(), caseLabel);
+
+      {
+         // Element instrumentation for tested call only.
+         Elem::Measures expected;
+         expected.moveAssignmentCalls = 0;
+         expected.dtorCalls = sv.size();
+         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+
+         // Test.
+         while (!sv.empty())
+            sv.erase(sv.begin() + sv.size() - 1);
+      }
+
+      // Verify vector state.
+      // Allocation is still on heap even though it is empty.
+      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(sv.empty(), caseLabel);
+   }
 }
 
 
@@ -4232,7 +4431,7 @@ void TestSboVectorIteratorCopyCtor()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2};
 
       Iter it{sv.begin()};
@@ -4252,7 +4451,7 @@ void TestSboVectorIteratorMoveCtor()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2};
 
       Iter it{sv.begin()};
@@ -4272,7 +4471,7 @@ void TestSboVectorIteratorCopyAssignment()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2};
 
       Iter it{sv.begin()};
@@ -4293,7 +4492,7 @@ void TestSboVectorIteratorMoveAssignment()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2};
 
       Iter it{sv.begin()};
@@ -4314,7 +4513,7 @@ void TestSboVectorIteratorIndirectionOperator()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2};
 
       Iter it{sv.begin()};
@@ -4328,7 +4527,7 @@ void TestSboVectorIteratorIndirectionOperator()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2};
 
       Iter it{sv.begin()};
@@ -4348,7 +4547,7 @@ void TestSboVectorIteratorIndirectionOperatorConst()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2};
 
       const Iter it{sv.begin()};
@@ -4373,7 +4572,7 @@ void TestSboVectorIteratorDereferenceOperator()
       using Elem = A;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorIterator<Elem, BufCap>;
-      
+
       SV sv{{1, 2}, {3, 4}};
 
       Iter it{sv.begin() + 1};
@@ -4422,7 +4621,7 @@ void TestSboVectorIteratorDereferenceOperatorConst()
       using Elem = A;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorIterator<Elem, BufCap>;
-      
+
       SV sv{{1, 2}, {3, 4}};
 
       const Iter it{sv.begin() + 1};
@@ -4442,7 +4641,7 @@ void TestSboVectorIteratorSubscriptOperator()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorIterator<Elem, BufCap>;
-      
+
       SV sv{{1}, {2}, {3}, {4}};
 
       Iter it{sv.begin() + 1};
@@ -4456,7 +4655,7 @@ void TestSboVectorIteratorSubscriptOperator()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorIterator<Elem, BufCap>;
-      
+
       SV sv{{1}, {2}, {3}, {4}};
 
       Iter it{sv.begin()};
@@ -4476,7 +4675,7 @@ void TestSboVectorIteratorSubscriptOperatorConst()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorIterator<Elem, BufCap>;
-      
+
       SV sv{{1}, {2}, {3}, {4}};
 
       const Iter it{sv.begin()};
@@ -4495,7 +4694,7 @@ void TestSboVectorIteratorPrefixIncrementOperator()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorIterator<Elem, BufCap>;
-      
+
       SV sv{{1}, {2}, {3}};
 
       Iter it{sv.begin()};
@@ -4516,7 +4715,7 @@ void TestSboVectorIteratorPostfixIncrementOperator()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorIterator<Elem, BufCap>;
-      
+
       SV sv{{1}, {2}, {3}};
 
       Iter it{sv.begin()};
@@ -4537,7 +4736,7 @@ void TestSboVectorIteratorPrefixDecrementOperator()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 3};
 
       Iter it{sv.begin() + 1};
@@ -4558,7 +4757,7 @@ void TestSboVectorIteratorPostfixDecrementOperator()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 3};
 
       Iter it{sv.begin() + 1};
@@ -4579,7 +4778,7 @@ void TestSboVectorIteratorSwap()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 3};
 
       Iter a{sv.begin()};
@@ -4602,7 +4801,7 @@ void TestSboVectorIteratorEquality()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 3};
 
       Iter a{sv.begin()};
@@ -4617,7 +4816,7 @@ void TestSboVectorIteratorEquality()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 3};
 
       Iter a{sv.begin()};
@@ -4632,7 +4831,7 @@ void TestSboVectorIteratorEquality()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 3};
       SV other{1, 2, 3};
 
@@ -4653,7 +4852,7 @@ void TestSboVectorIteratorInequality()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 3};
 
       Iter a{sv.begin()};
@@ -4668,7 +4867,7 @@ void TestSboVectorIteratorInequality()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 3};
 
       Iter a{sv.begin()};
@@ -4683,7 +4882,7 @@ void TestSboVectorIteratorInequality()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 3};
       SV other{1, 2, 3};
 
@@ -4704,7 +4903,7 @@ void TestSboVectorIteratorAdditionAssignment()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 3};
 
       Iter it{sv.begin()};
@@ -4719,7 +4918,7 @@ void TestSboVectorIteratorAdditionAssignment()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 3};
 
       Iter it{sv.begin() + 2};
@@ -4739,7 +4938,7 @@ void TestSboVectorIteratorSubtractionAssignment()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 3};
 
       Iter it{sv.begin() + 2};
@@ -4754,7 +4953,7 @@ void TestSboVectorIteratorSubtractionAssignment()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 3};
 
       Iter it{sv.begin()};
@@ -4775,7 +4974,7 @@ void TestSboVectorIteratorAdditionOfIteratorAndOffset()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 3};
 
       Iter it{sv.begin()};
@@ -4791,7 +4990,7 @@ void TestSboVectorIteratorAdditionOfIteratorAndOffset()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 3};
 
       Iter it{sv.begin() + 2};
@@ -4812,7 +5011,7 @@ void TestSboVectorIteratorAdditionOfOffsetAndIterator()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 3};
 
       Iter it{sv.begin()};
@@ -4828,7 +5027,7 @@ void TestSboVectorIteratorAdditionOfOffsetAndIterator()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 3};
 
       Iter it{sv.begin() + 2};
@@ -4849,7 +5048,7 @@ void TestSboVectorIteratorSubtractionOfIteratorAndOffset()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 3};
 
       Iter it{sv.begin() + 2};
@@ -4865,7 +5064,7 @@ void TestSboVectorIteratorSubtractionOfIteratorAndOffset()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 3};
 
       Iter it{sv.begin()};
@@ -4885,7 +5084,7 @@ void TestSboVectorIteratorSubtractionOfIterators()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 20};
 
       Iter a{sv.begin() + 2};
@@ -4906,7 +5105,7 @@ void TestSboVectorIteratorLessThan()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 20};
 
       Iter a{sv.begin()};
@@ -4922,7 +5121,7 @@ void TestSboVectorIteratorLessThan()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 20};
 
       Iter a{sv.begin() + 2};
@@ -4937,7 +5136,7 @@ void TestSboVectorIteratorLessThan()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 20};
 
       Iter a{sv.begin() + 2};
@@ -4951,14 +5150,13 @@ void TestSboVectorIteratorLessThan()
 void TestSboVectorIteratorLessOrEqualThan()
 {
    {
-      const std::string caseLabel{
-         "SboVectorIterator operator<= for less-than iterators"};
+      const std::string caseLabel{"SboVectorIterator operator<= for less-than iterators"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 20};
 
       Iter a{sv.begin()};
@@ -4974,7 +5172,7 @@ void TestSboVectorIteratorLessOrEqualThan()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 20};
 
       Iter a{sv.begin() + 2};
@@ -4989,7 +5187,7 @@ void TestSboVectorIteratorLessOrEqualThan()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 20};
 
       Iter a{sv.begin() + 2};
@@ -5009,7 +5207,7 @@ void TestSboVectorIteratorGreaterThan()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 20};
 
       Iter a{sv.begin()};
@@ -5025,7 +5223,7 @@ void TestSboVectorIteratorGreaterThan()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 20};
 
       Iter a{sv.begin() + 2};
@@ -5040,7 +5238,7 @@ void TestSboVectorIteratorGreaterThan()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 20};
 
       Iter a{sv.begin() + 2};
@@ -5054,14 +5252,13 @@ void TestSboVectorIteratorGreaterThan()
 void TestSboVectorIteratorGreaterOrEqualThan()
 {
    {
-      const std::string caseLabel{
-         "SboVectorIterator operator>= for less-than iterators"};
+      const std::string caseLabel{"SboVectorIterator operator>= for less-than iterators"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 20};
 
       Iter a{sv.begin()};
@@ -5077,7 +5274,7 @@ void TestSboVectorIteratorGreaterOrEqualThan()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 20};
 
       Iter a{sv.begin() + 2};
@@ -5092,7 +5289,7 @@ void TestSboVectorIteratorGreaterOrEqualThan()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 20};
 
       Iter a{sv.begin() + 2};
@@ -5114,7 +5311,7 @@ void TestSboVectorConstIteratorCopyCtor()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorConstIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2};
 
       Iter it{sv.begin() + 1};
@@ -5134,7 +5331,7 @@ void TestSboVectorConstIteratorMoveCtor()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorConstIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2};
 
       Iter it{sv.begin() + 1};
@@ -5154,7 +5351,7 @@ void TestSboVectorConstIteratorCopyAssignment()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorConstIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2};
 
       Iter it{sv.begin() + 1};
@@ -5175,7 +5372,7 @@ void TestSboVectorConstIteratorMoveAssignment()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorConstIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2};
 
       Iter it{sv.begin() + 1};
@@ -5196,7 +5393,7 @@ void TestSboVectorConstIteratorIndirectionOperatorConst()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorConstIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2};
 
       Iter it{sv.begin() + 1};
@@ -5241,7 +5438,7 @@ void TestSboVectorConstIteratorSubscriptOperatorConst()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorConstIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 3, {4}};
 
       Iter it{sv.begin() + 1};
@@ -5260,7 +5457,7 @@ void TestSboVectorConstIteratorPrefixIncrementOperator()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorConstIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 3};
 
       Iter it{sv.begin() + 1};
@@ -5281,7 +5478,7 @@ void TestSboVectorConstIteratorPostfixIncrementOperator()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorConstIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 3};
 
       Iter it{sv.begin() + 1};
@@ -5302,7 +5499,7 @@ void TestSboVectorConstIteratorPrefixDecrementOperator()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorConstIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 3};
 
       Iter it{sv.begin() + 1};
@@ -5323,7 +5520,7 @@ void TestSboVectorConstIteratorPostfixDecrementOperator()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorConstIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 3};
 
       Iter it{sv.begin() + 1};
@@ -5344,7 +5541,7 @@ void TestSboVectorConstIteratorSwap()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorConstIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 3};
 
       Iter a{sv.begin() + 1};
@@ -5367,7 +5564,7 @@ void TestSboVectorConstIteratorEquality()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorConstIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 3};
 
       Iter a{sv.begin() + 1};
@@ -5383,7 +5580,7 @@ void TestSboVectorConstIteratorEquality()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorConstIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 3};
 
       Iter a{sv.begin() + 1};
@@ -5399,7 +5596,7 @@ void TestSboVectorConstIteratorEquality()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorConstIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 3};
       SV other{1, 2, 3};
 
@@ -5420,7 +5617,7 @@ void TestSboVectorConstIteratorInequality()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorConstIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 3};
 
       Iter a{sv.begin() + 1};
@@ -5436,7 +5633,7 @@ void TestSboVectorConstIteratorInequality()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorConstIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 3};
 
       Iter a{sv.begin() + 1};
@@ -5452,7 +5649,7 @@ void TestSboVectorConstIteratorInequality()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorConstIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 3};
       SV other{1, 2, 3};
 
@@ -5474,7 +5671,7 @@ void TestSboVectorConstIteratorAdditionAssignment()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorConstIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 3};
 
       Iter it{sv.begin()};
@@ -5490,7 +5687,7 @@ void TestSboVectorConstIteratorAdditionAssignment()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorConstIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 3};
 
       Iter it{sv.begin() + 2};
@@ -5511,7 +5708,7 @@ void TestSboVectorConstIteratorSubtractionAssignment()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorConstIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 3};
 
       Iter it{sv.begin() + 2};
@@ -5527,7 +5724,7 @@ void TestSboVectorConstIteratorSubtractionAssignment()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorConstIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 3};
 
       Iter it{sv.begin()};
@@ -5548,7 +5745,7 @@ void TestSboVectorConstIteratorAdditionOfIteratorAndOffset()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorConstIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 3};
 
       Iter it{sv.begin()};
@@ -5564,7 +5761,7 @@ void TestSboVectorConstIteratorAdditionOfIteratorAndOffset()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorConstIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 3};
 
       Iter it{sv.begin() + 2};
@@ -5585,7 +5782,7 @@ void TestSboVectorConstIteratorAdditionOfOffsetAndIterator()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorConstIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 3};
 
       Iter it{sv.begin()};
@@ -5601,7 +5798,7 @@ void TestSboVectorConstIteratorAdditionOfOffsetAndIterator()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorConstIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 3};
 
       Iter it{sv.begin() + 2};
@@ -5622,7 +5819,7 @@ void TestSboVectorConstIteratorSubtractionOfIteratorAndOffset()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorConstIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 3};
 
       Iter it{sv.begin() + 2};
@@ -5638,7 +5835,7 @@ void TestSboVectorConstIteratorSubtractionOfIteratorAndOffset()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorConstIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 3};
 
       Iter it{sv.begin()};
@@ -5658,7 +5855,7 @@ void TestSboVectorConstIteratorSubtractionOfIterators()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorConstIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 20};
 
       Iter a{sv.begin() + 2};
@@ -5680,7 +5877,7 @@ void TestSboVectorConstIteratorLessThan()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorConstIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 20};
 
       Iter a{sv.begin()};
@@ -5696,7 +5893,7 @@ void TestSboVectorConstIteratorLessThan()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorConstIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 20};
 
       Iter a{sv.begin() + 2};
@@ -5705,14 +5902,13 @@ void TestSboVectorConstIteratorLessThan()
       VERIFY(!(a < b), caseLabel);
    }
    {
-      const std::string caseLabel{
-         "SboVectorConstIterator operator< for equal iterators"};
+      const std::string caseLabel{"SboVectorConstIterator operator< for equal iterators"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorConstIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 20};
 
       Iter a{sv.begin() + 2};
@@ -5733,7 +5929,7 @@ void TestSboVectorConstIteratorLessOrEqualThan()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorConstIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 20};
 
       Iter a{sv.begin()};
@@ -5749,7 +5945,7 @@ void TestSboVectorConstIteratorLessOrEqualThan()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorConstIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 20};
 
       Iter a{sv.begin() + 2};
@@ -5765,7 +5961,7 @@ void TestSboVectorConstIteratorLessOrEqualThan()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorConstIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 20};
 
       Iter a{sv.begin() + 2};
@@ -5786,7 +5982,7 @@ void TestSboVectorConstIteratorGreaterThan()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorConstIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 20};
 
       Iter a{sv.begin()};
@@ -5802,7 +5998,7 @@ void TestSboVectorConstIteratorGreaterThan()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorConstIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 20};
 
       Iter a{sv.begin() + 2};
@@ -5811,14 +6007,13 @@ void TestSboVectorConstIteratorGreaterThan()
       VERIFY(a > b, caseLabel);
    }
    {
-      const std::string caseLabel{
-         "SboVectorConstIterator operator> for equal iterators"};
+      const std::string caseLabel{"SboVectorConstIterator operator> for equal iterators"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorConstIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 20};
 
       Iter a{sv.begin() + 2};
@@ -5839,7 +6034,7 @@ void TestSboVectorConstIteratorGreaterOrEqualThan()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorConstIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 20};
 
       Iter a{sv.begin()};
@@ -5855,7 +6050,7 @@ void TestSboVectorConstIteratorGreaterOrEqualThan()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorConstIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 20};
 
       Iter a{sv.begin() + 2};
@@ -5871,7 +6066,7 @@ void TestSboVectorConstIteratorGreaterOrEqualThan()
       using Elem = int;
       using SV = SboVector<Elem, BufCap>;
       using Iter = SboVectorConstIterator<Elem, BufCap>;
-      
+
       SV sv{1, 2, 20};
 
       Iter a{sv.begin() + 2};
