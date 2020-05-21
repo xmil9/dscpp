@@ -4420,6 +4420,502 @@ void TestSboVectorEraseSingleElement()
 }
 
 
+void TestSboVectorEraseIteratorRange()
+{
+   {
+      const std::string caseLabel{"SvoVector::erase empty range"};
+
+      constexpr std::size_t BufCap = 10;
+      constexpr std::size_t NumElems = 5;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      // Memory instrumentation for entire scope.
+      const MemVerifier<SV> memCheck{caseLabel};
+
+      SV sv{1, 2, 3, 4, 5};
+      const std::size_t origSize = sv.size();
+      SV::iterator first = sv.begin();
+      SV::iterator last = sv.begin();
+
+      // Preconditions.
+      VERIFY(!sv.empty(), caseLabel);
+      VERIFY(first == last, caseLabel);
+
+      {
+         // Element instrumentation for tested call only.
+         Elem::Measures expected;
+         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+
+         // Test.
+         SV::iterator next = sv.erase(first, last);
+
+         // Verify returned value.
+         VERIFY(next == last, caseLabel);
+      }
+
+      // Verify vector state.
+      VERIFY(sv.size() == origSize, caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i].i == i + 1, caseLabel);
+   }
+   {
+      const std::string caseLabel{"SvoVector::erase range in middle of buffer instance"};
+
+      constexpr std::size_t BufCap = 10;
+      constexpr std::size_t NumElems = 9;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      // Memory instrumentation for entire scope.
+      const MemVerifier<SV> memCheck{caseLabel};
+
+      SV sv{1, 2, 3, 4, 5, 6, 7, 8, 9};
+      const std::size_t origSize = sv.size();
+      const std::size_t firstIdx = 2;
+      const std::size_t lastIdx = 5;
+
+      // Preconditions.
+      VERIFY(sv.inBuffer(), caseLabel);
+      VERIFY(!sv.empty(), caseLabel);
+      VERIFY(firstIdx < lastIdx, caseLabel);
+
+      {
+         // Element instrumentation for tested call only.
+         Elem::Measures expected;
+         expected.moveAssignmentCalls = origSize - lastIdx;
+         expected.dtorCalls = lastIdx - firstIdx;
+         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+
+         // Test.
+         SV::iterator next = sv.erase(sv.begin() + firstIdx, sv.begin() + lastIdx);
+
+         // Verify returned value.
+         VERIFY(next == sv.begin() + firstIdx, caseLabel);
+      }
+
+      // Verify vector state.
+      VERIFY(sv.inBuffer(), caseLabel);
+      VERIFY(sv.size() == origSize - (lastIdx - firstIdx), caseLabel);
+      VERIFY(sv[0].i == 1, caseLabel);
+      VERIFY(sv[1].i == 2, caseLabel);
+      VERIFY(sv[2].i == 6, caseLabel);
+      VERIFY(sv[3].i == 7, caseLabel);
+      VERIFY(sv[4].i == 8, caseLabel);
+      VERIFY(sv[5].i == 9, caseLabel);
+   }
+   {
+      const std::string caseLabel{"SvoVector::erase range at front of buffer instance"};
+
+      constexpr std::size_t BufCap = 10;
+      constexpr std::size_t NumElems = 9;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      // Memory instrumentation for entire scope.
+      const MemVerifier<SV> memCheck{caseLabel};
+
+      SV sv{1, 2, 3, 4, 5, 6, 7, 8, 9};
+      const std::size_t origSize = sv.size();
+      const std::size_t firstIdx = 0;
+      const std::size_t lastIdx = 4;
+
+      // Preconditions.
+      VERIFY(sv.inBuffer(), caseLabel);
+      VERIFY(!sv.empty(), caseLabel);
+      VERIFY(firstIdx < lastIdx, caseLabel);
+      VERIFY(firstIdx == 0, caseLabel);
+
+      {
+         // Element instrumentation for tested call only.
+         Elem::Measures expected;
+         expected.moveAssignmentCalls = origSize - lastIdx;
+         expected.dtorCalls = lastIdx - firstIdx;
+         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+
+         // Test.
+         SV::iterator next = sv.erase(sv.begin() + firstIdx, sv.begin() + lastIdx);
+
+         // Verify returned value.
+         VERIFY(next == sv.begin() + firstIdx, caseLabel);
+      }
+
+      // Verify vector state.
+      VERIFY(sv.inBuffer(), caseLabel);
+      VERIFY(sv.size() == origSize - (lastIdx - firstIdx), caseLabel);
+      VERIFY(sv[0].i == 5, caseLabel);
+      VERIFY(sv[1].i == 6, caseLabel);
+      VERIFY(sv[2].i == 7, caseLabel);
+      VERIFY(sv[3].i == 8, caseLabel);
+      VERIFY(sv[4].i == 9, caseLabel);
+   }
+   {
+      const std::string caseLabel{"SvoVector::erase range at rear of buffer instance"};
+
+      constexpr std::size_t BufCap = 10;
+      constexpr std::size_t NumElems = 9;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      // Memory instrumentation for entire scope.
+      const MemVerifier<SV> memCheck{caseLabel};
+
+      SV sv{1, 2, 3, 4, 5, 6, 7, 8, 9};
+      const std::size_t origSize = sv.size();
+      const std::size_t firstIdx = 7;
+      const std::size_t lastIdx = 9;
+
+      // Preconditions.
+      VERIFY(sv.inBuffer(), caseLabel);
+      VERIFY(!sv.empty(), caseLabel);
+      VERIFY(firstIdx < lastIdx, caseLabel);
+      VERIFY(lastIdx == sv.size(), caseLabel);
+
+      {
+         // Element instrumentation for tested call only.
+         Elem::Measures expected;
+         expected.moveAssignmentCalls = 0;
+         expected.dtorCalls = lastIdx - firstIdx;
+         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+
+         // Test.
+         SV::iterator next = sv.erase(sv.begin() + firstIdx, sv.begin() + lastIdx);
+
+         // Verify returned value.
+         VERIFY(next == sv.begin() + firstIdx, caseLabel);
+      }
+
+      // Verify vector state.
+      VERIFY(sv.inBuffer(), caseLabel);
+      VERIFY(sv.size() == origSize - (lastIdx - firstIdx), caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i].i == i + 1, caseLabel);
+   }
+   {
+      const std::string caseLabel{"SvoVector::erase range of all elements of buffer instance"};
+
+      constexpr std::size_t BufCap = 10;
+      constexpr std::size_t NumElems = 3;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      // Memory instrumentation for entire scope.
+      const MemVerifier<SV> memCheck{caseLabel};
+
+      SV sv{1, 2, 3};
+
+      // Preconditions.
+      VERIFY(sv.inBuffer(), caseLabel);
+      VERIFY(sv.size() == NumElems, caseLabel);
+
+      {
+         // Element instrumentation for tested call only.
+         Elem::Measures expected;
+         expected.moveAssignmentCalls = 0;
+         expected.dtorCalls = sv.size();
+         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+
+         // Test.
+         SV::iterator next = sv.erase(sv.begin(), sv.end());
+
+         // Verify returned value.
+         VERIFY(next == sv.end(), caseLabel);
+      }
+
+      // Verify vector state.
+      VERIFY(sv.inBuffer(), caseLabel);
+      VERIFY(sv.empty(), caseLabel);
+   }
+   {
+      const std::string caseLabel{"SvoVector::erase range in middle of heap instance"};
+
+      constexpr std::size_t BufCap = 5;
+      constexpr std::size_t NumElems = 9;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      // Memory instrumentation for entire scope.
+      const MemVerifier<SV> memCheck{caseLabel};
+
+      SV sv{1, 2, 3, 4, 5, 6, 7, 8, 9};
+      const std::size_t origSize = sv.size();
+      const std::size_t firstIdx = 2;
+      const std::size_t lastIdx = 5;
+
+      // Preconditions.
+      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(!sv.empty(), caseLabel);
+      VERIFY(firstIdx < lastIdx, caseLabel);
+
+      {
+         // Element instrumentation for tested call only.
+         Elem::Measures expected;
+         expected.moveAssignmentCalls = origSize - lastIdx;
+         expected.dtorCalls = lastIdx - firstIdx;
+         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+
+         // Test.
+         SV::iterator next = sv.erase(sv.begin() + firstIdx, sv.begin() + lastIdx);
+
+         // Verify returned value.
+         VERIFY(next == sv.begin() + firstIdx, caseLabel);
+      }
+
+      // Verify vector state.
+      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(sv.size() == origSize - (lastIdx - firstIdx), caseLabel);
+      VERIFY(sv[0].i == 1, caseLabel);
+      VERIFY(sv[1].i == 2, caseLabel);
+      VERIFY(sv[2].i == 6, caseLabel);
+      VERIFY(sv[3].i == 7, caseLabel);
+      VERIFY(sv[4].i == 8, caseLabel);
+      VERIFY(sv[5].i == 9, caseLabel);
+   }
+   {
+      const std::string caseLabel{"SvoVector::erase range at front of heap instance"};
+
+      constexpr std::size_t BufCap = 5;
+      constexpr std::size_t NumElems = 9;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      // Memory instrumentation for entire scope.
+      const MemVerifier<SV> memCheck{caseLabel};
+
+      SV sv{1, 2, 3, 4, 5, 6, 7, 8, 9};
+      const std::size_t origSize = sv.size();
+      const std::size_t firstIdx = 0;
+      const std::size_t lastIdx = 4;
+
+      // Preconditions.
+      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(!sv.empty(), caseLabel);
+      VERIFY(firstIdx < lastIdx, caseLabel);
+      VERIFY(firstIdx == 0, caseLabel);
+
+      {
+         // Element instrumentation for tested call only.
+         Elem::Measures expected;
+         expected.moveAssignmentCalls = origSize - lastIdx;
+         expected.dtorCalls = lastIdx - firstIdx;
+         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+
+         // Test.
+         SV::iterator next = sv.erase(sv.begin() + firstIdx, sv.begin() + lastIdx);
+
+         // Verify returned value.
+         VERIFY(next == sv.begin() + firstIdx, caseLabel);
+      }
+
+      // Verify vector state.
+      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(sv.size() == origSize - (lastIdx - firstIdx), caseLabel);
+      VERIFY(sv[0].i == 5, caseLabel);
+      VERIFY(sv[1].i == 6, caseLabel);
+      VERIFY(sv[2].i == 7, caseLabel);
+      VERIFY(sv[3].i == 8, caseLabel);
+      VERIFY(sv[4].i == 9, caseLabel);
+   }
+   {
+      const std::string caseLabel{"SvoVector::erase range at rear of heap instance"};
+
+      constexpr std::size_t BufCap = 5;
+      constexpr std::size_t NumElems = 9;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      // Memory instrumentation for entire scope.
+      const MemVerifier<SV> memCheck{caseLabel};
+
+      SV sv{1, 2, 3, 4, 5, 6, 7, 8, 9};
+      const std::size_t origSize = sv.size();
+      const std::size_t firstIdx = 7;
+      const std::size_t lastIdx = 9;
+
+      // Preconditions.
+      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(!sv.empty(), caseLabel);
+      VERIFY(firstIdx < lastIdx, caseLabel);
+      VERIFY(lastIdx == sv.size(), caseLabel);
+
+      {
+         // Element instrumentation for tested call only.
+         Elem::Measures expected;
+         expected.moveAssignmentCalls = 0;
+         expected.dtorCalls = lastIdx - firstIdx;
+         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+
+         // Test.
+         SV::iterator next = sv.erase(sv.begin() + firstIdx, sv.begin() + lastIdx);
+
+         // Verify returned value.
+         VERIFY(next == sv.begin() + firstIdx, caseLabel);
+      }
+
+      // Verify vector state.
+      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(sv.size() == origSize - (lastIdx - firstIdx), caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i].i == i + 1, caseLabel);
+   }
+   {
+      const std::string caseLabel{"SvoVector::erase range using const-iterators"};
+
+      constexpr std::size_t BufCap = 5;
+      constexpr std::size_t NumElems = 9;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      // Memory instrumentation for entire scope.
+      const MemVerifier<SV> memCheck{caseLabel};
+
+      SV sv{1, 2, 3, 4, 5, 6, 7, 8, 9};
+      const std::size_t origSize = sv.size();
+      const std::size_t firstIdx = 2;
+      const std::size_t lastIdx = 5;
+
+      // Preconditions.
+      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(!sv.empty(), caseLabel);
+      VERIFY(firstIdx < lastIdx, caseLabel);
+
+      {
+         // Element instrumentation for tested call only.
+         Elem::Measures expected;
+         expected.moveAssignmentCalls = origSize - lastIdx;
+         expected.dtorCalls = lastIdx - firstIdx;
+         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+
+         // Test.
+         SV::iterator next = sv.erase(sv.cbegin() + firstIdx, sv.cbegin() + lastIdx);
+
+         // Verify returned value.
+         VERIFY(next == sv.begin() + firstIdx, caseLabel);
+      }
+
+      // Verify vector state.
+      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(sv.size() == origSize - (lastIdx - firstIdx), caseLabel);
+      VERIFY(sv[0].i == 1, caseLabel);
+      VERIFY(sv[1].i == 2, caseLabel);
+      VERIFY(sv[2].i == 6, caseLabel);
+      VERIFY(sv[3].i == 7, caseLabel);
+      VERIFY(sv[4].i == 8, caseLabel);
+      VERIFY(sv[5].i == 9, caseLabel);
+   }
+   {
+      const std::string caseLabel{"SvoVector::erase range for empty vector"};
+
+      constexpr std::size_t BufCap = 10;
+      constexpr std::size_t NumElems = 5;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      // Memory instrumentation for entire scope.
+      const MemVerifier<SV> memCheck{caseLabel};
+
+      SV sv;
+
+      // Preconditions.
+      VERIFY(sv.empty(), caseLabel);
+
+      {
+         // Element instrumentation for tested call only.
+         Elem::Measures expected;
+         expected.moveAssignmentCalls = 0;
+         expected.dtorCalls = 0;
+         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+
+         // Test.
+         SV::iterator next = sv.erase(sv.begin(), sv.end());
+
+         // Verify returned value.
+         VERIFY(next == sv.end(), caseLabel);
+      }
+
+      // Verify vector state.
+      VERIFY(sv.empty(), caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "SvoVector::erase range of heap instance that makes elements fit into buffer"};
+
+      constexpr std::size_t BufCap = 5;
+      constexpr std::size_t NumElems = 8;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      // Memory instrumentation for entire scope.
+      const MemVerifier<SV> memCheck{caseLabel};
+
+      SV sv{1, 2, 3, 4, 5, 6, 7, 8};
+      const std::size_t origSize = sv.size();
+      const std::size_t firstIdx = 1;
+      const std::size_t lastIdx = 6;
+
+      // Preconditions.
+      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(sv.size() - (lastIdx - firstIdx) < BufCap, caseLabel);
+
+      {
+         // Element instrumentation for tested call only.
+         Elem::Measures expected;
+         expected.moveAssignmentCalls = origSize - lastIdx;
+         expected.dtorCalls = lastIdx - firstIdx;
+         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+
+         // Test.
+         SV::iterator next = sv.erase(sv.begin() + firstIdx, sv.begin() + lastIdx);
+
+         // Verify returned value.
+         VERIFY(next == sv.begin() + firstIdx, caseLabel);
+      }
+
+      // Verify vector state.
+      // Data is still on heap even though it would fit into buffer.
+      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(sv.size() == origSize - (lastIdx - firstIdx), caseLabel);
+      VERIFY(sv[0].i == 1, caseLabel);
+      VERIFY(sv[1].i == 7, caseLabel);
+      VERIFY(sv[2].i == 8, caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "SvoVector::erase full range of elements of heap instance"};
+
+      constexpr std::size_t BufCap = 5;
+      constexpr std::size_t NumElems = 8;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      // Memory instrumentation for entire scope.
+      const MemVerifier<SV> memCheck{caseLabel};
+
+      SV sv{1, 2, 3, 4, 5, 6, 7, 8};
+      const std::size_t origSize = sv.size();
+
+      // Preconditions.
+      VERIFY(sv.onHeap(), caseLabel);
+
+      {
+         // Element instrumentation for tested call only.
+         Elem::Measures expected;
+         expected.moveAssignmentCalls = 0;
+         expected.dtorCalls = sv.size();
+         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+
+         // Test.
+         sv.erase(sv.begin(), sv.end());
+      }
+
+      // Verify vector state.
+      // Allocation is still on heap even though it is empty.
+      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(sv.empty(), caseLabel);
+   }
+}
+
+
 ///////////////////
 
 void TestSboVectorIteratorCopyCtor()
@@ -6124,6 +6620,7 @@ void TestSboVector()
    TestSboVectorShrinkToFit();
    TestSboVectorClear();
    TestSboVectorEraseSingleElement();
+   TestSboVectorEraseIteratorRange();
 
    TestSboVectorIteratorCopyCtor();
    TestSboVectorIteratorMoveCtor();

@@ -775,16 +775,17 @@ typename SboVector<T, N>::iterator SboVector<T, N>::erase(const_iterator first,
       last = cend();
    
    const auto offset = first - cbegin();
+   iterator firstIt = begin() + offset;
    const auto size = last - first;
+   iterator lastIt = begin() + offset + size;
    if (size == 0)
-      return last;
+      return lastIt;
 
    std::destroy_n(first.m_elem, size);
 
-   iterator firstIt = begin() + offset;
-   iterator lastIt = begin() + offset + size;
    // Accoring to std::vector::erase spec T has to be moveable.
-   std::move(lastIt + 1, end(), firstIt);
+   if (lastIt < end())
+      std::move(lastIt, end(), firstIt);
    m_size -= size;
 
    return begin() + offset;
