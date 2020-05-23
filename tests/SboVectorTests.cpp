@@ -4019,7 +4019,7 @@ void TestSboVectorEraseSingleElement()
       {
          // Element instrumentation for tested call only.
          Elem::Measures expected;
-         expected.moveAssignmentCalls = sv.size() - erasedElemIdx - 1;
+         expected.moveCtorCalls = sv.size() - erasedElemIdx - 1;
          expected.dtorCalls = 1;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
 
@@ -4059,7 +4059,7 @@ void TestSboVectorEraseSingleElement()
       {
          // Element instrumentation for tested call only.
          Elem::Measures expected;
-         expected.moveAssignmentCalls = sv.size() - 1;
+         expected.moveCtorCalls = sv.size() - 1;
          expected.dtorCalls = 1;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
 
@@ -4099,7 +4099,7 @@ void TestSboVectorEraseSingleElement()
       {
          // Element instrumentation for tested call only.
          Elem::Measures expected;
-         expected.moveAssignmentCalls = 0;
+         expected.moveCtorCalls = 0;
          expected.dtorCalls = 1;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
 
@@ -4136,7 +4136,7 @@ void TestSboVectorEraseSingleElement()
       {
          // Element instrumentation for tested call only.
          Elem::Measures expected;
-         expected.moveAssignmentCalls = 0;
+         expected.moveCtorCalls = 0;
          expected.dtorCalls = 1;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
 
@@ -4172,7 +4172,7 @@ void TestSboVectorEraseSingleElement()
       {
          // Element instrumentation for tested call only.
          Elem::Measures expected;
-         expected.moveAssignmentCalls = sv.size() - erasedElemIdx - 1;
+         expected.moveCtorCalls = sv.size() - erasedElemIdx - 1;
          expected.dtorCalls = 1;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
 
@@ -4207,7 +4207,7 @@ void TestSboVectorEraseSingleElement()
       {
          // Element instrumentation for tested call only.
          Elem::Measures expected;
-         expected.moveAssignmentCalls = 0;
+         expected.moveCtorCalls = 0;
          expected.dtorCalls = 0;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
 
@@ -4244,7 +4244,7 @@ void TestSboVectorEraseSingleElement()
       {
          // Element instrumentation for tested call only.
          Elem::Measures expected;
-         expected.moveAssignmentCalls = sv.size() - erasedElemIdx - 1;
+         expected.moveCtorCalls = sv.size() - erasedElemIdx - 1;
          expected.dtorCalls = 1;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
 
@@ -4284,7 +4284,7 @@ void TestSboVectorEraseSingleElement()
       {
          // Element instrumentation for tested call only.
          Elem::Measures expected;
-         expected.moveAssignmentCalls = sv.size() - 1;
+         expected.moveCtorCalls = sv.size() - 1;
          expected.dtorCalls = 1;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
 
@@ -4324,7 +4324,7 @@ void TestSboVectorEraseSingleElement()
       {
          // Element instrumentation for tested call only.
          Elem::Measures expected;
-         expected.moveAssignmentCalls = 0;
+         expected.moveCtorCalls = 0;
          expected.dtorCalls = 1;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
 
@@ -4364,7 +4364,7 @@ void TestSboVectorEraseSingleElement()
       {
          // Element instrumentation for tested call only.
          Elem::Measures expected;
-         expected.moveAssignmentCalls = 0;
+         expected.moveCtorCalls = 0;
          expected.dtorCalls = 1;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
 
@@ -4402,7 +4402,7 @@ void TestSboVectorEraseSingleElement()
       {
          // Element instrumentation for tested call only.
          Elem::Measures expected;
-         expected.moveAssignmentCalls = 0;
+         expected.moveCtorCalls = 0;
          expected.dtorCalls = sv.size();
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
 
@@ -4415,6 +4415,48 @@ void TestSboVectorEraseSingleElement()
       // Allocation is still on heap even though it is empty.
       VERIFY(sv.onHeap(), caseLabel);
       VERIFY(sv.empty(), caseLabel);
+   }
+   {
+      const std::string caseLabel{"SvoVector::erase inner non-moveable element type"};
+
+      constexpr std::size_t BufCap = 10;
+      constexpr std::size_t NumElems = 5;
+      using Elem = NotMoveableElement;
+      using SV = SboVector<Elem, BufCap>;
+
+      // Memory instrumentation for entire scope.
+      const MemVerifier<SV> memCheck{caseLabel};
+
+      SV sv{1, 2, 3, 4, 5};
+      const std::size_t origSize = sv.size();
+      constexpr std::size_t erasedElemIdx = 1;
+      const std::size_t numRelocated = sv.size() - erasedElemIdx - 1;
+
+      // Preconditions.
+      VERIFY(sv.inBuffer(), caseLabel);
+      VERIFY(!sv.empty(), caseLabel);
+      VERIFY(erasedElemIdx > 0 && erasedElemIdx < sv.size() - 1, caseLabel);
+      static_assert(!std::is_move_constructible_v<Elem>);
+
+      {
+         // Element instrumentation for tested call only.
+         Elem::Measures expected;
+         expected.copyCtorCalls = numRelocated;
+         expected.dtorCalls = numRelocated + 1;
+         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+
+         // Test.
+         SV::iterator next = sv.erase(sv.begin() + erasedElemIdx);
+
+         // Verify returned value.
+         VERIFY(next == sv.begin() + erasedElemIdx, caseLabel);
+      }
+
+      // Verify vector state.
+      VERIFY(sv.inBuffer(), caseLabel);
+      VERIFY(sv.size() == origSize - 1, caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i].i == (i < erasedElemIdx) ? i + 1 : i + 2, caseLabel);
    }
 }
 
@@ -4482,7 +4524,7 @@ void TestSboVectorEraseIteratorRange()
       {
          // Element instrumentation for tested call only.
          Elem::Measures expected;
-         expected.moveAssignmentCalls = origSize - lastIdx;
+         expected.moveCtorCalls = origSize - lastIdx;
          expected.dtorCalls = lastIdx - firstIdx;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
 
@@ -4528,7 +4570,7 @@ void TestSboVectorEraseIteratorRange()
       {
          // Element instrumentation for tested call only.
          Elem::Measures expected;
-         expected.moveAssignmentCalls = origSize - lastIdx;
+         expected.moveCtorCalls = origSize - lastIdx;
          expected.dtorCalls = lastIdx - firstIdx;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
 
@@ -4573,7 +4615,7 @@ void TestSboVectorEraseIteratorRange()
       {
          // Element instrumentation for tested call only.
          Elem::Measures expected;
-         expected.moveAssignmentCalls = 0;
+         expected.moveCtorCalls = 0;
          expected.dtorCalls = lastIdx - firstIdx;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
 
@@ -4611,7 +4653,7 @@ void TestSboVectorEraseIteratorRange()
       {
          // Element instrumentation for tested call only.
          Elem::Measures expected;
-         expected.moveAssignmentCalls = 0;
+         expected.moveCtorCalls = 0;
          expected.dtorCalls = sv.size();
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
 
@@ -4650,7 +4692,7 @@ void TestSboVectorEraseIteratorRange()
       {
          // Element instrumentation for tested call only.
          Elem::Measures expected;
-         expected.moveAssignmentCalls = origSize - lastIdx;
+         expected.moveCtorCalls = origSize - lastIdx;
          expected.dtorCalls = lastIdx - firstIdx;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
 
@@ -4696,7 +4738,7 @@ void TestSboVectorEraseIteratorRange()
       {
          // Element instrumentation for tested call only.
          Elem::Measures expected;
-         expected.moveAssignmentCalls = origSize - lastIdx;
+         expected.moveCtorCalls = origSize - lastIdx;
          expected.dtorCalls = lastIdx - firstIdx;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
 
@@ -4741,7 +4783,7 @@ void TestSboVectorEraseIteratorRange()
       {
          // Element instrumentation for tested call only.
          Elem::Measures expected;
-         expected.moveAssignmentCalls = 0;
+         expected.moveCtorCalls = 0;
          expected.dtorCalls = lastIdx - firstIdx;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
 
@@ -4782,7 +4824,7 @@ void TestSboVectorEraseIteratorRange()
       {
          // Element instrumentation for tested call only.
          Elem::Measures expected;
-         expected.moveAssignmentCalls = origSize - lastIdx;
+         expected.moveCtorCalls = origSize - lastIdx;
          expected.dtorCalls = lastIdx - firstIdx;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
 
@@ -4822,7 +4864,7 @@ void TestSboVectorEraseIteratorRange()
       {
          // Element instrumentation for tested call only.
          Elem::Measures expected;
-         expected.moveAssignmentCalls = 0;
+         expected.moveCtorCalls = 0;
          expected.dtorCalls = 0;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
 
@@ -4860,7 +4902,7 @@ void TestSboVectorEraseIteratorRange()
       {
          // Element instrumentation for tested call only.
          Elem::Measures expected;
-         expected.moveAssignmentCalls = origSize - lastIdx;
+         expected.moveCtorCalls = origSize - lastIdx;
          expected.dtorCalls = lastIdx - firstIdx;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
 
@@ -4900,7 +4942,7 @@ void TestSboVectorEraseIteratorRange()
       {
          // Element instrumentation for tested call only.
          Elem::Measures expected;
-         expected.moveAssignmentCalls = 0;
+         expected.moveCtorCalls = 0;
          expected.dtorCalls = sv.size();
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
 
@@ -4912,6 +4954,54 @@ void TestSboVectorEraseIteratorRange()
       // Allocation is still on heap even though it is empty.
       VERIFY(sv.onHeap(), caseLabel);
       VERIFY(sv.empty(), caseLabel);
+   }
+   {
+      const std::string caseLabel{"SvoVector::erase range for non-moveable element type"};
+
+      constexpr std::size_t BufCap = 5;
+      constexpr std::size_t NumElems = 9;
+      using Elem = NotMoveableElement;
+      using SV = SboVector<Elem, BufCap>;
+
+      // Memory instrumentation for entire scope.
+      const MemVerifier<SV> memCheck{caseLabel};
+
+      SV sv{1, 2, 3, 4, 5, 6, 7, 8, 9};
+      const std::size_t origSize = sv.size();
+      const std::size_t firstIdx = 2;
+      const std::size_t lastIdx = 5;
+      const std::size_t numErased = lastIdx - firstIdx;
+      const std::size_t numBehind = origSize - lastIdx;
+
+      // Preconditions.
+      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(!sv.empty(), caseLabel);
+      VERIFY(firstIdx < lastIdx, caseLabel);
+      static_assert(!std::is_move_constructible_v<Elem>);
+
+      {
+         // Element instrumentation for tested call only.
+         Elem::Measures expected;
+         expected.copyCtorCalls = numBehind;
+         expected.dtorCalls = numErased + numBehind;
+         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+
+         // Test.
+         SV::iterator next = sv.erase(sv.begin() + firstIdx, sv.begin() + lastIdx);
+
+         // Verify returned value.
+         VERIFY(next == sv.begin() + firstIdx, caseLabel);
+      }
+
+      // Verify vector state.
+      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(sv.size() == origSize - numErased, caseLabel);
+      VERIFY(sv[0].i == 1, caseLabel);
+      VERIFY(sv[1].i == 2, caseLabel);
+      VERIFY(sv[2].i == 6, caseLabel);
+      VERIFY(sv[3].i == 7, caseLabel);
+      VERIFY(sv[4].i == 8, caseLabel);
+      VERIFY(sv[5].i == 9, caseLabel);
    }
 }
 
@@ -4945,8 +5035,8 @@ void TestSboVectorInsertSingleValue()
       {
          // Element instrumentation for tested call only.
          Elem::Measures expected;
-         expected.copyCtorCalls = numRelocated + 1;
-         expected.dtorCalls = numRelocated;
+         expected.moveCtorCalls = numRelocated;
+         expected.copyCtorCalls = 1;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
 
          // Test.
@@ -4993,8 +5083,8 @@ void TestSboVectorInsertSingleValue()
       {
          // Element instrumentation for tested call only.
          Elem::Measures expected;
-         expected.copyCtorCalls = numRelocated + 1;
-         expected.dtorCalls = numRelocated;
+         expected.moveCtorCalls = numRelocated;
+         expected.copyCtorCalls = 1;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
 
          // Test.
@@ -5041,8 +5131,8 @@ void TestSboVectorInsertSingleValue()
       {
          // Element instrumentation for tested call only.
          Elem::Measures expected;
-         expected.copyCtorCalls = numRelocated + 1;
-         expected.dtorCalls = numRelocated;
+         expected.moveCtorCalls = numRelocated;
+         expected.copyCtorCalls = 1;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
 
          // Test.
@@ -5089,8 +5179,8 @@ void TestSboVectorInsertSingleValue()
       {
          // Element instrumentation for tested call only.
          Elem::Measures expected;
-         expected.copyCtorCalls = numRelocated + 1;
-         expected.dtorCalls = numRelocated;
+         expected.moveCtorCalls = numRelocated;
+         expected.copyCtorCalls = 1;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
 
          // Test.
@@ -5138,8 +5228,8 @@ void TestSboVectorInsertSingleValue()
       {
          // Element instrumentation for tested call only.
          Elem::Measures expected;
-         expected.copyCtorCalls = numRelocated + 1;
-         expected.dtorCalls = numRelocated;
+         expected.moveCtorCalls = numRelocated;
+         expected.copyCtorCalls = 1;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
 
          // Test.
@@ -5187,8 +5277,8 @@ void TestSboVectorInsertSingleValue()
       {
          // Element instrumentation for tested call only.
          Elem::Measures expected;
-         expected.copyCtorCalls = numRelocated + 1;
-         expected.dtorCalls = numRelocated;
+         expected.moveCtorCalls = numRelocated;
+         expected.copyCtorCalls = 1;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
 
          // Test.
@@ -5239,8 +5329,8 @@ void TestSboVectorInsertSingleValue()
       {
          // Element instrumentation for tested call only.
          Elem::Measures expected;
-         expected.copyCtorCalls = numRelocated + 1;
-         expected.dtorCalls = numRelocated;
+         expected.moveCtorCalls = numRelocated;
+         expected.copyCtorCalls = 1;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
 
          // Test.
@@ -5285,8 +5375,8 @@ void TestSboVectorInsertSingleValue()
       {
          // Element instrumentation for tested call only.
          Elem::Measures expected;
-         expected.copyCtorCalls = numRelocated + 1;
-         expected.dtorCalls = numRelocated;
+         expected.moveCtorCalls = numRelocated;
+         expected.copyCtorCalls = 1;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
 
          // Test.
@@ -5334,8 +5424,8 @@ void TestSboVectorInsertSingleValue()
       {
          // Element instrumentation for tested call only.
          Elem::Measures expected;
-         expected.copyCtorCalls = numRelocated + 1;
-         expected.dtorCalls = numRelocated;
+         expected.moveCtorCalls = numRelocated;
+         expected.copyCtorCalls = 1;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
 
          // Test.
@@ -5393,6 +5483,55 @@ void TestSboVectorInsertSingleValue()
       VERIFY(sv.size() == NumElems + 1, caseLabel);
       VERIFY(sv.capacity() == BufCap, caseLabel);
       VERIFY(sv[0].i == 100, caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "SvoVector::insert single value for non-moveable element type"};
+
+      constexpr std::size_t BufCap = 5;
+      constexpr std::size_t Cap = 10;
+      constexpr std::size_t NumElems = 8;
+      using Elem = NotMoveableElement;
+      using SV = SboVector<Elem, BufCap>;
+
+      // Memory instrumentation for entire scope.
+      const MemVerifier<SV> memCheck{caseLabel};
+
+      SV sv{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+      while (sv.size() > NumElems)
+         sv.erase(sv.begin() + sv.size() - 1);
+      const Elem insertedVal = 100;
+      constexpr std::size_t insertedBefore = 3;
+      const std::size_t numRelocated = NumElems - insertedBefore;
+
+      // Preconditions.
+      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(sv.size() == NumElems, caseLabel);
+      VERIFY(sv.capacity() == Cap, caseLabel);
+      VERIFY(insertedBefore > 0 && insertedBefore < NumElems - 1, caseLabel);
+      VERIFY(sv.size() < sv.capacity(), caseLabel);
+      static_assert(!std::is_move_constructible_v<Elem>);
+
+      {
+         // Element instrumentation for tested call only.
+         Elem::Measures expected;
+         expected.copyCtorCalls = numRelocated + 1;
+         expected.dtorCalls = numRelocated;
+         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+
+         // Test.
+         SV::iterator insertedElem = sv.insert(sv.begin() + insertedBefore, insertedVal);
+
+         // Verify returned value.
+         VERIFY(insertedElem->i == insertedVal.i, caseLabel);
+      }
+
+      // Verify vector state.
+      VERIFY(sv.onHeap(), caseLabel);
+      VERIFY(sv.size() == NumElems + 1, caseLabel);
+      VERIFY(sv.capacity() == Cap, caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+         VERIFY(sv[i].i == (i != insertedBefore) ? i + 1 : insertedVal.i, caseLabel);
    }
 }
 
@@ -7058,8 +7197,72 @@ void TestSboVectorConstIteratorGreaterOrEqualThan()
 
 ///////////////////
 
+struct E
+{
+   E()
+   {
+      p = new int(5);
+      instances++;
+   }
+   E(const E& e)
+   {
+      p = new int(*e.p);
+      instances++;
+   }
+   E(E&& e)
+   {
+      p = e.p;
+      e.p = nullptr;
+      instances++;
+   }
+   ~E()
+   {
+      delete p;
+      instances--;
+   }
+   E& operator=(const E& e)
+   {
+      delete p;
+      p = new int(*e.p);
+      return *this;
+   }
+   E& operator=(E&& e)
+   {
+      delete p;
+      p = e.p;
+      e.p = nullptr;
+      return *this;
+   }
+
+   int* p = nullptr;
+
+   inline static size_t instances = 0;
+};
+
+void Experiment()
+{
+   {
+      E* mem = (E*)malloc(sizeof(E) * 10);
+
+      E val;
+
+      std::uninitialized_fill_n(mem, 1, val);
+      // std::uninitialized_default_construct_n(mem, 1);
+      // std::uninitialized_copy_n(mem, 1, mem + 5);
+      // std::destroy_n(mem + 5, 1);
+
+      free(mem);
+   }
+
+   size_t balance = E::instances;
+   balance;
+}
+
+
 void TestSboVector()
 {
+   // Experiment();
+
    TestSboVectorDefaultCtor();
    TestSboVectorCtorForElementCountAndValue();
    TestSboVectorCopyCtor();
