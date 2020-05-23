@@ -47,9 +47,9 @@ template <typename T, std::size_t N> class SboVector
 {
    // Requirements for T (std::vector has the same requirements for its T).
    static_assert(std::is_copy_constructible_v<T>,
-                 "Element type must be copy-constructible");
-   static_assert(std::is_copy_assignable_v<T>, "Element type must be copy-assignable");
-   static_assert(std::is_copy_assignable_v<T>, "Element type must be copy-assignable");
+                 "Element type must be copy-constructible.");
+   static_assert(std::is_copy_assignable_v<T>, "Element type must be copy-assignable.");
+   static_assert(std::is_copy_assignable_v<T>, "Element type must be copy-assignable.");
    static_assert(!std::is_array_v<T>,
                  "Element type must be erasable, i.e. calls to p->~T() must be valid. "
                  "Array types are not erasable.");
@@ -130,6 +130,7 @@ template <typename T, std::size_t N> class SboVector
    void clear() noexcept;
    iterator erase(const_iterator pos);
    iterator erase(const_iterator first, const_iterator last);
+   iterator insert(const_iterator pos, const T& value);
    void push_back(const T& value);
    void push_back(T&& value);
 
@@ -185,6 +186,25 @@ template <typename T, std::size_t N> class SboVector
    inline static int64_t m_allocatedCap = 0;
 #endif // SBOVEC_MEM_INSTR
 };
+
+
+namespace details
+{
+
+template <typename ElemIter>
+void copyAndDestroyBackward(ElemIter first, std::size_t count, ElemIter dest)
+{
+   ElemIter rFirst = first + count - 1;
+   ElemIter rLast = first - 1;
+   ElemIter rFirstDest = dest + count - 1;
+   for (; rFirst > rLast; --rFirst, --rFirstDest)
+   {
+      std::uninitialized_copy_n(rFirst, 1, rFirstDest);
+      std::destroy_at(rFirst);
+   }
+}
+
+} // namespace details
 
 
 template <typename T, std::size_t N>
@@ -750,6 +770,9 @@ template <typename T, std::size_t N> void SboVector<T, N>::clear() noexcept
 template <typename T, std::size_t N>
 typename SboVector<T, N>::iterator SboVector<T, N>::erase(const_iterator pos)
 {
+   // std::vector requirements.
+   static_assert(std::is_move_assignable_v<T>, "Element type must be move-assignable.");
+
    if (pos >= cend())
       return end();
 
@@ -757,7 +780,6 @@ typename SboVector<T, N>::iterator SboVector<T, N>::erase(const_iterator pos)
 
    const auto offset = pos - cbegin();
    iterator it = begin() + offset;
-   // Accoring to std::vector::erase spec T has to be moveable.
    std::move(it + 1, end(), it);
    --m_size;
 
@@ -769,11 +791,14 @@ template <typename T, std::size_t N>
 typename SboVector<T, N>::iterator SboVector<T, N>::erase(const_iterator first,
                                                           const_iterator last)
 {
+   // std::vector requirements.
+   static_assert(std::is_move_assignable_v<T>, "Element type must be move-assignable.");
+
    if (first >= cend())
       return end();
    if (last >= cend())
       last = cend();
-   
+
    const auto offset = first - cbegin();
    iterator firstIt = begin() + offset;
    const auto size = last - first;
@@ -783,12 +808,67 @@ typename SboVector<T, N>::iterator SboVector<T, N>::erase(const_iterator first,
 
    std::destroy_n(first.m_elem, size);
 
-   // Accoring to std::vector::erase spec T has to be moveable.
    if (lastIt < end())
       std::move(lastIt, end(), firstIt);
    m_size -= size;
 
    return begin() + offset;
+}
+
+
+template <typename T, std::size_t N>
+typename SboVector<T, N>::iterator SboVector<T, N>::insert(const_iterator pos,
+                                                           const T& value)
+{
+   // std::vector requirements.
+   static_assert(std::is_copy_assignable_v<T>, "Element type must be copy-assignable.");
+
+   // Cases:
+   // - In buffer and enough capacity to stay in buffer.
+   // - In buffer and not enough capacity. Allocate heap.
+   // - On heap and enough capacity.
+   // - On heap and not enough capacity. Need to reallocate.
+
+   const std::size_t count = 1;
+   const std::size_t newSize = size() + count;
+   const bool fitsBuffer = fitsIntoBuffer(newSize);
+   const bool canReuseHeap = onHeap() && m_capacity >= newSize;
+   const bool allocHeap = !fitsBuffer && !canReuseHeap;
+
+   // Perform allocation up front to prevent inconsistencies if allocation
+   // fails.
+   T* dest = data();
+   if (allocHeap)
+      dest = allocateMem(newSize);
+
+   const std::size_t posOffset = pos - cbegin();
+   const std::size_t rearSize = cend() - pos;
+   const std::size_t frontSize = pos - cbegin();
+
+   if (rearSize > 0)
+   {
+      T* rearSrc = data() + posOffset;
+      T* rearDest = dest + posOffset + count;
+      // When copying overlapping range to the right we have to copy backwards.
+      details::copyAndDestroyBackward(rearSrc, rearSize, rearDest);
+   }
+
+   *(dest + posOffset) = value;
+
+   const bool relocateFront = allocHeap;
+   if (frontSize > 0 && relocateFront)
+   {
+      T* frontSrc = data() + posOffset;
+      T* frontDest = dest + posOffset + count;
+      std::uninitialized_copy_n(frontSrc, frontSize, frontDest);
+      std::destroy_n(frontSrc, frontSize);
+   }
+
+   m_size = newSize;
+   if (allocHeap)
+      m_capacity = newSize;
+
+   return begin() + posOffset;
 }
 
 
