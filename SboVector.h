@@ -853,20 +853,24 @@ typename SboVector<T, N>::iterator SboVector<T, N>::insert(const_iterator pos,
       details::copyAndDestroyBackward(rearSrc, rearSize, rearDest);
    }
 
-   *(dest + posOffset) = value;
+   std::uninitialized_copy_n(&value, 1, dest + posOffset);
 
    const bool relocateFront = allocHeap;
    if (frontSize > 0 && relocateFront)
    {
-      T* frontSrc = data() + posOffset;
-      T* frontDest = dest + posOffset + count;
+      T* frontSrc = data();
+      T* frontDest = dest;
       std::uninitialized_copy_n(frontSrc, frontSize, frontDest);
       std::destroy_n(frontSrc, frontSize);
    }
 
    m_size = newSize;
    if (allocHeap)
+   {
+      deallocate();
+      m_data = dest;
       m_capacity = newSize;
+   }
 
    return begin() + posOffset;
 }
