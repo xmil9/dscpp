@@ -188,11 +188,25 @@ template <typename T, std::size_t N> class SboVector
 };
 
 
-namespace details
+///////////////////
+
+namespace internal
 {
 
 template <typename ElemIter>
-void copyAndDestroyBackward(ElemIter first, std::size_t count, ElemIter dest)
+void overlappedCopyAndDestroy(ElemIter first, std::size_t count, ElemIter dest)
+{
+   ElemIter last = first + count;
+   for (; first > last; ++first, ++dest)
+   {
+      std::uninitialized_copy_n(first, 1, dest);
+      std::destroy_at(first);
+   }
+}
+
+
+template <typename ElemIter>
+void overlappedCopyAndDestroyBackward(ElemIter first, std::size_t count, ElemIter dest)
 {
    ElemIter rFirst = first + count - 1;
    ElemIter rLast = first - 1;
@@ -204,8 +218,10 @@ void copyAndDestroyBackward(ElemIter first, std::size_t count, ElemIter dest)
    }
 }
 
-} // namespace details
+} // namespace internal
 
+
+///////////////////
 
 template <typename T, std::size_t N>
 SboVector<T, N>::SboVector(std::size_t count, const T& value)
@@ -850,7 +866,7 @@ typename SboVector<T, N>::iterator SboVector<T, N>::insert(const_iterator pos,
       T* rearSrc = data() + posOffset;
       T* rearDest = dest + posOffset + count;
       // When copying overlapping range to the right we have to copy backwards.
-      details::copyAndDestroyBackward(rearSrc, rearSize, rearDest);
+      internal::overlappedCopyAndDestroyBackward(rearSrc, rearSize, rearDest);
    }
 
    std::uninitialized_copy_n(&value, 1, dest + posOffset);
