@@ -131,6 +131,7 @@ template <typename T, std::size_t N> class SboVector
    iterator erase(const_iterator pos);
    iterator erase(const_iterator first, const_iterator last);
    iterator insert(const_iterator pos, const T& value);
+   iterator insert(const_iterator pos, T&& value);
    void push_back(const T& value);
    void push_back(T&& value);
 
@@ -213,8 +214,7 @@ void overlappedCopyAndDestroyBackward(T* first, std::size_t count, T* dest)
 }
 
 
-template <typename T>
-void overlappedMoveBackwards(T* first, std::size_t count, T* dest)
+template <typename T> void overlappedMoveBackwards(T* first, std::size_t count, T* dest)
 {
    T* rFirst = first + count - 1;
    T* rLast = first - 1;
@@ -796,7 +796,8 @@ typename SboVector<T, N>::iterator SboVector<T, N>::erase(const_iterator pos)
    if constexpr (std::is_move_constructible_v<T>)
       std::uninitialized_move(erasedElem + 1, data() + size(), erasedElem);
    else
-      svinternal::overlappedCopyAndDestroy(erasedElem + 1, size() - offset - 1, erasedElem);
+      svinternal::overlappedCopyAndDestroy(erasedElem + 1, size() - offset - 1,
+                                           erasedElem);
 
    --m_size;
 
@@ -872,6 +873,73 @@ typename SboVector<T, N>::iterator SboVector<T, N>::insert(const_iterator pos,
    }
 
    std::uninitialized_copy_n(&value, 1, dest + posOffset);
+
+   const bool relocateFront = allocHeap;
+   if (frontSize > 0 && relocateFront)
+   {
+      // Relocating the front only happens for reallocations, so we don't need to
+      // worry about overlaps.
+      T* frontSrc = data();
+      T* frontDest = dest;
+      if constexpr (std::is_move_constructible_v<T>)
+      {
+         std::uninitialized_move_n(frontSrc, frontSize, frontDest);
+      }
+      else
+      {
+         std::uninitialized_copy_n(frontSrc, frontSize, frontDest);
+         std::destroy_n(frontSrc, frontSize);
+      }
+   }
+
+   m_size = newSize;
+   if (allocHeap)
+   {
+      deallocate();
+      m_data = dest;
+      m_capacity = newSize;
+   }
+
+   return begin() + posOffset;
+}
+
+
+template <typename T, std::size_t N>
+typename SboVector<T, N>::iterator SboVector<T, N>::insert(const_iterator pos, T&& value)
+{
+   // Cases:
+   // - In buffer and enough capacity to stay in buffer.
+   // - In buffer and not enough capacity. Allocate heap.
+   // - On heap and enough capacity.
+   // - On heap and not enough capacity. Need to reallocate.
+
+   const std::size_t count = 1;
+   const std::size_t newSize = size() + count;
+   const bool fitsBuffer = fitsIntoBuffer(newSize);
+   const bool canReuseHeap = onHeap() && m_capacity >= newSize;
+   const bool allocHeap = !fitsBuffer && !canReuseHeap;
+
+   // Perform allocation up front to prevent inconsistencies if allocation
+   // fails.
+   T* dest = data();
+   if (allocHeap)
+      dest = allocateMem(newSize);
+
+   const std::size_t posOffset = pos - cbegin();
+   const std::size_t tailSize = cend() - pos;
+   const std::size_t frontSize = pos - cbegin();
+
+   if (tailSize > 0)
+   {
+      T* tailSrc = data() + posOffset;
+      T* tailDest = dest + posOffset + count;
+      if constexpr (std::is_move_constructible_v<T>)
+         svinternal::overlappedMoveBackwards(tailSrc, tailSize, tailDest);
+      else
+         svinternal::overlappedCopyAndDestroyBackward(tailSrc, tailSize, tailDest);
+   }
+
+   std::uninitialized_move_n(&value, 1, dest + posOffset);
 
    const bool relocateFront = allocHeap;
    if (frontSize > 0 && relocateFront)
