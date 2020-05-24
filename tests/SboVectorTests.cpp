@@ -5774,7 +5774,8 @@ void TestSboVectorInsertSingleValueWithMove()
 
          // Test.
          const int preMoveVal = insertedVal.i;
-         SV::iterator insertedElem = sv.insert(sv.begin() + insertedBefore, std::move(insertedVal));
+         SV::iterator insertedElem =
+            sv.insert(sv.begin() + insertedBefore, std::move(insertedVal));
 
          // Verify returned value.
          VERIFY(insertedElem->i == preMoveVal, caseLabel);
@@ -5820,7 +5821,8 @@ void TestSboVectorInsertSingleValueWithMove()
 
          // Test.
          const int preMoveVal = insertedVal.i;
-         SV::iterator insertedElem = sv.insert(sv.begin() + insertedBefore, std::move(insertedVal));
+         SV::iterator insertedElem =
+            sv.insert(sv.begin() + insertedBefore, std::move(insertedVal));
 
          // Verify returned value.
          VERIFY(insertedElem->i == preMoveVal, caseLabel);
@@ -5869,7 +5871,8 @@ void TestSboVectorInsertSingleValueWithMove()
 
          // Test.
          const int preMoveVal = insertedVal.i;
-         SV::iterator insertedElem = sv.insert(sv.cbegin() + insertedBefore, std::move(insertedVal));
+         SV::iterator insertedElem =
+            sv.insert(sv.cbegin() + insertedBefore, std::move(insertedVal));
 
          // Verify returned value.
          VERIFY(insertedElem->i == preMoveVal, caseLabel);
@@ -5883,7 +5886,8 @@ void TestSboVectorInsertSingleValueWithMove()
          VERIFY(sv[i].i == (i != insertedBefore) ? i + 1 : insertedVal.i, caseLabel);
    }
    {
-      const std::string caseLabel{"SvoVector::insert (move) single value into empty vector"};
+      const std::string caseLabel{
+         "SvoVector::insert (move) single value into empty vector"};
 
       constexpr std::size_t BufCap = 5;
       constexpr std::size_t NumElems = 0;
@@ -5912,7 +5916,8 @@ void TestSboVectorInsertSingleValueWithMove()
 
          // Test.
          const int preMoveVal = insertedVal.i;
-         SV::iterator insertedElem = sv.insert(sv.begin() + insertedBefore, std::move(insertedVal));
+         SV::iterator insertedElem =
+            sv.insert(sv.begin() + insertedBefore, std::move(insertedVal));
 
          // Verify returned value.
          VERIFY(insertedElem->i == preMoveVal, caseLabel);
@@ -5923,6 +5928,66 @@ void TestSboVectorInsertSingleValueWithMove()
       VERIFY(sv.size() == NumElems + 1, caseLabel);
       VERIFY(sv.capacity() == BufCap, caseLabel);
       VERIFY(sv[0].i == 100, caseLabel);
+   }
+}
+
+
+void TestSboVectorInsertValueMultipleTimes()
+{
+   {
+      const std::string caseLabel{
+         "SvoVector::insert value multiple times in middle of buffer "
+         "instance with enough capacity to fit into buffer"};
+
+      constexpr std::size_t BufCap = 10;
+      constexpr std::size_t NumElems = 5;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      // Memory instrumentation for entire scope.
+      const MemVerifier<SV> memCheck{caseLabel};
+
+      SV sv{1, 2, 3, 4, 5};
+      const std::size_t origSize = sv.size();
+      const Elem insertedVal = 100;
+      constexpr std::size_t numInserted = 4;
+      constexpr std::size_t insertedBefore = 3;
+      const std::size_t numRelocated = origSize - insertedBefore;
+
+      // Preconditions.
+      VERIFY(sv.inBuffer(), caseLabel);
+      VERIFY(!sv.empty(), caseLabel);
+      VERIFY(insertedBefore > 0 && insertedBefore < origSize - 1, caseLabel);
+      VERIFY(BufCap > origSize + numInserted, caseLabel);
+
+      {
+         // Element instrumentation for tested call only.
+         Elem::Measures expected;
+         expected.moveCtorCalls = numRelocated;
+         expected.copyCtorCalls = numInserted;
+         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+
+         // Test.
+         SV::iterator insertedElem =
+            sv.insert(sv.begin() + insertedBefore, numInserted, insertedVal);
+
+         // Verify returned value.
+         VERIFY(insertedElem->i == insertedVal.i, caseLabel);
+      }
+
+      // Verify vector state.
+      VERIFY(sv.inBuffer(), caseLabel);
+      VERIFY(sv.size() == origSize + numInserted, caseLabel);
+      for (int i = 0; i < sv.size(); ++i)
+      {
+         int expected = i + 1;
+         if (i >= insertedBefore && i < insertedBefore + numInserted)
+            expected = insertedVal.i;
+         else if (i >= insertedBefore + numInserted)
+            expected =  i - numInserted +  1;
+         
+         VERIFY(sv[i].i == expected, caseLabel);
+      }
    }
 }
 
@@ -7698,6 +7763,7 @@ void TestSboVector()
    TestSboVectorEraseIteratorRange();
    TestSboVectorInsertSingleValue();
    TestSboVectorInsertSingleValueWithMove();
+   TestSboVectorInsertValueMultipleTimes();
 
    TestSboVectorIteratorCopyCtor();
    TestSboVectorIteratorMoveCtor();
