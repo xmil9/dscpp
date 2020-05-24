@@ -158,12 +158,11 @@ template <typename T, std::size_t N> class SboVector
    void reallocate(std::size_t newCap);
    void reallocateMore(std::size_t newCap);
    void reallocateLess(std::size_t newCap);
+   std::size_t recalcCapacity(std::size_t minCap) const;
 
    static T* allocate_or_reuse_mem(std::size_t cap, std::size_t availCap);
    static T* allocateMem(std::size_t cap);
    static void deallocateMem(T* mem, std::size_t cap);
-
-   std::size_t recalc_capacity(std::size_t minCap) const;
 
  private:
    // Internal buffer.
@@ -854,12 +853,13 @@ typename SboVector<T, N>::iterator SboVector<T, N>::insert(const_iterator pos,
    const bool fitsBuffer = fitsIntoBuffer(newSize);
    const bool canReuseHeap = onHeap() && m_capacity >= newSize;
    const bool allocHeap = !fitsBuffer && !canReuseHeap;
+   const std::size_t newCap = allocHeap ? recalcCapacity(newSize) : capacity();
 
    // Perform allocation up front to prevent inconsistencies if allocation
    // fails.
    T* dest = data();
    if (allocHeap)
-      dest = allocateMem(newSize);
+      dest = allocateMem(newCap);
 
    const std::size_t posOffset = pos - cbegin();
    const std::size_t tailSize = cend() - pos;
@@ -900,7 +900,7 @@ typename SboVector<T, N>::iterator SboVector<T, N>::insert(const_iterator pos,
    {
       deallocate();
       m_data = dest;
-      m_capacity = newSize;
+      m_capacity = newCap;
    }
 
    return begin() + posOffset;
@@ -921,12 +921,13 @@ typename SboVector<T, N>::iterator SboVector<T, N>::insert(const_iterator pos, T
    const bool fitsBuffer = fitsIntoBuffer(newSize);
    const bool canReuseHeap = onHeap() && m_capacity >= newSize;
    const bool allocHeap = !fitsBuffer && !canReuseHeap;
+   const std::size_t newCap = allocHeap ? recalcCapacity(newSize) : capacity();
 
    // Perform allocation up front to prevent inconsistencies if allocation
    // fails.
    T* dest = data();
    if (allocHeap)
-      dest = allocateMem(newSize);
+      dest = allocateMem(newCap);
 
    const std::size_t posOffset = pos - cbegin();
    const std::size_t tailSize = cend() - pos;
@@ -967,7 +968,7 @@ typename SboVector<T, N>::iterator SboVector<T, N>::insert(const_iterator pos, T
    {
       deallocate();
       m_data = dest;
-      m_capacity = newSize;
+      m_capacity = newCap;
    }
 
    return begin() + posOffset;
@@ -992,12 +993,13 @@ SboVector<T, N>::insert(const_iterator pos, size_type count, const T& value)
    const bool fitsBuffer = fitsIntoBuffer(newSize);
    const bool canReuseHeap = onHeap() && m_capacity >= newSize;
    const bool allocHeap = !fitsBuffer && !canReuseHeap;
+   const std::size_t newCap = allocHeap ? recalcCapacity(newSize) : capacity();
 
    // Perform allocation up front to prevent inconsistencies if allocation
    // fails.
    T* dest = data();
    if (allocHeap)
-      dest = allocateMem(newSize);
+      dest = allocateMem(newCap);
 
    const std::size_t tailSize = cend() - pos;
    const std::size_t frontSize = posOffset;
@@ -1038,7 +1040,7 @@ SboVector<T, N>::insert(const_iterator pos, size_type count, const T& value)
    {
       deallocate();
       m_data = dest;
-      m_capacity = newSize;
+      m_capacity = newCap;
    }
 
    return begin() + posOffset;
@@ -1276,6 +1278,16 @@ void SboVector<T, N>::reallocateLess(std::size_t newCap)
 
 
 template <typename T, std::size_t N>
+std::size_t SboVector<T, N>::recalcCapacity(std::size_t minCap) const
+{
+   const std::size_t maxCap = max_size();
+   if (m_capacity > maxCap / 2)
+      return maxCap;
+   return std::max(2 * m_capacity, minCap);
+}
+
+
+template <typename T, std::size_t N>
 T* SboVector<T, N>::allocate_or_reuse_mem(std::size_t cap, std::size_t availCap)
 {
    if (fitsIntoBuffer(cap))
@@ -1320,16 +1332,6 @@ void SboVector<T, N>::deallocateMem(T* mem, std::size_t cap)
 #ifdef SBOVEC_MEM_INSTR
    m_allocatedCap -= cap;
 #endif // SBOVEC_MEM_INSTR
-}
-
-
-template <typename T, std::size_t N>
-std::size_t SboVector<T, N>::recalc_capacity(std::size_t minCap) const
-{
-   const std::size_t maxCap = max_size();
-   if (m_capacity > maxCap / 2)
-      return maxCap;
-   return std::max(2 * m_capacity, minCap);
 }
 
 

@@ -5013,6 +5013,7 @@ void TestSboVectorInsertSingleValue()
                                   "instance with enough capacity to fit into buffer"};
 
       constexpr std::size_t BufCap = 10;
+      constexpr std::size_t Cap = BufCap;
       constexpr std::size_t NumElems = 5;
       using Elem = Element;
       using SV = SboVector<Elem, BufCap>;
@@ -5030,7 +5031,7 @@ void TestSboVectorInsertSingleValue()
       VERIFY(sv.inBuffer(), caseLabel);
       VERIFY(!sv.empty(), caseLabel);
       VERIFY(insertedBefore > 0 && insertedBefore < origSize - 1, caseLabel);
-      VERIFY(BufCap > origSize + 1, caseLabel);
+      VERIFY(Cap > origSize + 1, caseLabel);
 
       {
          // Element instrumentation for tested call only.
@@ -5049,6 +5050,7 @@ void TestSboVectorInsertSingleValue()
       // Verify vector state.
       VERIFY(sv.inBuffer(), caseLabel);
       VERIFY(sv.size() == origSize + 1, caseLabel);
+      VERIFY(sv.capacity() == Cap, caseLabel);
       VERIFY(sv[0].i == 1, caseLabel);
       VERIFY(sv[1].i == 2, caseLabel);
       VERIFY(sv[2].i == 3, caseLabel);
@@ -5061,6 +5063,7 @@ void TestSboVectorInsertSingleValue()
                                   "instance with enough capacity to fit into buffer"};
 
       constexpr std::size_t BufCap = 10;
+      constexpr std::size_t Cap = BufCap;
       constexpr std::size_t NumElems = 5;
       using Elem = Element;
       using SV = SboVector<Elem, BufCap>;
@@ -5078,7 +5081,7 @@ void TestSboVectorInsertSingleValue()
       VERIFY(sv.inBuffer(), caseLabel);
       VERIFY(!sv.empty(), caseLabel);
       VERIFY(insertedBefore == 0, caseLabel);
-      VERIFY(BufCap > origSize + 1, caseLabel);
+      VERIFY(Cap > origSize + 1, caseLabel);
 
       {
          // Element instrumentation for tested call only.
@@ -5097,6 +5100,7 @@ void TestSboVectorInsertSingleValue()
       // Verify vector state.
       VERIFY(sv.inBuffer(), caseLabel);
       VERIFY(sv.size() == origSize + 1, caseLabel);
+      VERIFY(sv.capacity() == Cap, caseLabel);
       VERIFY(sv[0].i == 100, caseLabel);
       VERIFY(sv[1].i == 1, caseLabel);
       VERIFY(sv[2].i == 2, caseLabel);
@@ -5109,6 +5113,7 @@ void TestSboVectorInsertSingleValue()
                                   "instance with enough capacity to fit into buffer"};
 
       constexpr std::size_t BufCap = 10;
+      constexpr std::size_t Cap = BufCap;
       constexpr std::size_t NumElems = 5;
       using Elem = Element;
       using SV = SboVector<Elem, BufCap>;
@@ -5126,7 +5131,7 @@ void TestSboVectorInsertSingleValue()
       VERIFY(sv.inBuffer(), caseLabel);
       VERIFY(!sv.empty(), caseLabel);
       VERIFY(insertedBefore == sv.size(), caseLabel);
-      VERIFY(BufCap > origSize + 1, caseLabel);
+      VERIFY(Cap > origSize + 1, caseLabel);
 
       {
          // Element instrumentation for tested call only.
@@ -5145,6 +5150,7 @@ void TestSboVectorInsertSingleValue()
       // Verify vector state.
       VERIFY(sv.inBuffer(), caseLabel);
       VERIFY(sv.size() == origSize + 1, caseLabel);
+      VERIFY(sv.capacity() == Cap, caseLabel);
       VERIFY(sv[0].i == 1, caseLabel);
       VERIFY(sv[1].i == 2, caseLabel);
       VERIFY(sv[2].i == 3, caseLabel);
@@ -5157,6 +5163,7 @@ void TestSboVectorInsertSingleValue()
                                   "instance with max-ed out buffer capacity"};
 
       constexpr std::size_t BufCap = 5;
+      constexpr std::size_t Cap = BufCap;
       constexpr std::size_t NumElems = 5;
       using Elem = Element;
       using SV = SboVector<Elem, BufCap>;
@@ -5174,7 +5181,7 @@ void TestSboVectorInsertSingleValue()
       VERIFY(sv.inBuffer(), caseLabel);
       VERIFY(!sv.empty(), caseLabel);
       VERIFY(insertedBefore > 0 && insertedBefore < origSize - 1, caseLabel);
-      VERIFY(BufCap == origSize, caseLabel);
+      VERIFY(Cap == origSize, caseLabel);
 
       {
          // Element instrumentation for tested call only.
@@ -5193,7 +5200,7 @@ void TestSboVectorInsertSingleValue()
       // Verify vector state.
       VERIFY(sv.onHeap(), caseLabel);
       VERIFY(sv.size() == origSize + 1, caseLabel);
-      VERIFY(sv.capacity() == origSize + 1, caseLabel);
+      VERIFY(sv.capacity() > Cap, caseLabel);
       VERIFY(sv[0].i == 1, caseLabel);
       VERIFY(sv[1].i == 2, caseLabel);
       VERIFY(sv[2].i == 3, caseLabel);
@@ -5206,6 +5213,7 @@ void TestSboVectorInsertSingleValue()
                                   "instance with max-ed out buffer capacity"};
 
       constexpr std::size_t BufCap = 5;
+      constexpr std::size_t Cap = BufCap;
       constexpr std::size_t NumElems = 5;
       using Elem = Element;
       using SV = SboVector<Elem, BufCap>;
@@ -5223,7 +5231,7 @@ void TestSboVectorInsertSingleValue()
       VERIFY(sv.inBuffer(), caseLabel);
       VERIFY(!sv.empty(), caseLabel);
       VERIFY(insertedBefore == 0, caseLabel);
-      VERIFY(BufCap == origSize, caseLabel);
+      VERIFY(Cap == origSize, caseLabel);
 
       {
          // Element instrumentation for tested call only.
@@ -5242,7 +5250,7 @@ void TestSboVectorInsertSingleValue()
       // Verify vector state.
       VERIFY(sv.onHeap(), caseLabel);
       VERIFY(sv.size() == origSize + 1, caseLabel);
-      VERIFY(sv.capacity() == origSize + 1, caseLabel);
+      VERIFY(sv.capacity() > Cap, caseLabel);
       VERIFY(sv[0].i == 100, caseLabel);
       VERIFY(sv[1].i == 1, caseLabel);
       VERIFY(sv[2].i == 2, caseLabel);
@@ -5255,6 +5263,7 @@ void TestSboVectorInsertSingleValue()
                                   "instance with max-ed out buffer capacity"};
 
       constexpr std::size_t BufCap = 5;
+      constexpr std::size_t Cap = BufCap;
       constexpr std::size_t NumElems = 5;
       using Elem = Element;
       using SV = SboVector<Elem, BufCap>;
@@ -5272,7 +5281,7 @@ void TestSboVectorInsertSingleValue()
       VERIFY(sv.inBuffer(), caseLabel);
       VERIFY(!sv.empty(), caseLabel);
       VERIFY(insertedBefore == sv.size(), caseLabel);
-      VERIFY(BufCap == origSize, caseLabel);
+      VERIFY(Cap == origSize, caseLabel);
 
       {
          // Element instrumentation for tested call only.
@@ -5291,7 +5300,7 @@ void TestSboVectorInsertSingleValue()
       // Verify vector state.
       VERIFY(sv.onHeap(), caseLabel);
       VERIFY(sv.size() == origSize + 1, caseLabel);
-      VERIFY(sv.capacity() == origSize + 1, caseLabel);
+      VERIFY(sv.capacity() > Cap, caseLabel);
       VERIFY(sv[0].i == 1, caseLabel);
       VERIFY(sv[1].i == 2, caseLabel);
       VERIFY(sv[2].i == 3, caseLabel);
@@ -5544,6 +5553,7 @@ void TestSboVectorInsertSingleValueWithMove()
          "instance with enough capacity to fit into buffer"};
 
       constexpr std::size_t BufCap = 10;
+      constexpr std::size_t Cap = BufCap;
       constexpr std::size_t NumElems = 5;
       using Elem = Element;
       using SV = SboVector<Elem, BufCap>;
@@ -5561,7 +5571,7 @@ void TestSboVectorInsertSingleValueWithMove()
       VERIFY(sv.inBuffer(), caseLabel);
       VERIFY(!sv.empty(), caseLabel);
       VERIFY(insertedBefore > 0 && insertedBefore < origSize - 1, caseLabel);
-      VERIFY(BufCap > origSize + 1, caseLabel);
+      VERIFY(Cap > origSize + 1, caseLabel);
 
       {
          // Element instrumentation for tested call only.
@@ -5581,6 +5591,7 @@ void TestSboVectorInsertSingleValueWithMove()
       // Verify vector state.
       VERIFY(sv.inBuffer(), caseLabel);
       VERIFY(sv.size() == origSize + 1, caseLabel);
+      VERIFY(sv.capacity() == Cap, caseLabel);
       VERIFY(sv[0].i == 1, caseLabel);
       VERIFY(sv[1].i == 2, caseLabel);
       VERIFY(sv[2].i == 3, caseLabel);
@@ -5594,6 +5605,7 @@ void TestSboVectorInsertSingleValueWithMove()
          "instance with enough capacity to fit into buffer"};
 
       constexpr std::size_t BufCap = 10;
+      constexpr std::size_t Cap = BufCap;
       constexpr std::size_t NumElems = 5;
       using Elem = Element;
       using SV = SboVector<Elem, BufCap>;
@@ -5611,7 +5623,7 @@ void TestSboVectorInsertSingleValueWithMove()
       VERIFY(sv.inBuffer(), caseLabel);
       VERIFY(!sv.empty(), caseLabel);
       VERIFY(insertedBefore == 0, caseLabel);
-      VERIFY(BufCap > origSize + 1, caseLabel);
+      VERIFY(Cap > origSize + 1, caseLabel);
 
       {
          // Element instrumentation for tested call only.
@@ -5631,6 +5643,7 @@ void TestSboVectorInsertSingleValueWithMove()
       // Verify vector state.
       VERIFY(sv.inBuffer(), caseLabel);
       VERIFY(sv.size() == origSize + 1, caseLabel);
+      VERIFY(sv.capacity() == Cap, caseLabel);
       VERIFY(sv[0].i == 100, caseLabel);
       VERIFY(sv[1].i == 1, caseLabel);
       VERIFY(sv[2].i == 2, caseLabel);
@@ -5644,6 +5657,7 @@ void TestSboVectorInsertSingleValueWithMove()
          "instance with enough capacity to fit into buffer"};
 
       constexpr std::size_t BufCap = 10;
+      constexpr std::size_t Cap = BufCap;
       constexpr std::size_t NumElems = 5;
       using Elem = Element;
       using SV = SboVector<Elem, BufCap>;
@@ -5661,7 +5675,7 @@ void TestSboVectorInsertSingleValueWithMove()
       VERIFY(sv.inBuffer(), caseLabel);
       VERIFY(!sv.empty(), caseLabel);
       VERIFY(insertedBefore == sv.size(), caseLabel);
-      VERIFY(BufCap > origSize + 1, caseLabel);
+      VERIFY(Cap > origSize + 1, caseLabel);
 
       {
          // Element instrumentation for tested call only.
@@ -5681,6 +5695,7 @@ void TestSboVectorInsertSingleValueWithMove()
       // Verify vector state.
       VERIFY(sv.inBuffer(), caseLabel);
       VERIFY(sv.size() == origSize + 1, caseLabel);
+      VERIFY(sv.capacity() == Cap, caseLabel);
       VERIFY(sv[0].i == 1, caseLabel);
       VERIFY(sv[1].i == 2, caseLabel);
       VERIFY(sv[2].i == 3, caseLabel);
@@ -5694,6 +5709,7 @@ void TestSboVectorInsertSingleValueWithMove()
          "instance with max-ed out buffer capacity"};
 
       constexpr std::size_t BufCap = 5;
+      constexpr std::size_t Cap = BufCap;
       constexpr std::size_t NumElems = 5;
       using Elem = Element;
       using SV = SboVector<Elem, BufCap>;
@@ -5711,7 +5727,7 @@ void TestSboVectorInsertSingleValueWithMove()
       VERIFY(sv.inBuffer(), caseLabel);
       VERIFY(!sv.empty(), caseLabel);
       VERIFY(insertedBefore > 0 && insertedBefore < origSize - 1, caseLabel);
-      VERIFY(BufCap == origSize, caseLabel);
+      VERIFY(Cap == origSize, caseLabel);
 
       {
          // Element instrumentation for tested call only.
@@ -5731,7 +5747,7 @@ void TestSboVectorInsertSingleValueWithMove()
       // Verify vector state.
       VERIFY(sv.onHeap(), caseLabel);
       VERIFY(sv.size() == origSize + 1, caseLabel);
-      VERIFY(sv.capacity() == origSize + 1, caseLabel);
+      VERIFY(sv.capacity() > Cap, caseLabel);
       VERIFY(sv[0].i == 1, caseLabel);
       VERIFY(sv[1].i == 2, caseLabel);
       VERIFY(sv[2].i == 3, caseLabel);
@@ -5890,6 +5906,7 @@ void TestSboVectorInsertSingleValueWithMove()
          "SvoVector::insert (move) single value into empty vector"};
 
       constexpr std::size_t BufCap = 5;
+      constexpr std::size_t Cap = BufCap;
       constexpr std::size_t NumElems = 0;
       using Elem = Element;
       using SV = SboVector<Elem, BufCap>;
@@ -5905,7 +5922,7 @@ void TestSboVectorInsertSingleValueWithMove()
       // Preconditions.
       VERIFY(sv.inBuffer(), caseLabel);
       VERIFY(sv.size() == NumElems, caseLabel);
-      VERIFY(sv.capacity() == BufCap, caseLabel);
+      VERIFY(sv.capacity() == Cap, caseLabel);
       VERIFY(insertedBefore == 0, caseLabel);
 
       {
@@ -5926,7 +5943,7 @@ void TestSboVectorInsertSingleValueWithMove()
       // Verify vector state.
       VERIFY(sv.inBuffer(), caseLabel);
       VERIFY(sv.size() == NumElems + 1, caseLabel);
-      VERIFY(sv.capacity() == BufCap, caseLabel);
+      VERIFY(sv.capacity() == Cap, caseLabel);
       VERIFY(sv[0].i == 100, caseLabel);
    }
 }
@@ -5940,6 +5957,7 @@ void TestSboVectorInsertValueMultipleTimes()
          "instance with enough capacity to fit into buffer"};
 
       constexpr std::size_t BufCap = 10;
+      constexpr std::size_t Cap = BufCap;
       constexpr std::size_t NumElems = 5;
       using Elem = Element;
       using SV = SboVector<Elem, BufCap>;
@@ -5958,7 +5976,7 @@ void TestSboVectorInsertValueMultipleTimes()
       VERIFY(sv.inBuffer(), caseLabel);
       VERIFY(!sv.empty(), caseLabel);
       VERIFY(insertedBefore > 0 && insertedBefore < origSize - 1, caseLabel);
-      VERIFY(BufCap > origSize + numInserted, caseLabel);
+      VERIFY(Cap > origSize + numInserted, caseLabel);
 
       {
          // Element instrumentation for tested call only.
@@ -5978,6 +5996,7 @@ void TestSboVectorInsertValueMultipleTimes()
       // Verify vector state.
       VERIFY(sv.inBuffer(), caseLabel);
       VERIFY(sv.size() == origSize + numInserted, caseLabel);
+      VERIFY(sv.capacity() == Cap, caseLabel);
       for (int i = 0; i < sv.size(); ++i)
       {
          int expected = i + 1;
@@ -5995,6 +6014,7 @@ void TestSboVectorInsertValueMultipleTimes()
          "instance with enough capacity to fit into buffer"};
 
       constexpr std::size_t BufCap = 10;
+      constexpr std::size_t Cap = BufCap;
       constexpr std::size_t NumElems = 5;
       using Elem = Element;
       using SV = SboVector<Elem, BufCap>;
@@ -6013,7 +6033,7 @@ void TestSboVectorInsertValueMultipleTimes()
       VERIFY(sv.inBuffer(), caseLabel);
       VERIFY(!sv.empty(), caseLabel);
       VERIFY(insertedBefore == 0, caseLabel);
-      VERIFY(BufCap > origSize + numInserted, caseLabel);
+      VERIFY(Cap > origSize + numInserted, caseLabel);
 
       {
          // Element instrumentation for tested call only.
@@ -6033,6 +6053,7 @@ void TestSboVectorInsertValueMultipleTimes()
       // Verify vector state.
       VERIFY(sv.inBuffer(), caseLabel);
       VERIFY(sv.size() == origSize + numInserted, caseLabel);
+      VERIFY(sv.capacity() == Cap, caseLabel);
       for (int i = 0; i < sv.size(); ++i)
       {
          int expected = i + 1;
@@ -6050,6 +6071,7 @@ void TestSboVectorInsertValueMultipleTimes()
          "instance with enough capacity to fit into buffer"};
 
       constexpr std::size_t BufCap = 10;
+      constexpr std::size_t Cap = BufCap;
       constexpr std::size_t NumElems = 5;
       using Elem = Element;
       using SV = SboVector<Elem, BufCap>;
@@ -6068,7 +6090,7 @@ void TestSboVectorInsertValueMultipleTimes()
       VERIFY(sv.inBuffer(), caseLabel);
       VERIFY(!sv.empty(), caseLabel);
       VERIFY(insertedBefore == sv.size(), caseLabel);
-      VERIFY(BufCap > origSize + numInserted, caseLabel);
+      VERIFY(Cap > origSize + numInserted, caseLabel);
 
       {
          // Element instrumentation for tested call only.
@@ -6088,6 +6110,7 @@ void TestSboVectorInsertValueMultipleTimes()
       // Verify vector state.
       VERIFY(sv.inBuffer(), caseLabel);
       VERIFY(sv.size() == origSize + numInserted, caseLabel);
+      VERIFY(sv.capacity() == Cap, caseLabel);
       for (int i = 0; i < sv.size(); ++i)
       {
          int expected = i + 1;
@@ -6105,6 +6128,7 @@ void TestSboVectorInsertValueMultipleTimes()
          "instance with max-ed out buffer capacity"};
 
       constexpr std::size_t BufCap = 5;
+      constexpr std::size_t Cap = BufCap;
       constexpr std::size_t NumElems = 5;
       using Elem = Element;
       using SV = SboVector<Elem, BufCap>;
@@ -6123,7 +6147,7 @@ void TestSboVectorInsertValueMultipleTimes()
       VERIFY(sv.inBuffer(), caseLabel);
       VERIFY(!sv.empty(), caseLabel);
       VERIFY(insertedBefore > 0 && insertedBefore < origSize - 1, caseLabel);
-      VERIFY(BufCap == origSize, caseLabel);
+      VERIFY(Cap == origSize, caseLabel);
 
       {
          // Element instrumentation for tested call only.
@@ -6143,7 +6167,7 @@ void TestSboVectorInsertValueMultipleTimes()
       // Verify vector state.
       VERIFY(sv.onHeap(), caseLabel);
       VERIFY(sv.size() == origSize + numInserted, caseLabel);
-      VERIFY(sv.size() == origSize + numInserted, caseLabel);
+      VERIFY(sv.capacity() > Cap, caseLabel);
       for (int i = 0; i < sv.size(); ++i)
       {
          int expected = i + 1;
@@ -6333,6 +6357,7 @@ void TestSboVectorInsertValueMultipleTimes()
          "SvoVector::insert value multiple times into empty vector"};
 
       constexpr std::size_t BufCap = 5;
+      constexpr std::size_t Cap = BufCap;
       constexpr std::size_t NumElems = 0;
       using Elem = Element;
       using SV = SboVector<Elem, BufCap>;
@@ -6349,7 +6374,7 @@ void TestSboVectorInsertValueMultipleTimes()
       // Preconditions.
       VERIFY(sv.inBuffer(), caseLabel);
       VERIFY(sv.size() == NumElems, caseLabel);
-      VERIFY(sv.capacity() == BufCap, caseLabel);
+      VERIFY(sv.capacity() == Cap, caseLabel);
       VERIFY(insertedBefore == 0, caseLabel);
 
       {
@@ -6370,7 +6395,7 @@ void TestSboVectorInsertValueMultipleTimes()
       // Verify vector state.
       VERIFY(sv.inBuffer(), caseLabel);
       VERIFY(sv.size() == NumElems + numInserted, caseLabel);
-      VERIFY(sv.capacity() == BufCap, caseLabel);
+      VERIFY(sv.capacity() == Cap, caseLabel);
       for (int i = 0; i < sv.size(); ++i)
          VERIFY(sv[0].i == 100, caseLabel);
    }
@@ -6438,6 +6463,7 @@ void TestSboVectorInsertValueMultipleTimes()
          "SvoVector::insert value zero times into vector"};
 
       constexpr std::size_t BufCap = 10;
+      constexpr std::size_t Cap = BufCap;
       constexpr std::size_t NumElems = 5;
       using Elem = Element;
       using SV = SboVector<Elem, BufCap>;
@@ -6454,7 +6480,7 @@ void TestSboVectorInsertValueMultipleTimes()
       // Preconditions.
       VERIFY(sv.inBuffer(), caseLabel);
       VERIFY(sv.size() == NumElems, caseLabel);
-      VERIFY(sv.capacity() == BufCap, caseLabel);
+      VERIFY(sv.capacity() == Cap, caseLabel);
       VERIFY(numInserted == 0, caseLabel);
 
       {
@@ -6474,7 +6500,7 @@ void TestSboVectorInsertValueMultipleTimes()
       // Verify vector state.
       VERIFY(sv.inBuffer(), caseLabel);
       VERIFY(sv.size() == NumElems + numInserted, caseLabel);
-      VERIFY(sv.capacity() == BufCap, caseLabel);
+      VERIFY(sv.capacity() == Cap, caseLabel);
       for (int i = 0; i < sv.size(); ++i)
          VERIFY(sv[i].i == i + 1, caseLabel);
    }
