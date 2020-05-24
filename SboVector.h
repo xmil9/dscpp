@@ -136,8 +136,8 @@ template <typename T, std::size_t N> class SboVector
    void push_back(const T& value);
    void push_back(T&& value);
 
-   bool inBuffer() const;
-   bool onHeap() const;
+   bool inBuffer() const noexcept;
+   bool onHeap() const noexcept;
 
  private:
    constexpr T* buffer();
@@ -1061,13 +1061,13 @@ template <typename T, std::size_t N> void SboVector<T, N>::push_back(T&& value)
 }
 
 
-template <typename T, std::size_t N> bool SboVector<T, N>::inBuffer() const
+template <typename T, std::size_t N> bool SboVector<T, N>::inBuffer() const  noexcept
 {
    return (m_data == buffer());
 }
 
 
-template <typename T, std::size_t N> bool SboVector<T, N>::onHeap() const
+template <typename T, std::size_t N> bool SboVector<T, N>::onHeap() const noexcept
 {
    return !inBuffer();
 }
