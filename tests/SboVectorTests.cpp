@@ -7700,7 +7700,7 @@ void TestSboVectorInsertInitializerList()
          // Constructing the initializer list elements.
          expected.ctorCalls = numInserted;
          expected.copyCtorCalls = numRelocated + numInserted;
-         // Destroying the initializer list elements.
+         // Destroying the initializer list elements and the copied vector elements.
          expected.dtorCalls = numRelocated + numInserted;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
 
