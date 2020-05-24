@@ -7178,7 +7178,7 @@ void TestSboVectorInsertRange()
       VERIFY(Cap > origSize + numInserted, caseLabel);
 
       {
-         // Element type is 'int', so no instrumentation.
+         // No instrumentation because the element type is 'int'.
 
          // Test.
          SV::iterator insertedElem =
