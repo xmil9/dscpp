@@ -1161,7 +1161,7 @@ typename SboVector<T, N>::iterator SboVector<T, N>::insert(const_iterator pos,
          svinternal::overlappedCopyAndDestroyBackward(tailSrc, tailSize, tailDest);
    }
 
-   std::uninitialized_copy(ilist.begin(), count, dest + posOffset);
+   std::uninitialized_copy_n(ilist.begin(), count, dest + posOffset);
 
    const bool relocateFront = allocHeap;
    if (frontSize > 0 && relocateFront)
