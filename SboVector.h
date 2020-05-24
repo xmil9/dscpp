@@ -133,6 +133,8 @@ template <typename T, std::size_t N> class SboVector
    iterator insert(const_iterator pos, const T& value);
    iterator insert(const_iterator pos, T&& value);
    iterator insert(const_iterator pos, size_type count, const T& value);
+   template <typename InputIt>
+   iterator insert(const_iterator pos, InputIt first, InputIt last);
    void push_back(const T& value);
    void push_back(T&& value);
 
@@ -1043,6 +1045,16 @@ SboVector<T, N>::insert(const_iterator pos, size_type count, const T& value)
 }
 
 
+template <typename T, std::size_t N>
+template <typename InputIt>
+typename SboVector<T, N>::iterator SboVector<T, N>::insert(const_iterator pos,
+                                                           InputIt first, InputIt last)
+{
+   // todo
+   return end();
+}
+
+
 template <typename T, std::size_t N> void SboVector<T, N>::push_back(const T& value)
 {
    // todo
@@ -1061,7 +1073,7 @@ template <typename T, std::size_t N> void SboVector<T, N>::push_back(T&& value)
 }
 
 
-template <typename T, std::size_t N> bool SboVector<T, N>::inBuffer() const  noexcept
+template <typename T, std::size_t N> bool SboVector<T, N>::inBuffer() const noexcept
 {
    return (m_data == buffer());
 }
