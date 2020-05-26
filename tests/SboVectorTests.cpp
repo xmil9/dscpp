@@ -720,8 +720,9 @@ void TestDtor()
 
 void TestCopyAssignment()
 {
-   // Local function to calculate the expected call measurements.
-   auto expectedMeasures = [](std::size_t numFrom, std::size_t numTo) -> Element::Measures {
+   // Local function to calculate the expected metrics for copy-assignments.
+   auto expectedCopyMeasures = [](std::size_t numFrom,
+                                  std::size_t numTo) -> Element::Measures {
       Element::Measures measures;
       // For populating vectors and copying source to destination.
       measures.copyCtorCalls = 2 * numFrom + numTo;
@@ -742,7 +743,7 @@ void TestCopyAssignment()
       const std::initializer_list<Elem> toValues{1, 2, 3};
       const std::size_t numTo = toValues.size();
 
-      CtorTest<Elem, BufCap> test{caseLabel, expectedMeasures(numFrom, numTo)};
+      CtorTest<Elem, BufCap> test{caseLabel, expectedCopyMeasures(numFrom, numTo)};
       test.run([&]() {
          SV from{fromValues};
          SV to{toValues};
@@ -770,7 +771,7 @@ void TestCopyAssignment()
       const std::initializer_list<Elem> toValues{1, 2, 3};
       const std::size_t numTo = toValues.size();
 
-      CtorTest<Elem, BufCap> test{caseLabel, expectedMeasures(numFrom, numTo)};
+      CtorTest<Elem, BufCap> test{caseLabel, expectedCopyMeasures(numFrom, numTo)};
       test.run([&]() {
          SV from{fromValues};
          SV to{toValues};
@@ -798,7 +799,7 @@ void TestCopyAssignment()
       const std::initializer_list<Elem> toValues{1, 2, 3, 4, 5, 6, 7, 8};
       const std::size_t numTo = toValues.size();
 
-      CtorTest<Elem, BufCap> test{caseLabel, expectedMeasures(numFrom, numTo)};
+      CtorTest<Elem, BufCap> test{caseLabel, expectedCopyMeasures(numFrom, numTo)};
       test.run([&]() {
          SV from{fromValues};
          SV to{toValues};
@@ -826,7 +827,7 @@ void TestCopyAssignment()
       const std::initializer_list<Elem> toValues{1, 2, 3, 4, 5, 6, 7};
       const std::size_t numTo = toValues.size();
 
-      CtorTest<Elem, BufCap> test{caseLabel, expectedMeasures(numFrom, numTo)};
+      CtorTest<Elem, BufCap> test{caseLabel, expectedCopyMeasures(numFrom, numTo)};
       test.run([&]() {
          SV from{fromValues};
          SV to{toValues};
@@ -857,7 +858,7 @@ void TestCopyAssignment()
       const std::initializer_list<Elem> toValues{1, 2, 3, 4, 5, 6, 7, 8};
       const std::size_t numTo = toValues.size();
 
-      CtorTest<Elem, BufCap> test{caseLabel, expectedMeasures(numFrom, numTo)};
+      CtorTest<Elem, BufCap> test{caseLabel, expectedCopyMeasures(numFrom, numTo)};
       test.run([&]() {
          SV from{fromValues};
          SV to{toValues};
@@ -880,237 +881,168 @@ void TestCopyAssignment()
 
 void TestMoveAssignment()
 {
+   // Local functions to calculate the expected metrics for move-assignments.
+   auto expectedMoveHeapMetrics = [](std::size_t numFrom,
+                                     std::size_t numTo) -> Element::Measures {
+      Element::Measures measures;
+      measures.copyCtorCalls = numFrom + numTo;
+      // No moves because the heap allocations is stolen.
+      measures.moveCtorCalls = 0;
+      measures.dtorCalls = numFrom + numTo;
+      return measures;
+   };
+   auto expectedMoveBufferMetrics = [](std::size_t numFrom,
+                                       std::size_t numTo) -> Element::Measures {
+      Element::Measures measures;
+      measures.copyCtorCalls = numFrom + numTo;
+      measures.moveCtorCalls = numFrom;
+      measures.dtorCalls = numFrom + numTo;
+      return measures;
+   };
+
    {
-      const std::string caseLabel{"SboVector move assignment of buffer "
+      const std::string caseLabel{"SboVector move assignment from buffer "
                                   "instance to buffer instance"};
 
       constexpr std::size_t BufCap = 10;
-      constexpr std::size_t NumElems = 5;
-      constexpr std::size_t NumOrigElems = 3;
       using Elem = Element;
-      using SV = SboVector<Elem, BufCap>;
+      using SV = SboVector<Element, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::initializer_list<Elem> fromValues{1, 2, 3};
+      const std::size_t numFrom = fromValues.size();
+      const std::initializer_list<Elem> toValues{1, 2, 3, 4, 5};
+      const std::size_t numTo = toValues.size();
 
-      SV src(NumElems, {2});
-      for (int i = 0; i < src.size(); ++i)
-         src[i].i = i;
+      CtorTest<Elem, BufCap> test{caseLabel, expectedMoveBufferMetrics(numFrom, numTo)};
+      test.run([&]() {
+         SV from{fromValues};
+         SV to{toValues};
 
-      SV sv(NumOrigElems, {1});
+         VERIFY(from.inBuffer(), caseLabel);
+         VERIFY(to.inBuffer(), caseLabel);
 
-      // Preconditions.
-      VERIFY(NumElems < BufCap, caseLabel);
-      VERIFY(NumOrigElems < BufCap, caseLabel);
-      VERIFY(src.inBuffer(), caseLabel);
-      VERIFY(sv.inBuffer(), caseLabel);
+         to = std::move(from);
 
-      {
-         // Element instrumentation for tested call only.
-         Elem::Measures expected;
-         // Moved elements.
-         expected.moveCtorCalls = NumElems;
-         // Original elements got destroyed.
-         expected.dtorCalls = NumOrigElems;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
-
-         // Test.
-         sv = std::move(src);
-      }
-
-      // Verify vector state.
-      VERIFY(sv.size() == NumElems, caseLabel);
-      // Capacity of buffer.
-      VERIFY(sv.capacity() == BufCap, caseLabel);
-      VERIFY(sv.inBuffer(), caseLabel);
-      for (int i = 0; i < sv.size(); ++i)
-         VERIFY(sv[i].i == i, caseLabel);
+         VERIFY(to.inBuffer(), caseLabel);
+         VERIFY(to.capacity() == BufCap, caseLabel);
+         verifyValues(to, fromValues, caseLabel);
+      });
    }
    {
-      const std::string caseLabel{"SboVector move assignment of heap "
+      const std::string caseLabel{"SboVector move assignment from heap "
                                   "instance to buffer instance"};
 
-      constexpr std::size_t BufCap = 10;
-      constexpr std::size_t NumElems = 20;
-      constexpr std::size_t NumOrigElems = 3;
+      constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Elem, BufCap>;
+      using SV = SboVector<Element, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::initializer_list<Elem> fromValues{1, 2, 3, 4, 5, 6, 7};
+      const std::size_t numFrom = fromValues.size();
+      const std::initializer_list<Elem> toValues{1, 2, 3};
+      const std::size_t numTo = toValues.size();
 
-      SV src(NumElems, {2});
-      for (int i = 0; i < src.size(); ++i)
-         src[i].i = i;
+      CtorTest<Elem, BufCap> test{caseLabel, expectedMoveHeapMetrics(numFrom, numTo)};
+      test.run([&]() {
+         SV from{fromValues};
+         SV to{toValues};
 
-      SV sv(NumOrigElems, {1});
+         VERIFY(from.onHeap(), caseLabel);
+         VERIFY(to.inBuffer(), caseLabel);
 
-      // Preconditions.
-      VERIFY(NumElems > BufCap, caseLabel);
-      VERIFY(NumOrigElems < BufCap, caseLabel);
-      VERIFY(src.onHeap(), caseLabel);
-      VERIFY(sv.inBuffer(), caseLabel);
+         to = std::move(from);
 
-      {
-         // Element instrumentation for tested call only.
-         Elem::Measures expected;
-         // No moves because the SboVector simply stole the pointer to the heap memory.
-         expected.moveCtorCalls = 0;
-         // Original elements got destroyed.
-         expected.dtorCalls = NumOrigElems;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
-
-         // Test.
-         sv = std::move(src);
-      }
-
-      // Verify vector state.
-      VERIFY(sv.size() == NumElems, caseLabel);
-      // Will have capacity of stolen source heap memory.
-      VERIFY(sv.capacity() == NumElems, caseLabel);
-      VERIFY(sv.onHeap(), caseLabel);
-      for (int i = 0; i < sv.size(); ++i)
-         VERIFY(sv[i].i == i, caseLabel);
+         VERIFY(to.onHeap(), caseLabel);
+         VERIFY(to.capacity() == numFrom, caseLabel);
+         verifyValues(to, fromValues, caseLabel);
+      });
    }
    {
-      const std::string caseLabel{"SboVector move assignment of buffer "
+      const std::string caseLabel{"SboVector move assignment from buffer "
                                   "instance to heap instance"};
 
-      constexpr std::size_t BufCap = 10;
-      constexpr std::size_t NumElems = 5;
-      constexpr std::size_t NumOrigElems = 20;
+      constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Elem, BufCap>;
+      using SV = SboVector<Element, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::initializer_list<Elem> fromValues{1, 2, 3};
+      const std::size_t numFrom = fromValues.size();
+      const std::initializer_list<Elem> toValues{1, 2, 3, 4, 5, 6, 7};
+      const std::size_t numTo = toValues.size();
 
-      SV src(NumElems, {2});
-      for (int i = 0; i < src.size(); ++i)
-         src[i].i = i;
+      CtorTest<Elem, BufCap> test{caseLabel, expectedMoveBufferMetrics(numFrom, numTo)};
+      test.run([&]() {
+         SV from{fromValues};
+         SV to{toValues};
 
-      SV sv(NumOrigElems, {1});
+         VERIFY(from.inBuffer(), caseLabel);
+         VERIFY(to.onHeap(), caseLabel);
 
-      // Preconditions.
-      VERIFY(NumElems < BufCap, caseLabel);
-      VERIFY(NumOrigElems > BufCap, caseLabel);
-      VERIFY(src.inBuffer(), caseLabel);
-      VERIFY(sv.onHeap(), caseLabel);
+         to = std::move(from);
 
-      {
-         // Element instrumentation for tested call only.
-         Elem::Measures expected;
-         // Moved elements.
-         expected.moveCtorCalls = NumElems;
-         // Original elements got destroyed.
-         expected.dtorCalls = NumOrigElems;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
-
-         // Test.
-         sv = std::move(src);
-      }
-
-      // Verify vector state.
-      VERIFY(sv.size() == NumElems, caseLabel);
-      // Elements fit into buffer.
-      VERIFY(sv.capacity() == BufCap, caseLabel);
-      VERIFY(sv.inBuffer(), caseLabel);
-      for (int i = 0; i < sv.size(); ++i)
-         VERIFY(sv[i].i == i, caseLabel);
+         VERIFY(to.inBuffer(), caseLabel);
+         VERIFY(to.capacity() == BufCap, caseLabel);
+         verifyValues(to, fromValues, caseLabel);
+      });
    }
    {
-      const std::string caseLabel{"SboVector move assignment of smaller heap "
-                                  "instance to larger heap instance"};
+      const std::string caseLabel{"SboVector move assignment from smaller "
+                                  "to larger heap instance"};
 
-      constexpr std::size_t BufCap = 10;
-      constexpr std::size_t NumElems = 15;
-      constexpr std::size_t NumOrigElems = 20;
+      constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Elem, BufCap>;
+      using SV = SboVector<Element, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::initializer_list<Elem> fromValues{1, 2, 3, 4, 5, 6};
+      const std::size_t numFrom = fromValues.size();
+      const std::initializer_list<Elem> toValues{1, 2, 3, 4, 5, 6, 7, 8};
+      const std::size_t numTo = toValues.size();
 
-      SV src(NumElems, {2});
-      for (int i = 0; i < src.size(); ++i)
-         src[i].i = i;
+      CtorTest<Elem, BufCap> test{caseLabel, expectedMoveHeapMetrics(numFrom, numTo)};
+      test.run([&]() {
+         SV from{fromValues};
+         SV to{toValues};
 
-      SV sv(NumOrigElems, {1});
+         VERIFY(from.onHeap(), caseLabel);
+         VERIFY(to.onHeap(), caseLabel);
+         VERIFY(from.size() < to.size(), caseLabel);
 
-      // Preconditions.
-      VERIFY(NumElems > BufCap, caseLabel);
-      VERIFY(NumOrigElems > BufCap, caseLabel);
-      VERIFY(NumElems < NumOrigElems, caseLabel);
-      VERIFY(src.onHeap(), caseLabel);
-      VERIFY(sv.onHeap(), caseLabel);
+         to = std::move(from);
 
-      {
-         // Element instrumentation for tested call only.
-         Elem::Measures expected;
-         // No moves because the SboVector simply stole the pointer to the heap memory.
-         expected.moveCtorCalls = 0;
-         // Original elements got destroyed.
-         expected.dtorCalls = NumOrigElems;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
-
-         // Test.
-         sv = std::move(src);
-      }
-
-      // Verify vector state.
-      VERIFY(sv.size() == NumElems, caseLabel);
-      // Will take over the stolen capacity of the source.
-      VERIFY(sv.capacity() == NumElems, caseLabel);
-      VERIFY(sv.onHeap(), caseLabel);
-      for (int i = 0; i < sv.size(); ++i)
-         VERIFY(sv[i].i == i, caseLabel);
+         VERIFY(to.onHeap(), caseLabel);
+         // Will take over the stolen capacity of the source.
+         VERIFY(to.capacity() == numFrom, caseLabel);
+         verifyValues(to, fromValues, caseLabel);
+      });
    }
    {
-      const std::string caseLabel{"SboVector move assignment of larger heap "
+      const std::string caseLabel{"SboVector move assignment from larger heap "
                                   "instance to smaller heap instance"};
 
-      constexpr std::size_t BufCap = 10;
-      constexpr std::size_t NumElems = 20;
-      constexpr std::size_t NumOrigElems = 15;
+      constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Elem, BufCap>;
+      using SV = SboVector<Element, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::initializer_list<Elem> fromValues{1, 2, 3, 4, 5, 6, 7, 8, 9};
+      const std::size_t numFrom = fromValues.size();
+      const std::initializer_list<Elem> toValues{1, 2, 3, 4, 5, 6};
+      const std::size_t numTo = toValues.size();
 
-      SV src(NumElems, {2});
-      for (int i = 0; i < src.size(); ++i)
-         src[i].i = i;
+      CtorTest<Elem, BufCap> test{caseLabel, expectedMoveHeapMetrics(numFrom, numTo)};
+      test.run([&]() {
+         SV from{fromValues};
+         SV to{toValues};
 
-      SV sv(NumOrigElems, {1});
+         VERIFY(from.onHeap(), caseLabel);
+         VERIFY(to.onHeap(), caseLabel);
+         VERIFY(from.size() > to.size(), caseLabel);
 
-      // Preconditions.
-      VERIFY(NumElems > BufCap, caseLabel);
-      VERIFY(NumOrigElems > BufCap, caseLabel);
-      VERIFY(NumElems > NumOrigElems, caseLabel);
-      VERIFY(src.onHeap(), caseLabel);
-      VERIFY(sv.onHeap(), caseLabel);
+         to = std::move(from);
 
-      {
-         // Element instrumentation for tested call only.
-         Elem::Measures expected;
-         // No moves because the SboVector simply stole the pointer to the heap memory.
-         expected.moveCtorCalls = 0;
-         // Original elements got destroyed.
-         expected.dtorCalls = NumOrigElems;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
-
-         // Test.
-         sv = std::move(src);
-      }
-
-      // Verify vector state.
-      VERIFY(sv.size() == NumElems, caseLabel);
-      // Will take over the stolen capacity of the source.
-      VERIFY(sv.capacity() == NumElems, caseLabel);
-      VERIFY(sv.onHeap(), caseLabel);
-      for (int i = 0; i < sv.size(); ++i)
-         VERIFY(sv[i].i == i, caseLabel);
+         VERIFY(to.onHeap(), caseLabel);
+         // Will take over the stolen capacity of the source.
+         VERIFY(to.capacity() == numFrom, caseLabel);
+         verifyValues(to, fromValues, caseLabel);
+      });
    }
 }
 
