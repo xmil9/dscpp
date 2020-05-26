@@ -1629,129 +1629,82 @@ void TestAssignInitializerList()
 void TestAt()
 {
    {
-      const std::string caseLabel{
-         "SvoVector::at for reading from valid index into buffer instance"};
-
-      constexpr std::size_t BufCap = 10;
-      using Elem = int;
-      using SV = SboVector<Elem, BufCap>;
-
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
-
-      SV sv{{1}, {2}, {3}, {4}};
-
-      // Precondition.
-      VERIFY(sv.size() < BufCap, caseLabel);
-
-      // Test.
-      for (int i = 0; i < sv.size(); ++i)
-         VERIFY(sv.at(i) == i + 1, caseLabel);
-   }
-   {
-      const std::string caseLabel{
-         "SvoVector::at for writing to valid index into buffer instance"};
-
-      constexpr std::size_t BufCap = 10;
-      using Elem = int;
-      using SV = SboVector<Elem, BufCap>;
-
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
-
-      SV sv{{1}, {2}, {3}, {4}};
-
-      // Precondition.
-      VERIFY(sv.size() < BufCap, caseLabel);
-
-      // Test.
-      for (int i = 0; i < sv.size(); ++i)
-      {
-         sv.at(i) = 100;
-         VERIFY(sv.at(i) == 100, caseLabel);
-      }
-   }
-   {
-      const std::string caseLabel{
-         "SvoVector::at for reading from valid index into heap instance"};
+      const std::string caseLabel{"SvoVector::at for buffer instance"};
 
       constexpr std::size_t BufCap = 5;
-      using Elem = int;
-      using SV = SboVector<Elem, BufCap>;
+      using Elem = Element;
+      using SV = SboVector<Element, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::size_t numElems = 4;
+      const Elem val = 10;
+      SV sv(numElems, val);
 
-      SV sv{{1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}};
+      Elem::Metrics metrics;
+      metrics.ctorCalls = numElems;
+      metrics.assignmentCalls = numElems;
+      metrics.dtorCalls = numElems;
 
-      // Precondition.
-      VERIFY(sv.size() > BufCap, caseLabel);
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         VERIFY(sv.inBuffer(), caseLabel);
 
-      // Test.
-      for (int i = 0; i < sv.size(); ++i)
-         VERIFY(sv.at(i) == i + 1, caseLabel);
+         for (int i = 0; i < sv.size(); ++i)
+         {
+            VERIFY(sv[i] == val, caseLabel);
+
+            const Elem newVal{i};
+            sv[i] = newVal;
+            VERIFY(sv[i] == newVal, caseLabel);
+         }
+      });
    }
    {
-      const std::string caseLabel{
-         "SvoVector::at for writing to valid index into heap instance"};
+      const std::string caseLabel{"SvoVector::at for heap instance"};
 
       constexpr std::size_t BufCap = 5;
-      using Elem = int;
-      using SV = SboVector<Elem, BufCap>;
+      using Elem = Element;
+      using SV = SboVector<Element, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::size_t numElems = 7;
+      const Elem val = 10;
+      SV sv(numElems, val);
 
-      SV sv{{1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}};
+      Elem::Metrics metrics;
+      metrics.ctorCalls = numElems;
+      metrics.assignmentCalls = numElems;
+      metrics.dtorCalls = numElems;
 
-      // Precondition.
-      VERIFY(sv.size() > BufCap, caseLabel);
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         VERIFY(sv.onHeap(), caseLabel);
 
-      // Test.
-      for (int i = 0; i < sv.size(); ++i)
-      {
-         sv.at(i) = 100;
-         VERIFY(sv.at(i) == 100, caseLabel);
-      }
+         for (int i = 0; i < sv.size(); ++i)
+         {
+            VERIFY(sv[i] == val, caseLabel);
+
+            const Elem newVal{i};
+            sv[i] = newVal;
+            VERIFY(sv[i] == newVal, caseLabel);
+         }
+      });
    }
    {
-      const std::string caseLabel{
-         "SvoVector::at for accessing invalid index into buffer instance"};
-
-      constexpr std::size_t BufCap = 10;
-      using Elem = int;
-      using SV = SboVector<Elem, BufCap>;
-
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
-
-      SV sv{{1}, {2}, {3}, {4}};
-
-      // Precondition.
-      VERIFY(sv.size() < BufCap, caseLabel);
-
-      // Test.
-      VERIFY_THROW(([&sv]() { sv.at(sv.size()); }), std::out_of_range, caseLabel);
-      VERIFY_THROW(([&sv, BufCap]() { sv.at(BufCap); }), std::out_of_range, caseLabel);
-   }
-   {
-      const std::string caseLabel{
-         "SvoVector::at for accessing invalid index into heap instance"};
+      const std::string caseLabel{"SvoVector::at for invalid index"};
 
       constexpr std::size_t BufCap = 5;
-      using Elem = int;
-      using SV = SboVector<Elem, BufCap>;
+      using Elem = Element;
+      using SV = SboVector<Element, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::size_t numElems = 4;
+      const Elem val = 10;
+      SV sv(numElems, val);
 
-      SV sv{{1}, {2}, {3}, {4}, {5}, {6}};
+      Elem::Metrics zeros;
 
-      // Precondition.
-      VERIFY(sv.size() > BufCap, caseLabel);
-
-      // Test.
-      VERIFY_THROW(([&sv]() { sv.at(sv.size()); }), std::out_of_range, caseLabel);
+      Test<Elem, BufCap> test{caseLabel, zeros};
+      test.run([&]() {
+         VERIFY_THROW(([&]() { sv.at(sv.size()); }), std::out_of_range, caseLabel);
+      });
    }
 }
 
@@ -1759,83 +1712,74 @@ void TestAt()
 void TestAtConst()
 {
    {
-      const std::string caseLabel{
-         "SvoVector::at const for reading from valid index into buffer instance"};
-
-      constexpr std::size_t BufCap = 10;
-      using Elem = int;
-      using SV = SboVector<Elem, BufCap>;
-
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
-
-      const SV sv{{1}, {2}, {3}, {4}};
-
-      // Precondition.
-      VERIFY(sv.size() < BufCap, caseLabel);
-
-      // Test.
-      for (int i = 0; i < sv.size(); ++i)
-         VERIFY(sv.at(i) == i + 1, caseLabel);
-   }
-   {
-      const std::string caseLabel{
-         "SvoVector::at const for reading from valid index into heap instance"};
+      const std::string caseLabel{"SvoVector::at const for buffer instance"};
 
       constexpr std::size_t BufCap = 5;
-      using Elem = int;
-      using SV = SboVector<Elem, BufCap>;
+      using Elem = Element;
+      using SV = SboVector<Element, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::size_t numElems = 4;
+      const Elem val = 10;
+      const SV sv(numElems, val);
 
-      const SV sv{{1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}};
+      Elem::Metrics zeros;
 
-      // Precondition.
-      VERIFY(sv.size() > BufCap, caseLabel);
+      Test<Elem, BufCap> test{caseLabel, zeros};
+      test.run([&]() {
+         VERIFY(sv.inBuffer(), caseLabel);
+         // Ref types are always non-const, so remove the reference.
+         static_assert(
+            std::is_const_v<typename std::remove_reference<decltype(sv)>::type>);
 
-      // Test.
-      for (int i = 0; i < sv.size(); ++i)
-         VERIFY(sv.at(i) == i + 1, caseLabel);
+         for (int i = 0; i < sv.size(); ++i)
+            VERIFY(sv[i] == val, caseLabel);
+      });
    }
    {
-      const std::string caseLabel{
-         "SvoVector::at const for accessing invalid index into buffer instance"};
-
-      constexpr std::size_t BufCap = 10;
-      using Elem = int;
-      using SV = SboVector<Elem, BufCap>;
-
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
-
-      const SV sv{{1}, {2}, {3}, {4}};
-
-      // Precondition.
-      VERIFY(sv.size() < BufCap, caseLabel);
-
-      // Test.
-      VERIFY_THROW(([&sv]() { sv.at(sv.size()); }), std::out_of_range, caseLabel);
-      VERIFY_THROW(([&sv, BufCap]() { sv.at(BufCap); }), std::out_of_range, caseLabel);
-   }
-   {
-      const std::string caseLabel{
-         "SvoVector::at const for accessing invalid index into heap instance"};
+      const std::string caseLabel{"SvoVector::at const for heap instance"};
 
       constexpr std::size_t BufCap = 5;
-      using Elem = int;
-      using SV = SboVector<Elem, BufCap>;
+      using Elem = Element;
+      using SV = SboVector<Element, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::size_t numElems = 12;
+      const Elem val = 10;
+      const SV sv(numElems, val);
 
-      const SV sv{{1}, {2}, {3}, {4}, {5}, {6}};
+      Elem::Metrics zeros;
 
-      // Precondition.
-      VERIFY(sv.size() > BufCap, caseLabel);
+      Test<Elem, BufCap> test{caseLabel, zeros};
+      test.run([&]() {
+         VERIFY(sv.onHeap(), caseLabel);
+         // Ref types are always non-const, so remove the reference.
+         static_assert(
+            std::is_const_v<typename std::remove_reference<decltype(sv)>::type>);
 
-      // Test.
-      VERIFY_THROW(([&sv]() { sv.at(sv.size()); }), std::out_of_range, caseLabel);
+         for (int i = 0; i < sv.size(); ++i)
+            VERIFY(sv[i] == val, caseLabel);
+      });
+   }
+   {
+      const std::string caseLabel{"SvoVector::at const for invalid index"};
+
+      constexpr std::size_t BufCap = 5;
+      using Elem = Element;
+      using SV = SboVector<Element, BufCap>;
+
+      const std::size_t numElems = 7;
+      const Elem val = 10;
+      const SV sv(numElems, val);
+
+      Elem::Metrics zeros;
+
+      Test<Elem, BufCap> test{caseLabel, zeros};
+      test.run([&]() {
+         // Ref types are always non-const, so remove the reference.
+         static_assert(
+            std::is_const_v<typename std::remove_reference<decltype(sv)>::type>);
+
+         VERIFY_THROW(([&]() { sv.at(sv.size()); }), std::out_of_range, caseLabel);
+      });
    }
 }
 
@@ -3098,8 +3042,8 @@ void TestReserve()
       {
          // Element instrumentation for tested call only.
          Elem::Metrics expected;
-         // All expected values are zero because the reserve call throws without making.
-         // changes.
+         // All expected values are zero because the reserve call throws without
+         // making. changes.
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
 
          // Test.
@@ -4011,8 +3955,8 @@ void TestEraseSingleElement()
          VERIFY(sv[i].i == i + 1, caseLabel);
    }
    {
-      const std::string caseLabel{
-         "SvoVector::erase element of heap instance that makes elements fit into buffer"};
+      const std::string caseLabel{"SvoVector::erase element of heap instance that "
+                                  "makes elements fit into buffer"};
 
       constexpr std::size_t BufCap = 5;
       constexpr std::size_t NumElems = 6;
@@ -4548,8 +4492,8 @@ void TestEraseIteratorRange()
       VERIFY(sv.empty(), caseLabel);
    }
    {
-      const std::string caseLabel{
-         "SvoVector::erase range of heap instance that makes elements fit into buffer"};
+      const std::string caseLabel{"SvoVector::erase range of heap instance that makes "
+                                  "elements fit into buffer"};
 
       constexpr std::size_t BufCap = 5;
       constexpr std::size_t NumElems = 8;
