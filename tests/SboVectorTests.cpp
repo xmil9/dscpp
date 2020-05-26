@@ -316,9 +316,12 @@ void verifyValues(const SV& sv, std::initializer_list<typename SV::value_type> v
 
 ///////////////////
 
-// Data needed by all tests.
+// General structure of test cases.
 template <typename Elem, std::size_t BufCap> class Test
 {
+ public:
+   using SV = SboVector<Elem, BufCap>;
+
  public:
    Test(const std::string& caseLabel, const typename Elem::Metrics& metrics)
    : m_caseLabel{caseLabel}, m_expectedMetrics{metrics}
@@ -326,27 +329,7 @@ template <typename Elem, std::size_t BufCap> class Test
    }
    Test(const Test&) = delete;
    Test(Test&&) = delete;
-   virtual ~Test() = default;
-
- protected:
-   const std::string m_caseLabel;
-   const typename Elem::Metrics m_expectedMetrics;
-};
-
-
-// General structure of constructor test cases.
-template <typename Elem, std::size_t BufCap> class CtorTest : public Test<Elem, BufCap>
-{
- public:
-   using SV = SboVector<Elem, BufCap>;
-
- public:
-   CtorTest(const std::string& caseLabel, const typename Elem::Metrics& metrics)
-   : Test<Elem, BufCap>{caseLabel, metrics}
-   {
-   }
-   CtorTest(const CtorTest&) = delete;
-   CtorTest(CtorTest&&) = delete;
+   ~Test() = default;
 
    void run(std::function<void()> testFn) const
    {
@@ -361,49 +344,10 @@ template <typename Elem, std::size_t BufCap> class CtorTest : public Test<Elem, 
          testFn();
       }
    }
-};
-
-
-// General structure of member function test cases.
-template <typename Elem, std::size_t BufCap> class MemberTest : public Test<Elem, BufCap>
-{
- public:
-   using SV = SboVector<Elem, BufCap>;
-
- public:
-   MemberTest(const std::string& caseLabel, const typename Elem::Metrics& metrics,
-              std::size_t cap, std::initializer_list<Elem> elems)
-   : Test<Elem, BufCap>{caseLabel, metrics}, m_cap{cap}, m_elems(elems)
-   {
-   }
-   MemberTest(const MemberTest&) = delete;
-   MemberTest(MemberTest&&) = delete;
-
-   void run(std::function<void(SV& sv)> testFn,
-            std::function<void(const SV& sv)> checkPreconditions,
-            std::function<void(const SV& sv)> checkPostconditions) const
-   {
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{this->m_caseLabel};
-
-      SV sv = makeVector<Elem, BufCap>(m_cap, m_elems);
-      if (checkPreconditions)
-         checkPreconditions(sv);
-
-      {
-         // Element instrumentation for tested call only.
-         const ElementVerifier<Elem> elemCheck{this->m_expectedMetrics,
-                                               this->m_caseLabel};
-         testFn(sv);
-      }
-
-      if (checkPostconditions)
-         checkPostconditions(sv);
-   }
 
  private:
-   const std::size_t m_cap = BufCap;
-   const std::initializer_list<Elem> m_elems;
+   const std::string m_caseLabel;
+   const typename Elem::Metrics m_expectedMetrics;
 };
 
 
@@ -419,7 +363,7 @@ void TestDefaultCtor()
 
    const Elem::Metrics zeros;
 
-   CtorTest<Elem, BufCap> test{caseLabel, zeros};
+   Test<Elem, BufCap> test{caseLabel, zeros};
    test.run([&]() {
       SV sv;
 
@@ -448,7 +392,7 @@ void TestCtorForElementCountAndValue()
       metrics.copyCtorCalls = numElems;
       metrics.dtorCalls = numElems;
 
-      CtorTest<Elem, BufCap> test{caseLabel, metrics};
+      Test<Elem, BufCap> test{caseLabel, metrics};
       test.run([&, BufCap]() {
          SV sv(numElems, initVal);
 
@@ -474,7 +418,7 @@ void TestCtorForElementCountAndValue()
       metrics.copyCtorCalls = numElems;
       metrics.dtorCalls = numElems;
 
-      CtorTest<Elem, BufCap> test{caseLabel, metrics};
+      Test<Elem, BufCap> test{caseLabel, metrics};
       test.run([&, BufCap]() {
          SV sv(numElems, initVal);
 
@@ -503,7 +447,7 @@ void TestCopyCtor()
       metrics.copyCtorCalls = 2 * numElems;
       metrics.dtorCalls = 2 * numElems;
 
-      CtorTest<Elem, BufCap> test{caseLabel, metrics};
+      Test<Elem, BufCap> test{caseLabel, metrics};
       test.run([&, BufCap]() {
          const SV src{values};
          SV sv{src};
@@ -528,7 +472,7 @@ void TestCopyCtor()
       metrics.copyCtorCalls = 2 * numElems;
       metrics.dtorCalls = 2 * numElems;
 
-      CtorTest<Elem, BufCap> test{caseLabel, metrics};
+      Test<Elem, BufCap> test{caseLabel, metrics};
       test.run([&, BufCap]() {
          const SV src{values};
          SV sv{src};
@@ -562,7 +506,7 @@ void TestMoveCtor()
       // needs to be destroyed.
       metrics.dtorCalls = numElems;
 
-      CtorTest<Elem, BufCap> test{caseLabel, metrics};
+      Test<Elem, BufCap> test{caseLabel, metrics};
       test.run([&, BufCap]() {
          SV src{values};
          SV sv{std::move(src)};
@@ -591,7 +535,7 @@ void TestMoveCtor()
       metrics.moveCtorCalls = 0;
       metrics.dtorCalls = numElems;
 
-      CtorTest<Elem, BufCap> test{caseLabel, metrics};
+      Test<Elem, BufCap> test{caseLabel, metrics};
       test.run([&, BufCap]() {
          SV src{values};
          SV sv{std::move(src)};
@@ -622,7 +566,7 @@ void TestInitializerListCtor()
       metrics.copyCtorCalls = numElems;
       metrics.dtorCalls = numElems;
 
-      CtorTest<Elem, BufCap> test{caseLabel, metrics};
+      Test<Elem, BufCap> test{caseLabel, metrics};
       test.run([&, BufCap]() {
          SV sv{values};
 
@@ -645,7 +589,7 @@ void TestInitializerListCtor()
       metrics.copyCtorCalls = numElems;
       metrics.dtorCalls = numElems;
 
-      CtorTest<Elem, BufCap> test{caseLabel, metrics};
+      Test<Elem, BufCap> test{caseLabel, metrics};
       test.run([&, BufCap]() {
          SV sv{values};
 
@@ -740,7 +684,7 @@ void TestCopyAssignment()
       const std::initializer_list<Elem> toValues{1, 2, 3};
       const std::size_t numTo = toValues.size();
 
-      CtorTest<Elem, BufCap> test{caseLabel, expectedCopyMetrics(numFrom, numTo)};
+      Test<Elem, BufCap> test{caseLabel, expectedCopyMetrics(numFrom, numTo)};
       test.run([&]() {
          SV from{fromValues};
          SV to{toValues};
@@ -768,7 +712,7 @@ void TestCopyAssignment()
       const std::initializer_list<Elem> toValues{1, 2, 3};
       const std::size_t numTo = toValues.size();
 
-      CtorTest<Elem, BufCap> test{caseLabel, expectedCopyMetrics(numFrom, numTo)};
+      Test<Elem, BufCap> test{caseLabel, expectedCopyMetrics(numFrom, numTo)};
       test.run([&]() {
          SV from{fromValues};
          SV to{toValues};
@@ -796,7 +740,7 @@ void TestCopyAssignment()
       const std::initializer_list<Elem> toValues{1, 2, 3, 4, 5, 6, 7, 8};
       const std::size_t numTo = toValues.size();
 
-      CtorTest<Elem, BufCap> test{caseLabel, expectedCopyMetrics(numFrom, numTo)};
+      Test<Elem, BufCap> test{caseLabel, expectedCopyMetrics(numFrom, numTo)};
       test.run([&]() {
          SV from{fromValues};
          SV to{toValues};
@@ -824,7 +768,7 @@ void TestCopyAssignment()
       const std::initializer_list<Elem> toValues{1, 2, 3, 4, 5, 6, 7};
       const std::size_t numTo = toValues.size();
 
-      CtorTest<Elem, BufCap> test{caseLabel, expectedCopyMetrics(numFrom, numTo)};
+      Test<Elem, BufCap> test{caseLabel, expectedCopyMetrics(numFrom, numTo)};
       test.run([&]() {
          SV from{fromValues};
          SV to{toValues};
@@ -855,7 +799,7 @@ void TestCopyAssignment()
       const std::initializer_list<Elem> toValues{1, 2, 3, 4, 5, 6, 7, 8};
       const std::size_t numTo = toValues.size();
 
-      CtorTest<Elem, BufCap> test{caseLabel, expectedCopyMetrics(numFrom, numTo)};
+      Test<Elem, BufCap> test{caseLabel, expectedCopyMetrics(numFrom, numTo)};
       test.run([&]() {
          SV from{fromValues};
          SV to{toValues};
@@ -910,7 +854,7 @@ void TestMoveAssignment()
       const std::initializer_list<Elem> toValues{1, 2, 3, 4, 5};
       const std::size_t numTo = toValues.size();
 
-      CtorTest<Elem, BufCap> test{caseLabel, expectedMoveBufferMetrics(numFrom, numTo)};
+      Test<Elem, BufCap> test{caseLabel, expectedMoveBufferMetrics(numFrom, numTo)};
       test.run([&]() {
          SV from{fromValues};
          SV to{toValues};
@@ -938,7 +882,7 @@ void TestMoveAssignment()
       const std::initializer_list<Elem> toValues{1, 2, 3};
       const std::size_t numTo = toValues.size();
 
-      CtorTest<Elem, BufCap> test{caseLabel, expectedMoveHeapMetrics(numFrom, numTo)};
+      Test<Elem, BufCap> test{caseLabel, expectedMoveHeapMetrics(numFrom, numTo)};
       test.run([&]() {
          SV from{fromValues};
          SV to{toValues};
@@ -966,7 +910,7 @@ void TestMoveAssignment()
       const std::initializer_list<Elem> toValues{1, 2, 3, 4, 5, 6, 7};
       const std::size_t numTo = toValues.size();
 
-      CtorTest<Elem, BufCap> test{caseLabel, expectedMoveBufferMetrics(numFrom, numTo)};
+      Test<Elem, BufCap> test{caseLabel, expectedMoveBufferMetrics(numFrom, numTo)};
       test.run([&]() {
          SV from{fromValues};
          SV to{toValues};
@@ -994,7 +938,7 @@ void TestMoveAssignment()
       const std::initializer_list<Elem> toValues{1, 2, 3, 4, 5, 6, 7, 8};
       const std::size_t numTo = toValues.size();
 
-      CtorTest<Elem, BufCap> test{caseLabel, expectedMoveHeapMetrics(numFrom, numTo)};
+      Test<Elem, BufCap> test{caseLabel, expectedMoveHeapMetrics(numFrom, numTo)};
       test.run([&]() {
          SV from{fromValues};
          SV to{toValues};
@@ -1024,7 +968,7 @@ void TestMoveAssignment()
       const std::initializer_list<Elem> toValues{1, 2, 3, 4, 5, 6};
       const std::size_t numTo = toValues.size();
 
-      CtorTest<Elem, BufCap> test{caseLabel, expectedMoveHeapMetrics(numFrom, numTo)};
+      Test<Elem, BufCap> test{caseLabel, expectedMoveHeapMetrics(numFrom, numTo)};
       test.run([&]() {
          SV from{fromValues};
          SV to{toValues};
@@ -1068,7 +1012,7 @@ void TestInitializerListAssignment()
       const std::initializer_list<Elem> toValues{1, 2, 3};
       const std::size_t numTo = toValues.size();
 
-      CtorTest<Elem, BufCap> test{caseLabel, expectedMetrics(numFrom, numTo)};
+      Test<Elem, BufCap> test{caseLabel, expectedMetrics(numFrom, numTo)};
       test.run([&]() {
          SV to{toValues};
 
@@ -1095,7 +1039,7 @@ void TestInitializerListAssignment()
       const std::initializer_list<Elem> toValues{1, 2, 3};
       const std::size_t numTo = toValues.size();
 
-      CtorTest<Elem, BufCap> test{caseLabel, expectedMetrics(numFrom, numTo)};
+      Test<Elem, BufCap> test{caseLabel, expectedMetrics(numFrom, numTo)};
       test.run([&]() {
          SV to{toValues};
 
@@ -1122,7 +1066,7 @@ void TestInitializerListAssignment()
       const std::initializer_list<Elem> toValues{1, 2, 3, 4, 5, 6, 7};
       const std::size_t numTo = toValues.size();
 
-      CtorTest<Elem, BufCap> test{caseLabel, expectedMetrics(numFrom, numTo)};
+      Test<Elem, BufCap> test{caseLabel, expectedMetrics(numFrom, numTo)};
       test.run([&]() {
          SV to{toValues};
 
@@ -1149,7 +1093,7 @@ void TestInitializerListAssignment()
       const std::initializer_list<Elem> toValues{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
       const std::size_t numTo = toValues.size();
 
-      CtorTest<Elem, BufCap> test{caseLabel, expectedMetrics(numFrom, numTo)};
+      Test<Elem, BufCap> test{caseLabel, expectedMetrics(numFrom, numTo)};
       test.run([&]() {
          SV to{toValues};
          const std::size_t origCap = to.capacity();
@@ -1178,7 +1122,7 @@ void TestInitializerListAssignment()
       const std::initializer_list<Elem> toValues{1, 2, 3, 4, 5, 6, 7};
       const std::size_t numTo = toValues.size();
 
-      CtorTest<Elem, BufCap> test{caseLabel, expectedMetrics(numFrom, numTo)};
+      Test<Elem, BufCap> test{caseLabel, expectedMetrics(numFrom, numTo)};
       test.run([&]() {
          SV to{toValues};
          const std::size_t origCap = to.capacity();
