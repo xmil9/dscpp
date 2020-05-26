@@ -2,6 +2,7 @@
 #define SBOVEC_MEM_INSTR
 #include "SboVector.h"
 #include "TestUtil.h"
+#include <functional>
 #include <iostream>
 #include <list>
 #include <string>
@@ -17,26 +18,41 @@ namespace
 // Ctors and dtor are instrumented with call counters.
 struct Element
 {
-   Element() { ++m_instrumented.defaultCtorCalls; }
-   Element(int i_) : i{i_} { ++m_instrumented.ctorCalls; }
+   Element() noexcept
+   {
+      if (!m_paused)
+         ++m_instrumented.defaultCtorCalls;
+   }
+   Element(int i_) : i{i_}
+   {
+      if (!m_paused)
+         ++m_instrumented.ctorCalls;
+   }
    Element(const Element& other) : d{other.d}, i{other.i}, b{other.b}
    {
-      ++m_instrumented.copyCtorCalls;
+      if (!m_paused)
+         ++m_instrumented.copyCtorCalls;
    }
    Element(Element&& other)
    {
       std::swap(d, other.d);
       std::swap(i, other.i);
       std::swap(b, other.b);
-      ++m_instrumented.moveCtorCalls;
+      if (!m_paused)
+         ++m_instrumented.moveCtorCalls;
    }
-   ~Element() { ++m_instrumented.dtorCalls; }
+   ~Element()
+   {
+      if (!m_paused)
+         ++m_instrumented.dtorCalls;
+   }
    Element& operator=(const Element& other)
    {
       d = other.d;
       i = other.i;
       b = other.b;
-      ++m_instrumented.assignmentCalls;
+      if (!m_paused)
+         ++m_instrumented.assignmentCalls;
       return *this;
    }
    Element& operator=(Element&& other)
@@ -44,8 +60,13 @@ struct Element
       std::swap(d, other.d);
       std::swap(i, other.i);
       std::swap(b, other.b);
-      ++m_instrumented.moveAssignmentCalls;
+      if (!m_paused)
+         ++m_instrumented.moveAssignmentCalls;
       return *this;
+   }
+   friend bool operator==(const Element& a, const Element& b)
+   {
+      return (a.d == b.d && a.i == b.i && a.b == b.b);
    }
 
    double d = 1.0;
@@ -66,9 +87,11 @@ struct Element
    };
 
    inline static Measures m_instrumented;
+   inline static bool m_paused = false;
 
    static void resetInstrumentation()
    {
+      m_paused = false;
       m_instrumented.defaultCtorCalls = 0;
       m_instrumented.ctorCalls = 0;
       m_instrumented.copyCtorCalls = 0;
@@ -77,6 +100,8 @@ struct Element
       m_instrumented.moveAssignmentCalls = 0;
       m_instrumented.dtorCalls = 0;
    }
+
+   static void pauseInstrumentation() { m_paused = true; }
 
    static void verifyInstrumentation(const Measures& expected,
                                      const std::string& caseLabel)
@@ -270,277 +295,321 @@ template <typename SV> class MemVerifier
 
 ///////////////////
 
-void TestSboVectorDefaultCtor()
+template <typename Elem, std::size_t BufCap>
+SboVector<Elem, BufCap> makeVector(std::size_t cap, std::initializer_list<Elem> elems)
 {
-   {
-      const std::string caseLabel{"SboVector default ctor"};
-
-      constexpr std::size_t BufCap = 10;
-      using Elem = Element;
-      using SV = SboVector<Elem, BufCap>;
-
-      // Instrumentation.
-      const MemVerifier<SV> memCheck{caseLabel};
-
-      {
-         const ElementVerifier<Elem> elemCheck{{0, 0, 0, 0, 0, 0, 0}, caseLabel};
-
-         // Test.
-         SV sv;
-
-         // Verify vector state.
-         VERIFY(sv.empty(), caseLabel);
-         VERIFY(sv.capacity() == BufCap, caseLabel);
-         VERIFY(sv.inBuffer(), caseLabel);
-      }
-   }
+   SboVector<Elem, BufCap> sv;
+   sv.reserve(cap);
+   for (const auto& elem : elems)
+      sv.push_back(elem);
+   return sv;
 }
 
 
-void TestSboVectorCtorForElementCountAndValue()
+template <typename SV>
+void verifyValues(const SV& sv, std::initializer_list<typename SV::value_type> values,
+                  const std::string& caseLabel)
 {
+   VERIFY(sv.size() == values.size(), caseLabel);
+   auto svPos = sv.cbegin();
+   for (const auto& val : values)
+      VERIFY(*(svPos++) == val, caseLabel);
+}
+
+
+///////////////////
+
+// Data needed by all tests.
+template <typename Elem, std::size_t BufCap> class Test
+{
+ public:
+   Test(const std::string& caseLabel, const typename Elem::Measures& measures)
+   : m_caseLabel{caseLabel}, m_expectedMeasures{measures}
    {
-      const std::string caseLabel{"SboVector count-and-value ctor for buffer instance"};
+   }
+   Test(const Test&) = delete;
+   Test(Test&&) = delete;
+   virtual ~Test() = default;
 
-      constexpr std::size_t BufCap = 10;
-      constexpr std::size_t NumElems = 5;
-      using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+ protected:
+   const std::string m_caseLabel;
+   const typename Elem::Measures m_expectedMeasures;
+};
 
+
+// General structure of constructor test cases.
+template <typename Elem, std::size_t BufCap> class CtorTest : public Test<Elem, BufCap>
+{
+ public:
+   using SV = SboVector<Elem, BufCap>;
+
+ public:
+   CtorTest(const std::string& caseLabel, const typename Elem::Measures& measures)
+   : Test<Elem, BufCap>{caseLabel, measures}
+   {
+   }
+   CtorTest(const CtorTest&) = delete;
+   CtorTest(CtorTest&&) = delete;
+
+   void run(std::function<void()> testFn) const
+   {
       // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
-
-      // Preconditions.
-      VERIFY(BufCap >= NumElems, caseLabel);
+      const MemVerifier<SV> memCheck{this->m_caseLabel};
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
-         // Creation of passed-in instance.
-         expected.ctorCalls = 1;
-         // Creation of elements.
-         expected.copyCtorCalls = NumElems;
-         // Destruction of passed-in instance and elements.
-         expected.dtorCalls = 1 + NumElems;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
-
-         // Test.
-         SV sv(NumElems, {2});
-
-         // Verify vector state.
-         VERIFY(sv.size() == NumElems, caseLabel);
-         VERIFY(sv.capacity() == BufCap, caseLabel);
-         VERIFY(sv.inBuffer(), caseLabel);
-         for (int i = 0; i < sv.size(); ++i)
-            VERIFY(sv[i].i == 2, caseLabel);
+         const ElementVerifier<Elem> elemCheck{this->m_expectedMeasures,
+                                               this->m_caseLabel};
+         assert(testFn);
+         testFn();
       }
+   }
+};
+
+
+// General structure of member function test cases.
+template <typename Elem, std::size_t BufCap> class MemberTest : public Test<Elem, BufCap>
+{
+ public:
+   using SV = SboVector<Elem, BufCap>;
+
+ public:
+   MemberTest(const std::string& caseLabel, const typename Elem::Measures& measures,
+              std::size_t cap, std::initializer_list<Elem> elems)
+   : Test<Elem, BufCap>{caseLabel, measures}, m_cap{cap}, m_elems(elems)
+   {
+   }
+   MemberTest(const MemberTest&) = delete;
+   MemberTest(MemberTest&&) = delete;
+
+   void run(std::function<void(SV& sv)> testFn,
+            std::function<void(const SV& sv)> checkPreconditions,
+            std::function<void(const SV& sv)> checkPostconditions) const
+   {
+      // Memory instrumentation for entire scope.
+      const MemVerifier<SV> memCheck{this->m_caseLabel};
+
+      SV sv = makeVector<Elem, BufCap>(m_cap, m_elems);
+      if (checkPreconditions)
+         checkPreconditions(sv);
+
+      {
+         // Element instrumentation for tested call only.
+         const ElementVerifier<Elem> elemCheck{this->m_expectedMeasures,
+                                               this->m_caseLabel};
+         testFn(sv);
+      }
+
+      if (checkPostconditions)
+         checkPostconditions(sv);
+   }
+
+ private:
+   const std::size_t m_cap = BufCap;
+   const std::initializer_list<Elem> m_elems;
+};
+
+
+///////////////////
+
+void TestDefaultCtor()
+{
+   const std::string caseLabel{"SboVector default ctor"};
+
+   constexpr std::size_t BufCap = 10;
+   using Elem = Element;
+   using SV = SboVector<Element, BufCap>;
+
+   const Elem::Measures zeros;
+
+   CtorTest<Elem, BufCap> test{caseLabel, zeros};
+   test.run([&]() {
+      SV sv;
+
+      VERIFY(sv.empty(), caseLabel);
+      VERIFY(sv.capacity() == BufCap, caseLabel);
+      VERIFY(sv.inBuffer(), caseLabel);
+   });
+}
+
+
+void TestCtorForElementCountAndValue()
+{
+   {
+      const std::string caseLabel{"SboVector count-and-value ctor for buffer storage"};
+
+      constexpr std::size_t BufCap = 10;
+      using Elem = Element;
+      using SV = SboVector<Element, BufCap>;
+
+      constexpr std::size_t numElems = 5;
+      const Elem initVal{2};
+      const std::initializer_list<Elem> expectedValues{initVal, initVal, initVal, initVal,
+                                                       initVal};
+
+      Elem::Measures measures;
+      measures.copyCtorCalls = numElems;
+      measures.dtorCalls = numElems;
+
+      CtorTest<Elem, BufCap> test{caseLabel, measures};
+      test.run([&, BufCap]() {
+         SV sv(numElems, initVal);
+
+         VERIFY(sv.inBuffer(), caseLabel);
+         VERIFY(sv.capacity() == BufCap, caseLabel);
+         verifyValues(sv, expectedValues, caseLabel);
+      });
    }
    {
       const std::string caseLabel{"SboVector count-and-value ctor for heap instance"};
 
       constexpr std::size_t BufCap = 10;
-      constexpr std::size_t NumElems = 20;
       using Elem = Element;
-      using SV = SboVector<Elem, BufCap>;
+      using SV = SboVector<Element, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      constexpr std::size_t numElems = 12;
+      const Elem initVal{2};
+      const std::initializer_list<Elem> expectedValues{
+         initVal, initVal, initVal, initVal, initVal, initVal,
+         initVal, initVal, initVal, initVal, initVal, initVal};
 
-      // Preconditions.
-      VERIFY(BufCap < NumElems, caseLabel);
+      Elem::Measures measures;
+      measures.copyCtorCalls = numElems;
+      measures.dtorCalls = numElems;
 
-      {
-         // Element instrumentation for tested call only.
-         Elem::Measures expected;
-         // Creation of passed-in instance.
-         expected.ctorCalls = 1;
-         // Creation of elements.
-         expected.copyCtorCalls = NumElems;
-         // Destruction of passed-in instance and elements.
-         expected.dtorCalls = 1 + NumElems;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+      CtorTest<Elem, BufCap> test{caseLabel, measures};
+      test.run([&, BufCap]() {
+         SV sv(numElems, initVal);
 
-         // Test.
-         SV sv(NumElems, {2});
-
-         // Verify vector state.
-         VERIFY(sv.size() == NumElems, caseLabel);
-         VERIFY(sv.capacity() == NumElems, caseLabel);
          VERIFY(sv.onHeap(), caseLabel);
-         for (int i = 0; i < sv.size(); ++i)
-            VERIFY(sv[i].i == 2, caseLabel);
-      }
+         VERIFY(sv.capacity() == numElems, caseLabel);
+         verifyValues(sv, expectedValues, caseLabel);
+      });
    }
 }
 
 
-void TestSboVectorCopyCtor()
+void TestCopyCtor()
 {
    {
       const std::string caseLabel{"SboVector copy ctor for buffer instance"};
 
       constexpr std::size_t BufCap = 10;
-      constexpr std::size_t NumElems = 5;
       using Elem = Element;
-      using SV = SboVector<Elem, BufCap>;
+      using SV = SboVector<Element, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::initializer_list<Elem> values{1, 2, 3, 4, 5};
+      const std::size_t numElems = values.size();
 
-      SV src(NumElems, {1});
-      for (int i = 0; i < src.size(); ++i)
-         src[i].i = i;
+      Elem::Measures measures;
+      // For source elements and copies.
+      measures.copyCtorCalls = 2 * numElems;
+      measures.dtorCalls = 2 * numElems;
 
-      // Preconditions.
-      VERIFY(src.inBuffer(), caseLabel);
-
-      {
-         // Element instrumentation for tested call only.
-         Elem::Measures expected;
-         // Copied elements.
-         expected.copyCtorCalls = NumElems;
-         // Destruction of elements.
-         expected.dtorCalls = NumElems;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
-
-         // Test.
+      CtorTest<Elem, BufCap> test{caseLabel, measures};
+      test.run([&, BufCap]() {
+         const SV src{values};
          SV sv{src};
 
-         // Verify vector state.
-         VERIFY(sv.size() == NumElems, caseLabel);
-         VERIFY(sv.capacity() == BufCap, caseLabel);
          VERIFY(sv.inBuffer(), caseLabel);
-         for (int i = 0; i < sv.size(); ++i)
-            VERIFY(sv[i].i == i, caseLabel);
-      }
+         VERIFY(sv.capacity() == BufCap, caseLabel);
+         verifyValues(sv, values, caseLabel);
+      });
    }
    {
       const std::string caseLabel{"SboVector copy ctor for heap instance"};
 
-      constexpr std::size_t BufCap = 10;
-      constexpr std::size_t NumElems = 20;
+      constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Elem, BufCap>;
+      using SV = SboVector<Element, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::initializer_list<Elem> values{1, 2, 3, 4, 5, 6, 7};
+      const std::size_t numElems = values.size();
 
-      SV src(NumElems, {1});
-      for (int i = 0; i < src.size(); ++i)
-         src[i].i = i;
+      Elem::Measures measures;
+      // For source elements and copies.
+      measures.copyCtorCalls = 2 * numElems;
+      measures.dtorCalls = 2 * numElems;
 
-      // Precondition.
-      VERIFY(src.onHeap(), caseLabel);
-
-      {
-         // Element instrumentation for tested call only.
-         Elem::Measures expected;
-         // Copied elements.
-         expected.copyCtorCalls = NumElems;
-         // Destruction of elements.
-         expected.dtorCalls = NumElems;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
-
-         // Test.
+      CtorTest<Elem, BufCap> test{caseLabel, measures};
+      test.run([&, BufCap]() {
+         const SV src{values};
          SV sv{src};
 
-         // Verify vector state.
-         VERIFY(sv.size() == NumElems, caseLabel);
-         VERIFY(sv.capacity() == NumElems, caseLabel);
          VERIFY(sv.onHeap(), caseLabel);
-         for (int i = 0; i < sv.size(); ++i)
-            VERIFY(sv[i].i == i, caseLabel);
-      }
+         VERIFY(sv.capacity() == numElems, caseLabel);
+         verifyValues(sv, values, caseLabel);
+      });
    }
 }
 
 
-void TestSboVectorMoveCtor()
+void TestMoveCtor()
 {
    {
       const std::string caseLabel{"SboVector move ctor for buffer instance"};
 
       constexpr std::size_t BufCap = 10;
-      constexpr std::size_t NumElems = 5;
       using Elem = Element;
-      using SV = SboVector<Elem, BufCap>;
+      using SV = SboVector<Element, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::initializer_list<Elem> values{1, 2, 3, 4, 5};
+      const std::size_t numElems = values.size();
 
-      SV src(NumElems, {2});
-      for (int i = 0; i < src.size(); ++i)
-         src[i].i = i;
+      Elem::Measures measures;
+      // For constructing the source elements.
+      measures.copyCtorCalls = numElems;
+      // For constructing the copies.
+      measures.moveCtorCalls = numElems;
+      // For destroying the copies. The source vector is empty after the move and nothing
+      // needs to be destroyed.
+      measures.dtorCalls = numElems;
 
-      // Precondition.
-      VERIFY(src.inBuffer(), caseLabel);
-
-      {
-         // Element instrumentation for tested call only.
-         Elem::Measures expected;
-         // Moved elements.
-         expected.moveCtorCalls = NumElems;
-         // Destruction of elements.
-         expected.dtorCalls = NumElems;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
-
-         // Test.
+      CtorTest<Elem, BufCap> test{caseLabel, measures};
+      test.run([&, BufCap]() {
+         SV src{values};
          SV sv{std::move(src)};
 
-         // Verify vector state.
-         VERIFY(sv.size() == NumElems, caseLabel);
-         VERIFY(sv.capacity() == BufCap, caseLabel);
          VERIFY(sv.inBuffer(), caseLabel);
-         for (int i = 0; i < sv.size(); ++i)
-            VERIFY(sv[i].i == i, caseLabel);
+         VERIFY(sv.capacity() == BufCap, caseLabel);
+         verifyValues(sv, values, caseLabel);
          // Verify moved-from instance is empty.
          VERIFY(src.size() == 0, caseLabel);
-      }
+      });
    }
    {
       const std::string caseLabel{"SboVector move ctor for heap instance"};
 
-      constexpr std::size_t BufCap = 10;
-      constexpr std::size_t NumElems = 20;
+      constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Elem, BufCap>;
+      using SV = SboVector<Element, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::initializer_list<Elem> values{1, 2, 3, 4, 5, 6, 7};
+      const std::size_t numElems = values.size();
 
-      SV src(NumElems, {2});
-      for (int i = 0; i < src.size(); ++i)
-         src[i].i = i;
+      Elem::Measures measures;
+      // For constructing the source elements.
+      measures.copyCtorCalls = numElems;
+      // No moves because the SboVector simply stole the pointer to the heap memory.
+      measures.moveCtorCalls = 0;
+      measures.dtorCalls = numElems;
 
-      // Precondition.
-      VERIFY(src.onHeap(), caseLabel);
-
-      {
-         // Element instrumentation for tested call only.
-         Elem::Measures expected;
-         // No moves because the SboVector simply stole the pointer to the heap memory.
-         expected.moveCtorCalls = 0;
-         // Destruction of elements.
-         expected.dtorCalls = NumElems;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
-
-         // Test.
+      CtorTest<Elem, BufCap> test{caseLabel, measures};
+      test.run([&, BufCap]() {
+         SV src{values};
          SV sv{std::move(src)};
 
-         // Verify vector state.
-         VERIFY(sv.size() == NumElems, caseLabel);
-         VERIFY(sv.capacity() == NumElems, caseLabel);
          VERIFY(sv.onHeap(), caseLabel);
-         for (int i = 0; i < sv.size(); ++i)
-            VERIFY(sv[i].i == i, caseLabel);
+         VERIFY(sv.capacity() == numElems, caseLabel);
+         verifyValues(sv, values, caseLabel);
          // Verify moved-from instance is empty.
          VERIFY(src.size() == 0, caseLabel);
-      }
+      });
    }
 }
 
 
-void TestSboVectorInitializerListCtor()
+void TestInitializerListCtor()
 {
    {
       const std::string caseLabel{"SboVector initializer list ctor for buffer instance"};
@@ -619,7 +688,7 @@ void TestSboVectorInitializerListCtor()
 }
 
 
-void TestSboVectorDtor()
+void TestDtor()
 {
    {
       const std::string caseLabel{"SboVector dtor for buffer instance"};
@@ -675,7 +744,7 @@ void TestSboVectorDtor()
 }
 
 
-void TestSboVectorCopyAssignment()
+void TestCopyAssignment()
 {
    {
       const std::string caseLabel{
@@ -911,7 +980,7 @@ void TestSboVectorCopyAssignment()
 }
 
 
-void TestSboVectorMoveAssignment()
+void TestMoveAssignment()
 {
    {
       const std::string caseLabel{"SboVector move assignment of buffer "
@@ -1148,7 +1217,7 @@ void TestSboVectorMoveAssignment()
 }
 
 
-void TestSboVectorInitializerListAssignment()
+void TestInitializerListAssignment()
 {
    {
       const std::string caseLabel{
@@ -1365,7 +1434,7 @@ void TestSboVectorInitializerListAssignment()
 }
 
 
-void TestSboVectorAssignElementValue()
+void TestAssignElementValue()
 {
    {
       const std::string caseLabel{
@@ -1589,7 +1658,7 @@ void TestSboVectorAssignElementValue()
 }
 
 
-void TestSboVectorAssignIteratorRange()
+void TestAssignIteratorRange()
 {
    {
       const std::string caseLabel{
@@ -1807,7 +1876,7 @@ void TestSboVectorAssignIteratorRange()
 }
 
 
-void TestSboVectorAssignInitializerList()
+void TestAssignInitializerList()
 {
    {
       const std::string caseLabel{
@@ -2029,7 +2098,7 @@ void TestSboVectorAssignInitializerList()
 }
 
 
-void TestSboVectorAt()
+void TestAt()
 {
    {
       const std::string caseLabel{
@@ -2159,7 +2228,7 @@ void TestSboVectorAt()
 }
 
 
-void TestSboVectorAtConst()
+void TestAtConst()
 {
    {
       const std::string caseLabel{
@@ -2243,7 +2312,7 @@ void TestSboVectorAtConst()
 }
 
 
-void TestSboVectorSubscriptOperator()
+void TestSubscriptOperator()
 {
    {
       const std::string caseLabel{
@@ -2334,7 +2403,7 @@ void TestSboVectorSubscriptOperator()
 }
 
 
-void TestSboVectorSubscriptOperatorConst()
+void TestSubscriptOperatorConst()
 {
    {
       const std::string caseLabel{
@@ -2379,7 +2448,7 @@ void TestSboVectorSubscriptOperatorConst()
 }
 
 
-void TestSboVectorFront()
+void TestFront()
 {
    {
       const std::string caseLabel{"SvoVector::front for reading from buffer instance"};
@@ -2459,7 +2528,7 @@ void TestSboVectorFront()
 }
 
 
-void TestSboVectorFrontConst()
+void TestFrontConst()
 {
    {
       const std::string caseLabel{"SvoVector::front const for buffer instance"};
@@ -2500,7 +2569,7 @@ void TestSboVectorFrontConst()
 }
 
 
-void TestSboVectorBack()
+void TestBack()
 {
    {
       const std::string caseLabel{"SvoVector::back for reading from buffer instance"};
@@ -2578,7 +2647,7 @@ void TestSboVectorBack()
 }
 
 
-void TestSboVectorBackConst()
+void TestBackConst()
 {
    {
       const std::string caseLabel{"SvoVector::back const for buffer instance"};
@@ -2619,7 +2688,7 @@ void TestSboVectorBackConst()
 }
 
 
-void TestSboVectorData()
+void TestData()
 {
    {
       const std::string caseLabel{"SvoVector::data for reading from buffer instance"};
@@ -2711,7 +2780,7 @@ void TestSboVectorData()
 }
 
 
-void TestSboVectorDataConst()
+void TestDataConst()
 {
    {
       const std::string caseLabel{"SvoVector::data const for buffer instance"};
@@ -2756,7 +2825,7 @@ void TestSboVectorDataConst()
 }
 
 
-void TestSboVectorBegin()
+void TestBegin()
 {
    {
       const std::string caseLabel{"SboVector::begin for populated vector"};
@@ -2799,7 +2868,7 @@ void TestSboVectorBegin()
 }
 
 
-void TestSboVectorEnd()
+void TestEnd()
 {
    {
       const std::string caseLabel{"SboVector::end for populated vector"};
@@ -2843,7 +2912,7 @@ void TestSboVectorEnd()
 }
 
 
-void TestSboVectorBeginConst()
+void TestBeginConst()
 {
    {
       const std::string caseLabel{"SboVector::begin const for populated vector"};
@@ -2886,7 +2955,7 @@ void TestSboVectorBeginConst()
 }
 
 
-void TestSboVectorEndConst()
+void TestEndConst()
 {
    {
       const std::string caseLabel{"SboVector::end const for populated vector"};
@@ -2930,7 +2999,7 @@ void TestSboVectorEndConst()
 }
 
 
-void TestSboVectorCBegin()
+void TestCBegin()
 {
    {
       const std::string caseLabel{"SboVector::cbegin const for populated vector"};
@@ -2973,7 +3042,7 @@ void TestSboVectorCBegin()
 }
 
 
-void TestSboVectorCEnd()
+void TestCEnd()
 {
    {
       const std::string caseLabel{"SboVector::cend const for populated vector"};
@@ -3017,7 +3086,7 @@ void TestSboVectorCEnd()
 }
 
 
-void TestSboVectorRBegin()
+void TestRBegin()
 {
    {
       const std::string caseLabel{"SboVector::rbegin for populated vector"};
@@ -3060,7 +3129,7 @@ void TestSboVectorRBegin()
 }
 
 
-void TestSboVectorREnd()
+void TestREnd()
 {
    {
       const std::string caseLabel{"SboVector::rend for populated vector"};
@@ -3104,7 +3173,7 @@ void TestSboVectorREnd()
 }
 
 
-void TestSboVectorRBeginConst()
+void TestRBeginConst()
 {
    {
       const std::string caseLabel{"SboVector::rbegin const for populated vector"};
@@ -3147,7 +3216,7 @@ void TestSboVectorRBeginConst()
 }
 
 
-void TestSboVectorREndConst()
+void TestREndConst()
 {
    {
       const std::string caseLabel{"SboVector::rend const for populated vector"};
@@ -3191,7 +3260,7 @@ void TestSboVectorREndConst()
 }
 
 
-void TestSboVectorCRBegin()
+void TestCRBegin()
 {
    {
       const std::string caseLabel{"SboVector::crbegin const for populated vector"};
@@ -3234,7 +3303,7 @@ void TestSboVectorCRBegin()
 }
 
 
-void TestSboVectorCREnd()
+void TestCREnd()
 {
    {
       const std::string caseLabel{"SboVector::crend const for populated vector"};
@@ -3278,7 +3347,7 @@ void TestSboVectorCREnd()
 }
 
 
-void TestSboVectorEmpty()
+void TestEmpty()
 {
    {
       const std::string caseLabel{"SvoVector::empty for empty instance"};
@@ -3336,7 +3405,7 @@ void TestSboVectorEmpty()
 }
 
 
-void TestSboVectorSize()
+void TestSize()
 {
    {
       const std::string caseLabel{"SvoVector::size for empty instance"};
@@ -3394,7 +3463,7 @@ void TestSboVectorSize()
 }
 
 
-void TestSboVectorMaxSize()
+void TestMaxSize()
 {
    {
       const std::string caseLabel{"SvoVector::max_size for buffer instance"};
@@ -3450,7 +3519,7 @@ void TestSboVectorMaxSize()
 }
 
 
-void TestSboVectorReserve()
+void TestReserve()
 {
    {
       const std::string caseLabel{"SvoVector::reserve for capacity less than current"};
@@ -3710,7 +3779,7 @@ void TestSboVectorReserve()
 }
 
 
-void TestSboVectorShrinkToFit()
+void TestShrinkToFit()
 {
    {
       const std::string caseLabel{"SvoVector::shrink_to_fit for buffer instance"};
@@ -3967,7 +4036,7 @@ void TestSboVectorShrinkToFit()
 }
 
 
-void TestSboVectorClear()
+void TestClear()
 {
    {
       const std::string caseLabel{"SvoVector::clear for empty vector"};
@@ -4066,7 +4135,7 @@ void TestSboVectorClear()
 }
 
 
-void TestSboVectorEraseSingleElement()
+void TestEraseSingleElement()
 {
    {
       const std::string caseLabel{"SvoVector::erase inner element of buffer instance"};
@@ -4533,7 +4602,7 @@ void TestSboVectorEraseSingleElement()
 }
 
 
-void TestSboVectorEraseIteratorRange()
+void TestEraseIteratorRange()
 {
    {
       const std::string caseLabel{"SvoVector::erase empty range"};
@@ -5078,7 +5147,7 @@ void TestSboVectorEraseIteratorRange()
 }
 
 
-void TestSboVectorInsertSingleValue()
+void TestInsertSingleValue()
 {
    {
       const std::string caseLabel{"SvoVector::insert single value in middle of buffer "
@@ -5617,7 +5686,7 @@ void TestSboVectorInsertSingleValue()
 }
 
 
-void TestSboVectorInsertSingleValueWithMove()
+void TestInsertSingleValueWithMove()
 {
    {
       const std::string caseLabel{
@@ -6021,7 +6090,7 @@ void TestSboVectorInsertSingleValueWithMove()
 }
 
 
-void TestSboVectorInsertValueMultipleTimes()
+void TestInsertValueMultipleTimes()
 {
    {
       const std::string caseLabel{
@@ -6578,7 +6647,7 @@ void TestSboVectorInsertValueMultipleTimes()
 }
 
 
-void TestSboVectorInsertRange()
+void TestInsertRange()
 {
    {
       const std::string caseLabel{"SvoVector::insert iterator range in middle of buffer "
@@ -7204,296 +7273,268 @@ void TestSboVectorInsertRange()
 }
 
 
-void TestSboVectorInsertInitializerList()
+template <typename Elem> struct ExpectedResult
+{
+   ExpectedResult(bool inBuf, std::function<bool(std::size_t)> capVerifier_,
+                  std::initializer_list<Elem> values_)
+   : isInBuffer{inBuf}, capVerifier{capVerifier_}, values(values_)
+   {
+   }
+
+   template <typename SV> void verify(const SV& sv, const std::string& caseLabel) const
+   {
+      VERIFY(sv.inBuffer() == isInBuffer, caseLabel);
+      VERIFY(capVerifier(sv.capacity()), caseLabel);
+      VERIFY(sv.size() == values.size(), caseLabel);
+      for (int i = 0; i < values.size(); ++i)
+         VERIFY(sv[i] == values[i], caseLabel);
+   }
+
+   bool isInBuffer = false;
+   std::function<bool(std::size_t)> capVerifier;
+   std::vector<Elem> values;
+};
+
+
+template <typename Elem, std::size_t BufCap, std::size_t Cap>
+class SboVectorInsertInitializerListTest
+{
+ public:
+   using SV = SboVector<Elem, BufCap>;
+
+ public:
+   SboVectorInsertInitializerListTest(const std::string& caseLabel,
+                                      std::initializer_list<Elem> elems)
+   : m_caseLabel{caseLabel}, m_elems(elems)
+   {
+   }
+   SboVectorInsertInitializerListTest(const SboVectorInsertInitializerListTest&) = delete;
+   SboVectorInsertInitializerListTest(SboVectorInsertInitializerListTest&&) = delete;
+
+   void run(std::initializer_list<Elem> inserted, std::size_t insertAt,
+            const typename Elem::Measures& measures, const ExpectedResult<Elem>& res);
+
+ private:
+   SV makeVector();
+
+ private:
+   const std::string m_caseLabel;
+   const std::initializer_list<Elem> m_elems;
+};
+
+
+template <typename Elem, std::size_t BufCap, std::size_t Cap>
+void SboVectorInsertInitializerListTest<Elem, BufCap, Cap>::run(
+   std::initializer_list<Elem> inserted, std::size_t insertAt,
+   const typename Elem::Measures& measures, const ExpectedResult<Elem>& result)
+{
+   // Memory instrumentation for entire scope.
+   const MemVerifier<SV> memCheck{m_caseLabel};
+
+   SV sv = makeVector();
+
+   {
+      // Element instrumentation for tested call only.
+      const ElementVerifier<Elem> elemCheck{measures, m_caseLabel};
+
+      // Test.
+      typename SV::iterator insertedElem = sv.insert(sv.begin() + insertAt, inserted);
+
+      // Verify returned value.
+      VERIFY(insertedElem == sv.begin() + insertAt, m_caseLabel);
+   }
+
+   // Verify vector state.
+   result.verify(sv, m_caseLabel);
+}
+
+
+template <typename Elem, std::size_t BufCap, std::size_t Cap>
+typename SboVectorInsertInitializerListTest<Elem, BufCap, Cap>::SV
+SboVectorInsertInitializerListTest<Elem, BufCap, Cap>::makeVector()
+{
+   SV sv;
+   sv.reserve(Cap);
+   for (const auto& elem : m_elems)
+      sv.push_back(elem);
+   return sv;
+}
+
+
+void TestInsertInitializerList()
 {
    {
-      const std::string caseLabel{"SvoVector::insert initializer list in middle of buffer "
-                                  "instance with enough capacity to fit into buffer"};
+      const std::string caseLabel{
+         "SvoVector::insert initializer list in middle of buffer "
+         "instance with enough capacity to fit into buffer"};
 
+      using Elem = Element;
       constexpr std::size_t BufCap = 10;
       constexpr std::size_t Cap = BufCap;
-      constexpr std::size_t NumElems = 5;
-      using Elem = Element;
-      using SV = SboVector<Elem, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::initializer_list<Elem> initial = {1, 2, 3, 4, 5};
+      const std::size_t numElems = initial.size();
+      constexpr std::size_t insertAt = 3;
 
-      SV sv{1, 2, 3, 4, 5};
-      const std::size_t origSize = sv.size();
-      const std::size_t numInserted = 3;
-      constexpr std::size_t insertedBefore = 3;
-      const std::size_t numRelocated = origSize - insertedBefore;
+      const std::initializer_list<Elem> inserted = {101, 102, 103};
+      const std::size_t numInserted = inserted.size();
+      const std::size_t numRelocated = numElems - insertAt;
+
+      SboVectorInsertInitializerListTest<Elem, BufCap, Cap> test(caseLabel, initial);
+
+      Elem::Measures measures;
+      measures.moveCtorCalls = numRelocated;
+      measures.copyCtorCalls = numInserted;
+
+      ExpectedResult<Elem> result{
+         true,
+         [Cap](std::size_t resultCap) { return resultCap == Cap; },
+         {1, 2, 3, 101, 102, 103, 4, 5}};
 
       // Preconditions.
-      VERIFY(sv.inBuffer(), caseLabel);
-      VERIFY(!sv.empty(), caseLabel);
-      VERIFY(insertedBefore > 0 && insertedBefore < origSize - 1, caseLabel);
-      VERIFY(Cap > origSize + numInserted, caseLabel);
+      VERIFY(0 < numElems && numElems <= BufCap, caseLabel);
+      VERIFY(insertAt > 0 && insertAt < numElems - 1, caseLabel);
+      VERIFY(BufCap > numElems + numInserted, caseLabel);
 
-      {
-         // Element instrumentation for tested call only.
-         Elem::Measures expected;
-         // Constructing the initializer list elements.
-         expected.ctorCalls = numInserted;
-         expected.moveCtorCalls = numRelocated;
-         expected.copyCtorCalls = numInserted;
-         // Destroying the initializer list elements.
-         expected.dtorCalls = numInserted;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
-
-         // Test.
-         SV::iterator insertedElem =
-            sv.insert(sv.begin() + insertedBefore, {101, 102, 103});
-
-         // Verify returned value.
-         VERIFY(insertedElem == sv.begin() + insertedBefore, caseLabel);
-      }
-
-      // Verify vector state.
-      VERIFY(sv.inBuffer(), caseLabel);
-      VERIFY(sv.size() == origSize + numInserted, caseLabel);
-      VERIFY(sv.capacity() == Cap, caseLabel);
-      VERIFY(sv[0].i == 1, caseLabel);
-      VERIFY(sv[1].i == 2, caseLabel);
-      VERIFY(sv[2].i == 3, caseLabel);
-      VERIFY(sv[3].i == 101, caseLabel);
-      VERIFY(sv[4].i == 102, caseLabel);
-      VERIFY(sv[5].i == 103, caseLabel);
-      VERIFY(sv[6].i == 4, caseLabel);
-      VERIFY(sv[7].i == 5, caseLabel);
+      test.run(inserted, insertAt, measures, result);
    }
    {
       const std::string caseLabel{"SvoVector::insert initializer list at front of buffer "
                                   "instance with enough capacity to fit into buffer"};
 
+      using Elem = Element;
       constexpr std::size_t BufCap = 10;
       constexpr std::size_t Cap = BufCap;
-      constexpr std::size_t NumElems = 5;
-      using Elem = Element;
-      using SV = SboVector<Elem, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::initializer_list<Elem> initial = {1, 2, 3, 4, 5};
+      const std::size_t numElems = initial.size();
+      constexpr std::size_t insertAt = 0;
 
-      SV sv{1, 2, 3, 4, 5};
-      const std::size_t origSize = sv.size();
-      const std::size_t numInserted = 3;
-      constexpr std::size_t insertedBefore = 0;
-      const std::size_t numRelocated = origSize - insertedBefore;
+      const std::initializer_list<Elem> inserted = {101, 102, 103};
+      const std::size_t numInserted = inserted.size();
+      const std::size_t numRelocated = numElems - insertAt;
+
+      SboVectorInsertInitializerListTest<Elem, BufCap, Cap> test(caseLabel, initial);
+
+      Elem::Measures measures;
+      measures.moveCtorCalls = numRelocated;
+      measures.copyCtorCalls = numInserted;
+
+      ExpectedResult<Elem> result{
+         true,
+         [Cap](std::size_t resultCap) { return resultCap == Cap; },
+         {101, 102, 103, 1, 2, 3, 4, 5}};
 
       // Preconditions.
-      VERIFY(sv.inBuffer(), caseLabel);
-      VERIFY(!sv.empty(), caseLabel);
-      VERIFY(insertedBefore == 0, caseLabel);
-      VERIFY(Cap > origSize + numInserted, caseLabel);
+      VERIFY(0 < numElems && numElems <= BufCap, caseLabel);
+      VERIFY(insertAt == 0, caseLabel);
+      VERIFY(BufCap > numElems + numInserted, caseLabel);
 
-      {
-         // Element instrumentation for tested call only.
-         Elem::Measures expected;
-         // Constructing the initializer list elements.
-         expected.ctorCalls = numInserted;
-         expected.moveCtorCalls = numRelocated;
-         expected.copyCtorCalls = numInserted;
-         // Destroying the initializer list elements.
-         expected.dtorCalls = numInserted;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
-
-         // Test.
-         SV::iterator insertedElem =
-            sv.insert(sv.begin() + insertedBefore, {101, 102, 103});
-
-         // Verify returned value.
-         VERIFY(insertedElem == sv.begin() + insertedBefore, caseLabel);
-      }
-
-      // Verify vector state.
-      VERIFY(sv.inBuffer(), caseLabel);
-      VERIFY(sv.size() == origSize + numInserted, caseLabel);
-      VERIFY(sv.capacity() == Cap, caseLabel);
-      VERIFY(sv[0].i == 101, caseLabel);
-      VERIFY(sv[1].i == 102, caseLabel);
-      VERIFY(sv[2].i == 103, caseLabel);
-      VERIFY(sv[3].i == 1, caseLabel);
-      VERIFY(sv[4].i == 2, caseLabel);
-      VERIFY(sv[5].i == 3, caseLabel);
-      VERIFY(sv[6].i == 4, caseLabel);
-      VERIFY(sv[7].i == 5, caseLabel);
+      test.run(inserted, insertAt, measures, result);
    }
    {
       const std::string caseLabel{"SvoVector::insert initializer list at rear of buffer "
                                   "instance with enough capacity to fit into buffer"};
 
+      using Elem = Element;
       constexpr std::size_t BufCap = 10;
       constexpr std::size_t Cap = BufCap;
-      constexpr std::size_t NumElems = 5;
-      using Elem = Element;
-      using SV = SboVector<Elem, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::initializer_list<Elem> initial = {1, 2, 3, 4, 5};
+      const std::size_t numElems = initial.size();
+      const std::size_t insertAt = numElems;
 
-      SV sv{1, 2, 3, 4, 5};
-      const std::size_t origSize = sv.size();
-      const std::size_t numInserted = 3;
-      const std::size_t insertedBefore = sv.size();
-      const std::size_t numRelocated = origSize - insertedBefore;
+      const std::initializer_list<Elem> inserted = {101, 102, 103};
+      const std::size_t numInserted = inserted.size();
+      const std::size_t numRelocated = numElems - insertAt;
+
+      SboVectorInsertInitializerListTest<Elem, BufCap, Cap> test(caseLabel, initial);
+
+      Elem::Measures measures;
+      measures.moveCtorCalls = numRelocated;
+      measures.copyCtorCalls = numInserted;
+
+      ExpectedResult<Elem> result{
+         true,
+         [Cap](std::size_t resultCap) { return resultCap == Cap; },
+         {1, 2, 3, 4, 5, 101, 102, 103}};
 
       // Preconditions.
-      VERIFY(sv.inBuffer(), caseLabel);
-      VERIFY(!sv.empty(), caseLabel);
-      VERIFY(insertedBefore == sv.size(), caseLabel);
-      VERIFY(Cap > origSize + numInserted, caseLabel);
+      VERIFY(0 < numElems && numElems <= BufCap, caseLabel);
+      VERIFY(insertAt == numElems, caseLabel);
+      VERIFY(BufCap > numElems + numInserted, caseLabel);
 
-      {
-         // Element instrumentation for tested call only.
-         Elem::Measures expected;
-         // Constructing the initializer list elements.
-         expected.ctorCalls = numInserted;
-         expected.moveCtorCalls = numRelocated;
-         expected.copyCtorCalls = numInserted;
-         // Destroying the initializer list elements.
-         expected.dtorCalls = numInserted;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
-
-         // Test.
-         SV::iterator insertedElem =
-            sv.insert(sv.begin() + insertedBefore, {101, 102, 103});
-
-         // Verify returned value.
-         VERIFY(insertedElem == sv.begin() + insertedBefore, caseLabel);
-      }
-
-      // Verify vector state.
-      VERIFY(sv.inBuffer(), caseLabel);
-      VERIFY(sv.size() == origSize + numInserted, caseLabel);
-      VERIFY(sv.capacity() == Cap, caseLabel);
-      VERIFY(sv[0].i == 1, caseLabel);
-      VERIFY(sv[1].i == 2, caseLabel);
-      VERIFY(sv[2].i == 3, caseLabel);
-      VERIFY(sv[3].i == 4, caseLabel);
-      VERIFY(sv[4].i == 5, caseLabel);
-      VERIFY(sv[5].i == 101, caseLabel);
-      VERIFY(sv[6].i == 102, caseLabel);
-      VERIFY(sv[7].i == 103, caseLabel);
+      test.run(inserted, insertAt, measures, result);
    }
    {
-      const std::string caseLabel{"SvoVector::insert initializer list in middle of buffer "
-                                  "instance with max-ed out buffer capacity"};
+      const std::string caseLabel{
+         "SvoVector::insert initializer list in middle of buffer "
+         "instance with max-ed out buffer capacity"};
 
+      using Elem = Element;
       constexpr std::size_t BufCap = 5;
       constexpr std::size_t Cap = BufCap;
-      constexpr std::size_t NumElems = 5;
-      using Elem = Element;
-      using SV = SboVector<Elem, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::initializer_list<Elem> initial = {1, 2, 3, 4, 5};
+      const std::size_t numElems = initial.size();
+      const std::size_t insertAt = 3;
 
-      SV sv{1, 2, 3, 4, 5};
-      const std::size_t origSize = sv.size();
-      const std::size_t numInserted = 3;
-      constexpr std::size_t insertedBefore = 3;
-      const std::size_t numRelocated = sv.size();
+      const std::initializer_list<Elem> inserted = {101, 102, 103};
+      const std::size_t numInserted = inserted.size();
+      const std::size_t numRelocated = numElems;
+
+      SboVectorInsertInitializerListTest<Elem, BufCap, Cap> test(caseLabel, initial);
+
+      Elem::Measures measures;
+      measures.moveCtorCalls = numRelocated;
+      measures.copyCtorCalls = numInserted;
+
+      ExpectedResult<Elem> result{
+         false,
+         [Cap](std::size_t resultCap) { return resultCap > Cap; },
+         {1, 2, 3, 101, 102, 103, 4, 5}};
 
       // Preconditions.
-      VERIFY(sv.inBuffer(), caseLabel);
-      VERIFY(!sv.empty(), caseLabel);
-      VERIFY(insertedBefore > 0 && insertedBefore < origSize - 1, caseLabel);
-      VERIFY(Cap == origSize, caseLabel);
+      VERIFY(0 < numElems && numElems <= BufCap, caseLabel);
+      VERIFY(insertAt > 0 && insertAt < numElems - 1, caseLabel);
+      VERIFY(Cap == numElems, caseLabel);
 
-      {
-         // Element instrumentation for tested call only.
-         Elem::Measures expected;
-         // Constructing the initializer list elements.
-         expected.ctorCalls = numInserted;
-         expected.moveCtorCalls = numRelocated;
-         expected.copyCtorCalls = numInserted;
-         // Destroying the initializer list elements.
-         expected.dtorCalls = numInserted;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
-
-         // Test.
-         SV::iterator insertedElem =
-            sv.insert(sv.begin() + insertedBefore, {101, 102, 103});
-
-         // Verify returned value.
-         VERIFY(insertedElem == sv.begin() + insertedBefore, caseLabel);
-      }
-
-      // Verify vector state.
-      VERIFY(sv.onHeap(), caseLabel);
-      VERIFY(sv.size() == origSize + numInserted, caseLabel);
-      VERIFY(sv.capacity() > Cap, caseLabel);
-      VERIFY(sv[0].i == 1, caseLabel);
-      VERIFY(sv[1].i == 2, caseLabel);
-      VERIFY(sv[2].i == 3, caseLabel);
-      VERIFY(sv[3].i == 101, caseLabel);
-      VERIFY(sv[4].i == 102, caseLabel);
-      VERIFY(sv[5].i == 103, caseLabel);
-      VERIFY(sv[6].i == 4, caseLabel);
-      VERIFY(sv[7].i == 5, caseLabel);
+      test.run(inserted, insertAt, measures, result);
    }
    {
       const std::string caseLabel{"SvoVector::insert initializer list into heap "
                                   "instance with unused capacity left"};
 
+      using Elem = Element;
       constexpr std::size_t BufCap = 5;
       constexpr std::size_t Cap = 10;
-      constexpr std::size_t NumElems = 7;
-      using Elem = Element;
-      using SV = SboVector<Elem, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::initializer_list<Elem> initial = {1, 2, 3, 4, 5, 6, 7};
+      const std::size_t numElems = initial.size();
+      const std::size_t insertAt = 3;
 
-      SV sv{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-      while (sv.size() > NumElems)
-         sv.erase(sv.begin() + sv.size() - 1);
-      const std::size_t numInserted = 3;
-      constexpr std::size_t insertedBefore = 3;
-      const std::size_t numRelocated = NumElems - insertedBefore;
+      const std::initializer_list<Elem> inserted = {101, 102, 103};
+      const std::size_t numInserted = inserted.size();
+      const std::size_t numRelocated = numElems - insertAt;
+
+      SboVectorInsertInitializerListTest<Elem, BufCap, Cap> test(caseLabel, initial);
+
+      Elem::Measures measures;
+      measures.moveCtorCalls = numRelocated;
+      measures.copyCtorCalls = numInserted;
+
+      ExpectedResult<Elem> result{
+         false,
+         [Cap](std::size_t resultCap) { return resultCap == Cap; },
+         {1, 2, 3, 101, 102, 103, 4, 5, 6, 7}};
 
       // Preconditions.
-      VERIFY(sv.onHeap(), caseLabel);
-      VERIFY(sv.size() == NumElems, caseLabel);
-      VERIFY(sv.capacity() == Cap, caseLabel);
-      VERIFY(insertedBefore > 0 && insertedBefore < NumElems - 1, caseLabel);
-      VERIFY(sv.size() < sv.capacity(), caseLabel);
+      VERIFY(0 < numElems && numElems > BufCap, caseLabel);
+      VERIFY(insertAt > 0 && insertAt < numElems - 1, caseLabel);
+      VERIFY(Cap > BufCap, caseLabel);
+      VERIFY(numElems < Cap, caseLabel);
 
-      {
-         // Element instrumentation for tested call only.
-         Elem::Measures expected;
-         // Constructing the initializer list elements.
-         expected.ctorCalls = numInserted;
-         expected.moveCtorCalls = numRelocated;
-         expected.copyCtorCalls = numInserted;
-         // Destroying the initializer list elements.
-         expected.dtorCalls = numInserted;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
-
-         // Test.
-         SV::iterator insertedElem =
-            sv.insert(sv.begin() + insertedBefore, {101, 102, 103});
-
-         // Verify returned value.
-         VERIFY(insertedElem == sv.begin() + insertedBefore, caseLabel);
-      }
-
-      // Verify vector state.
-      VERIFY(sv.onHeap(), caseLabel);
-      VERIFY(sv.size() == NumElems + numInserted, caseLabel);
-      VERIFY(sv.capacity() == Cap, caseLabel);
-      VERIFY(sv[0].i == 1, caseLabel);
-      VERIFY(sv[1].i == 2, caseLabel);
-      VERIFY(sv[2].i == 3, caseLabel);
-      VERIFY(sv[3].i == 101, caseLabel);
-      VERIFY(sv[4].i == 102, caseLabel);
-      VERIFY(sv[5].i == 103, caseLabel);
-      VERIFY(sv[6].i == 4, caseLabel);
-      VERIFY(sv[7].i == 5, caseLabel);
-      VERIFY(sv[8].i == 6, caseLabel);
-      VERIFY(sv[9].i == 7, caseLabel);
+      test.run(inserted, insertAt, measures, result);
    }
    {
       const std::string caseLabel{"SvoVector::insert initializer list into heap "
@@ -7776,7 +7817,7 @@ void TestSboVectorInsertInitializerList()
 
 ///////////////////
 
-void TestSboVectorIteratorCopyCtor()
+void TestIteratorCopyCtor()
 {
    {
       const std::string caseLabel{"SboVectorIterator copy ctor"};
@@ -7796,7 +7837,7 @@ void TestSboVectorIteratorCopyCtor()
 }
 
 
-void TestSboVectorIteratorMoveCtor()
+void TestIteratorMoveCtor()
 {
    {
       const std::string caseLabel{"SboVectorIterator move ctor"};
@@ -7816,7 +7857,7 @@ void TestSboVectorIteratorMoveCtor()
 }
 
 
-void TestSboVectorIteratorCopyAssignment()
+void TestIteratorCopyAssignment()
 {
    {
       const std::string caseLabel{"SboVectorIterator copy assignment"};
@@ -7837,7 +7878,7 @@ void TestSboVectorIteratorCopyAssignment()
 }
 
 
-void TestSboVectorIteratorMoveAssignment()
+void TestIteratorMoveAssignment()
 {
    {
       const std::string caseLabel{"SboVectorIterator move assignment"};
@@ -7858,7 +7899,7 @@ void TestSboVectorIteratorMoveAssignment()
 }
 
 
-void TestSboVectorIteratorIndirectionOperator()
+void TestIteratorIndirectionOperator()
 {
    {
       const std::string caseLabel{"SboVectorIterator indirection operator for reading"};
@@ -7892,7 +7933,7 @@ void TestSboVectorIteratorIndirectionOperator()
 }
 
 
-void TestSboVectorIteratorIndirectionOperatorConst()
+void TestIteratorIndirectionOperatorConst()
 {
    {
       const std::string caseLabel{"SboVectorIterator const indirection operator"};
@@ -7911,7 +7952,7 @@ void TestSboVectorIteratorIndirectionOperatorConst()
 }
 
 
-void TestSboVectorIteratorDereferenceOperator()
+void TestIteratorDereferenceOperator()
 {
    {
       const std::string caseLabel{"SboVectorIterator dereference operator for reading"};
@@ -7960,7 +8001,7 @@ void TestSboVectorIteratorDereferenceOperator()
 }
 
 
-void TestSboVectorIteratorDereferenceOperatorConst()
+void TestIteratorDereferenceOperatorConst()
 {
    {
       const std::string caseLabel{"SboVectorIterator const dereference operator"};
@@ -7986,7 +8027,7 @@ void TestSboVectorIteratorDereferenceOperatorConst()
 }
 
 
-void TestSboVectorIteratorSubscriptOperator()
+void TestIteratorSubscriptOperator()
 {
    {
       const std::string caseLabel{"SboVectorIterator operator[] for reading"};
@@ -8020,7 +8061,7 @@ void TestSboVectorIteratorSubscriptOperator()
 }
 
 
-void TestSboVectorIteratorSubscriptOperatorConst()
+void TestIteratorSubscriptOperatorConst()
 {
    {
       const std::string caseLabel{"SboVectorIterator const operator[] for reading"};
@@ -8039,7 +8080,7 @@ void TestSboVectorIteratorSubscriptOperatorConst()
 }
 
 
-void TestSboVectorIteratorPrefixIncrementOperator()
+void TestIteratorPrefixIncrementOperator()
 {
    {
       const std::string caseLabel{"SboVectorIterator prefix increment operator"};
@@ -8060,7 +8101,7 @@ void TestSboVectorIteratorPrefixIncrementOperator()
 }
 
 
-void TestSboVectorIteratorPostfixIncrementOperator()
+void TestIteratorPostfixIncrementOperator()
 {
    {
       const std::string caseLabel{"SboVectorIterator prefix increment operator"};
@@ -8081,7 +8122,7 @@ void TestSboVectorIteratorPostfixIncrementOperator()
 }
 
 
-void TestSboVectorIteratorPrefixDecrementOperator()
+void TestIteratorPrefixDecrementOperator()
 {
    {
       const std::string caseLabel{"SboVectorIterator prefix decrement operator"};
@@ -8102,7 +8143,7 @@ void TestSboVectorIteratorPrefixDecrementOperator()
 }
 
 
-void TestSboVectorIteratorPostfixDecrementOperator()
+void TestIteratorPostfixDecrementOperator()
 {
    {
       const std::string caseLabel{"SboVectorIterator prefix increment operator"};
@@ -8123,7 +8164,7 @@ void TestSboVectorIteratorPostfixDecrementOperator()
 }
 
 
-void TestSboVectorIteratorSwap()
+void TestIteratorSwap()
 {
    {
       const std::string caseLabel{"SboVectorIterator swap"};
@@ -8146,7 +8187,7 @@ void TestSboVectorIteratorSwap()
 }
 
 
-void TestSboVectorIteratorEquality()
+void TestIteratorEquality()
 {
    {
       const std::string caseLabel{"SboVectorIterator equality for equal values"};
@@ -8197,7 +8238,7 @@ void TestSboVectorIteratorEquality()
 }
 
 
-void TestSboVectorIteratorInequality()
+void TestIteratorInequality()
 {
    {
       const std::string caseLabel{"SboVectorIterator inequality for equal values"};
@@ -8248,7 +8289,7 @@ void TestSboVectorIteratorInequality()
 }
 
 
-void TestSboVectorIteratorAdditionAssignment()
+void TestIteratorAdditionAssignment()
 {
    {
       const std::string caseLabel{"SboVectorIterator operator+= for positive offset"};
@@ -8283,7 +8324,7 @@ void TestSboVectorIteratorAdditionAssignment()
 }
 
 
-void TestSboVectorIteratorSubtractionAssignment()
+void TestIteratorSubtractionAssignment()
 {
    {
       const std::string caseLabel{"SboVectorIterator operator-= for positive offset"};
@@ -8318,7 +8359,7 @@ void TestSboVectorIteratorSubtractionAssignment()
 }
 
 
-void TestSboVectorIteratorAdditionOfIteratorAndOffset()
+void TestIteratorAdditionOfIteratorAndOffset()
 {
    {
       const std::string caseLabel{
@@ -8355,7 +8396,7 @@ void TestSboVectorIteratorAdditionOfIteratorAndOffset()
 }
 
 
-void TestSboVectorIteratorAdditionOfOffsetAndIterator()
+void TestIteratorAdditionOfOffsetAndIterator()
 {
    {
       const std::string caseLabel{
@@ -8392,7 +8433,7 @@ void TestSboVectorIteratorAdditionOfOffsetAndIterator()
 }
 
 
-void TestSboVectorIteratorSubtractionOfIteratorAndOffset()
+void TestIteratorSubtractionOfIteratorAndOffset()
 {
    {
       const std::string caseLabel{
@@ -8429,7 +8470,7 @@ void TestSboVectorIteratorSubtractionOfIteratorAndOffset()
 }
 
 
-void TestSboVectorIteratorSubtractionOfIterators()
+void TestIteratorSubtractionOfIterators()
 {
    {
       const std::string caseLabel{"SboVectorIterator iterator minus iterator"};
@@ -8450,7 +8491,7 @@ void TestSboVectorIteratorSubtractionOfIterators()
 }
 
 
-void TestSboVectorIteratorLessThan()
+void TestIteratorLessThan()
 {
    {
       const std::string caseLabel{"SboVectorIterator operator< for less-than iterators"};
@@ -8501,7 +8542,7 @@ void TestSboVectorIteratorLessThan()
 }
 
 
-void TestSboVectorIteratorLessOrEqualThan()
+void TestIteratorLessOrEqualThan()
 {
    {
       const std::string caseLabel{"SboVectorIterator operator<= for less-than iterators"};
@@ -8552,7 +8593,7 @@ void TestSboVectorIteratorLessOrEqualThan()
 }
 
 
-void TestSboVectorIteratorGreaterThan()
+void TestIteratorGreaterThan()
 {
    {
       const std::string caseLabel{"SboVectorIterator operator> for less-than iterators"};
@@ -8603,7 +8644,7 @@ void TestSboVectorIteratorGreaterThan()
 }
 
 
-void TestSboVectorIteratorGreaterOrEqualThan()
+void TestIteratorGreaterOrEqualThan()
 {
    {
       const std::string caseLabel{"SboVectorIterator operator>= for less-than iterators"};
@@ -8656,7 +8697,7 @@ void TestSboVectorIteratorGreaterOrEqualThan()
 
 ///////////////////
 
-void TestSboVectorConstIteratorCopyCtor()
+void TestConstIteratorCopyCtor()
 {
    {
       const std::string caseLabel{"SboVectorConstIterator copy ctor"};
@@ -8676,7 +8717,7 @@ void TestSboVectorConstIteratorCopyCtor()
 }
 
 
-void TestSboVectorConstIteratorMoveCtor()
+void TestConstIteratorMoveCtor()
 {
    {
       const std::string caseLabel{"SboVectorConstIterator move ctor"};
@@ -8696,7 +8737,7 @@ void TestSboVectorConstIteratorMoveCtor()
 }
 
 
-void TestSboVectorConstIteratorCopyAssignment()
+void TestConstIteratorCopyAssignment()
 {
    {
       const std::string caseLabel{"SboVectorConstIterator copy assignment"};
@@ -8717,7 +8758,7 @@ void TestSboVectorConstIteratorCopyAssignment()
 }
 
 
-void TestSboVectorConstIteratorMoveAssignment()
+void TestConstIteratorMoveAssignment()
 {
    {
       const std::string caseLabel{"SboVectorConstIterator move assignment"};
@@ -8738,7 +8779,7 @@ void TestSboVectorConstIteratorMoveAssignment()
 }
 
 
-void TestSboVectorConstIteratorIndirectionOperatorConst()
+void TestConstIteratorIndirectionOperatorConst()
 {
    {
       const std::string caseLabel{"SboVectorConstIterator const indirection operator"};
@@ -8757,7 +8798,7 @@ void TestSboVectorConstIteratorIndirectionOperatorConst()
 }
 
 
-void TestSboVectorConstIteratorDereferenceOperatorConst()
+void TestConstIteratorDereferenceOperatorConst()
 {
    {
       const std::string caseLabel{"SboVectorConstIterator const dereference operator"};
@@ -8783,7 +8824,7 @@ void TestSboVectorConstIteratorDereferenceOperatorConst()
 }
 
 
-void TestSboVectorConstIteratorSubscriptOperatorConst()
+void TestConstIteratorSubscriptOperatorConst()
 {
    {
       const std::string caseLabel{"SboVectorConstIterator const operator[] for reading"};
@@ -8802,7 +8843,7 @@ void TestSboVectorConstIteratorSubscriptOperatorConst()
 }
 
 
-void TestSboVectorConstIteratorPrefixIncrementOperator()
+void TestConstIteratorPrefixIncrementOperator()
 {
    {
       const std::string caseLabel{"SboVectorConstIterator prefix increment operator"};
@@ -8823,7 +8864,7 @@ void TestSboVectorConstIteratorPrefixIncrementOperator()
 }
 
 
-void TestSboVectorConstIteratorPostfixIncrementOperator()
+void TestConstIteratorPostfixIncrementOperator()
 {
    {
       const std::string caseLabel{"SboVectorConstIterator prefix increment operator"};
@@ -8844,7 +8885,7 @@ void TestSboVectorConstIteratorPostfixIncrementOperator()
 }
 
 
-void TestSboVectorConstIteratorPrefixDecrementOperator()
+void TestConstIteratorPrefixDecrementOperator()
 {
    {
       const std::string caseLabel{"SboVectorConstIterator prefix decrement operator"};
@@ -8865,7 +8906,7 @@ void TestSboVectorConstIteratorPrefixDecrementOperator()
 }
 
 
-void TestSboVectorConstIteratorPostfixDecrementOperator()
+void TestConstIteratorPostfixDecrementOperator()
 {
    {
       const std::string caseLabel{"SboVectorConstIterator prefix increment operator"};
@@ -8886,7 +8927,7 @@ void TestSboVectorConstIteratorPostfixDecrementOperator()
 }
 
 
-void TestSboVectorConstIteratorSwap()
+void TestConstIteratorSwap()
 {
    {
       const std::string caseLabel{"SboVectorConstIterator swap"};
@@ -8909,7 +8950,7 @@ void TestSboVectorConstIteratorSwap()
 }
 
 
-void TestSboVectorConstIteratorEquality()
+void TestConstIteratorEquality()
 {
    {
       const std::string caseLabel{"SboVectorConstIterator equality for equal values"};
@@ -8962,7 +9003,7 @@ void TestSboVectorConstIteratorEquality()
 }
 
 
-void TestSboVectorConstIteratorInequality()
+void TestConstIteratorInequality()
 {
    {
       const std::string caseLabel{"SboVectorConstIterator inequality for equal values"};
@@ -9015,7 +9056,7 @@ void TestSboVectorConstIteratorInequality()
 }
 
 
-void TestSboVectorConstIteratorAdditionAssignment()
+void TestConstIteratorAdditionAssignment()
 {
    {
       const std::string caseLabel{
@@ -9052,7 +9093,7 @@ void TestSboVectorConstIteratorAdditionAssignment()
 }
 
 
-void TestSboVectorConstIteratorSubtractionAssignment()
+void TestConstIteratorSubtractionAssignment()
 {
    {
       const std::string caseLabel{
@@ -9089,7 +9130,7 @@ void TestSboVectorConstIteratorSubtractionAssignment()
 }
 
 
-void TestSboVectorConstIteratorAdditionOfIteratorAndOffset()
+void TestConstIteratorAdditionOfIteratorAndOffset()
 {
    {
       const std::string caseLabel{
@@ -9126,7 +9167,7 @@ void TestSboVectorConstIteratorAdditionOfIteratorAndOffset()
 }
 
 
-void TestSboVectorConstIteratorAdditionOfOffsetAndIterator()
+void TestConstIteratorAdditionOfOffsetAndIterator()
 {
    {
       const std::string caseLabel{
@@ -9163,7 +9204,7 @@ void TestSboVectorConstIteratorAdditionOfOffsetAndIterator()
 }
 
 
-void TestSboVectorConstIteratorSubtractionOfIteratorAndOffset()
+void TestConstIteratorSubtractionOfIteratorAndOffset()
 {
    {
       const std::string caseLabel{
@@ -9200,7 +9241,7 @@ void TestSboVectorConstIteratorSubtractionOfIteratorAndOffset()
 }
 
 
-void TestSboVectorConstIteratorSubtractionOfIterators()
+void TestConstIteratorSubtractionOfIterators()
 {
    {
       const std::string caseLabel{"SboVectorConstIterator iterator minus iterator"};
@@ -9221,7 +9262,7 @@ void TestSboVectorConstIteratorSubtractionOfIterators()
 }
 
 
-void TestSboVectorConstIteratorLessThan()
+void TestConstIteratorLessThan()
 {
    {
       const std::string caseLabel{
@@ -9273,7 +9314,7 @@ void TestSboVectorConstIteratorLessThan()
 }
 
 
-void TestSboVectorConstIteratorLessOrEqualThan()
+void TestConstIteratorLessOrEqualThan()
 {
    {
       const std::string caseLabel{
@@ -9326,7 +9367,7 @@ void TestSboVectorConstIteratorLessOrEqualThan()
 }
 
 
-void TestSboVectorConstIteratorGreaterThan()
+void TestConstIteratorGreaterThan()
 {
    {
       const std::string caseLabel{
@@ -9378,7 +9419,7 @@ void TestSboVectorConstIteratorGreaterThan()
 }
 
 
-void TestSboVectorConstIteratorGreaterOrEqualThan()
+void TestConstIteratorGreaterOrEqualThan()
 {
    {
       const std::string caseLabel{
@@ -9501,104 +9542,104 @@ void TestSboVector()
 {
    // Experiment();
 
-   TestSboVectorDefaultCtor();
-   TestSboVectorCtorForElementCountAndValue();
-   TestSboVectorCopyCtor();
-   TestSboVectorMoveCtor();
-   TestSboVectorInitializerListCtor();
-   TestSboVectorDtor();
-   TestSboVectorCopyAssignment();
-   TestSboVectorMoveAssignment();
-   TestSboVectorInitializerListAssignment();
-   TestSboVectorAssignElementValue();
-   TestSboVectorAssignIteratorRange();
-   TestSboVectorAssignInitializerList();
-   TestSboVectorAt();
-   TestSboVectorAtConst();
-   TestSboVectorSubscriptOperator();
-   TestSboVectorSubscriptOperatorConst();
-   TestSboVectorFront();
-   TestSboVectorFrontConst();
-   TestSboVectorBack();
-   TestSboVectorBackConst();
-   TestSboVectorData();
-   TestSboVectorDataConst();
-   TestSboVectorBegin();
-   TestSboVectorEnd();
-   TestSboVectorBeginConst();
-   TestSboVectorEndConst();
-   TestSboVectorCBegin();
-   TestSboVectorCEnd();
-   TestSboVectorRBegin();
-   TestSboVectorREnd();
-   TestSboVectorRBeginConst();
-   TestSboVectorREndConst();
-   TestSboVectorCRBegin();
-   TestSboVectorCREnd();
-   TestSboVectorEmpty();
-   TestSboVectorSize();
-   TestSboVectorMaxSize();
-   TestSboVectorReserve();
-   TestSboVectorShrinkToFit();
-   TestSboVectorClear();
-   TestSboVectorEraseSingleElement();
-   TestSboVectorEraseIteratorRange();
-   TestSboVectorInsertSingleValue();
-   TestSboVectorInsertSingleValueWithMove();
-   TestSboVectorInsertValueMultipleTimes();
-   TestSboVectorInsertRange();
-   TestSboVectorInsertInitializerList();
+   TestDefaultCtor();
+   TestCtorForElementCountAndValue();
+   TestCopyCtor();
+   TestMoveCtor();
+   TestInitializerListCtor();
+   TestDtor();
+   TestCopyAssignment();
+   TestMoveAssignment();
+   TestInitializerListAssignment();
+   TestAssignElementValue();
+   TestAssignIteratorRange();
+   TestAssignInitializerList();
+   TestAt();
+   TestAtConst();
+   TestSubscriptOperator();
+   TestSubscriptOperatorConst();
+   TestFront();
+   TestFrontConst();
+   TestBack();
+   TestBackConst();
+   TestData();
+   TestDataConst();
+   TestBegin();
+   TestEnd();
+   TestBeginConst();
+   TestEndConst();
+   TestCBegin();
+   TestCEnd();
+   TestRBegin();
+   TestREnd();
+   TestRBeginConst();
+   TestREndConst();
+   TestCRBegin();
+   TestCREnd();
+   TestEmpty();
+   TestSize();
+   TestMaxSize();
+   TestReserve();
+   TestShrinkToFit();
+   TestClear();
+   TestEraseSingleElement();
+   TestEraseIteratorRange();
+   TestInsertSingleValue();
+   TestInsertSingleValueWithMove();
+   TestInsertValueMultipleTimes();
+   TestInsertRange();
+   TestInsertInitializerList();
 
-   TestSboVectorIteratorCopyCtor();
-   TestSboVectorIteratorMoveCtor();
-   TestSboVectorIteratorCopyAssignment();
-   TestSboVectorIteratorMoveAssignment();
-   TestSboVectorIteratorIndirectionOperator();
-   TestSboVectorIteratorIndirectionOperatorConst();
-   TestSboVectorIteratorDereferenceOperator();
-   TestSboVectorIteratorDereferenceOperatorConst();
-   TestSboVectorIteratorSubscriptOperator();
-   TestSboVectorIteratorSubscriptOperatorConst();
-   TestSboVectorIteratorPrefixIncrementOperator();
-   TestSboVectorIteratorPostfixIncrementOperator();
-   TestSboVectorIteratorPrefixDecrementOperator();
-   TestSboVectorIteratorPostfixDecrementOperator();
-   TestSboVectorIteratorSwap();
-   TestSboVectorIteratorEquality();
-   TestSboVectorIteratorInequality();
-   TestSboVectorIteratorAdditionAssignment();
-   TestSboVectorIteratorSubtractionAssignment();
-   TestSboVectorIteratorAdditionOfIteratorAndOffset();
-   TestSboVectorIteratorAdditionOfOffsetAndIterator();
-   TestSboVectorIteratorSubtractionOfIteratorAndOffset();
-   TestSboVectorIteratorSubtractionOfIterators();
-   TestSboVectorIteratorLessThan();
-   TestSboVectorIteratorLessOrEqualThan();
-   TestSboVectorIteratorGreaterThan();
-   TestSboVectorIteratorGreaterOrEqualThan();
+   TestIteratorCopyCtor();
+   TestIteratorMoveCtor();
+   TestIteratorCopyAssignment();
+   TestIteratorMoveAssignment();
+   TestIteratorIndirectionOperator();
+   TestIteratorIndirectionOperatorConst();
+   TestIteratorDereferenceOperator();
+   TestIteratorDereferenceOperatorConst();
+   TestIteratorSubscriptOperator();
+   TestIteratorSubscriptOperatorConst();
+   TestIteratorPrefixIncrementOperator();
+   TestIteratorPostfixIncrementOperator();
+   TestIteratorPrefixDecrementOperator();
+   TestIteratorPostfixDecrementOperator();
+   TestIteratorSwap();
+   TestIteratorEquality();
+   TestIteratorInequality();
+   TestIteratorAdditionAssignment();
+   TestIteratorSubtractionAssignment();
+   TestIteratorAdditionOfIteratorAndOffset();
+   TestIteratorAdditionOfOffsetAndIterator();
+   TestIteratorSubtractionOfIteratorAndOffset();
+   TestIteratorSubtractionOfIterators();
+   TestIteratorLessThan();
+   TestIteratorLessOrEqualThan();
+   TestIteratorGreaterThan();
+   TestIteratorGreaterOrEqualThan();
 
-   TestSboVectorConstIteratorCopyCtor();
-   TestSboVectorConstIteratorMoveCtor();
-   TestSboVectorConstIteratorCopyAssignment();
-   TestSboVectorConstIteratorMoveAssignment();
-   TestSboVectorConstIteratorIndirectionOperatorConst();
-   TestSboVectorConstIteratorDereferenceOperatorConst();
-   TestSboVectorConstIteratorSubscriptOperatorConst();
-   TestSboVectorConstIteratorPrefixIncrementOperator();
-   TestSboVectorConstIteratorPostfixIncrementOperator();
-   TestSboVectorConstIteratorPrefixDecrementOperator();
-   TestSboVectorConstIteratorPostfixDecrementOperator();
-   TestSboVectorConstIteratorSwap();
-   TestSboVectorConstIteratorEquality();
-   TestSboVectorConstIteratorInequality();
-   TestSboVectorConstIteratorAdditionAssignment();
-   TestSboVectorConstIteratorSubtractionAssignment();
-   TestSboVectorConstIteratorAdditionOfIteratorAndOffset();
-   TestSboVectorConstIteratorAdditionOfOffsetAndIterator();
-   TestSboVectorConstIteratorSubtractionOfIteratorAndOffset();
-   TestSboVectorConstIteratorSubtractionOfIterators();
-   TestSboVectorConstIteratorLessThan();
-   TestSboVectorConstIteratorLessOrEqualThan();
-   TestSboVectorConstIteratorGreaterThan();
-   TestSboVectorConstIteratorGreaterOrEqualThan();
+   TestConstIteratorCopyCtor();
+   TestConstIteratorMoveCtor();
+   TestConstIteratorCopyAssignment();
+   TestConstIteratorMoveAssignment();
+   TestConstIteratorIndirectionOperatorConst();
+   TestConstIteratorDereferenceOperatorConst();
+   TestConstIteratorSubscriptOperatorConst();
+   TestConstIteratorPrefixIncrementOperator();
+   TestConstIteratorPostfixIncrementOperator();
+   TestConstIteratorPrefixDecrementOperator();
+   TestConstIteratorPostfixDecrementOperator();
+   TestConstIteratorSwap();
+   TestConstIteratorEquality();
+   TestConstIteratorInequality();
+   TestConstIteratorAdditionAssignment();
+   TestConstIteratorSubtractionAssignment();
+   TestConstIteratorAdditionOfIteratorAndOffset();
+   TestConstIteratorAdditionOfOffsetAndIterator();
+   TestConstIteratorSubtractionOfIteratorAndOffset();
+   TestConstIteratorSubtractionOfIterators();
+   TestConstIteratorLessThan();
+   TestConstIteratorLessOrEqualThan();
+   TestConstIteratorGreaterThan();
+   TestConstIteratorGreaterOrEqualThan();
 }
