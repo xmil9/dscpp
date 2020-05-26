@@ -304,7 +304,7 @@ SboVector<Elem, BufCap> makeVector(std::size_t cap, std::initializer_list<Elem> 
 
 
 template <typename SV>
-void verifyValues(const SV& sv, std::initializer_list<typename SV::value_type> values,
+void verifyVector(const SV& sv, std::initializer_list<typename SV::value_type> values,
                   const std::string& caseLabel)
 {
    VERIFY(sv.size() == values.size(), caseLabel);
@@ -398,7 +398,7 @@ void TestCtorForElementCountAndValue()
 
          VERIFY(sv.inBuffer(), caseLabel);
          VERIFY(sv.capacity() == BufCap, caseLabel);
-         verifyValues(sv, expectedValues, caseLabel);
+         verifyVector(sv, expectedValues, caseLabel);
       });
    }
    {
@@ -424,7 +424,7 @@ void TestCtorForElementCountAndValue()
 
          VERIFY(sv.onHeap(), caseLabel);
          VERIFY(sv.capacity() == numElems, caseLabel);
-         verifyValues(sv, expectedValues, caseLabel);
+         verifyVector(sv, expectedValues, caseLabel);
       });
    }
 }
@@ -454,7 +454,7 @@ void TestCopyCtor()
 
          VERIFY(sv.inBuffer(), caseLabel);
          VERIFY(sv.capacity() == BufCap, caseLabel);
-         verifyValues(sv, values, caseLabel);
+         verifyVector(sv, values, caseLabel);
       });
    }
    {
@@ -479,7 +479,7 @@ void TestCopyCtor()
 
          VERIFY(sv.onHeap(), caseLabel);
          VERIFY(sv.capacity() == numElems, caseLabel);
-         verifyValues(sv, values, caseLabel);
+         verifyVector(sv, values, caseLabel);
       });
    }
 }
@@ -513,7 +513,7 @@ void TestMoveCtor()
 
          VERIFY(sv.inBuffer(), caseLabel);
          VERIFY(sv.capacity() == BufCap, caseLabel);
-         verifyValues(sv, values, caseLabel);
+         verifyVector(sv, values, caseLabel);
          // Verify moved-from instance is empty.
          VERIFY(src.size() == 0, caseLabel);
       });
@@ -542,7 +542,7 @@ void TestMoveCtor()
 
          VERIFY(sv.onHeap(), caseLabel);
          VERIFY(sv.capacity() == numElems, caseLabel);
-         verifyValues(sv, values, caseLabel);
+         verifyVector(sv, values, caseLabel);
          // Verify moved-from instance is empty.
          VERIFY(src.size() == 0, caseLabel);
       });
@@ -572,7 +572,7 @@ void TestInitializerListCtor()
 
          VERIFY(sv.inBuffer(), caseLabel);
          VERIFY(sv.capacity() == BufCap, caseLabel);
-         verifyValues(sv, values, caseLabel);
+         verifyVector(sv, values, caseLabel);
       });
    }
    {
@@ -595,7 +595,7 @@ void TestInitializerListCtor()
 
          VERIFY(sv.onHeap(), caseLabel);
          VERIFY(sv.capacity() == numElems, caseLabel);
-         verifyValues(sv, values, caseLabel);
+         verifyVector(sv, values, caseLabel);
       });
    }
 }
@@ -696,7 +696,7 @@ void TestCopyAssignment()
 
          VERIFY(to.inBuffer(), caseLabel);
          VERIFY(to.capacity() == BufCap, caseLabel);
-         verifyValues(to, fromValues, caseLabel);
+         verifyVector(to, fromValues, caseLabel);
       });
    }
    {
@@ -724,7 +724,7 @@ void TestCopyAssignment()
 
          VERIFY(to.onHeap(), caseLabel);
          VERIFY(to.capacity() == numFrom, caseLabel);
-         verifyValues(to, fromValues, caseLabel);
+         verifyVector(to, fromValues, caseLabel);
       });
    }
    {
@@ -752,7 +752,7 @@ void TestCopyAssignment()
 
          VERIFY(to.inBuffer(), caseLabel);
          VERIFY(to.capacity() == BufCap, caseLabel);
-         verifyValues(to, fromValues, caseLabel);
+         verifyVector(to, fromValues, caseLabel);
       });
    }
    {
@@ -783,7 +783,7 @@ void TestCopyAssignment()
          // Assigning data that needs a larger heap allocation will reallocate
          // heap memory.
          VERIFY(to.capacity() == numFrom, caseLabel);
-         verifyValues(to, fromValues, caseLabel);
+         verifyVector(to, fromValues, caseLabel);
       });
    }
    {
@@ -814,7 +814,7 @@ void TestCopyAssignment()
          // Assigning data that needs a smaller heap allocation will reuse the existing
          // heap memory. Capacity will remain at previous (larger) size.
          VERIFY(to.capacity() == numTo, caseLabel);
-         verifyValues(to, fromValues, caseLabel);
+         verifyVector(to, fromValues, caseLabel);
       });
    }
 }
@@ -866,7 +866,7 @@ void TestMoveAssignment()
 
          VERIFY(to.inBuffer(), caseLabel);
          VERIFY(to.capacity() == BufCap, caseLabel);
-         verifyValues(to, fromValues, caseLabel);
+         verifyVector(to, fromValues, caseLabel);
       });
    }
    {
@@ -894,7 +894,7 @@ void TestMoveAssignment()
 
          VERIFY(to.onHeap(), caseLabel);
          VERIFY(to.capacity() == numFrom, caseLabel);
-         verifyValues(to, fromValues, caseLabel);
+         verifyVector(to, fromValues, caseLabel);
       });
    }
    {
@@ -922,7 +922,7 @@ void TestMoveAssignment()
 
          VERIFY(to.inBuffer(), caseLabel);
          VERIFY(to.capacity() == BufCap, caseLabel);
-         verifyValues(to, fromValues, caseLabel);
+         verifyVector(to, fromValues, caseLabel);
       });
    }
    {
@@ -952,7 +952,7 @@ void TestMoveAssignment()
          VERIFY(to.onHeap(), caseLabel);
          // Will take over the stolen capacity of the source.
          VERIFY(to.capacity() == numFrom, caseLabel);
-         verifyValues(to, fromValues, caseLabel);
+         verifyVector(to, fromValues, caseLabel);
       });
    }
    {
@@ -982,7 +982,7 @@ void TestMoveAssignment()
          VERIFY(to.onHeap(), caseLabel);
          // Will take over the stolen capacity of the source.
          VERIFY(to.capacity() == numFrom, caseLabel);
-         verifyValues(to, fromValues, caseLabel);
+         verifyVector(to, fromValues, caseLabel);
       });
    }
 }
@@ -1023,7 +1023,7 @@ void TestInitializerListAssignment()
 
          VERIFY(to.inBuffer(), caseLabel);
          VERIFY(to.capacity() == BufCap, caseLabel);
-         verifyValues(to, fromValues, caseLabel);
+         verifyVector(to, fromValues, caseLabel);
       });
    }
    {
@@ -1050,7 +1050,7 @@ void TestInitializerListAssignment()
 
          VERIFY(to.onHeap(), caseLabel);
          VERIFY(to.capacity() == numFrom, caseLabel);
-         verifyValues(to, fromValues, caseLabel);
+         verifyVector(to, fromValues, caseLabel);
       });
    }
    {
@@ -1077,7 +1077,7 @@ void TestInitializerListAssignment()
 
          VERIFY(to.inBuffer(), caseLabel);
          VERIFY(to.capacity() == BufCap, caseLabel);
-         verifyValues(to, fromValues, caseLabel);
+         verifyVector(to, fromValues, caseLabel);
       });
    }
    {
@@ -1106,7 +1106,7 @@ void TestInitializerListAssignment()
 
          VERIFY(to.onHeap(), caseLabel);
          VERIFY(to.capacity() == origCap, caseLabel);
-         verifyValues(to, fromValues, caseLabel);
+         verifyVector(to, fromValues, caseLabel);
       });
    }
    {
@@ -1135,7 +1135,7 @@ void TestInitializerListAssignment()
 
          VERIFY(to.onHeap(), caseLabel);
          VERIFY(to.capacity() > origCap, caseLabel);
-         verifyValues(to, fromValues, caseLabel);
+         verifyVector(to, fromValues, caseLabel);
       });
    }
 }
@@ -1178,7 +1178,7 @@ void TestAssignElementValue()
 
          VERIFY(sv.inBuffer(), caseLabel);
          VERIFY(sv.capacity() == BufCap, caseLabel);
-         verifyValues(sv, expected, caseLabel);
+         verifyVector(sv, expected, caseLabel);
       });
    }
    {
@@ -1208,7 +1208,7 @@ void TestAssignElementValue()
 
          VERIFY(sv.onHeap(), caseLabel);
          VERIFY(sv.capacity() > origCap, caseLabel);
-         verifyValues(sv, expected, caseLabel);
+         verifyVector(sv, expected, caseLabel);
       });
    }
    {
@@ -1236,7 +1236,7 @@ void TestAssignElementValue()
 
          VERIFY(sv.inBuffer(), caseLabel);
          VERIFY(sv.capacity() == BufCap, caseLabel);
-         verifyValues(sv, expected, caseLabel);
+         verifyVector(sv, expected, caseLabel);
       });
    }
    {
@@ -1268,7 +1268,7 @@ void TestAssignElementValue()
 
          VERIFY(sv.onHeap(), caseLabel);
          VERIFY(sv.capacity() > origCap, caseLabel);
-         verifyValues(sv, expected, caseLabel);
+         verifyVector(sv, expected, caseLabel);
       });
    }
    {
@@ -1299,7 +1299,7 @@ void TestAssignElementValue()
 
          VERIFY(sv.onHeap(), caseLabel);
          VERIFY(sv.capacity() == origCap, caseLabel);
-         verifyValues(sv, expected, caseLabel);
+         verifyVector(sv, expected, caseLabel);
       });
    }
 }
@@ -1342,7 +1342,7 @@ void TestAssignIteratorRange()
 
          VERIFY(sv.inBuffer(), caseLabel);
          VERIFY(sv.capacity() == BufCap, caseLabel);
-         verifyValues(sv, assigned, caseLabel);
+         verifyVector(sv, assigned, caseLabel);
       });
    }
    {
@@ -1371,7 +1371,7 @@ void TestAssignIteratorRange()
 
          VERIFY(sv.onHeap(), caseLabel);
          VERIFY(sv.capacity() > BufCap, caseLabel);
-         verifyValues(sv, assigned, caseLabel);
+         verifyVector(sv, assigned, caseLabel);
       });
    }
    {
@@ -1400,7 +1400,7 @@ void TestAssignIteratorRange()
 
          VERIFY(sv.inBuffer(), caseLabel);
          VERIFY(sv.capacity() == BufCap, caseLabel);
-         verifyValues(sv, assigned, caseLabel);
+         verifyVector(sv, assigned, caseLabel);
       });
    }
    {
@@ -1431,7 +1431,7 @@ void TestAssignIteratorRange()
 
          VERIFY(sv.onHeap(), caseLabel);
          VERIFY(sv.capacity() > origCap, caseLabel);
-         verifyValues(sv, assigned, caseLabel);
+         verifyVector(sv, assigned, caseLabel);
       });
    }
    {
@@ -1462,7 +1462,7 @@ void TestAssignIteratorRange()
 
          VERIFY(sv.onHeap(), caseLabel);
          VERIFY(sv.capacity() == origCap, caseLabel);
-         verifyValues(sv, assigned, caseLabel);
+         verifyVector(sv, assigned, caseLabel);
       });
    }
 }
