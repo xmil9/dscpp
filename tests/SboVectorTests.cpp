@@ -720,6 +720,15 @@ void TestDtor()
 
 void TestCopyAssignment()
 {
+   // Local function to calculate the expected call measurements.
+   auto expectedMeasures = [](std::size_t numFrom, std::size_t numTo) -> Element::Measures {
+      Element::Measures measures;
+      // For populating vectors and copying source to destination.
+      measures.copyCtorCalls = 2 * numFrom + numTo;
+      measures.dtorCalls = 2 * numFrom + numTo;
+      return measures;
+   };
+
    {
       const std::string caseLabel{
          "SboVector copy assignment from buffer instance to buffer instance"};
@@ -733,12 +742,7 @@ void TestCopyAssignment()
       const std::initializer_list<Elem> toValues{1, 2, 3};
       const std::size_t numTo = toValues.size();
 
-      Elem::Measures measures;
-      // For populating vectors and copying source to destination.
-      measures.copyCtorCalls = 2 * numFrom + numTo;
-      measures.dtorCalls = 2 * numFrom + numTo;
-
-      CtorTest<Elem, BufCap> test{caseLabel, measures};
+      CtorTest<Elem, BufCap> test{caseLabel, expectedMeasures(numFrom, numTo)};
       test.run([&]() {
          SV from{fromValues};
          SV to{toValues};
@@ -766,12 +770,7 @@ void TestCopyAssignment()
       const std::initializer_list<Elem> toValues{1, 2, 3};
       const std::size_t numTo = toValues.size();
 
-      Elem::Measures measures;
-      // For populating vectors and copying source to destination.
-      measures.copyCtorCalls = 2 * numFrom + numTo;
-      measures.dtorCalls = 2 * numFrom + numTo;
-
-      CtorTest<Elem, BufCap> test{caseLabel, measures};
+      CtorTest<Elem, BufCap> test{caseLabel, expectedMeasures(numFrom, numTo)};
       test.run([&]() {
          SV from{fromValues};
          SV to{toValues};
@@ -799,12 +798,7 @@ void TestCopyAssignment()
       const std::initializer_list<Elem> toValues{1, 2, 3, 4, 5, 6, 7, 8};
       const std::size_t numTo = toValues.size();
 
-      Elem::Measures measures;
-      // For populating vectors and copying source to destination.
-      measures.copyCtorCalls = 2 * numFrom + numTo;
-      measures.dtorCalls = 2 * numFrom + numTo;
-
-      CtorTest<Elem, BufCap> test{caseLabel, measures};
+      CtorTest<Elem, BufCap> test{caseLabel, expectedMeasures(numFrom, numTo)};
       test.run([&]() {
          SV from{fromValues};
          SV to{toValues};
@@ -832,12 +826,7 @@ void TestCopyAssignment()
       const std::initializer_list<Elem> toValues{1, 2, 3, 4, 5, 6, 7};
       const std::size_t numTo = toValues.size();
 
-      Elem::Measures measures;
-      // For populating vectors and copying source to destination.
-      measures.copyCtorCalls = 2 * numFrom + numTo;
-      measures.dtorCalls = 2 * numFrom + numTo;
-
-      CtorTest<Elem, BufCap> test{caseLabel, measures};
+      CtorTest<Elem, BufCap> test{caseLabel, expectedMeasures(numFrom, numTo)};
       test.run([&]() {
          SV from{fromValues};
          SV to{toValues};
@@ -868,12 +857,7 @@ void TestCopyAssignment()
       const std::initializer_list<Elem> toValues{1, 2, 3, 4, 5, 6, 7, 8};
       const std::size_t numTo = toValues.size();
 
-      Elem::Measures measures;
-      // For populating vectors and copying source to destination.
-      measures.copyCtorCalls = 2 * numFrom + numTo;
-      measures.dtorCalls = 2 * numFrom + numTo;
-
-      CtorTest<Elem, BufCap> test{caseLabel, measures};
+      CtorTest<Elem, BufCap> test{caseLabel, expectedMeasures(numFrom, numTo)};
       test.run([&]() {
          SV from{fromValues};
          SV to{toValues};
