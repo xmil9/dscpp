@@ -1307,218 +1307,163 @@ void TestAssignElementValue()
 
 void TestAssignIteratorRange()
 {
+   // Local functions to calculate the expected metrics.
+   auto expectedMetrics = [](std::size_t numInitial,
+                             std::size_t numAssigned) -> Element::Metrics {
+      Element::Metrics metrics;
+      metrics.copyCtorCalls = numInitial + numAssigned;
+      metrics.dtorCalls = numInitial + numAssigned;
+      return metrics;
+   };
+
    {
       const std::string caseLabel{
          "SboVector assign iterator range. Assigned values fit in buffer. "
-         "SboVector was a buffer instance"};
+         "SboVector is a buffer instance"};
 
-      constexpr std::size_t BufCap = 10;
-      constexpr std::size_t NumElems = 2;
-      constexpr std::size_t NumOrigElems = 3;
+      constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Elem, BufCap>;
+      using SV = SboVector<Element, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::initializer_list<Elem> initial{1, 2};
+      const std::size_t numInitial = initial.size();
+      const std::initializer_list<Elem> assigned{1, 2, 3};
+      const std::size_t numAssigned = assigned.size();
+      const std::list<Element> from{assigned};
 
-      const std::list<Element> src{{1}, {2}};
-      SV sv(NumOrigElems, {1});
+      Test<Elem, BufCap> test{caseLabel, expectedMetrics(numInitial, numAssigned)};
+      test.run([&]() {
+         SV sv{initial};
 
-      // Preconditions.
-      VERIFY(NumElems < BufCap, caseLabel);
-      VERIFY(NumOrigElems < BufCap, caseLabel);
-      VERIFY(sv.inBuffer(), caseLabel);
+         VERIFY(sv.inBuffer(), caseLabel);
+         VERIFY(numAssigned < BufCap, caseLabel);
 
-      {
-         // Element instrumentation for tested call only.
-         Elem::Metrics expected;
-         // Assigned elements.
-         expected.copyCtorCalls = NumElems;
-         // Destruct original elements.
-         expected.dtorCalls = NumOrigElems;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+         sv.assign(from.begin(), from.end());
 
-         // Test.
-         sv.assign(src.begin(), src.end());
-      }
-
-      // Verify vector state.
-      VERIFY(sv.size() == NumElems, caseLabel);
-      VERIFY(sv.capacity() == BufCap, caseLabel);
-      VERIFY(sv.inBuffer(), caseLabel);
-      for (int i = 0; i < sv.size(); ++i)
-         VERIFY(sv[i].i == i + 1, caseLabel);
+         VERIFY(sv.inBuffer(), caseLabel);
+         VERIFY(sv.capacity() == BufCap, caseLabel);
+         verifyValues(sv, assigned, caseLabel);
+      });
    }
    {
       const std::string caseLabel{
          "SboVector assign iterator range. Assigned values require heap. "
-         "SboVector was a buffer instance"};
+         "SboVector is a buffer instance"};
 
       constexpr std::size_t BufCap = 5;
-      constexpr std::size_t NumElems = 7;
-      constexpr std::size_t NumOrigElems = 3;
       using Elem = Element;
-      using SV = SboVector<Elem, BufCap>;
+      using SV = SboVector<Element, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::initializer_list<Elem> initial{1, 2};
+      const std::size_t numInitial = initial.size();
+      const std::initializer_list<Elem> assigned{1, 2, 3, 4, 5, 6};
+      const std::size_t numAssigned = assigned.size();
+      const std::list<Element> from{assigned};
 
-      const std::list<Element> src{{1}, {2}, {3}, {4}, {5}, {6}, {7}};
-      SV sv(NumOrigElems, {1});
+      Test<Elem, BufCap> test{caseLabel, expectedMetrics(numInitial, numAssigned)};
+      test.run([&]() {
+         SV sv{initial};
 
-      // Preconditions.
-      VERIFY(NumElems > BufCap, caseLabel);
-      VERIFY(NumOrigElems < BufCap, caseLabel);
-      VERIFY(sv.inBuffer(), caseLabel);
+         VERIFY(sv.inBuffer(), caseLabel);
+         VERIFY(numAssigned > BufCap, caseLabel);
 
-      {
-         // Element instrumentation for tested call only.
-         Elem::Metrics expected;
-         // Assigned elements.
-         expected.copyCtorCalls = NumElems;
-         // Destruct original elements.
-         expected.dtorCalls = NumOrigElems;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+         sv.assign(from.begin(), from.end());
 
-         // Test.
-         sv.assign(src.begin(), src.end());
-      }
-
-      // Verify vector state.
-      VERIFY(sv.size() == NumElems, caseLabel);
-      VERIFY(sv.capacity() == NumElems, caseLabel);
-      VERIFY(sv.onHeap(), caseLabel);
-      for (int i = 0; i < sv.size(); ++i)
-         VERIFY(sv[i].i == i + 1, caseLabel);
+         VERIFY(sv.onHeap(), caseLabel);
+         VERIFY(sv.capacity() > BufCap, caseLabel);
+         verifyValues(sv, assigned, caseLabel);
+      });
    }
    {
       const std::string caseLabel{
-         "SboVector assign iterator range. Assigned fit into buffer. "
-         "SboVector was a heap instance"};
+         "SboVector assign iterator range. Assigned values fit into buffer. "
+         "SboVector is a heap instance"};
 
       constexpr std::size_t BufCap = 5;
-      constexpr std::size_t NumElems = 3;
-      constexpr std::size_t NumOrigElems = 7;
       using Elem = Element;
-      using SV = SboVector<Elem, BufCap>;
+      using SV = SboVector<Element, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::initializer_list<Elem> initial{1, 2, 3, 4, 5, 6, 7, 8};
+      const std::size_t numInitial = initial.size();
+      const std::initializer_list<Elem> assigned{1, 2, 3, 4};
+      const std::size_t numAssigned = assigned.size();
+      const std::list<Element> from{assigned};
 
-      const std::list<Element> src{{1}, {2}, {3}};
-      SV sv(NumOrigElems, {1});
+      Test<Elem, BufCap> test{caseLabel, expectedMetrics(numInitial, numAssigned)};
+      test.run([&]() {
+         SV sv{initial};
 
-      // Preconditions.
-      VERIFY(NumElems < BufCap, caseLabel);
-      VERIFY(NumOrigElems > BufCap, caseLabel);
-      VERIFY(sv.onHeap(), caseLabel);
+         VERIFY(sv.onHeap(), caseLabel);
+         VERIFY(numAssigned < BufCap, caseLabel);
 
-      {
-         // Element instrumentation for tested call only.
-         Elem::Metrics expected;
-         // Assigned elements.
-         expected.copyCtorCalls = NumElems;
-         // Destruct original elements.
-         expected.dtorCalls = NumOrigElems;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+         sv.assign(from.begin(), from.end());
 
-         // Test.
-         sv.assign(src.begin(), src.end());
-      }
-
-      // Verify vector state.
-      VERIFY(sv.size() == NumElems, caseLabel);
-      VERIFY(sv.capacity() == BufCap, caseLabel);
-      VERIFY(sv.inBuffer(), caseLabel);
-      for (int i = 0; i < sv.size(); ++i)
-         VERIFY(sv[i].i == i + 1, caseLabel);
+         VERIFY(sv.inBuffer(), caseLabel);
+         VERIFY(sv.capacity() == BufCap, caseLabel);
+         verifyValues(sv, assigned, caseLabel);
+      });
    }
    {
       const std::string caseLabel{
-         "SboVector assign iterator range. Assigned require heap. "
-         "SboVector was a smaller heap instance"};
+         "SboVector assign iterator range. Assigned values require heap. "
+         "SboVector is a smaller heap instance"};
 
       constexpr std::size_t BufCap = 5;
-      constexpr std::size_t NumElems = 8;
-      constexpr std::size_t NumOrigElems = 7;
       using Elem = Element;
-      using SV = SboVector<Elem, BufCap>;
+      using SV = SboVector<Element, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::initializer_list<Elem> initial{1, 2, 3, 4, 5, 6, 7};
+      const std::size_t numInitial = initial.size();
+      const std::initializer_list<Elem> assigned{1, 2, 3, 4, 5, 6, 7, 8, 9};
+      const std::size_t numAssigned = assigned.size();
+      const std::list<Element> from{assigned};
 
-      const std::list<Element> src{{1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}};
-      SV sv(NumOrigElems, {1});
+      Test<Elem, BufCap> test{caseLabel, expectedMetrics(numInitial, numAssigned)};
+      test.run([&]() {
+         SV sv{initial};
+         const std::size_t origCap = sv.capacity();
 
-      // Preconditions.
-      VERIFY(NumElems > BufCap, caseLabel);
-      VERIFY(NumOrigElems > BufCap, caseLabel);
-      VERIFY(NumOrigElems < NumElems, caseLabel);
-      VERIFY(sv.onHeap(), caseLabel);
+         VERIFY(sv.onHeap(), caseLabel);
+         VERIFY(numAssigned > BufCap, caseLabel);
+         VERIFY(numAssigned > numInitial, caseLabel);
 
-      {
-         // Element instrumentation for tested call only.
-         Elem::Metrics expected;
-         // Assigned elements.
-         expected.copyCtorCalls = NumElems;
-         // Destruct original elements.
-         expected.dtorCalls = NumOrigElems;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+         sv.assign(from.begin(), from.end());
 
-         // Test.
-         sv.assign(src.begin(), src.end());
-      }
-
-      // Verify vector state.
-      VERIFY(sv.size() == NumElems, caseLabel);
-      VERIFY(sv.capacity() == NumElems, caseLabel);
-      VERIFY(sv.onHeap(), caseLabel);
-      for (int i = 0; i < sv.size(); ++i)
-         VERIFY(sv[i].i == i + 1, caseLabel);
+         VERIFY(sv.onHeap(), caseLabel);
+         VERIFY(sv.capacity() > origCap, caseLabel);
+         verifyValues(sv, assigned, caseLabel);
+      });
    }
    {
       const std::string caseLabel{
-         "SboVector assign iterator range. Assigned require heap. "
-         "SboVector was a larger heap instance"};
+         "SboVector assign iterator range. Assigned values require heap. "
+         "SboVector is a larger heap instance"};
 
       constexpr std::size_t BufCap = 5;
-      constexpr std::size_t NumElems = 7;
-      constexpr std::size_t NumOrigElems = 8;
       using Elem = Element;
-      using SV = SboVector<Elem, BufCap>;
+      using SV = SboVector<Element, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::initializer_list<Elem> initial{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+      const std::size_t numInitial = initial.size();
+      const std::initializer_list<Elem> assigned{1, 2, 3, 4, 5, 6, 7, 8};
+      const std::size_t numAssigned = assigned.size();
+      const std::list<Element> from{assigned};
 
-      const std::list<Element> src{{1}, {2}, {3}, {4}, {5}, {6}, {7}};
-      SV sv(NumOrigElems, {1});
+      Test<Elem, BufCap> test{caseLabel, expectedMetrics(numInitial, numAssigned)};
+      test.run([&]() {
+         SV sv{initial};
+         const std::size_t origCap = sv.capacity();
 
-      // Preconditions.
-      VERIFY(NumElems > BufCap, caseLabel);
-      VERIFY(NumOrigElems > BufCap, caseLabel);
-      VERIFY(NumOrigElems > NumElems, caseLabel);
-      VERIFY(sv.onHeap(), caseLabel);
+         VERIFY(sv.onHeap(), caseLabel);
+         VERIFY(numAssigned > BufCap, caseLabel);
+         VERIFY(numAssigned < numInitial, caseLabel);
 
-      {
-         // Element instrumentation for tested call only.
-         Elem::Metrics expected;
-         // Assigned elements.
-         expected.copyCtorCalls = NumElems;
-         // Destruct original elements.
-         expected.dtorCalls = NumOrigElems;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+         sv.assign(from.begin(), from.end());
 
-         // Test.
-         sv.assign(src.begin(), src.end());
-      }
-
-      // Verify vector state.
-      VERIFY(sv.size() == NumElems, caseLabel);
-      // Capacity remains at larger, reused size.
-      VERIFY(sv.capacity() == NumOrigElems, caseLabel);
-      VERIFY(sv.onHeap(), caseLabel);
-      for (int i = 0; i < sv.size(); ++i)
-         VERIFY(sv[i].i == i + 1, caseLabel);
+         VERIFY(sv.onHeap(), caseLabel);
+         VERIFY(sv.capacity() == origCap, caseLabel);
+         verifyValues(sv, assigned, caseLabel);
+      });
    }
 }
 
