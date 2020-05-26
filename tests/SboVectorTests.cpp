@@ -21,17 +21,17 @@ struct Element
    Element() noexcept
    {
       if (!m_paused)
-         ++m_instrumented.defaultCtorCalls;
+         ++m_metrics.defaultCtorCalls;
    }
    Element(int i_) : i{i_}
    {
       if (!m_paused)
-         ++m_instrumented.ctorCalls;
+         ++m_metrics.ctorCalls;
    }
    Element(const Element& other) : d{other.d}, i{other.i}, b{other.b}
    {
       if (!m_paused)
-         ++m_instrumented.copyCtorCalls;
+         ++m_metrics.copyCtorCalls;
    }
    Element(Element&& other)
    {
@@ -39,12 +39,12 @@ struct Element
       std::swap(i, other.i);
       std::swap(b, other.b);
       if (!m_paused)
-         ++m_instrumented.moveCtorCalls;
+         ++m_metrics.moveCtorCalls;
    }
    ~Element()
    {
       if (!m_paused)
-         ++m_instrumented.dtorCalls;
+         ++m_metrics.dtorCalls;
    }
    Element& operator=(const Element& other)
    {
@@ -52,7 +52,7 @@ struct Element
       i = other.i;
       b = other.b;
       if (!m_paused)
-         ++m_instrumented.assignmentCalls;
+         ++m_metrics.assignmentCalls;
       return *this;
    }
    Element& operator=(Element&& other)
@@ -61,7 +61,7 @@ struct Element
       std::swap(i, other.i);
       std::swap(b, other.b);
       if (!m_paused)
-         ++m_instrumented.moveAssignmentCalls;
+         ++m_metrics.moveAssignmentCalls;
       return *this;
    }
    friend bool operator==(const Element& a, const Element& b)
@@ -75,7 +75,7 @@ struct Element
 
    // Instrumentation.
 
-   struct Measures
+   struct Metrics
    {
       std::size_t defaultCtorCalls = 0;
       std::size_t ctorCalls = 0;
@@ -86,34 +86,32 @@ struct Element
       std::size_t dtorCalls = 0;
    };
 
-   inline static Measures m_instrumented;
+   inline static Metrics m_metrics;
    inline static bool m_paused = false;
 
-   static void resetInstrumentation()
+   static void resetMetrics()
    {
       m_paused = false;
-      m_instrumented.defaultCtorCalls = 0;
-      m_instrumented.ctorCalls = 0;
-      m_instrumented.copyCtorCalls = 0;
-      m_instrumented.moveCtorCalls = 0;
-      m_instrumented.assignmentCalls = 0;
-      m_instrumented.moveAssignmentCalls = 0;
-      m_instrumented.dtorCalls = 0;
+      m_metrics.defaultCtorCalls = 0;
+      m_metrics.ctorCalls = 0;
+      m_metrics.copyCtorCalls = 0;
+      m_metrics.moveCtorCalls = 0;
+      m_metrics.assignmentCalls = 0;
+      m_metrics.moveAssignmentCalls = 0;
+      m_metrics.dtorCalls = 0;
    }
 
-   static void pauseInstrumentation() { m_paused = true; }
+   static void pauseMetrics() { m_paused = true; }
 
-   static void verifyInstrumentation(const Measures& expected,
-                                     const std::string& caseLabel)
+   static void verifyMetrics(const Metrics& expected, const std::string& caseLabel)
    {
-      VERIFY(expected.defaultCtorCalls == m_instrumented.defaultCtorCalls, caseLabel);
-      VERIFY(expected.ctorCalls == m_instrumented.ctorCalls, caseLabel);
-      VERIFY(expected.copyCtorCalls == m_instrumented.copyCtorCalls, caseLabel);
-      VERIFY(expected.moveCtorCalls == m_instrumented.moveCtorCalls, caseLabel);
-      VERIFY(expected.assignmentCalls == m_instrumented.assignmentCalls, caseLabel);
-      VERIFY(expected.moveAssignmentCalls == m_instrumented.moveAssignmentCalls,
-             caseLabel);
-      VERIFY(expected.dtorCalls == m_instrumented.dtorCalls, caseLabel);
+      VERIFY(expected.defaultCtorCalls == m_metrics.defaultCtorCalls, caseLabel);
+      VERIFY(expected.ctorCalls == m_metrics.ctorCalls, caseLabel);
+      VERIFY(expected.copyCtorCalls == m_metrics.copyCtorCalls, caseLabel);
+      VERIFY(expected.moveCtorCalls == m_metrics.moveCtorCalls, caseLabel);
+      VERIFY(expected.assignmentCalls == m_metrics.assignmentCalls, caseLabel);
+      VERIFY(expected.moveAssignmentCalls == m_metrics.moveAssignmentCalls, caseLabel);
+      VERIFY(expected.dtorCalls == m_metrics.dtorCalls, caseLabel);
    }
 };
 
@@ -125,21 +123,21 @@ struct Element
 // Does not support move semantics.
 struct NotMoveableElement
 {
-   NotMoveableElement() { ++m_instrumented.defaultCtorCalls; }
-   NotMoveableElement(int i_) : i{i_} { ++m_instrumented.ctorCalls; }
+   NotMoveableElement() { ++m_metrics.defaultCtorCalls; }
+   NotMoveableElement(int i_) : i{i_} { ++m_metrics.ctorCalls; }
    NotMoveableElement(const NotMoveableElement& other)
    : d{other.d}, i{other.i}, b{other.b}
    {
-      ++m_instrumented.copyCtorCalls;
+      ++m_metrics.copyCtorCalls;
    }
    NotMoveableElement(NotMoveableElement&& other) = delete;
-   ~NotMoveableElement() { ++m_instrumented.dtorCalls; }
+   ~NotMoveableElement() { ++m_metrics.dtorCalls; }
    NotMoveableElement& operator=(const NotMoveableElement& other)
    {
       d = other.d;
       i = other.i;
       b = other.b;
-      ++m_instrumented.assignmentCalls;
+      ++m_metrics.assignmentCalls;
       return *this;
    }
    NotMoveableElement& operator=(NotMoveableElement&& other) = delete;
@@ -150,7 +148,7 @@ struct NotMoveableElement
 
    // Instrumentation.
 
-   struct Measures
+   struct Metrics
    {
       std::size_t defaultCtorCalls = 0;
       std::size_t ctorCalls = 0;
@@ -159,25 +157,24 @@ struct NotMoveableElement
       std::size_t dtorCalls = 0;
    };
 
-   inline static Measures m_instrumented;
+   inline static Metrics m_metrics;
 
-   static void resetInstrumentation()
+   static void resetMetrics()
    {
-      m_instrumented.defaultCtorCalls = 0;
-      m_instrumented.ctorCalls = 0;
-      m_instrumented.copyCtorCalls = 0;
-      m_instrumented.assignmentCalls = 0;
-      m_instrumented.dtorCalls = 0;
+      m_metrics.defaultCtorCalls = 0;
+      m_metrics.ctorCalls = 0;
+      m_metrics.copyCtorCalls = 0;
+      m_metrics.assignmentCalls = 0;
+      m_metrics.dtorCalls = 0;
    }
 
-   static void verifyInstrumentation(const Measures& expected,
-                                     const std::string& caseLabel)
+   static void verifyMetrics(const Metrics& expected, const std::string& caseLabel)
    {
-      VERIFY(expected.defaultCtorCalls == m_instrumented.defaultCtorCalls, caseLabel);
-      VERIFY(expected.ctorCalls == m_instrumented.ctorCalls, caseLabel);
-      VERIFY(expected.copyCtorCalls == m_instrumented.copyCtorCalls, caseLabel);
-      VERIFY(expected.assignmentCalls == m_instrumented.assignmentCalls, caseLabel);
-      VERIFY(expected.dtorCalls == m_instrumented.dtorCalls, caseLabel);
+      VERIFY(expected.defaultCtorCalls == m_metrics.defaultCtorCalls, caseLabel);
+      VERIFY(expected.ctorCalls == m_metrics.ctorCalls, caseLabel);
+      VERIFY(expected.copyCtorCalls == m_metrics.copyCtorCalls, caseLabel);
+      VERIFY(expected.assignmentCalls == m_metrics.assignmentCalls, caseLabel);
+      VERIFY(expected.dtorCalls == m_metrics.dtorCalls, caseLabel);
    }
 };
 
@@ -256,19 +253,19 @@ InputIter makeInputIter(std::size_t pos)
 
 ///////////////////
 
-// RAII class to verify the instrumentation measurements of a given element type.
+// RAII class to verify the instrumentation metrics of a given element type.
 template <typename Elem> class ElementVerifier
 {
  public:
-   ElementVerifier(const typename Elem::Measures& expected, std::string caseLabel)
+   ElementVerifier(const typename Elem::Metrics& expected, std::string caseLabel)
    : m_expected{expected}, m_caseLabel{std::move(caseLabel)}
    {
-      Elem::resetInstrumentation();
+      Elem::resetMetrics();
    }
-   ~ElementVerifier() { Elem::verifyInstrumentation(m_expected, m_caseLabel); }
+   ~ElementVerifier() { Elem::verifyMetrics(m_expected, m_caseLabel); }
 
  private:
-   typename Elem::Measures m_expected = 0;
+   typename Elem::Metrics m_expected = 0;
    std::string m_caseLabel;
 };
 
@@ -323,8 +320,8 @@ void verifyValues(const SV& sv, std::initializer_list<typename SV::value_type> v
 template <typename Elem, std::size_t BufCap> class Test
 {
  public:
-   Test(const std::string& caseLabel, const typename Elem::Measures& measures)
-   : m_caseLabel{caseLabel}, m_expectedMeasures{measures}
+   Test(const std::string& caseLabel, const typename Elem::Metrics& metrics)
+   : m_caseLabel{caseLabel}, m_expectedMetrics{metrics}
    {
    }
    Test(const Test&) = delete;
@@ -333,7 +330,7 @@ template <typename Elem, std::size_t BufCap> class Test
 
  protected:
    const std::string m_caseLabel;
-   const typename Elem::Measures m_expectedMeasures;
+   const typename Elem::Metrics m_expectedMetrics;
 };
 
 
@@ -344,8 +341,8 @@ template <typename Elem, std::size_t BufCap> class CtorTest : public Test<Elem, 
    using SV = SboVector<Elem, BufCap>;
 
  public:
-   CtorTest(const std::string& caseLabel, const typename Elem::Measures& measures)
-   : Test<Elem, BufCap>{caseLabel, measures}
+   CtorTest(const std::string& caseLabel, const typename Elem::Metrics& metrics)
+   : Test<Elem, BufCap>{caseLabel, metrics}
    {
    }
    CtorTest(const CtorTest&) = delete;
@@ -358,7 +355,7 @@ template <typename Elem, std::size_t BufCap> class CtorTest : public Test<Elem, 
 
       {
          // Element instrumentation for tested call only.
-         const ElementVerifier<Elem> elemCheck{this->m_expectedMeasures,
+         const ElementVerifier<Elem> elemCheck{this->m_expectedMetrics,
                                                this->m_caseLabel};
          assert(testFn);
          testFn();
@@ -374,9 +371,9 @@ template <typename Elem, std::size_t BufCap> class MemberTest : public Test<Elem
    using SV = SboVector<Elem, BufCap>;
 
  public:
-   MemberTest(const std::string& caseLabel, const typename Elem::Measures& measures,
+   MemberTest(const std::string& caseLabel, const typename Elem::Metrics& metrics,
               std::size_t cap, std::initializer_list<Elem> elems)
-   : Test<Elem, BufCap>{caseLabel, measures}, m_cap{cap}, m_elems(elems)
+   : Test<Elem, BufCap>{caseLabel, metrics}, m_cap{cap}, m_elems(elems)
    {
    }
    MemberTest(const MemberTest&) = delete;
@@ -395,7 +392,7 @@ template <typename Elem, std::size_t BufCap> class MemberTest : public Test<Elem
 
       {
          // Element instrumentation for tested call only.
-         const ElementVerifier<Elem> elemCheck{this->m_expectedMeasures,
+         const ElementVerifier<Elem> elemCheck{this->m_expectedMetrics,
                                                this->m_caseLabel};
          testFn(sv);
       }
@@ -420,7 +417,7 @@ void TestDefaultCtor()
    using Elem = Element;
    using SV = SboVector<Element, BufCap>;
 
-   const Elem::Measures zeros;
+   const Elem::Metrics zeros;
 
    CtorTest<Elem, BufCap> test{caseLabel, zeros};
    test.run([&]() {
@@ -447,11 +444,11 @@ void TestCtorForElementCountAndValue()
       const std::initializer_list<Elem> expectedValues{initVal, initVal, initVal, initVal,
                                                        initVal};
 
-      Elem::Measures measures;
-      measures.copyCtorCalls = numElems;
-      measures.dtorCalls = numElems;
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = numElems;
+      metrics.dtorCalls = numElems;
 
-      CtorTest<Elem, BufCap> test{caseLabel, measures};
+      CtorTest<Elem, BufCap> test{caseLabel, metrics};
       test.run([&, BufCap]() {
          SV sv(numElems, initVal);
 
@@ -473,11 +470,11 @@ void TestCtorForElementCountAndValue()
          initVal, initVal, initVal, initVal, initVal, initVal,
          initVal, initVal, initVal, initVal, initVal, initVal};
 
-      Elem::Measures measures;
-      measures.copyCtorCalls = numElems;
-      measures.dtorCalls = numElems;
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = numElems;
+      metrics.dtorCalls = numElems;
 
-      CtorTest<Elem, BufCap> test{caseLabel, measures};
+      CtorTest<Elem, BufCap> test{caseLabel, metrics};
       test.run([&, BufCap]() {
          SV sv(numElems, initVal);
 
@@ -501,12 +498,12 @@ void TestCopyCtor()
       const std::initializer_list<Elem> values{1, 2, 3, 4, 5};
       const std::size_t numElems = values.size();
 
-      Elem::Measures measures;
+      Elem::Metrics metrics;
       // For source elements and copies.
-      measures.copyCtorCalls = 2 * numElems;
-      measures.dtorCalls = 2 * numElems;
+      metrics.copyCtorCalls = 2 * numElems;
+      metrics.dtorCalls = 2 * numElems;
 
-      CtorTest<Elem, BufCap> test{caseLabel, measures};
+      CtorTest<Elem, BufCap> test{caseLabel, metrics};
       test.run([&, BufCap]() {
          const SV src{values};
          SV sv{src};
@@ -526,12 +523,12 @@ void TestCopyCtor()
       const std::initializer_list<Elem> values{1, 2, 3, 4, 5, 6, 7};
       const std::size_t numElems = values.size();
 
-      Elem::Measures measures;
+      Elem::Metrics metrics;
       // For source elements and copies.
-      measures.copyCtorCalls = 2 * numElems;
-      measures.dtorCalls = 2 * numElems;
+      metrics.copyCtorCalls = 2 * numElems;
+      metrics.dtorCalls = 2 * numElems;
 
-      CtorTest<Elem, BufCap> test{caseLabel, measures};
+      CtorTest<Elem, BufCap> test{caseLabel, metrics};
       test.run([&, BufCap]() {
          const SV src{values};
          SV sv{src};
@@ -556,16 +553,16 @@ void TestMoveCtor()
       const std::initializer_list<Elem> values{1, 2, 3, 4, 5};
       const std::size_t numElems = values.size();
 
-      Elem::Measures measures;
+      Elem::Metrics metrics;
       // For constructing the source elements.
-      measures.copyCtorCalls = numElems;
+      metrics.copyCtorCalls = numElems;
       // For constructing the copies.
-      measures.moveCtorCalls = numElems;
+      metrics.moveCtorCalls = numElems;
       // For destroying the copies. The source vector is empty after the move and nothing
       // needs to be destroyed.
-      measures.dtorCalls = numElems;
+      metrics.dtorCalls = numElems;
 
-      CtorTest<Elem, BufCap> test{caseLabel, measures};
+      CtorTest<Elem, BufCap> test{caseLabel, metrics};
       test.run([&, BufCap]() {
          SV src{values};
          SV sv{std::move(src)};
@@ -587,14 +584,14 @@ void TestMoveCtor()
       const std::initializer_list<Elem> values{1, 2, 3, 4, 5, 6, 7};
       const std::size_t numElems = values.size();
 
-      Elem::Measures measures;
+      Elem::Metrics metrics;
       // For constructing the source elements.
-      measures.copyCtorCalls = numElems;
+      metrics.copyCtorCalls = numElems;
       // No moves because the SboVector simply stole the pointer to the heap memory.
-      measures.moveCtorCalls = 0;
-      measures.dtorCalls = numElems;
+      metrics.moveCtorCalls = 0;
+      metrics.dtorCalls = numElems;
 
-      CtorTest<Elem, BufCap> test{caseLabel, measures};
+      CtorTest<Elem, BufCap> test{caseLabel, metrics};
       test.run([&, BufCap]() {
          SV src{values};
          SV sv{std::move(src)};
@@ -621,11 +618,11 @@ void TestInitializerListCtor()
       const std::initializer_list<Elem> values{1, 2, 3, 4, 5};
       const std::size_t numElems = values.size();
 
-      Elem::Measures measures;
-      measures.copyCtorCalls = numElems;
-      measures.dtorCalls = numElems;
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = numElems;
+      metrics.dtorCalls = numElems;
 
-      CtorTest<Elem, BufCap> test{caseLabel, measures};
+      CtorTest<Elem, BufCap> test{caseLabel, metrics};
       test.run([&, BufCap]() {
          SV sv{values};
 
@@ -644,11 +641,11 @@ void TestInitializerListCtor()
       const std::initializer_list<Elem> values{1, 2, 3, 4, 5, 6, 7};
       const std::size_t numElems = values.size();
 
-      Elem::Measures measures;
-      measures.copyCtorCalls = numElems;
-      measures.dtorCalls = numElems;
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = numElems;
+      metrics.dtorCalls = numElems;
 
-      CtorTest<Elem, BufCap> test{caseLabel, measures};
+      CtorTest<Elem, BufCap> test{caseLabel, metrics};
       test.run([&, BufCap]() {
          SV sv{values};
 
@@ -682,13 +679,13 @@ void TestDtor()
 
          // Reset element instrumentation right before the SboVector gets destroyed
          // to only verify the destruction of the vector elements.
-         Elem::resetInstrumentation();
+         Elem::resetMetrics();
 
          // Test.
          // End of scope triggers dtor.
       }
 
-      VERIFY(Elem::m_instrumented.dtorCalls == numElems, caseLabel);
+      VERIFY(Elem::m_metrics.dtorCalls == numElems, caseLabel);
    }
    {
       const std::string caseLabel{"SboVector dtor for heap instance"};
@@ -710,10 +707,10 @@ void TestDtor()
 
          // Reset element instrumentation right before the SboVector gets destroyed
          // to only verify the destruction of the vector elements.
-         Elem::resetInstrumentation();
+         Elem::resetMetrics();
       }
 
-      VERIFY(Elem::m_instrumented.dtorCalls == numElems, caseLabel);
+      VERIFY(Elem::m_metrics.dtorCalls == numElems, caseLabel);
    }
 }
 
@@ -721,13 +718,13 @@ void TestDtor()
 void TestCopyAssignment()
 {
    // Local function to calculate the expected metrics for copy-assignments.
-   auto expectedCopyMeasures = [](std::size_t numFrom,
-                                  std::size_t numTo) -> Element::Measures {
-      Element::Measures measures;
+   auto expectedCopyMetrics = [](std::size_t numFrom,
+                                  std::size_t numTo) -> Element::Metrics {
+      Element::Metrics metrics;
       // For populating vectors and copying source to destination.
-      measures.copyCtorCalls = 2 * numFrom + numTo;
-      measures.dtorCalls = 2 * numFrom + numTo;
-      return measures;
+      metrics.copyCtorCalls = 2 * numFrom + numTo;
+      metrics.dtorCalls = 2 * numFrom + numTo;
+      return metrics;
    };
 
    {
@@ -743,7 +740,7 @@ void TestCopyAssignment()
       const std::initializer_list<Elem> toValues{1, 2, 3};
       const std::size_t numTo = toValues.size();
 
-      CtorTest<Elem, BufCap> test{caseLabel, expectedCopyMeasures(numFrom, numTo)};
+      CtorTest<Elem, BufCap> test{caseLabel, expectedCopyMetrics(numFrom, numTo)};
       test.run([&]() {
          SV from{fromValues};
          SV to{toValues};
@@ -771,7 +768,7 @@ void TestCopyAssignment()
       const std::initializer_list<Elem> toValues{1, 2, 3};
       const std::size_t numTo = toValues.size();
 
-      CtorTest<Elem, BufCap> test{caseLabel, expectedCopyMeasures(numFrom, numTo)};
+      CtorTest<Elem, BufCap> test{caseLabel, expectedCopyMetrics(numFrom, numTo)};
       test.run([&]() {
          SV from{fromValues};
          SV to{toValues};
@@ -799,7 +796,7 @@ void TestCopyAssignment()
       const std::initializer_list<Elem> toValues{1, 2, 3, 4, 5, 6, 7, 8};
       const std::size_t numTo = toValues.size();
 
-      CtorTest<Elem, BufCap> test{caseLabel, expectedCopyMeasures(numFrom, numTo)};
+      CtorTest<Elem, BufCap> test{caseLabel, expectedCopyMetrics(numFrom, numTo)};
       test.run([&]() {
          SV from{fromValues};
          SV to{toValues};
@@ -827,7 +824,7 @@ void TestCopyAssignment()
       const std::initializer_list<Elem> toValues{1, 2, 3, 4, 5, 6, 7};
       const std::size_t numTo = toValues.size();
 
-      CtorTest<Elem, BufCap> test{caseLabel, expectedCopyMeasures(numFrom, numTo)};
+      CtorTest<Elem, BufCap> test{caseLabel, expectedCopyMetrics(numFrom, numTo)};
       test.run([&]() {
          SV from{fromValues};
          SV to{toValues};
@@ -858,7 +855,7 @@ void TestCopyAssignment()
       const std::initializer_list<Elem> toValues{1, 2, 3, 4, 5, 6, 7, 8};
       const std::size_t numTo = toValues.size();
 
-      CtorTest<Elem, BufCap> test{caseLabel, expectedCopyMeasures(numFrom, numTo)};
+      CtorTest<Elem, BufCap> test{caseLabel, expectedCopyMetrics(numFrom, numTo)};
       test.run([&]() {
          SV from{fromValues};
          SV to{toValues};
@@ -883,21 +880,21 @@ void TestMoveAssignment()
 {
    // Local functions to calculate the expected metrics for move-assignments.
    auto expectedMoveHeapMetrics = [](std::size_t numFrom,
-                                     std::size_t numTo) -> Element::Measures {
-      Element::Measures measures;
-      measures.copyCtorCalls = numFrom + numTo;
+                                     std::size_t numTo) -> Element::Metrics {
+      Element::Metrics metrics;
+      metrics.copyCtorCalls = numFrom + numTo;
       // No moves because the heap allocations is stolen.
-      measures.moveCtorCalls = 0;
-      measures.dtorCalls = numFrom + numTo;
-      return measures;
+      metrics.moveCtorCalls = 0;
+      metrics.dtorCalls = numFrom + numTo;
+      return metrics;
    };
    auto expectedMoveBufferMetrics = [](std::size_t numFrom,
-                                       std::size_t numTo) -> Element::Measures {
-      Element::Measures measures;
-      measures.copyCtorCalls = numFrom + numTo;
-      measures.moveCtorCalls = numFrom;
-      measures.dtorCalls = numFrom + numTo;
-      return measures;
+                                       std::size_t numTo) -> Element::Metrics {
+      Element::Metrics metrics;
+      metrics.copyCtorCalls = numFrom + numTo;
+      metrics.moveCtorCalls = numFrom;
+      metrics.dtorCalls = numFrom + numTo;
+      return metrics;
    };
 
    {
@@ -1071,7 +1068,7 @@ void TestInitializerListAssignment()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          // Constructing initializer list elements.
          expected.ctorCalls = NumElems;
          // Copied elements.
@@ -1113,7 +1110,7 @@ void TestInitializerListAssignment()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          // Constructing initializer list elements.
          expected.ctorCalls = NumElems;
          // Copied elements.
@@ -1155,7 +1152,7 @@ void TestInitializerListAssignment()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          // Constructing initializer list elements.
          expected.ctorCalls = NumElems;
          // Copied elements.
@@ -1198,7 +1195,7 @@ void TestInitializerListAssignment()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          // Constructing initializer list elements.
          expected.ctorCalls = NumElems;
          // Copied elements.
@@ -1241,7 +1238,7 @@ void TestInitializerListAssignment()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          // Constructing initializer list elements.
          expected.ctorCalls = NumElems;
          // Copied elements.
@@ -1289,7 +1286,7 @@ void TestAssignElementValue()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          // Constructing assigned element.
          expected.ctorCalls = 1;
          // Populated elements.
@@ -1333,7 +1330,7 @@ void TestAssignElementValue()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          // Constructing assigned element.
          expected.ctorCalls = 1;
          // Populated elements.
@@ -1376,7 +1373,7 @@ void TestAssignElementValue()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          // Constructing assigned element.
          expected.ctorCalls = 1;
          // Populated elements.
@@ -1420,7 +1417,7 @@ void TestAssignElementValue()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          // Constructing assigned element.
          expected.ctorCalls = 1;
          // Populated elements.
@@ -1464,7 +1461,7 @@ void TestAssignElementValue()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          // Constructing assigned element.
          expected.ctorCalls = 1;
          // Populated elements.
@@ -1514,7 +1511,7 @@ void TestAssignIteratorRange()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          // Assigned elements.
          expected.copyCtorCalls = NumElems;
          // Destruct original elements.
@@ -1556,7 +1553,7 @@ void TestAssignIteratorRange()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          // Assigned elements.
          expected.copyCtorCalls = NumElems;
          // Destruct original elements.
@@ -1598,7 +1595,7 @@ void TestAssignIteratorRange()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          // Assigned elements.
          expected.copyCtorCalls = NumElems;
          // Destruct original elements.
@@ -1641,7 +1638,7 @@ void TestAssignIteratorRange()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          // Assigned elements.
          expected.copyCtorCalls = NumElems;
          // Destruct original elements.
@@ -1684,7 +1681,7 @@ void TestAssignIteratorRange()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          // Assigned elements.
          expected.copyCtorCalls = NumElems;
          // Destruct original elements.
@@ -1731,7 +1728,7 @@ void TestAssignInitializerList()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          // Elements constructed by initalizer list.
          expected.ctorCalls = NumElems;
          // Assigned elements.
@@ -1774,7 +1771,7 @@ void TestAssignInitializerList()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          // Elements constructed by initalizer list.
          expected.ctorCalls = NumElems;
          // Assigned elements.
@@ -1817,7 +1814,7 @@ void TestAssignInitializerList()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          // Elements constructed by initalizer list.
          expected.ctorCalls = NumElems;
          // Assigned elements.
@@ -1861,7 +1858,7 @@ void TestAssignInitializerList()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          // Elements constructed by initalizer list.
          expected.ctorCalls = NumElems;
          // Assigned elements.
@@ -1905,7 +1902,7 @@ void TestAssignInitializerList()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          // Elements constructed by initalizer list.
          expected.ctorCalls = NumElems;
          // Assigned elements.
@@ -3370,7 +3367,7 @@ void TestReserve()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          // All expected values are zero because the reserve call is a no-op.
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
 
@@ -3399,7 +3396,7 @@ void TestReserve()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          // All expected values are zero because the reserve call throws without making.
          // changes.
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -3431,7 +3428,7 @@ void TestReserve()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          // Elements are moved.
          expected.moveCtorCalls = OrigCap;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -3469,7 +3466,7 @@ void TestReserve()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          // Copy elements to larger allocation.
          expected.copyCtorCalls = OrigCap;
          // Destroy previous elements.
@@ -3510,7 +3507,7 @@ void TestReserve()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          // Elements are moved.
          expected.moveCtorCalls = OrigCap;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -3550,7 +3547,7 @@ void TestReserve()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          // Copy elements to larger allocation.
          expected.copyCtorCalls = OrigCap;
          // Destroy previous elements.
@@ -3591,7 +3588,7 @@ void TestReserve()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          // It's a no-op.
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
 
@@ -3629,7 +3626,7 @@ void TestShrinkToFit()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          // All expected values are zero because the call is a no-op.
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
 
@@ -3665,7 +3662,7 @@ void TestShrinkToFit()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          // All expected values are zero because the call is a no-op.
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
 
@@ -3708,7 +3705,7 @@ void TestShrinkToFit()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          // Elements are moved.
          expected.moveCtorCalls = NumElems;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -3751,7 +3748,7 @@ void TestShrinkToFit()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          // Copy elements to larger allocation.
          expected.copyCtorCalls = NumElems;
          // Destroy previous elements.
@@ -3797,7 +3794,7 @@ void TestShrinkToFit()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          // Elements are moved.
          expected.moveCtorCalls = NumElems;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -3844,7 +3841,7 @@ void TestShrinkToFit()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          // Elements are moved.
          // Copy elements to larger allocation.
          expected.copyCtorCalls = NumElems;
@@ -3886,7 +3883,7 @@ void TestClear()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          // It's a no-op
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
 
@@ -3918,7 +3915,7 @@ void TestClear()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.dtorCalls = NumElems;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
 
@@ -3950,7 +3947,7 @@ void TestClear()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.dtorCalls = NumElems;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
 
@@ -3989,7 +3986,7 @@ void TestEraseSingleElement()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.moveCtorCalls = sv.size() - erasedElemIdx - 1;
          expected.dtorCalls = 1;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -4029,7 +4026,7 @@ void TestEraseSingleElement()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.moveCtorCalls = sv.size() - 1;
          expected.dtorCalls = 1;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -4069,7 +4066,7 @@ void TestEraseSingleElement()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.moveCtorCalls = 0;
          expected.dtorCalls = 1;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -4106,7 +4103,7 @@ void TestEraseSingleElement()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.moveCtorCalls = 0;
          expected.dtorCalls = 1;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -4142,7 +4139,7 @@ void TestEraseSingleElement()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.moveCtorCalls = sv.size() - erasedElemIdx - 1;
          expected.dtorCalls = 1;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -4177,7 +4174,7 @@ void TestEraseSingleElement()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.moveCtorCalls = 0;
          expected.dtorCalls = 0;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -4214,7 +4211,7 @@ void TestEraseSingleElement()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.moveCtorCalls = sv.size() - erasedElemIdx - 1;
          expected.dtorCalls = 1;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -4254,7 +4251,7 @@ void TestEraseSingleElement()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.moveCtorCalls = sv.size() - 1;
          expected.dtorCalls = 1;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -4294,7 +4291,7 @@ void TestEraseSingleElement()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.moveCtorCalls = 0;
          expected.dtorCalls = 1;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -4334,7 +4331,7 @@ void TestEraseSingleElement()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.moveCtorCalls = 0;
          expected.dtorCalls = 1;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -4372,7 +4369,7 @@ void TestEraseSingleElement()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.moveCtorCalls = 0;
          expected.dtorCalls = sv.size();
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -4411,7 +4408,7 @@ void TestEraseSingleElement()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.copyCtorCalls = numRelocated;
          expected.dtorCalls = numRelocated + 1;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -4456,7 +4453,7 @@ void TestEraseIteratorRange()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
 
          // Test.
@@ -4494,7 +4491,7 @@ void TestEraseIteratorRange()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.moveCtorCalls = origSize - lastIdx;
          expected.dtorCalls = lastIdx - firstIdx;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -4540,7 +4537,7 @@ void TestEraseIteratorRange()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.moveCtorCalls = origSize - lastIdx;
          expected.dtorCalls = lastIdx - firstIdx;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -4585,7 +4582,7 @@ void TestEraseIteratorRange()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.moveCtorCalls = 0;
          expected.dtorCalls = lastIdx - firstIdx;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -4623,7 +4620,7 @@ void TestEraseIteratorRange()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.moveCtorCalls = 0;
          expected.dtorCalls = sv.size();
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -4662,7 +4659,7 @@ void TestEraseIteratorRange()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.moveCtorCalls = origSize - lastIdx;
          expected.dtorCalls = lastIdx - firstIdx;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -4708,7 +4705,7 @@ void TestEraseIteratorRange()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.moveCtorCalls = origSize - lastIdx;
          expected.dtorCalls = lastIdx - firstIdx;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -4753,7 +4750,7 @@ void TestEraseIteratorRange()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.moveCtorCalls = 0;
          expected.dtorCalls = lastIdx - firstIdx;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -4794,7 +4791,7 @@ void TestEraseIteratorRange()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.moveCtorCalls = origSize - lastIdx;
          expected.dtorCalls = lastIdx - firstIdx;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -4834,7 +4831,7 @@ void TestEraseIteratorRange()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.moveCtorCalls = 0;
          expected.dtorCalls = 0;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -4872,7 +4869,7 @@ void TestEraseIteratorRange()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.moveCtorCalls = origSize - lastIdx;
          expected.dtorCalls = lastIdx - firstIdx;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -4912,7 +4909,7 @@ void TestEraseIteratorRange()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.moveCtorCalls = 0;
          expected.dtorCalls = sv.size();
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -4952,7 +4949,7 @@ void TestEraseIteratorRange()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.copyCtorCalls = numBehind;
          expected.dtorCalls = numErased + numBehind;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -5006,7 +5003,7 @@ void TestInsertSingleValue()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.moveCtorCalls = numRelocated;
          expected.copyCtorCalls = 1;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -5056,7 +5053,7 @@ void TestInsertSingleValue()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.moveCtorCalls = numRelocated;
          expected.copyCtorCalls = 1;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -5106,7 +5103,7 @@ void TestInsertSingleValue()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.moveCtorCalls = numRelocated;
          expected.copyCtorCalls = 1;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -5156,7 +5153,7 @@ void TestInsertSingleValue()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.moveCtorCalls = numRelocated;
          expected.copyCtorCalls = 1;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -5206,7 +5203,7 @@ void TestInsertSingleValue()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.moveCtorCalls = numRelocated;
          expected.copyCtorCalls = 1;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -5256,7 +5253,7 @@ void TestInsertSingleValue()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.moveCtorCalls = numRelocated;
          expected.copyCtorCalls = 1;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -5308,7 +5305,7 @@ void TestInsertSingleValue()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.moveCtorCalls = numRelocated;
          expected.copyCtorCalls = 1;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -5354,7 +5351,7 @@ void TestInsertSingleValue()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.moveCtorCalls = numRelocated;
          expected.copyCtorCalls = 1;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -5403,7 +5400,7 @@ void TestInsertSingleValue()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.moveCtorCalls = numRelocated;
          expected.copyCtorCalls = 1;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -5446,7 +5443,7 @@ void TestInsertSingleValue()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.copyCtorCalls = 1;
          expected.dtorCalls = 0;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -5494,7 +5491,7 @@ void TestInsertSingleValue()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.copyCtorCalls = numRelocated + 1;
          expected.dtorCalls = numRelocated;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -5546,7 +5543,7 @@ void TestInsertSingleValueWithMove()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.moveCtorCalls = numRelocated + 1;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
 
@@ -5598,7 +5595,7 @@ void TestInsertSingleValueWithMove()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.moveCtorCalls = numRelocated + 1;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
 
@@ -5650,7 +5647,7 @@ void TestInsertSingleValueWithMove()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.moveCtorCalls = numRelocated + 1;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
 
@@ -5702,7 +5699,7 @@ void TestInsertSingleValueWithMove()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.moveCtorCalls = numRelocated + 1;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
 
@@ -5755,7 +5752,7 @@ void TestInsertSingleValueWithMove()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.moveCtorCalls = numRelocated + 1;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
 
@@ -5802,7 +5799,7 @@ void TestInsertSingleValueWithMove()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.moveCtorCalls = numRelocated + 1;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
 
@@ -5852,7 +5849,7 @@ void TestInsertSingleValueWithMove()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.moveCtorCalls = numRelocated + 1;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
 
@@ -5898,7 +5895,7 @@ void TestInsertSingleValueWithMove()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.moveCtorCalls = 1;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
 
@@ -5951,7 +5948,7 @@ void TestInsertValueMultipleTimes()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.moveCtorCalls = numRelocated;
          expected.copyCtorCalls = numInserted;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -6008,7 +6005,7 @@ void TestInsertValueMultipleTimes()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.moveCtorCalls = numRelocated;
          expected.copyCtorCalls = numInserted;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -6065,7 +6062,7 @@ void TestInsertValueMultipleTimes()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.moveCtorCalls = numRelocated;
          expected.copyCtorCalls = numInserted;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -6122,7 +6119,7 @@ void TestInsertValueMultipleTimes()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.moveCtorCalls = numRelocated;
          expected.copyCtorCalls = numInserted;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -6180,7 +6177,7 @@ void TestInsertValueMultipleTimes()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.moveCtorCalls = numRelocated;
          expected.copyCtorCalls = numInserted;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -6236,7 +6233,7 @@ void TestInsertValueMultipleTimes()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.moveCtorCalls = numRelocated;
          expected.copyCtorCalls = numInserted;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -6295,7 +6292,7 @@ void TestInsertValueMultipleTimes()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.moveCtorCalls = numRelocated;
          expected.copyCtorCalls = numInserted;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -6350,7 +6347,7 @@ void TestInsertValueMultipleTimes()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.copyCtorCalls = numInserted;
          expected.dtorCalls = 0;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -6401,7 +6398,7 @@ void TestInsertValueMultipleTimes()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.copyCtorCalls = numRelocated + numInserted;
          expected.dtorCalls = numRelocated;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -6455,7 +6452,7 @@ void TestInsertValueMultipleTimes()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.copyCtorCalls = 0;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
 
@@ -6510,7 +6507,7 @@ void TestInsertRange()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.moveCtorCalls = numRelocated;
          expected.copyCtorCalls = numInserted;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -6567,7 +6564,7 @@ void TestInsertRange()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.moveCtorCalls = numRelocated;
          expected.copyCtorCalls = numInserted;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -6624,7 +6621,7 @@ void TestInsertRange()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.moveCtorCalls = numRelocated;
          expected.copyCtorCalls = numInserted;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -6681,7 +6678,7 @@ void TestInsertRange()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.moveCtorCalls = numRelocated;
          expected.copyCtorCalls = numInserted;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -6740,7 +6737,7 @@ void TestInsertRange()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.moveCtorCalls = numRelocated;
          expected.copyCtorCalls = numInserted;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -6799,7 +6796,7 @@ void TestInsertRange()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.moveCtorCalls = numRelocated;
          expected.copyCtorCalls = numInserted;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -6862,7 +6859,7 @@ void TestInsertRange()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.moveCtorCalls = numRelocated;
          expected.copyCtorCalls = numInserted;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -6919,7 +6916,7 @@ void TestInsertRange()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.copyCtorCalls = numInserted;
          expected.dtorCalls = 0;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -6973,7 +6970,7 @@ void TestInsertRange()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.copyCtorCalls = numRelocated + numInserted;
          expected.dtorCalls = numRelocated;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
@@ -7030,7 +7027,7 @@ void TestInsertRange()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.copyCtorCalls = 0;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
 
@@ -7142,7 +7139,7 @@ class SboVectorInsertInitializerListTest
    SboVectorInsertInitializerListTest(SboVectorInsertInitializerListTest&&) = delete;
 
    void run(std::initializer_list<Elem> inserted, std::size_t insertAt,
-            const typename Elem::Measures& measures, const ExpectedResult<Elem>& res);
+            const typename Elem::Metrics& metrics, const ExpectedResult<Elem>& res);
 
  private:
    SV makeVector();
@@ -7156,7 +7153,7 @@ class SboVectorInsertInitializerListTest
 template <typename Elem, std::size_t BufCap, std::size_t Cap>
 void SboVectorInsertInitializerListTest<Elem, BufCap, Cap>::run(
    std::initializer_list<Elem> inserted, std::size_t insertAt,
-   const typename Elem::Measures& measures, const ExpectedResult<Elem>& result)
+   const typename Elem::Metrics& metrics, const ExpectedResult<Elem>& result)
 {
    // Memory instrumentation for entire scope.
    const MemVerifier<SV> memCheck{m_caseLabel};
@@ -7165,7 +7162,7 @@ void SboVectorInsertInitializerListTest<Elem, BufCap, Cap>::run(
 
    {
       // Element instrumentation for tested call only.
-      const ElementVerifier<Elem> elemCheck{measures, m_caseLabel};
+      const ElementVerifier<Elem> elemCheck{metrics, m_caseLabel};
 
       // Test.
       typename SV::iterator insertedElem = sv.insert(sv.begin() + insertAt, inserted);
@@ -7212,9 +7209,9 @@ void TestInsertInitializerList()
 
       SboVectorInsertInitializerListTest<Elem, BufCap, Cap> test(caseLabel, initial);
 
-      Elem::Measures measures;
-      measures.moveCtorCalls = numRelocated;
-      measures.copyCtorCalls = numInserted;
+      Elem::Metrics metrics;
+      metrics.moveCtorCalls = numRelocated;
+      metrics.copyCtorCalls = numInserted;
 
       ExpectedResult<Elem> result{
          true,
@@ -7226,7 +7223,7 @@ void TestInsertInitializerList()
       VERIFY(insertAt > 0 && insertAt < numElems - 1, caseLabel);
       VERIFY(BufCap > numElems + numInserted, caseLabel);
 
-      test.run(inserted, insertAt, measures, result);
+      test.run(inserted, insertAt, metrics, result);
    }
    {
       const std::string caseLabel{"SvoVector::insert initializer list at front of buffer "
@@ -7246,9 +7243,9 @@ void TestInsertInitializerList()
 
       SboVectorInsertInitializerListTest<Elem, BufCap, Cap> test(caseLabel, initial);
 
-      Elem::Measures measures;
-      measures.moveCtorCalls = numRelocated;
-      measures.copyCtorCalls = numInserted;
+      Elem::Metrics metrics;
+      metrics.moveCtorCalls = numRelocated;
+      metrics.copyCtorCalls = numInserted;
 
       ExpectedResult<Elem> result{
          true,
@@ -7260,7 +7257,7 @@ void TestInsertInitializerList()
       VERIFY(insertAt == 0, caseLabel);
       VERIFY(BufCap > numElems + numInserted, caseLabel);
 
-      test.run(inserted, insertAt, measures, result);
+      test.run(inserted, insertAt, metrics, result);
    }
    {
       const std::string caseLabel{"SvoVector::insert initializer list at rear of buffer "
@@ -7280,9 +7277,9 @@ void TestInsertInitializerList()
 
       SboVectorInsertInitializerListTest<Elem, BufCap, Cap> test(caseLabel, initial);
 
-      Elem::Measures measures;
-      measures.moveCtorCalls = numRelocated;
-      measures.copyCtorCalls = numInserted;
+      Elem::Metrics metrics;
+      metrics.moveCtorCalls = numRelocated;
+      metrics.copyCtorCalls = numInserted;
 
       ExpectedResult<Elem> result{
          true,
@@ -7294,7 +7291,7 @@ void TestInsertInitializerList()
       VERIFY(insertAt == numElems, caseLabel);
       VERIFY(BufCap > numElems + numInserted, caseLabel);
 
-      test.run(inserted, insertAt, measures, result);
+      test.run(inserted, insertAt, metrics, result);
    }
    {
       const std::string caseLabel{
@@ -7315,9 +7312,9 @@ void TestInsertInitializerList()
 
       SboVectorInsertInitializerListTest<Elem, BufCap, Cap> test(caseLabel, initial);
 
-      Elem::Measures measures;
-      measures.moveCtorCalls = numRelocated;
-      measures.copyCtorCalls = numInserted;
+      Elem::Metrics metrics;
+      metrics.moveCtorCalls = numRelocated;
+      metrics.copyCtorCalls = numInserted;
 
       ExpectedResult<Elem> result{
          false,
@@ -7329,7 +7326,7 @@ void TestInsertInitializerList()
       VERIFY(insertAt > 0 && insertAt < numElems - 1, caseLabel);
       VERIFY(Cap == numElems, caseLabel);
 
-      test.run(inserted, insertAt, measures, result);
+      test.run(inserted, insertAt, metrics, result);
    }
    {
       const std::string caseLabel{"SvoVector::insert initializer list into heap "
@@ -7349,9 +7346,9 @@ void TestInsertInitializerList()
 
       SboVectorInsertInitializerListTest<Elem, BufCap, Cap> test(caseLabel, initial);
 
-      Elem::Measures measures;
-      measures.moveCtorCalls = numRelocated;
-      measures.copyCtorCalls = numInserted;
+      Elem::Metrics metrics;
+      metrics.moveCtorCalls = numRelocated;
+      metrics.copyCtorCalls = numInserted;
 
       ExpectedResult<Elem> result{
          false,
@@ -7364,7 +7361,7 @@ void TestInsertInitializerList()
       VERIFY(Cap > BufCap, caseLabel);
       VERIFY(numElems < Cap, caseLabel);
 
-      test.run(inserted, insertAt, measures, result);
+      test.run(inserted, insertAt, metrics, result);
    }
    {
       const std::string caseLabel{"SvoVector::insert initializer list into heap "
@@ -7393,7 +7390,7 @@ void TestInsertInitializerList()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          // Constructing the initializer list elements.
          expected.ctorCalls = numInserted;
          expected.moveCtorCalls = numRelocated;
@@ -7456,7 +7453,7 @@ void TestInsertInitializerList()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          // Constructing the initializer list elements.
          expected.ctorCalls = numInserted;
          expected.moveCtorCalls = numRelocated;
@@ -7513,7 +7510,7 @@ void TestInsertInitializerList()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          // Constructing the initializer list elements.
          expected.ctorCalls = numInserted;
          expected.moveCtorCalls = numRelocated;
@@ -7567,7 +7564,7 @@ void TestInsertInitializerList()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          // Constructing the initializer list elements.
          expected.ctorCalls = numInserted;
          expected.copyCtorCalls = numRelocated + numInserted;
@@ -7623,7 +7620,7 @@ void TestInsertInitializerList()
 
       {
          // Element instrumentation for tested call only.
-         Elem::Measures expected;
+         Elem::Metrics expected;
          expected.copyCtorCalls = 0;
          const ElementVerifier<Elem> elemCheck{expected, caseLabel};
 
