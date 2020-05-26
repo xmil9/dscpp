@@ -615,75 +615,47 @@ void TestInitializerListCtor()
       const std::string caseLabel{"SboVector initializer list ctor for buffer instance"};
 
       constexpr std::size_t BufCap = 10;
-      constexpr std::size_t NumElems = 4;
       using Elem = Element;
-      using SV = SboVector<Elem, BufCap>;
+      using SV = SboVector<Element, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::initializer_list<Elem> values{1, 2, 3, 4, 5};
+      const std::size_t numElems = values.size();
 
-      // Precondition.
-      VERIFY(NumElems < BufCap, caseLabel);
+      Elem::Measures measures;
+      measures.copyCtorCalls = numElems;
+      measures.dtorCalls = numElems;
 
-      {
-         // Element instrumentation for tested call only.
-         Elem::Measures expected;
-         // Constructing initializer list elements.
-         expected.ctorCalls = NumElems;
-         // Copy constructing vector elements.
-         expected.copyCtorCalls = NumElems;
-         // Destruction of elements in vector and initializer list.
-         expected.dtorCalls = 2 * NumElems;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+      CtorTest<Elem, BufCap> test{caseLabel, measures};
+      test.run([&, BufCap]() {
+         SV sv{values};
 
-         // Test.
-         SV sv{{1}, {2}, {3}, {4}};
-
-         // Verify vector state.
-         VERIFY(sv.size() == NumElems, caseLabel);
-         VERIFY(sv.capacity() == BufCap, caseLabel);
          VERIFY(sv.inBuffer(), caseLabel);
-         for (int i = 0; i < sv.size(); ++i)
-            VERIFY(sv[i].i == i + 1, caseLabel);
-      }
+         VERIFY(sv.capacity() == BufCap, caseLabel);
+         verifyValues(sv, values, caseLabel);
+      });
    }
    {
       const std::string caseLabel{"SboVector initializer list ctor for heap instance"};
 
-      constexpr std::size_t BufCap = 10;
-      constexpr std::size_t NumElems = 12;
+      constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Elem, BufCap>;
+      using SV = SboVector<Element, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::initializer_list<Elem> values{1, 2, 3, 4, 5, 6, 7};
+      const std::size_t numElems = values.size();
 
-      // Precondition.
-      VERIFY(NumElems > BufCap, caseLabel);
+      Elem::Measures measures;
+      measures.copyCtorCalls = numElems;
+      measures.dtorCalls = numElems;
 
-      {
-         // Element instrumentation for tested call only.
-         Elem::Measures expected;
-         // Constructing initializer list elements.
-         expected.ctorCalls = NumElems;
-         // Copy constructing vector elements.
-         expected.copyCtorCalls = NumElems;
-         // Destruction of elements in vector and initializer list.
-         expected.dtorCalls = 2 * NumElems;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+      CtorTest<Elem, BufCap> test{caseLabel, measures};
+      test.run([&, BufCap]() {
+         SV sv{values};
 
-         // Test.
-         SV sv{
-            {1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}, {12},
-         };
-
-         // Verify vector state.
-         VERIFY(sv.size() == NumElems, caseLabel);
-         VERIFY(sv.capacity() == NumElems, caseLabel);
          VERIFY(sv.onHeap(), caseLabel);
-         for (int i = 0; i < sv.size(); ++i)
-            VERIFY(sv[i].i == i + 1, caseLabel);
-      }
+         VERIFY(sv.capacity() == numElems, caseLabel);
+         verifyValues(sv, values, caseLabel);
+      });
    }
 }
 
@@ -694,18 +666,19 @@ void TestDtor()
       const std::string caseLabel{"SboVector dtor for buffer instance"};
 
       constexpr std::size_t BufCap = 10;
-      constexpr std::size_t NumElems = 3;
+      constexpr std::size_t numElems = 3;
       using Elem = Element;
       using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation.
       const MemVerifier<SV> memCheck{caseLabel};
 
-      // Precondition.
-      VERIFY(NumElems < BufCap, caseLabel);
-
       {
-         SV sv{{1}, {2}, {3}};
+         SV sv{1, 2, 3};
+
+         // Preconditions.
+         VERIFY(sv.inBuffer(), caseLabel);
+         VERIFY(sv.size() == numElems, caseLabel);
 
          // Reset element instrumentation right before the SboVector gets destroyed
          // to only verify the destruction of the vector elements.
@@ -715,31 +688,32 @@ void TestDtor()
          // End of scope triggers dtor.
       }
 
-      VERIFY(Elem::m_instrumented.dtorCalls == NumElems, caseLabel);
+      VERIFY(Elem::m_instrumented.dtorCalls == numElems, caseLabel);
    }
    {
       const std::string caseLabel{"SboVector dtor for heap instance"};
 
       constexpr std::size_t BufCap = 3;
-      constexpr std::size_t NumElems = 5;
+      constexpr std::size_t numElems = 5;
       using Elem = Element;
       using SV = SboVector<Elem, BufCap>;
 
       // Memory instrumentation.
       const MemVerifier<SV> memCheck{caseLabel};
 
-      // Precondition.
-      VERIFY(NumElems > BufCap, caseLabel);
-
       {
-         SV sv{{1}, {2}, {3}, {4}, {5}};
+         SV sv{1, 2, 3, 4, 5};
+
+         // Precondition.
+         VERIFY(sv.onHeap(), caseLabel);
+         VERIFY(sv.size() == numElems, caseLabel);
 
          // Reset element instrumentation right before the SboVector gets destroyed
          // to only verify the destruction of the vector elements.
          Elem::resetInstrumentation();
       }
 
-      VERIFY(Elem::m_instrumented.dtorCalls == NumElems, caseLabel);
+      VERIFY(Elem::m_instrumented.dtorCalls == numElems, caseLabel);
    }
 }
 
