@@ -722,234 +722,174 @@ void TestCopyAssignment()
 {
    {
       const std::string caseLabel{
-         "SboVector copy assignment of buffer instance to buffer instance"};
+         "SboVector copy assignment from buffer instance to buffer instance"};
 
       constexpr std::size_t BufCap = 10;
-      constexpr std::size_t NumElems = 5;
-      constexpr std::size_t NumOrigElems = 3;
       using Elem = Element;
-      using SV = SboVector<Elem, BufCap>;
+      using SV = SboVector<Element, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::initializer_list<Elem> fromValues{1, 2, 3, 4, 5};
+      const std::size_t numFrom = fromValues.size();
+      const std::initializer_list<Elem> toValues{1, 2, 3};
+      const std::size_t numTo = toValues.size();
 
-      SV src(NumElems, {2});
-      for (int i = 0; i < src.size(); ++i)
-         src[i].i = i;
+      Elem::Measures measures;
+      // For populating vectors and copying source to destination.
+      measures.copyCtorCalls = 2 * numFrom + numTo;
+      measures.dtorCalls = 2 * numFrom + numTo;
 
-      SV sv(NumOrigElems, {1});
+      CtorTest<Elem, BufCap> test{caseLabel, measures};
+      test.run([&]() {
+         SV from{fromValues};
+         SV to{toValues};
 
-      // Preconditions.
-      VERIFY(NumElems < BufCap, caseLabel);
-      VERIFY(NumOrigElems < BufCap, caseLabel);
-      VERIFY(src.inBuffer(), caseLabel);
-      VERIFY(sv.inBuffer(), caseLabel);
+         VERIFY(from.inBuffer(), caseLabel);
+         VERIFY(to.inBuffer(), caseLabel);
 
-      {
-         // Element instrumentation for tested call only.
-         Elem::Measures expected;
-         // Copied elements.
-         expected.copyCtorCalls = NumElems;
-         // Original elements got destroyed.
-         expected.dtorCalls = NumOrigElems;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+         to = from;
 
-         // Test.
-         sv = src;
-      }
-
-      // Verify vector state.
-      VERIFY(sv.size() == NumElems, caseLabel);
-      VERIFY(sv.capacity() == BufCap, caseLabel);
-      VERIFY(sv.inBuffer(), caseLabel);
-      for (int i = 0; i < sv.size(); ++i)
-         VERIFY(sv[i].i == i, caseLabel);
+         VERIFY(to.inBuffer(), caseLabel);
+         VERIFY(to.capacity() == BufCap, caseLabel);
+         verifyValues(to, fromValues, caseLabel);
+      });
    }
    {
       const std::string caseLabel{
-         "SboVector copy assignment of heap instance to buffer instance"};
+         "SboVector copy assignment from heap instance to buffer instance"};
 
-      constexpr std::size_t BufCap = 10;
-      constexpr std::size_t NumElems = 20;
-      constexpr std::size_t NumOrigElems = 3;
+      constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Elem, BufCap>;
+      using SV = SboVector<Element, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::initializer_list<Elem> fromValues{1, 2, 3, 4, 5, 6, 7};
+      const std::size_t numFrom = fromValues.size();
+      const std::initializer_list<Elem> toValues{1, 2, 3};
+      const std::size_t numTo = toValues.size();
 
-      SV src(NumElems, {2});
-      for (int i = 0; i < src.size(); ++i)
-         src[i].i = i;
+      Elem::Measures measures;
+      // For populating vectors and copying source to destination.
+      measures.copyCtorCalls = 2 * numFrom + numTo;
+      measures.dtorCalls = 2 * numFrom + numTo;
 
-      SV sv(NumOrigElems, {1});
+      CtorTest<Elem, BufCap> test{caseLabel, measures};
+      test.run([&]() {
+         SV from{fromValues};
+         SV to{toValues};
 
-      // Preconditions.
-      VERIFY(NumElems > BufCap, caseLabel);
-      VERIFY(NumOrigElems < BufCap, caseLabel);
-      VERIFY(src.onHeap(), caseLabel);
-      VERIFY(sv.inBuffer(), caseLabel);
+         VERIFY(from.onHeap(), caseLabel);
+         VERIFY(to.inBuffer(), caseLabel);
 
-      {
-         // Element instrumentation for tested call only.
-         Elem::Measures expected;
-         // Copied elements.
-         expected.copyCtorCalls = NumElems;
-         // Original elements got destroyed.
-         expected.dtorCalls = NumOrigElems;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+         to = from;
 
-         // Test.
-         sv = src;
-      }
-
-      // Verify vector state.
-      VERIFY(sv.size() == NumElems, caseLabel);
-      VERIFY(sv.capacity() == NumElems, caseLabel);
-      VERIFY(sv.onHeap(), caseLabel);
-      for (int i = 0; i < sv.size(); ++i)
-         VERIFY(sv[i].i == i, caseLabel);
+         VERIFY(to.onHeap(), caseLabel);
+         VERIFY(to.capacity() == numFrom, caseLabel);
+         verifyValues(to, fromValues, caseLabel);
+      });
    }
    {
       const std::string caseLabel{
-         "SboVector copy assignment of buffer instance to heap instance"};
+         "SboVector copy assignment from buffer instance to heap instance"};
 
-      constexpr std::size_t BufCap = 10;
-      constexpr std::size_t NumElems = 5;
-      constexpr std::size_t NumOrigElems = 20;
+      constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Elem, BufCap>;
+      using SV = SboVector<Element, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::initializer_list<Elem> fromValues{1, 2, 3};
+      const std::size_t numFrom = fromValues.size();
+      const std::initializer_list<Elem> toValues{1, 2, 3, 4, 5, 6, 7, 8};
+      const std::size_t numTo = toValues.size();
 
-      SV src(NumElems, {2});
-      for (int i = 0; i < src.size(); ++i)
-         src[i].i = i;
+      Elem::Measures measures;
+      // For populating vectors and copying source to destination.
+      measures.copyCtorCalls = 2 * numFrom + numTo;
+      measures.dtorCalls = 2 * numFrom + numTo;
 
-      SV sv(NumOrigElems, {1});
+      CtorTest<Elem, BufCap> test{caseLabel, measures};
+      test.run([&]() {
+         SV from{fromValues};
+         SV to{toValues};
 
-      // Preconditions.
-      VERIFY(NumElems < BufCap, caseLabel);
-      VERIFY(NumOrigElems > BufCap, caseLabel);
-      VERIFY(src.inBuffer(), caseLabel);
-      VERIFY(sv.onHeap(), caseLabel);
+         VERIFY(from.inBuffer(), caseLabel);
+         VERIFY(to.onHeap(), caseLabel);
 
-      {
-         // Element instrumentation for tested call only.
-         Elem::Measures expected;
-         // Copied elements.
-         expected.copyCtorCalls = NumElems;
-         // Original elements got destroyed.
-         expected.dtorCalls = NumOrigElems;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+         to = from;
 
-         // Test.
-         sv = src;
-      }
-
-      // Verify vector state.
-      VERIFY(sv.size() == NumElems, caseLabel);
-      VERIFY(sv.capacity() == BufCap, caseLabel);
-      VERIFY(sv.inBuffer(), caseLabel);
-      for (int i = 0; i < sv.size(); ++i)
-         VERIFY(sv[i].i == i, caseLabel);
+         VERIFY(to.inBuffer(), caseLabel);
+         VERIFY(to.capacity() == BufCap, caseLabel);
+         verifyValues(to, fromValues, caseLabel);
+      });
    }
    {
       const std::string caseLabel{
-         "SboVector copy assignment of larger heap instance to smaller heap instance"};
+         "SboVector copy assignment from larger to smaller heap instance"};
 
-      constexpr std::size_t BufCap = 10;
-      constexpr std::size_t NumElems = 20;
-      constexpr std::size_t NumOrigElems = 15;
+      constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Elem, BufCap>;
+      using SV = SboVector<Element, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::initializer_list<Elem> fromValues{1, 2, 3, 4, 5, 6, 7, 8, 9};
+      const std::size_t numFrom = fromValues.size();
+      const std::initializer_list<Elem> toValues{1, 2, 3, 4, 5, 6, 7};
+      const std::size_t numTo = toValues.size();
 
-      SV src(NumElems, {2});
-      for (int i = 0; i < src.size(); ++i)
-         src[i].i = i;
+      Elem::Measures measures;
+      // For populating vectors and copying source to destination.
+      measures.copyCtorCalls = 2 * numFrom + numTo;
+      measures.dtorCalls = 2 * numFrom + numTo;
 
-      SV sv(NumOrigElems, {1});
+      CtorTest<Elem, BufCap> test{caseLabel, measures};
+      test.run([&]() {
+         SV from{fromValues};
+         SV to{toValues};
 
-      // Preconditions.
-      VERIFY(NumElems > BufCap, caseLabel);
-      VERIFY(NumOrigElems > BufCap, caseLabel);
-      VERIFY(NumElems > NumOrigElems, caseLabel);
-      VERIFY(src.onHeap(), caseLabel);
-      VERIFY(sv.onHeap(), caseLabel);
+         VERIFY(from.onHeap(), caseLabel);
+         VERIFY(to.onHeap(), caseLabel);
+         VERIFY(from.size() > to.size(), caseLabel);
 
-      {
-         // Element instrumentation for tested call only.
-         Elem::Measures expected;
-         // Copied elements.
-         expected.copyCtorCalls = NumElems;
-         // Original elements got destroyed.
-         expected.dtorCalls = NumOrigElems;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+         to = from;
 
-         // Test.
-         sv = src;
-      }
-
-      // Verify vector state.
-      VERIFY(sv.size() == NumElems, caseLabel);
-      // Assigning data that needs a larger heap allocation will trigger a new
-      // allocation. Capacity will increase to larger size.
-      VERIFY(sv.capacity() == NumElems, caseLabel);
-      VERIFY(sv.onHeap(), caseLabel);
-      for (int i = 0; i < sv.size(); ++i)
-         VERIFY(sv[i].i == i, caseLabel);
+         VERIFY(to.onHeap(), caseLabel);
+         // Assigning data that needs a larger heap allocation will reallocate
+         // heap memory.
+         VERIFY(to.capacity() == numFrom, caseLabel);
+         verifyValues(to, fromValues, caseLabel);
+      });
    }
    {
       const std::string caseLabel{
-         "SboVector copy assignment of smaller heap instance to larger heap instance"};
+         "SboVector copy assignment from smaller to larger heap instance"};
 
-      constexpr std::size_t BufCap = 10;
-      constexpr std::size_t NumElems = 15;
-      constexpr std::size_t NumOrigElems = 20;
+      constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Elem, BufCap>;
+      using SV = SboVector<Element, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::initializer_list<Elem> fromValues{1, 2, 3, 4, 5, 6};
+      const std::size_t numFrom = fromValues.size();
+      const std::initializer_list<Elem> toValues{1, 2, 3, 4, 5, 6, 7, 8};
+      const std::size_t numTo = toValues.size();
 
-      SV src(NumElems, {2});
-      for (int i = 0; i < src.size(); ++i)
-         src[i].i = i;
+      Elem::Measures measures;
+      // For populating vectors and copying source to destination.
+      measures.copyCtorCalls = 2 * numFrom + numTo;
+      measures.dtorCalls = 2 * numFrom + numTo;
 
-      SV sv(NumOrigElems, {1});
+      CtorTest<Elem, BufCap> test{caseLabel, measures};
+      test.run([&]() {
+         SV from{fromValues};
+         SV to{toValues};
 
-      // Preconditions.
-      VERIFY(NumElems > BufCap, caseLabel);
-      VERIFY(NumOrigElems > BufCap, caseLabel);
-      VERIFY(NumElems < NumOrigElems, caseLabel);
-      VERIFY(src.onHeap(), caseLabel);
-      VERIFY(sv.onHeap(), caseLabel);
+         VERIFY(from.onHeap(), caseLabel);
+         VERIFY(to.onHeap(), caseLabel);
+         VERIFY(from.size() < to.size(), caseLabel);
 
-      {
-         // Element instrumentation for tested call only.
-         Elem::Measures expected;
-         // Copied elements.
-         expected.copyCtorCalls = NumElems;
-         // Original elements got destroyed.
-         expected.dtorCalls = NumOrigElems;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+         to = from;
 
-         // Test.
-         sv = src;
-      }
-
-      // Verify vector state.
-      VERIFY(sv.size() == NumElems, caseLabel);
-      // Assigning data that needs a smaller heap allocation will reuse the existing
-      // heap memory. Capacity will remain at previous (larger) size.
-      VERIFY(sv.capacity() == NumOrigElems, caseLabel);
-      VERIFY(sv.onHeap(), caseLabel);
-      for (int i = 0; i < sv.size(); ++i)
-         VERIFY(sv[i].i == i, caseLabel);
+         VERIFY(to.onHeap(), caseLabel);
+         // Assigning data that needs a smaller heap allocation will reuse the existing
+         // heap memory. Capacity will remain at previous (larger) size.
+         VERIFY(to.capacity() == numTo, caseLabel);
+         verifyValues(to, fromValues, caseLabel);
+      });
    }
 }
 
