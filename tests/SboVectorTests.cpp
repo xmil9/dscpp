@@ -2634,6 +2634,63 @@ void TestCBegin()
 void TestCEnd()
 {
    {
+      const std::string caseLabel{"SboVector::cend for buffer instance"};
+
+      constexpr std::size_t BufCap = 5;
+      using Elem = Element;
+      using SV = SboVector<Element, BufCap>;
+
+      SV sv{1, 2, 3, 4};
+      Elem::Metrics zeros;
+
+      Test<Elem, BufCap> test{caseLabel, zeros};
+      test.run([&]() {
+         VERIFY(sv.inBuffer(), caseLabel);
+
+         SV::const_iterator last = sv.cend();
+         VERIFY(last == sv.begin() + sv.size(), caseLabel);
+      });
+   }
+   {
+      const std::string caseLabel{"SboVector::cend for heap instance"};
+
+      constexpr std::size_t BufCap = 5;
+      using Elem = Element;
+      using SV = SboVector<Element, BufCap>;
+
+      SV sv{1, 2, 3, 4, 5, 6, 7};
+      Elem::Metrics zeros;
+
+      Test<Elem, BufCap> test{caseLabel, zeros};
+      test.run([&]() {
+         VERIFY(sv.onHeap(), caseLabel);
+
+         SV::const_iterator last = sv.cend();
+         VERIFY(last == sv.begin() + sv.size(), caseLabel);
+      });
+   }
+   {
+      const std::string caseLabel{"SboVector::cend for empty vector"};
+
+      constexpr std::size_t BufCap = 5;
+      using Elem = Element;
+      using SV = SboVector<Element, BufCap>;
+
+      SV sv;
+      Elem::Metrics zeros;
+
+      Test<Elem, BufCap> test{caseLabel, zeros};
+      test.run([&]() {
+         VERIFY(sv.empty(), caseLabel);
+
+         SV::const_iterator last = sv.cend();
+         VERIFY(last == sv.begin(), caseLabel);
+      });
+   }
+
+
+
+   {
       const std::string caseLabel{"SboVector::cend const for populated vector"};
 
       constexpr std::size_t BufCap = 10;
