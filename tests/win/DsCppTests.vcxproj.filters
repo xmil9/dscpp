@@ -11,5 +11,6 @@
     <ClInclude Include="..\RingBufferTests.h" />
     <ClInclude Include="..\SboVectorTests.h" />
     <ClInclude Include="..\..\SboVector.h" />
+    <ClInclude Include="..\..\TypeTraitsEx.h" />
   </ItemGroup>
 </Project>

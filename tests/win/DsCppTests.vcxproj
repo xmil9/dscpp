@@ -26,6 +26,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\RingBuffer.h" />
     <ClInclude Include="..\..\SboVector.h" />
+    <ClInclude Include="..\..\TypeTraitsEx.h" />
     <ClInclude Include="..\RingBufferTests.h" />
     <ClInclude Include="..\SboVectorTests.h" />
     <ClInclude Include="..\TestUtil.h" />
