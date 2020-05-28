@@ -1911,90 +1911,64 @@ void TestAtConst()
 void TestSubscriptOperator()
 {
    {
-      const std::string caseLabel{
-         "SvoVector::operator[] for reading from valid index into buffer instance"};
-
-      constexpr std::size_t BufCap = 10;
-      using Elem = int;
-      using SV = SboVector<Elem, BufCap>;
-
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
-
-      SV sv{{1}, {2}, {3}, {4}};
-
-      // Precondition.
-      VERIFY(sv.size() < BufCap, caseLabel);
-
-      // Test.
-      for (int i = 0; i < sv.size(); ++i)
-         VERIFY(sv[i] == i + 1, caseLabel);
-   }
-   {
-      const std::string caseLabel{
-         "SvoVector::operator[] for writing to valid index into buffer instance"};
-
-      constexpr std::size_t BufCap = 10;
-      using Elem = int;
-      using SV = SboVector<Elem, BufCap>;
-
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
-
-      SV sv{{1}, {2}, {3}, {4}};
-
-      // Precondition.
-      VERIFY(sv.size() < BufCap, caseLabel);
-
-      // Test.
-      for (int i = 0; i < sv.size(); ++i)
-      {
-         sv[i] = 100;
-         VERIFY(sv[i] == 100, caseLabel);
-      }
-   }
-   {
-      const std::string caseLabel{
-         "SvoVector::operator[] for reading from valid index into heap instance"};
+      const std::string caseLabel{"SvoVector::operator[] for buffer instance"};
 
       constexpr std::size_t BufCap = 5;
-      using Elem = int;
-      using SV = SboVector<Elem, BufCap>;
+      using Elem = Element;
+      using SV = SboVector<Element, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::size_t numElems = 4;
+      const Elem val = 10;
+      SV sv(numElems, val);
 
-      SV sv{{1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}};
+      Elem::Metrics metrics;
+      metrics.ctorCalls = numElems;
+      metrics.assignmentCalls = numElems;
+      metrics.dtorCalls = numElems;
 
-      // Precondition.
-      VERIFY(sv.size() > BufCap, caseLabel);
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         VERIFY(sv.inBuffer(), caseLabel);
 
-      // Test.
-      for (int i = 0; i < sv.size(); ++i)
-         VERIFY(sv[i] == i + 1, caseLabel);
+         for (int i = 0; i < sv.size(); ++i)
+         {
+            VERIFY(sv[i] == val, caseLabel);
+
+            const Elem newVal{i};
+            sv[i] = newVal;
+            VERIFY(sv[i] == newVal, caseLabel);
+         }
+      });
    }
    {
-      const std::string caseLabel{
-         "SvoVector::operator[] for writing to valid index into heap instance"};
+      const std::string caseLabel{"SvoVector::operator[] for heap instance"};
 
       constexpr std::size_t BufCap = 5;
-      using Elem = int;
-      using SV = SboVector<Elem, BufCap>;
+      using Elem = Element;
+      using SV = SboVector<Element, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::size_t numElems = 7;
+      const Elem val = 10;
+      SV sv(numElems, val);
 
-      SV sv{{1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}};
+      Elem::Metrics metrics;
+      metrics.ctorCalls = numElems;
+      metrics.assignmentCalls = numElems;
+      metrics.dtorCalls = numElems;
 
-      // Precondition.
-      VERIFY(sv.size() > BufCap, caseLabel);
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         VERIFY(sv.onHeap(), caseLabel);
 
-      // Test.
-      for (int i = 0; i < sv.size(); ++i)
-      {
-         sv[i] = 100;
-         VERIFY(sv[i] == 100, caseLabel);
-      }
+         for (int i = 0; i < sv.size(); ++i)
+         {
+            VERIFY(sv[i] == val, caseLabel);
+
+            const Elem newVal{i};
+            sv[i] = newVal;
+            VERIFY(sv[i] == newVal, caseLabel);
+         }
+      });
    }
 }
 
@@ -2002,44 +1976,46 @@ void TestSubscriptOperator()
 void TestSubscriptOperatorConst()
 {
    {
-      const std::string caseLabel{
-         "SvoVector::operator[] const for accessing valid index into buffer instance"};
-
-      constexpr std::size_t BufCap = 10;
-      using Elem = int;
-      using SV = SboVector<Elem, BufCap>;
-
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
-
-      const SV sv{{1}, {2}, {3}, {4}};
-
-      // Precondition.
-      VERIFY(sv.size() < BufCap, caseLabel);
-
-      // Test.
-      for (int i = 0; i < sv.size(); ++i)
-         VERIFY(sv[i] == i + 1, caseLabel);
-   }
-   {
-      const std::string caseLabel{
-         "SvoVector::operator[] const for accessing valid index into heap instance"};
+      const std::string caseLabel{"SvoVector::operator[] const for buffer instance"};
 
       constexpr std::size_t BufCap = 5;
-      using Elem = int;
-      using SV = SboVector<Elem, BufCap>;
+      using Elem = Element;
+      using SV = SboVector<Element, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::size_t numElems = 4;
+      const Elem val = 10;
+      const SV sv(numElems, val);
 
-      const SV sv{{1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}};
+      Elem::Metrics zeros;
 
-      // Precondition.
-      VERIFY(sv.size() > BufCap, caseLabel);
+      Test<Elem, BufCap> test{caseLabel, zeros};
+      test.run([&]() {
+         VERIFY(sv.inBuffer(), caseLabel);
 
-      // Test.
-      for (int i = 0; i < sv.size(); ++i)
-         VERIFY(sv[i] == i + 1, caseLabel);
+         for (int i = 0; i < sv.size(); ++i)
+            VERIFY(sv[i] == val, caseLabel);
+      });
+   }
+   {
+      const std::string caseLabel{"SvoVector::operator[] const for heap instance"};
+
+      constexpr std::size_t BufCap = 5;
+      using Elem = Element;
+      using SV = SboVector<Element, BufCap>;
+
+      const std::size_t numElems = 7;
+      const Elem val = 10;
+      const SV sv(numElems, val);
+
+      Elem::Metrics zeros;
+
+      Test<Elem, BufCap> test{caseLabel, zeros};
+      test.run([&]() {
+         VERIFY(sv.onHeap(), caseLabel);
+
+         for (int i = 0; i < sv.size(); ++i)
+            VERIFY(sv[i] == val, caseLabel);
+      });
    }
 }
 
