@@ -2327,42 +2327,58 @@ void TestDataConst()
 void TestBegin()
 {
    {
-      const std::string caseLabel{"SboVector::begin for populated vector"};
+      const std::string caseLabel{"SboVector::begin for buffer instance"};
 
-      constexpr std::size_t BufCap = 10;
-      using SV = SboVector<int, BufCap>;
+      constexpr std::size_t BufCap = 5;
+      using Elem = Element;
+      using SV = SboVector<Element, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      SV sv{1, 2, 3, 4};
+      Elem::Metrics zeros;
 
-      SV sv{1, 2, 20};
+      Test<Elem, BufCap> test{caseLabel, zeros};
+      test.run([&]() {
+         VERIFY(sv.inBuffer(), caseLabel);
 
-      // Preconditions.
-      VERIFY(!sv.empty(), caseLabel);
+         SV::iterator first = sv.begin();
+         VERIFY(*first == sv[0], caseLabel);
+      });
+   }
+   {
+      const std::string caseLabel{"SboVector::begin for heap instance"};
 
-      // Test.
-      SV::iterator first = sv.begin();
+      constexpr std::size_t BufCap = 5;
+      using Elem = Element;
+      using SV = SboVector<Element, BufCap>;
 
-      VERIFY(*first == 1, caseLabel);
+      SV sv{1, 2, 3, 4, 5, 6, 7};
+      Elem::Metrics zeros;
+
+      Test<Elem, BufCap> test{caseLabel, zeros};
+      test.run([&]() {
+         VERIFY(sv.onHeap(), caseLabel);
+
+         SV::iterator first = sv.begin();
+         VERIFY(*first == sv[0], caseLabel);
+      });
    }
    {
       const std::string caseLabel{"SboVector::begin for empty vector"};
 
-      constexpr std::size_t BufCap = 10;
-      using SV = SboVector<int, BufCap>;
-
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      constexpr std::size_t BufCap = 5;
+      using Elem = Element;
+      using SV = SboVector<Element, BufCap>;
 
       SV sv;
+      Elem::Metrics zeros;
 
-      // Preconditions.
-      VERIFY(sv.empty(), caseLabel);
+      Test<Elem, BufCap> test{caseLabel, zeros};
+      test.run([&]() {
+         VERIFY(sv.inBuffer(), caseLabel);
 
-      // Test.
-      SV::iterator first = sv.begin();
-
-      VERIFY(first == sv.end(), caseLabel);
+         SV::iterator first = sv.begin();
+         VERIFY(first == sv.end(), caseLabel);
+      });
    }
 }
 
