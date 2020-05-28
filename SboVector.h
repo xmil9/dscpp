@@ -4,6 +4,7 @@
 #define VS_COMPILER
 #endif
 
+#include "TypeTraitsEx.h"
 #include <algorithm>
 #include <cassert>
 #include <cstdlib>
@@ -83,9 +84,11 @@ template <typename T, std::size_t N> class SboVector
  public:
    SboVector() = default;
    explicit SboVector(std::size_t count, const T& value);
+   template <typename InputIt, typename = std::enable_if_t<IsIterator_v<InputIt>, void>>
+   SboVector(InputIt first, InputIt last);
+   SboVector(std::initializer_list<T> ilist);
    SboVector(const SboVector& other);
    SboVector(SboVector&& other);
-   SboVector(std::initializer_list<T> ilist);
    ~SboVector();
 
    SboVector& operator=(const SboVector& other);
@@ -249,6 +252,45 @@ SboVector<T, N>::SboVector(std::size_t count, const T& value)
 }
 
 
+template <typename T, std::size_t N>
+template <typename InputIt, typename>
+SboVector<T, N>::SboVector(InputIt first, InputIt last)
+{
+   // Available strategies are to use the buffer or make a new heap allocation.
+
+   const std::size_t srcSize = std::distance(first, last);
+   const bool allocHeap = !fitsIntoBuffer(srcSize);
+
+   if (allocHeap)
+   {
+      allocate(srcSize);
+      m_capacity = srcSize;
+   }
+
+   std::uninitialized_copy(first, last, m_data);
+   m_size = srcSize;
+}
+
+
+template <typename T, std::size_t N>
+SboVector<T, N>::SboVector(std::initializer_list<T> ilist)
+{
+   // Available strategies are to use the buffer or make a new heap allocation.
+
+   const auto srcSize = ilist.size();
+   const bool allocHeap = !fitsIntoBuffer(srcSize);
+
+   if (allocHeap)
+   {
+      allocate(srcSize);
+      m_capacity = srcSize;
+   }
+
+   std::uninitialized_copy_n(ilist.begin(), srcSize, m_data);
+   m_size = srcSize;
+}
+
+
 template <typename T, std::size_t N> SboVector<T, N>::SboVector(const SboVector& other)
 {
    // Available strategies are to use the buffer or make a new heap allocation.
@@ -293,25 +335,6 @@ template <typename T, std::size_t N> SboVector<T, N>::SboVector(SboVector&& othe
    m_size = srcSize;
    // Reset other size to prevent destruction of the stolen or moved objects.
    other.m_size = 0;
-}
-
-
-template <typename T, std::size_t N>
-SboVector<T, N>::SboVector(std::initializer_list<T> ilist)
-{
-   // Available strategies are to use the buffer or make a new heap allocation.
-
-   const auto srcSize = ilist.size();
-   const bool allocHeap = !fitsIntoBuffer(srcSize);
-
-   if (allocHeap)
-   {
-      allocate(srcSize);
-      m_capacity = srcSize;
-   }
-
-   std::uninitialized_copy_n(ilist.begin(), srcSize, m_data);
-   m_size = srcSize;
 }
 
 
