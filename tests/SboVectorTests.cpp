@@ -1899,8 +1899,7 @@ void TestAtConst()
       Test<Elem, BufCap> test{caseLabel, zeros};
       test.run([&]() {
          // Ref types are always non-const, so remove the reference.
-         static_assert(
-            std::is_const_v<typename std::remove_reference<decltype(sv)>::type>);
+         static_assert(std::is_const_v<std::remove_reference<decltype(sv)>::type>);
 
          VERIFY_THROW(([&]() { sv.at(sv.size()); }), std::out_of_range, caseLabel);
       });
@@ -2023,79 +2022,58 @@ void TestSubscriptOperatorConst()
 void TestFront()
 {
    {
-      const std::string caseLabel{"SvoVector::front for reading from buffer instance"};
-
-      constexpr std::size_t BufCap = 10;
-      using Elem = int;
-      using SV = SboVector<Elem, BufCap>;
-
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
-
-      SV sv{{1}, {2}, {3}, {4}};
-
-      // Precondition.
-      VERIFY(sv.size() < BufCap, caseLabel);
-
-      // Test.
-      VERIFY(sv.front() == 1, caseLabel);
-   }
-   {
-      const std::string caseLabel{"SvoVector::front for writing to buffer instance"};
-
-      constexpr std::size_t BufCap = 10;
-      using Elem = int;
-      using SV = SboVector<Elem, BufCap>;
-
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
-
-      SV sv{{1}, {2}, {3}, {4}};
-
-      // Precondition.
-      VERIFY(sv.size() < BufCap, caseLabel);
-
-      // Test.
-      sv.front() = 100;
-      VERIFY(sv[0] == 100, caseLabel);
-   }
-   {
-      const std::string caseLabel{"SvoVector::front for reading from heap instance"};
+      const std::string caseLabel{"SvoVector::front for buffer instance"};
 
       constexpr std::size_t BufCap = 5;
-      using Elem = int;
-      using SV = SboVector<Elem, BufCap>;
+      using Elem = Element;
+      using SV = SboVector<Element, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::size_t numElems = 4;
+      const Elem val = 10;
+      SV sv(numElems, val);
 
-      SV sv{{1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}};
+      Elem::Metrics metrics;
+      metrics.ctorCalls = 1;
+      metrics.assignmentCalls = 1;
+      metrics.dtorCalls = 1;
 
-      // Precondition.
-      VERIFY(sv.size() > BufCap, caseLabel);
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         VERIFY(sv.inBuffer(), caseLabel);
 
-      // Test.
-      VERIFY(sv.front() == 1, caseLabel);
+         VERIFY(sv.front() == val, caseLabel);
+
+         const Elem newVal{20};
+         sv.front() = newVal;
+         VERIFY(sv[0] == newVal, caseLabel);
+      });
    }
    {
-      const std::string caseLabel{
-         "SvoVector::front for writing to valid index into heap instance"};
+      const std::string caseLabel{"SvoVector::front for heap instance"};
 
       constexpr std::size_t BufCap = 5;
-      using Elem = int;
-      using SV = SboVector<Elem, BufCap>;
+      using Elem = Element;
+      using SV = SboVector<Element, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::size_t numElems = 7;
+      const Elem val = 10;
+      SV sv(numElems, val);
 
-      SV sv{{1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}};
+      Elem::Metrics metrics;
+      metrics.ctorCalls = 1;
+      metrics.assignmentCalls = 1;
+      metrics.dtorCalls = 1;
 
-      // Precondition.
-      VERIFY(sv.size() > BufCap, caseLabel);
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         VERIFY(sv.onHeap(), caseLabel);
 
-      // Test.
-      sv.front() = 100;
-      VERIFY(sv[0] == 100, caseLabel);
+         VERIFY(sv.front() == val, caseLabel);
+
+         const Elem newVal{20};
+         sv.front() = newVal;
+         VERIFY(sv[0] == newVal, caseLabel);
+      });
    }
 }
 
@@ -2105,38 +2083,46 @@ void TestFrontConst()
    {
       const std::string caseLabel{"SvoVector::front const for buffer instance"};
 
-      constexpr std::size_t BufCap = 10;
-      using Elem = int;
-      using SV = SboVector<Elem, BufCap>;
+      constexpr std::size_t BufCap = 5;
+      using Elem = Element;
+      using SV = SboVector<Element, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::size_t numElems = 4;
+      const Elem val = 10;
+      const SV sv(numElems, val);
 
-      const SV sv{{1}, {2}, {3}, {4}};
+      Elem::Metrics zeros;
 
-      // Precondition.
-      VERIFY(sv.size() < BufCap, caseLabel);
+      Test<Elem, BufCap> test{caseLabel, zeros};
+      test.run([&]() {
+         VERIFY(sv.inBuffer(), caseLabel);
+         // Ref types are always non-const, so remove the reference.
+         static_assert(std::is_const_v<std::remove_reference<decltype(sv)>::type>);
 
-      // Test.
-      VERIFY(sv.front() == 1, caseLabel);
+         VERIFY(sv.front() == val, caseLabel);
+      });
    }
    {
       const std::string caseLabel{"SvoVector::front const for heap instance"};
 
       constexpr std::size_t BufCap = 5;
-      using Elem = int;
-      using SV = SboVector<Elem, BufCap>;
+      using Elem = Element;
+      using SV = SboVector<Element, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::size_t numElems = 7;
+      const Elem val = 10;
+      const SV sv(numElems, val);
 
-      const SV sv{{1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}};
+      Elem::Metrics zeros;
 
-      // Precondition.
-      VERIFY(sv.size() > BufCap, caseLabel);
-
-      // Test.
-      VERIFY(sv.front() == 1, caseLabel);
+      Test<Elem, BufCap> test{caseLabel, zeros};
+      test.run([&]() {
+         VERIFY(sv.onHeap(), caseLabel);
+         // Ref types are always non-const, so remove the reference.
+         static_assert(std::is_const_v<std::remove_reference<decltype(sv)>::type>);
+         
+         VERIFY(sv.front() == val, caseLabel);
+      });
    }
 }
 
