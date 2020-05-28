@@ -1774,11 +1774,11 @@ void TestAt()
 
          for (int i = 0; i < sv.size(); ++i)
          {
-            VERIFY(sv[i] == val, caseLabel);
+            VERIFY(sv.at(i) == val, caseLabel);
 
             const Elem newVal{i};
-            sv[i] = newVal;
-            VERIFY(sv[i] == newVal, caseLabel);
+            sv.at(i) = newVal;
+            VERIFY(sv.at(i) == newVal, caseLabel);
          }
       });
    }
@@ -1804,11 +1804,11 @@ void TestAt()
 
          for (int i = 0; i < sv.size(); ++i)
          {
-            VERIFY(sv[i] == val, caseLabel);
+            VERIFY(sv.at(i) == val, caseLabel);
 
             const Elem newVal{i};
-            sv[i] = newVal;
-            VERIFY(sv[i] == newVal, caseLabel);
+            sv.at(i) = newVal;
+            VERIFY(sv.at(i) == newVal, caseLabel);
          }
       });
    }
@@ -1856,7 +1856,7 @@ void TestAtConst()
             std::is_const_v<typename std::remove_reference<decltype(sv)>::type>);
 
          for (int i = 0; i < sv.size(); ++i)
-            VERIFY(sv[i] == val, caseLabel);
+            VERIFY(sv.at(i) == val, caseLabel);
       });
    }
    {
@@ -1880,7 +1880,7 @@ void TestAtConst()
             std::is_const_v<typename std::remove_reference<decltype(sv)>::type>);
 
          for (int i = 0; i < sv.size(); ++i)
-            VERIFY(sv[i] == val, caseLabel);
+            VERIFY(sv.at(i) == val, caseLabel);
       });
    }
    {
