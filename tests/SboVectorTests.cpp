@@ -2374,7 +2374,7 @@ void TestBegin()
 
       Test<Elem, BufCap> test{caseLabel, zeros};
       test.run([&]() {
-         VERIFY(sv.inBuffer(), caseLabel);
+         VERIFY(sv.empty(), caseLabel);
 
          SV::iterator first = sv.begin();
          VERIFY(first == sv.end(), caseLabel);
@@ -2386,43 +2386,58 @@ void TestBegin()
 void TestEnd()
 {
    {
-      const std::string caseLabel{"SboVector::end for populated vector"};
+      const std::string caseLabel{"SboVector::end for buffer instance"};
 
-      constexpr std::size_t BufCap = 10;
-      using SV = SboVector<int, BufCap>;
+      constexpr std::size_t BufCap = 5;
+      using Elem = Element;
+      using SV = SboVector<Element, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      SV sv{1, 2, 3, 4};
+      Elem::Metrics zeros;
 
-      SV sv{1, 2};
+      Test<Elem, BufCap> test{caseLabel, zeros};
+      test.run([&]() {
+         VERIFY(sv.inBuffer(), caseLabel);
 
-      // Preconditions.
-      VERIFY(!sv.empty(), caseLabel);
+         SV::iterator last = sv.end();
+         VERIFY(last == sv.begin() + sv.size(), caseLabel);
+      });
+   }
+   {
+      const std::string caseLabel{"SboVector::end for heap instance"};
 
-      SV::iterator last = sv.end();
+      constexpr std::size_t BufCap = 5;
+      using Elem = Element;
+      using SV = SboVector<Element, BufCap>;
 
-      // Test.
-      VERIFY(last != sv.begin(), caseLabel);
-      VERIFY(last == sv.begin() + sv.size(), caseLabel);
+      SV sv{1, 2, 3, 4, 5, 6, 7};
+      Elem::Metrics zeros;
+
+      Test<Elem, BufCap> test{caseLabel, zeros};
+      test.run([&]() {
+         VERIFY(sv.onHeap(), caseLabel);
+
+         SV::iterator last = sv.end();
+         VERIFY(last == sv.begin() + sv.size(), caseLabel);
+      });
    }
    {
       const std::string caseLabel{"SboVector::end for empty vector"};
 
-      constexpr std::size_t BufCap = 10;
-      using SV = SboVector<int, BufCap>;
-
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      constexpr std::size_t BufCap = 5;
+      using Elem = Element;
+      using SV = SboVector<Element, BufCap>;
 
       SV sv;
+      Elem::Metrics zeros;
 
-      // Preconditions.
-      VERIFY(sv.empty(), caseLabel);
+      Test<Elem, BufCap> test{caseLabel, zeros};
+      test.run([&]() {
+         VERIFY(sv.empty(), caseLabel);
 
-      // Test.
-      SV::iterator last = sv.end();
-
-      VERIFY(last == sv.begin(), caseLabel);
+         SV::iterator last = sv.end();
+         VERIFY(last == sv.begin(), caseLabel);
+      });
    }
 }
 
