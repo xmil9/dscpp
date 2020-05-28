@@ -2687,48 +2687,6 @@ void TestCEnd()
          VERIFY(last == sv.begin(), caseLabel);
       });
    }
-
-
-
-   {
-      const std::string caseLabel{"SboVector::cend const for populated vector"};
-
-      constexpr std::size_t BufCap = 10;
-      using SV = SboVector<int, BufCap>;
-
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
-
-      const SV sv{1, 2};
-
-      // Preconditions.
-      VERIFY(!sv.empty(), caseLabel);
-
-      // Test.
-      SV::const_iterator last = sv.cend();
-
-      VERIFY(last != sv.cbegin(), caseLabel);
-      VERIFY(last == sv.cbegin() + sv.size(), caseLabel);
-   }
-   {
-      const std::string caseLabel{"SboVector::cend const for empty vector"};
-
-      constexpr std::size_t BufCap = 10;
-      using SV = SboVector<int, BufCap>;
-
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
-
-      const SV sv;
-
-      // Preconditions.
-      VERIFY(sv.empty(), caseLabel);
-
-      // Test.
-      SV::const_iterator last = sv.cend();
-
-      VERIFY(last == sv.cbegin(), caseLabel);
-   }
 }
 
 
