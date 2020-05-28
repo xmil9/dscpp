@@ -193,6 +193,7 @@ class InputIter
    using difference_type = std::vector<int>::difference_type;
    using pointer = std::vector<int>::pointer;
    using reference = std::vector<int>::reference;
+   using iterator_category = std::input_iterator_tag;
 
  public:
    InputIter() = default;
@@ -430,6 +431,180 @@ void TestCtorForElementCountAndValue()
 }
 
 
+void TestIteratorCtor()
+{
+   {
+      const std::string caseLabel{"SboVector iterator ctor for buffer instance"};
+
+      constexpr std::size_t BufCap = 10;
+      using Elem = Element;
+      using SV = SboVector<Element, BufCap>;
+
+      const std::initializer_list<Elem> values{1, 2, 3, 4, 5};
+      const std::size_t numElems = values.size();
+      std::vector<Elem> from{values};
+
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = numElems;
+      metrics.dtorCalls = numElems;
+
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&, BufCap]() {
+         SV sv{from.begin(), from.end()};
+
+         VERIFY(sv.inBuffer(), caseLabel);
+         VERIFY(sv.capacity() == BufCap, caseLabel);
+         verifyVector(sv, values, caseLabel);
+      });
+   }
+   {
+      const std::string caseLabel{"SboVector iterator ctor for heap instance"};
+
+      constexpr std::size_t BufCap = 5;
+      using Elem = Element;
+      using SV = SboVector<Element, BufCap>;
+
+      const std::initializer_list<Elem> values{1, 2, 3, 4, 5, 6, 7};
+      const std::size_t numElems = values.size();
+      std::vector<Elem> from{values};
+
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = numElems;
+      metrics.dtorCalls = numElems;
+
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&, BufCap]() {
+         SV sv{from.begin(), from.end()};
+
+         VERIFY(sv.onHeap(), caseLabel);
+         VERIFY(sv.capacity() == numElems, caseLabel);
+         verifyVector(sv, values, caseLabel);
+      });
+   }
+   {
+      const std::string caseLabel{"SboVector iterator ctor for const iterator"};
+
+      constexpr std::size_t BufCap = 5;
+      using Elem = Element;
+      using SV = SboVector<Element, BufCap>;
+
+      const std::initializer_list<Elem> values{1, 2, 3, 4, 5, 6, 7};
+      const std::size_t numElems = values.size();
+      const std::vector<Elem> from{values};
+
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = numElems;
+      metrics.dtorCalls = numElems;
+
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&, BufCap]() {
+         SV sv{from.cbegin(), from.cend()};
+
+         VERIFY(sv.onHeap(), caseLabel);
+         VERIFY(sv.capacity() == numElems, caseLabel);
+         verifyVector(sv, values, caseLabel);
+      });
+   }
+   {
+      const std::string caseLabel{"SboVector iterator ctor empty iterator range"};
+
+      constexpr std::size_t BufCap = 5;
+      using Elem = Element;
+      using SV = SboVector<Element, BufCap>;
+
+      std::vector<Elem> from;
+      Elem::Metrics zeros;
+
+      Test<Elem, BufCap> test{caseLabel, zeros};
+      test.run([&, BufCap]() {
+         SV sv{from.begin(), from.end()};
+
+         VERIFY(sv.inBuffer(), caseLabel);
+         VERIFY(sv.capacity() == BufCap, caseLabel);
+         VERIFY(sv.empty(), caseLabel);
+      });
+   }
+   {
+      const std::string caseLabel{"SboVector iterator ctor for input iterators"};
+
+      constexpr std::size_t BufCap = 5;
+      using Elem = Element;
+      using SV = SboVector<Element, BufCap>;
+
+      const std::size_t numElems = 3;
+      InputIter fromFirst = inputBegin();
+      InputIter fromLast = makeInputIter(numElems);
+
+      Elem::Metrics metrics;
+      metrics.ctorCalls = numElems;
+      metrics.dtorCalls = numElems;
+
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&, BufCap]() {
+         static_assert(
+            std::is_same_v<InputIter::iterator_category, std::input_iterator_tag>);
+
+         SV sv{fromFirst, fromLast};
+
+         VERIFY(sv.inBuffer(), caseLabel);
+         VERIFY(sv.capacity() == BufCap, caseLabel);
+         VERIFY(sv.size() == numElems, caseLabel);
+      });
+   }
+}
+
+
+void TestInitializerListCtor()
+{
+   {
+      const std::string caseLabel{"SboVector initializer list ctor for buffer instance"};
+
+      constexpr std::size_t BufCap = 10;
+      using Elem = Element;
+      using SV = SboVector<Element, BufCap>;
+
+      const std::initializer_list<Elem> values{1, 2, 3, 4, 5};
+      const std::size_t numElems = values.size();
+
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = numElems;
+      metrics.dtorCalls = numElems;
+
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&, BufCap]() {
+         SV sv{values};
+
+         VERIFY(sv.inBuffer(), caseLabel);
+         VERIFY(sv.capacity() == BufCap, caseLabel);
+         verifyVector(sv, values, caseLabel);
+      });
+   }
+   {
+      const std::string caseLabel{"SboVector initializer list ctor for heap instance"};
+
+      constexpr std::size_t BufCap = 5;
+      using Elem = Element;
+      using SV = SboVector<Element, BufCap>;
+
+      const std::initializer_list<Elem> values{1, 2, 3, 4, 5, 6, 7};
+      const std::size_t numElems = values.size();
+
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = numElems;
+      metrics.dtorCalls = numElems;
+
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&, BufCap]() {
+         SV sv{values};
+
+         VERIFY(sv.onHeap(), caseLabel);
+         VERIFY(sv.capacity() == numElems, caseLabel);
+         verifyVector(sv, values, caseLabel);
+      });
+   }
+}
+
+
 void TestCopyCtor()
 {
    {
@@ -545,57 +720,6 @@ void TestMoveCtor()
          verifyVector(sv, values, caseLabel);
          // Verify moved-from instance is empty.
          VERIFY(src.size() == 0, caseLabel);
-      });
-   }
-}
-
-
-void TestInitializerListCtor()
-{
-   {
-      const std::string caseLabel{"SboVector initializer list ctor for buffer instance"};
-
-      constexpr std::size_t BufCap = 10;
-      using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
-
-      const std::initializer_list<Elem> values{1, 2, 3, 4, 5};
-      const std::size_t numElems = values.size();
-
-      Elem::Metrics metrics;
-      metrics.copyCtorCalls = numElems;
-      metrics.dtorCalls = numElems;
-
-      Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&, BufCap]() {
-         SV sv{values};
-
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(sv.capacity() == BufCap, caseLabel);
-         verifyVector(sv, values, caseLabel);
-      });
-   }
-   {
-      const std::string caseLabel{"SboVector initializer list ctor for heap instance"};
-
-      constexpr std::size_t BufCap = 5;
-      using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
-
-      const std::initializer_list<Elem> values{1, 2, 3, 4, 5, 6, 7};
-      const std::size_t numElems = values.size();
-
-      Elem::Metrics metrics;
-      metrics.copyCtorCalls = numElems;
-      metrics.dtorCalls = numElems;
-
-      Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&, BufCap]() {
-         SV sv{values};
-
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() == numElems, caseLabel);
-         verifyVector(sv, values, caseLabel);
       });
    }
 }
@@ -9016,9 +9140,10 @@ void TestSboVector()
 
    TestDefaultCtor();
    TestCtorForElementCountAndValue();
+   TestIteratorCtor();
+   TestInitializerListCtor();
    TestCopyCtor();
    TestMoveCtor();
-   TestInitializerListCtor();
    TestDtor();
    TestCopyAssignment();
    TestMoveAssignment();
