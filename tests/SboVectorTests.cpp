@@ -3179,53 +3179,55 @@ void TestMaxSize()
    {
       const std::string caseLabel{"SvoVector::max_size for buffer instance"};
 
-      constexpr std::size_t BufCap = 10;
-      using SV = SboVector<int, BufCap>;
+      constexpr std::size_t BufCap = 5;
+      using Elem = Element;
+      using SV = SboVector<Element, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      SV sv{1, 2, 3};
+      Elem::Metrics zeros;
 
-      const SV sv{1, 2};
+      Test<Elem, BufCap> test{caseLabel, zeros};
+      test.run([&]() {
+         VERIFY(sv.inBuffer(), caseLabel);
+         VERIFY(!sv.empty(), caseLabel);
 
-      // Precondition.
-      VERIFY(sv.inBuffer(), caseLabel);
-
-      // Test.
-      VERIFY(sv.max_size() > 0, caseLabel);
+         VERIFY(sv.max_size() > 0, caseLabel);
+      });
    }
    {
       const std::string caseLabel{"SvoVector::max_size for heap instance"};
 
       constexpr std::size_t BufCap = 5;
-      using SV = SboVector<int, BufCap>;
+      using Elem = Element;
+      using SV = SboVector<Element, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      SV sv{1, 2, 3, 4, 5, 6};
+      Elem::Metrics zeros;
 
-      const SV sv{{1}, {2}, {3}, {4}, {5}, {6}};
+      Test<Elem, BufCap> test{caseLabel, zeros};
+      test.run([&]() {
+         VERIFY(sv.onHeap(), caseLabel);
+         VERIFY(!sv.empty(), caseLabel);
 
-      // Precondition.
-      VERIFY(sv.onHeap(), caseLabel);
-
-      // Test.
-      VERIFY(sv.max_size() > 0, caseLabel);
+         VERIFY(sv.max_size() > 0, caseLabel);
+      });
    }
    {
       const std::string caseLabel{"SvoVector::max_size for empty instance"};
 
       constexpr std::size_t BufCap = 5;
-      using SV = SboVector<int, BufCap>;
+      using Elem = Element;
+      using SV = SboVector<Element, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      SV sv;
+      Elem::Metrics zeros;
 
-      const SV sv;
-
-      // Precondition.
-      VERIFY(sv.empty(), caseLabel);
-
-      // Test.
-      VERIFY(sv.max_size() > 0, caseLabel);
+      Test<Elem, BufCap> test{caseLabel, zeros};
+      test.run([&]() {
+         VERIFY(sv.empty(), caseLabel);
+         
+         VERIFY(sv.max_size() > 0, caseLabel);
+      });
    }
 }
 
