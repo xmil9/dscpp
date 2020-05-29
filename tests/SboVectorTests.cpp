@@ -3119,55 +3119,57 @@ void TestSize()
    {
       const std::string caseLabel{"SvoVector::size for empty instance"};
 
-      constexpr std::size_t BufCap = 10;
-      using SV = SboVector<int, BufCap>;
+      constexpr std::size_t BufCap = 5;
+      using Elem = Element;
+      using SV = SboVector<Element, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      SV sv;
+      Elem::Metrics zeros;
 
-      const SV sv;
-
-      // Precondition.
-      VERIFY(sv.empty(), caseLabel);
-
-      // Test.
-      VERIFY(sv.size() == 0, caseLabel);
-   }
-   {
-      const std::string caseLabel{"SvoVector::empty for non-empty buffer instance"};
-
-      constexpr std::size_t BufCap = 10;
-      using SV = SboVector<int, BufCap>;
-
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
-
-      const SV sv{1, 2};
-
-      // Precondition.
-      VERIFY(sv.inBuffer(), caseLabel);
-      VERIFY(!sv.empty(), caseLabel);
-
-      // Test.
-      VERIFY(sv.size() == 2, caseLabel);
+      Test<Elem, BufCap> test{caseLabel, zeros};
+      test.run([&]() {
+         VERIFY(sv.empty(), caseLabel);
+         
+         VERIFY(sv.size() == 0, caseLabel);
+      });
    }
    {
       const std::string caseLabel{"SvoVector::empty for non-empty buffer instance"};
 
       constexpr std::size_t BufCap = 5;
-      using SV = SboVector<int, BufCap>;
+      using Elem = Element;
+      using SV = SboVector<Element, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::initializer_list<Elem> values{1, 2, 3};
+      SV sv{values};
+      Elem::Metrics zeros;
 
-      const SV sv{{1}, {2}, {3}, {4}, {5}, {6}};
+      Test<Elem, BufCap> test{caseLabel, zeros};
+      test.run([&]() {
+         VERIFY(sv.inBuffer(), caseLabel);
+         VERIFY(!sv.empty(), caseLabel);
 
-      // Precondition.
-      VERIFY(sv.onHeap(), caseLabel);
-      VERIFY(!sv.empty(), caseLabel);
+         VERIFY(sv.size() == values.size(), caseLabel);
+      });
+   }
+   {
+      const std::string caseLabel{"SvoVector::empty for non-empty buffer instance"};
 
-      // Test.
-      VERIFY(sv.size() == 6, caseLabel);
+      constexpr std::size_t BufCap = 5;
+      using Elem = Element;
+      using SV = SboVector<Element, BufCap>;
+
+      const std::initializer_list<Elem> values{1, 2, 3, 4, 5, 6};
+      SV sv{values};
+      Elem::Metrics zeros;
+
+      Test<Elem, BufCap> test{caseLabel, zeros};
+      test.run([&]() {
+         VERIFY(sv.onHeap(), caseLabel);
+         VERIFY(!sv.empty(), caseLabel);
+
+         VERIFY(sv.size() == values.size(), caseLabel);
+      });
    }
 }
 
