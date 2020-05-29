@@ -2752,43 +2752,58 @@ void TestRBegin()
 void TestREnd()
 {
    {
-      const std::string caseLabel{"SboVector::rend for populated vector"};
+      const std::string caseLabel{"SboVector::rend for buffer instance"};
 
-      constexpr std::size_t BufCap = 10;
-      using SV = SboVector<int, BufCap>;
+      constexpr std::size_t BufCap = 5;
+      using Elem = Element;
+      using SV = SboVector<Element, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      SV sv{1, 2, 3, 4};
+      Elem::Metrics zeros;
 
-      SV sv{1, 2};
+      Test<Elem, BufCap> test{caseLabel, zeros};
+      test.run([&]() {
+         VERIFY(sv.inBuffer(), caseLabel);
 
-      // Preconditions.
-      VERIFY(!sv.empty(), caseLabel);
+         SV::reverse_iterator rlast = sv.rend();
+         VERIFY(rlast == sv.rbegin() + sv.size(), caseLabel);
+      });
+   }
+   {
+      const std::string caseLabel{"SboVector::rend for heap instance"};
 
-      // Test.
-      SV::reverse_iterator rlast = sv.rend();
+      constexpr std::size_t BufCap = 5;
+      using Elem = Element;
+      using SV = SboVector<Element, BufCap>;
 
-      VERIFY(rlast != sv.rbegin(), caseLabel);
-      VERIFY(rlast == sv.rbegin() + sv.size(), caseLabel);
+      SV sv{1, 2, 3, 4, 5, 6, 7};
+      Elem::Metrics zeros;
+
+      Test<Elem, BufCap> test{caseLabel, zeros};
+      test.run([&]() {
+         VERIFY(sv.onHeap(), caseLabel);
+
+         SV::reverse_iterator rlast = sv.rend();
+         VERIFY(rlast == sv.rbegin() + sv.size(), caseLabel);
+      });
    }
    {
       const std::string caseLabel{"SboVector::rend for empty vector"};
 
-      constexpr std::size_t BufCap = 10;
-      using SV = SboVector<int, BufCap>;
-
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      constexpr std::size_t BufCap = 5;
+      using Elem = Element;
+      using SV = SboVector<Element, BufCap>;
 
       SV sv;
+      Elem::Metrics zeros;
 
-      // Preconditions.
-      VERIFY(sv.empty(), caseLabel);
+      Test<Elem, BufCap> test{caseLabel, zeros};
+      test.run([&]() {
+         VERIFY(sv.empty(), caseLabel);
 
-      // Test.
-      SV::reverse_iterator rlast = sv.rend();
-
-      VERIFY(rlast == sv.rbegin(), caseLabel);
+         SV::reverse_iterator rlast = sv.rend();
+         VERIFY(rlast == sv.rbegin(), caseLabel);
+      });
    }
 }
 
