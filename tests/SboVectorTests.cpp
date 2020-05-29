@@ -2811,42 +2811,64 @@ void TestREnd()
 void TestRBeginConst()
 {
    {
-      const std::string caseLabel{"SboVector::rbegin const for populated vector"};
+      const std::string caseLabel{"SboVector::rbegin const for buffer instance"};
 
-      constexpr std::size_t BufCap = 10;
-      using SV = SboVector<int, BufCap>;
+      constexpr std::size_t BufCap = 5;
+      using Elem = Element;
+      using SV = SboVector<Element, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const SV sv{1, 2, 3, 4};
+      Elem::Metrics zeros;
 
-      const SV sv{1, 2, 20};
+      Test<Elem, BufCap> test{caseLabel, zeros};
+      test.run([&]() {
+         VERIFY(sv.inBuffer(), caseLabel);
+         // Ref types are always non-const, so remove the reference.
+         static_assert(std::is_const_v<std::remove_reference<decltype(sv)>::type>);
 
-      // Preconditions.
-      VERIFY(!sv.empty(), caseLabel);
+         SV::const_reverse_iterator rfirst = sv.rbegin();
+         VERIFY(*rfirst == sv.back(), caseLabel);
+      });
+   }
+   {
+      const std::string caseLabel{"SboVector::rbegin const for heap instance"};
 
-      // Test.
-      SV::const_reverse_iterator rfirst = sv.rbegin();
+      constexpr std::size_t BufCap = 5;
+      using Elem = Element;
+      using SV = SboVector<Element, BufCap>;
 
-      VERIFY(*rfirst == 20, caseLabel);
+      const SV sv{1, 2, 3, 4, 5, 6, 7};
+      Elem::Metrics zeros;
+
+      Test<Elem, BufCap> test{caseLabel, zeros};
+      test.run([&]() {
+         VERIFY(sv.onHeap(), caseLabel);
+         // Ref types are always non-const, so remove the reference.
+         static_assert(std::is_const_v<std::remove_reference<decltype(sv)>::type>);
+
+         SV::const_reverse_iterator rfirst = sv.rbegin();
+         VERIFY(*rfirst == sv.back(), caseLabel);
+      });
    }
    {
       const std::string caseLabel{"SboVector::rbegin const for empty vector"};
 
-      constexpr std::size_t BufCap = 10;
-      using SV = SboVector<int, BufCap>;
-
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      constexpr std::size_t BufCap = 5;
+      using Elem = Element;
+      using SV = SboVector<Element, BufCap>;
 
       const SV sv;
+      Elem::Metrics zeros;
 
-      // Preconditions.
-      VERIFY(sv.empty(), caseLabel);
+      Test<Elem, BufCap> test{caseLabel, zeros};
+      test.run([&]() {
+         VERIFY(sv.empty(), caseLabel);
+         // Ref types are always non-const, so remove the reference.
+         static_assert(std::is_const_v<std::remove_reference<decltype(sv)>::type>);
 
-      // Test.
-      SV::const_reverse_iterator rfirst = sv.rbegin();
-
-      VERIFY(rfirst == sv.rend(), caseLabel);
+         SV::const_reverse_iterator rfirst = sv.rbegin();
+         VERIFY(rfirst == sv.rend(), caseLabel);
+      });
    }
 }
 
