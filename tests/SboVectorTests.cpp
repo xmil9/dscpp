@@ -2941,7 +2941,7 @@ void TestREndConst()
 void TestCRBegin()
 {
    {
-      const std::string caseLabel{"SboVector::crbegin const for buffer instance"};
+      const std::string caseLabel{"SboVector::crbegin for buffer instance"};
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
@@ -2959,7 +2959,7 @@ void TestCRBegin()
       });
    }
    {
-      const std::string caseLabel{"SboVector::crbegin const for heap instance"};
+      const std::string caseLabel{"SboVector::crbegin for heap instance"};
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
@@ -2977,7 +2977,7 @@ void TestCRBegin()
       });
    }
    {
-      const std::string caseLabel{"SboVector::crbegin const for empty vector"};
+      const std::string caseLabel{"SboVector::crbegin for empty vector"};
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
@@ -3000,43 +3000,58 @@ void TestCRBegin()
 void TestCREnd()
 {
    {
-      const std::string caseLabel{"SboVector::crend const for populated vector"};
+      const std::string caseLabel{"SboVector::crend for buffer instance"};
 
-      constexpr std::size_t BufCap = 10;
-      using SV = SboVector<int, BufCap>;
+      constexpr std::size_t BufCap = 5;
+      using Elem = Element;
+      using SV = SboVector<Element, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      SV sv{1, 2, 3, 4};
+      Elem::Metrics zeros;
 
-      const SV sv{1, 2};
+      Test<Elem, BufCap> test{caseLabel, zeros};
+      test.run([&]() {
+         VERIFY(sv.inBuffer(), caseLabel);
 
-      // Preconditions.
-      VERIFY(!sv.empty(), caseLabel);
-
-      // Test.
-      SV::const_reverse_iterator rlast = sv.crend();
-
-      VERIFY(rlast != sv.crbegin(), caseLabel);
-      VERIFY(rlast == sv.crbegin() + sv.size(), caseLabel);
+         SV::const_reverse_iterator rlast = sv.crend();
+         VERIFY(rlast == sv.crbegin() + sv.size(), caseLabel);
+      });
    }
    {
-      const std::string caseLabel{"SboVector::crend const for empty vector"};
+      const std::string caseLabel{"SboVector::crend for heap instance"};
 
-      constexpr std::size_t BufCap = 10;
-      using SV = SboVector<int, BufCap>;
+      constexpr std::size_t BufCap = 5;
+      using Elem = Element;
+      using SV = SboVector<Element, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      SV sv{1, 2, 3, 4, 5, 6, 7};
+      Elem::Metrics zeros;
 
-      const SV sv;
+      Test<Elem, BufCap> test{caseLabel, zeros};
+      test.run([&]() {
+         VERIFY(sv.onHeap(), caseLabel);
 
-      // Preconditions.
-      VERIFY(sv.empty(), caseLabel);
+         SV::const_reverse_iterator rlast = sv.crend();
+         VERIFY(rlast == sv.crbegin() + sv.size(), caseLabel);
+      });
+   }
+   {
+      const std::string caseLabel{"SboVector::crend for empty vector"};
 
-      // Test.
-      SV::const_reverse_iterator rlast = sv.crend();
+      constexpr std::size_t BufCap = 5;
+      using Elem = Element;
+      using SV = SboVector<Element, BufCap>;
 
-      VERIFY(rlast == sv.crbegin(), caseLabel);
+      SV sv;
+      Elem::Metrics zeros;
+
+      Test<Elem, BufCap> test{caseLabel, zeros};
+      test.run([&]() {
+         VERIFY(sv.empty(), caseLabel);
+
+         SV::const_reverse_iterator rlast = sv.crend();
+         VERIFY(rlast == sv.crbegin(), caseLabel);
+      });
    }
 }
 
