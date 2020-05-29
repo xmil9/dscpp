@@ -2876,43 +2876,64 @@ void TestRBeginConst()
 void TestREndConst()
 {
    {
-      const std::string caseLabel{"SboVector::rend const for populated vector"};
+      const std::string caseLabel{"SboVector::rend const for buffer instance"};
 
-      constexpr std::size_t BufCap = 10;
-      using SV = SboVector<int, BufCap>;
+      constexpr std::size_t BufCap = 5;
+      using Elem = Element;
+      using SV = SboVector<Element, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const SV sv{1, 2, 3, 4};
+      Elem::Metrics zeros;
 
-      const SV sv{1, 2};
+      Test<Elem, BufCap> test{caseLabel, zeros};
+      test.run([&]() {
+         VERIFY(sv.inBuffer(), caseLabel);
+         // Ref types are always non-const, so remove the reference.
+         static_assert(std::is_const_v<std::remove_reference<decltype(sv)>::type>);
 
-      // Preconditions.
-      VERIFY(!sv.empty(), caseLabel);
-
-      // Test.
-      SV::const_reverse_iterator rlast = sv.rend();
-
-      VERIFY(rlast != sv.rbegin(), caseLabel);
-      VERIFY(rlast == sv.rbegin() + sv.size(), caseLabel);
+         SV::const_reverse_iterator rlast = sv.rend();
+         VERIFY(rlast == sv.rbegin() + sv.size(), caseLabel);
+      });
    }
    {
-      const std::string caseLabel{"SboVector::rend const for empty vector"};
+      const std::string caseLabel{"SboVector::rend for heap instance"};
 
-      constexpr std::size_t BufCap = 10;
-      using SV = SboVector<int, BufCap>;
+      constexpr std::size_t BufCap = 5;
+      using Elem = Element;
+      using SV = SboVector<Element, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const SV sv{1, 2, 3, 4, 5, 6, 7};
+      Elem::Metrics zeros;
+
+      Test<Elem, BufCap> test{caseLabel, zeros};
+      test.run([&]() {
+         VERIFY(sv.onHeap(), caseLabel);
+         // Ref types are always non-const, so remove the reference.
+         static_assert(std::is_const_v<std::remove_reference<decltype(sv)>::type>);
+
+         SV::const_reverse_iterator rlast = sv.rend();
+         VERIFY(rlast == sv.rbegin() + sv.size(), caseLabel);
+      });
+   }
+   {
+      const std::string caseLabel{"SboVector::rend for empty vector"};
+
+      constexpr std::size_t BufCap = 5;
+      using Elem = Element;
+      using SV = SboVector<Element, BufCap>;
 
       const SV sv;
+      Elem::Metrics zeros;
 
-      // Preconditions.
-      VERIFY(sv.empty(), caseLabel);
+      Test<Elem, BufCap> test{caseLabel, zeros};
+      test.run([&]() {
+         VERIFY(sv.empty(), caseLabel);
+         // Ref types are always non-const, so remove the reference.
+         static_assert(std::is_const_v<std::remove_reference<decltype(sv)>::type>);
 
-      // Test.
-      SV::const_reverse_iterator rlast = sv.rend();
-
-      VERIFY(rlast == sv.rbegin(), caseLabel);
+         SV::const_reverse_iterator rlast = sv.rend();
+         VERIFY(rlast == sv.rbegin(), caseLabel);
+      });
    }
 }
 
