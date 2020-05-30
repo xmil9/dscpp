@@ -1432,7 +1432,7 @@ void SboVector<T, N>::reallocateLess(std::size_t newCap)
    deallocate();
 
    m_data = newData;
-   m_capacity = newCap;
+   m_capacity = std::max(newCap, BufferCapacity);
 }
 
 
