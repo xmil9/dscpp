@@ -3717,466 +3717,285 @@ void TestClear()
 void TestEraseSingleElement()
 {
    {
-      const std::string caseLabel{"SvoVector::erase inner element of buffer instance"};
+      const std::string caseLabel{"SvoVector::erase element of buffer instance"};
 
-      constexpr std::size_t BufCap = 10;
-      constexpr std::size_t NumElems = 5;
+      constexpr std::size_t BufCap = 5;
       using Elem = Element;
       using SV = SboVector<Elem, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::initializer_list<Elem> values{1, 2, 3, 4};
+      const std::size_t initialSize = values.size();
+      constexpr int erasedPos = 1;
+      const std::initializer_list<Elem> expected{1, 3, 4};
 
-      SV sv{1, 2, 3, 4, 5};
-      const std::size_t origSize = sv.size();
-      constexpr int erasedElemIdx = 1;
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = initialSize;
+      metrics.moveCtorCalls = initialSize - erasedPos - 1;
+      metrics.dtorCalls = initialSize;
 
-      // Preconditions.
-      VERIFY(sv.inBuffer(), caseLabel);
-      VERIFY(!sv.empty(), caseLabel);
-      VERIFY(erasedElemIdx > 0 && erasedElemIdx < sv.size() - 1, caseLabel);
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv{values};
+         VERIFY(sv.inBuffer(), caseLabel);
 
-      {
-         // Element instrumentation for tested call only.
-         Elem::Metrics expected;
-         expected.moveCtorCalls = sv.size() - erasedElemIdx - 1;
-         expected.dtorCalls = 1;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+         SV::iterator next = sv.erase(sv.begin() + erasedPos);
 
-         // Test.
-         SV::iterator next = sv.erase(sv.begin() + erasedElemIdx);
-
-         // Verify returned value.
-         VERIFY(next == sv.begin() + erasedElemIdx, caseLabel);
-      }
-
-      // Verify vector state.
-      VERIFY(sv.inBuffer(), caseLabel);
-      VERIFY(sv.size() == origSize - 1, caseLabel);
-      for (int i = 0; i < sv.size(); ++i)
-         VERIFY(sv[i].i == (i < erasedElemIdx) ? i + 1 : i + 2, caseLabel);
+         VERIFY(next == sv.begin() + erasedPos, caseLabel);
+         VERIFY(sv.inBuffer(), caseLabel);
+         verifyVector(sv, expected, caseLabel);
+      });
    }
    {
-      const std::string caseLabel{"SvoVector::erase first element of buffer instance"};
+      const std::string caseLabel{"SvoVector::erase only element"};
 
-      constexpr std::size_t BufCap = 10;
-      constexpr std::size_t NumElems = 5;
+      constexpr std::size_t BufCap = 5;
       using Elem = Element;
       using SV = SboVector<Elem, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::initializer_list<Elem> values{1};
+      const std::size_t initialSize = values.size();
+      constexpr int erasedPos = 0;
 
-      SV sv{1, 2, 3, 4, 5};
-      const std::size_t origSize = sv.size();
-      constexpr int erasedElemIdx = 0;
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = initialSize;
+      metrics.moveCtorCalls = 0;
+      metrics.dtorCalls = initialSize;
 
-      // Preconditions.
-      VERIFY(sv.inBuffer(), caseLabel);
-      VERIFY(!sv.empty(), caseLabel);
-      VERIFY(erasedElemIdx == 0, caseLabel);
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv{values};
+         VERIFY(sv.inBuffer(), caseLabel);
 
-      {
-         // Element instrumentation for tested call only.
-         Elem::Metrics expected;
-         expected.moveCtorCalls = sv.size() - 1;
-         expected.dtorCalls = 1;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+         SV::iterator next = sv.erase(sv.begin() + erasedPos);
 
-         // Test.
-         SV::iterator next = sv.erase(sv.begin() + erasedElemIdx);
-
-         // Verify returned value.
-         VERIFY(next == sv.begin() + erasedElemIdx, caseLabel);
-      }
-
-      // Verify vector state.
-      VERIFY(sv.inBuffer(), caseLabel);
-      VERIFY(sv.size() == origSize - 1, caseLabel);
-      for (int i = 0; i < sv.size(); ++i)
-         VERIFY(sv[i].i == i + 2, caseLabel);
-   }
-   {
-      const std::string caseLabel{"SvoVector::erase last element of buffer instance"};
-
-      constexpr std::size_t BufCap = 10;
-      constexpr std::size_t NumElems = 5;
-      using Elem = Element;
-      using SV = SboVector<Elem, BufCap>;
-
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
-
-      SV sv{1, 2, 3, 4, 5};
-      const std::size_t origSize = sv.size();
-      const std::size_t erasedElemIdx = sv.size() - 1;
-
-      // Preconditions.
-      VERIFY(sv.inBuffer(), caseLabel);
-      VERIFY(!sv.empty(), caseLabel);
-      VERIFY(erasedElemIdx == sv.size() - 1, caseLabel);
-
-      {
-         // Element instrumentation for tested call only.
-         Elem::Metrics expected;
-         expected.moveCtorCalls = 0;
-         expected.dtorCalls = 1;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
-
-         // Test.
-         SV::iterator next = sv.erase(sv.begin() + erasedElemIdx);
-
-         // Verify returned value.
-         VERIFY(next == sv.begin() + erasedElemIdx, caseLabel);
-      }
-
-      // Verify vector state.
-      VERIFY(sv.inBuffer(), caseLabel);
-      VERIFY(sv.size() == origSize - 1, caseLabel);
-      for (int i = 0; i < sv.size(); ++i)
-         VERIFY(sv[i].i == i + 1, caseLabel);
-   }
-   {
-      const std::string caseLabel{"SvoVector::erase only element of buffer instance"};
-
-      constexpr std::size_t BufCap = 10;
-      constexpr std::size_t NumElems = 5;
-      using Elem = Element;
-      using SV = SboVector<Elem, BufCap>;
-
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
-
-      SV sv{1};
-
-      // Preconditions.
-      VERIFY(sv.inBuffer(), caseLabel);
-      VERIFY(sv.size() == 1, caseLabel);
-
-      {
-         // Element instrumentation for tested call only.
-         Elem::Metrics expected;
-         expected.moveCtorCalls = 0;
-         expected.dtorCalls = 1;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
-
-         // Test.
-         SV::iterator next = sv.erase(sv.begin());
-
-         // Verify returned value.
          VERIFY(next == sv.end(), caseLabel);
-      }
-
-      // Verify vector state.
-      VERIFY(sv.inBuffer(), caseLabel);
-      VERIFY(sv.empty(), caseLabel);
+         VERIFY(sv.inBuffer(), caseLabel);
+         VERIFY(sv.empty(), caseLabel);
+      });
    }
    {
       const std::string caseLabel{"SvoVector::erase using a const-iterator"};
 
-      constexpr std::size_t BufCap = 10;
-      constexpr std::size_t NumElems = 5;
+      constexpr std::size_t BufCap = 5;
       using Elem = Element;
       using SV = SboVector<Elem, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::initializer_list<Elem> values{1, 2, 3, 4};
+      const std::size_t initialSize = values.size();
+      constexpr int erasedPos = 1;
+      const std::initializer_list<Elem> expected{1, 3, 4};
 
-      SV sv{1, 2, 3, 4, 5};
-      const std::size_t origSize = sv.size();
-      constexpr int erasedElemIdx = 1;
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = initialSize;
+      metrics.moveCtorCalls = initialSize - erasedPos - 1;
+      metrics.dtorCalls = initialSize;
 
-      // Preconditions.
-      VERIFY(!sv.empty(), caseLabel);
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv{values};
 
-      {
-         // Element instrumentation for tested call only.
-         Elem::Metrics expected;
-         expected.moveCtorCalls = sv.size() - erasedElemIdx - 1;
-         expected.dtorCalls = 1;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+         SV::iterator next = sv.erase(sv.cbegin() + erasedPos);
 
-         // Test.
-         SV::iterator next = sv.erase(sv.cbegin() + erasedElemIdx);
-
-         // Verify returned value.
-         VERIFY(next == sv.begin() + erasedElemIdx, caseLabel);
-      }
-
-      // Verify vector state.
-      VERIFY(sv.size() == origSize - 1, caseLabel);
-      for (int i = 0; i < sv.size(); ++i)
-         VERIFY(sv[i].i == (i < erasedElemIdx) ? i + 1 : i + 2, caseLabel);
+         VERIFY(next == sv.begin() + erasedPos, caseLabel);
+         VERIFY(sv.inBuffer(), caseLabel);
+         verifyVector(sv, expected, caseLabel);
+      });
    }
    {
       const std::string caseLabel{"SvoVector::erase for empty vector"};
 
-      constexpr std::size_t BufCap = 10;
-      constexpr std::size_t NumElems = 5;
+      constexpr std::size_t BufCap = 5;
       using Elem = Element;
       using SV = SboVector<Elem, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      Elem::Metrics zeros;
 
-      SV sv;
+      Test<Elem, BufCap> test{caseLabel, zeros};
+      test.run([&]() {
+         SV sv;
+         VERIFY(sv.empty(), caseLabel);
 
-      // Preconditions.
-      VERIFY(sv.empty(), caseLabel);
+         SV::iterator next = sv.erase(sv.begin());
 
-      {
-         // Element instrumentation for tested call only.
-         Elem::Metrics expected;
-         expected.moveCtorCalls = 0;
-         expected.dtorCalls = 0;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
-
-         // Test.
-         SV::iterator next = sv.erase(sv.end());
-
-         // Verify returned value.
          VERIFY(next == sv.end(), caseLabel);
-      }
-
-      // Verify vector state.
-      VERIFY(sv.empty(), caseLabel);
+         VERIFY(sv.empty(), caseLabel);
+      });
    }
    {
-      const std::string caseLabel{"SvoVector::erase inner element of heap instance"};
+      const std::string caseLabel{"SvoVector::erase element of heap instance"};
 
       constexpr std::size_t BufCap = 5;
-      constexpr std::size_t NumElems = 8;
       using Elem = Element;
       using SV = SboVector<Elem, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::initializer_list<Elem> values{1, 2, 3, 4, 5, 6, 7};
+      const std::size_t initialSize = values.size();
+      constexpr int erasedPos = 1;
+      const std::initializer_list<Elem> expected{1, 3, 4, 5, 6, 7};
 
-      SV sv{1, 2, 3, 4, 5, 6, 7, 8};
-      const std::size_t origSize = sv.size();
-      constexpr int erasedElemIdx = 3;
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = initialSize;
+      metrics.moveCtorCalls = initialSize - erasedPos - 1;
+      metrics.dtorCalls = initialSize;
 
-      // Preconditions.
-      VERIFY(sv.onHeap(), caseLabel);
-      VERIFY(!sv.empty(), caseLabel);
-      VERIFY(erasedElemIdx > 0 && erasedElemIdx < sv.size() - 1, caseLabel);
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv{values};
+         VERIFY(sv.onHeap(), caseLabel);
 
-      {
-         // Element instrumentation for tested call only.
-         Elem::Metrics expected;
-         expected.moveCtorCalls = sv.size() - erasedElemIdx - 1;
-         expected.dtorCalls = 1;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+         SV::iterator next = sv.erase(sv.begin() + erasedPos);
 
-         // Test.
-         SV::iterator next = sv.erase(sv.begin() + erasedElemIdx);
-
-         // Verify returned value.
-         VERIFY(next == sv.begin() + erasedElemIdx, caseLabel);
-      }
-
-      // Verify vector state.
-      VERIFY(sv.onHeap(), caseLabel);
-      VERIFY(sv.size() == origSize - 1, caseLabel);
-      for (int i = 0; i < sv.size(); ++i)
-         VERIFY(sv[i].i == (i < erasedElemIdx) ? i + 1 : i + 2, caseLabel);
+         VERIFY(next == sv.begin() + erasedPos, caseLabel);
+         VERIFY(sv.onHeap(), caseLabel);
+         verifyVector(sv, expected, caseLabel);
+      });
    }
    {
-      const std::string caseLabel{"SvoVector::erase first element of heap instance"};
+      const std::string caseLabel{"SvoVector::erase first element"};
 
       constexpr std::size_t BufCap = 5;
-      constexpr std::size_t NumElems = 8;
       using Elem = Element;
       using SV = SboVector<Elem, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::initializer_list<Elem> values{1, 2, 3, 4, 5, 6, 7};
+      const std::size_t initialSize = values.size();
+      constexpr int erasedPos = 0;
+      const std::initializer_list<Elem> expected{2, 3, 4, 5, 6, 7};
 
-      SV sv{1, 2, 3, 4, 5, 6, 7, 8};
-      const std::size_t origSize = sv.size();
-      constexpr int erasedElemIdx = 0;
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = initialSize;
+      metrics.moveCtorCalls = initialSize - erasedPos - 1;
+      metrics.dtorCalls = initialSize;
 
-      // Preconditions.
-      VERIFY(sv.onHeap(), caseLabel);
-      VERIFY(!sv.empty(), caseLabel);
-      VERIFY(erasedElemIdx == 0, caseLabel);
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv{values};
+         VERIFY(sv.onHeap(), caseLabel);
 
-      {
-         // Element instrumentation for tested call only.
-         Elem::Metrics expected;
-         expected.moveCtorCalls = sv.size() - 1;
-         expected.dtorCalls = 1;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+         SV::iterator next = sv.erase(sv.begin() + erasedPos);
 
-         // Test.
-         SV::iterator next = sv.erase(sv.begin() + erasedElemIdx);
-
-         // Verify returned value.
-         VERIFY(next == sv.begin() + erasedElemIdx, caseLabel);
-      }
-
-      // Verify vector state.
-      VERIFY(sv.onHeap(), caseLabel);
-      VERIFY(sv.size() == origSize - 1, caseLabel);
-      for (int i = 0; i < sv.size(); ++i)
-         VERIFY(sv[i].i == i + 2, caseLabel);
+         VERIFY(next == sv.begin() + erasedPos, caseLabel);
+         VERIFY(sv.onHeap(), caseLabel);
+         verifyVector(sv, expected, caseLabel);
+      });
    }
    {
       const std::string caseLabel{"SvoVector::erase last element of heap instance"};
 
       constexpr std::size_t BufCap = 5;
-      constexpr std::size_t NumElems = 8;
       using Elem = Element;
       using SV = SboVector<Elem, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::initializer_list<Elem> values{1, 2, 3, 4, 5, 6, 7};
+      const std::size_t initialSize = values.size();
+      const std::size_t erasedPos = initialSize - 1;
+      const std::initializer_list<Elem> expected{1, 2, 3, 4, 5, 6};
 
-      SV sv{1, 2, 3, 4, 5, 6, 7, 8};
-      const std::size_t origSize = sv.size();
-      const std::size_t erasedElemIdx = sv.size() - 1;
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = initialSize;
+      metrics.moveCtorCalls = initialSize - erasedPos - 1;
+      metrics.dtorCalls = initialSize;
 
-      // Preconditions.
-      VERIFY(sv.onHeap(), caseLabel);
-      VERIFY(!sv.empty(), caseLabel);
-      VERIFY(erasedElemIdx == sv.size() - 1, caseLabel);
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv{values};
+         VERIFY(sv.onHeap(), caseLabel);
 
-      {
-         // Element instrumentation for tested call only.
-         Elem::Metrics expected;
-         expected.moveCtorCalls = 0;
-         expected.dtorCalls = 1;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+         SV::iterator next = sv.erase(sv.begin() + erasedPos);
 
-         // Test.
-         SV::iterator next = sv.erase(sv.begin() + erasedElemIdx);
-
-         // Verify returned value.
-         VERIFY(next == sv.begin() + erasedElemIdx, caseLabel);
-      }
-
-      // Verify vector state.
-      VERIFY(sv.onHeap(), caseLabel);
-      VERIFY(sv.size() == origSize - 1, caseLabel);
-      for (int i = 0; i < sv.size(); ++i)
-         VERIFY(sv[i].i == i + 1, caseLabel);
+         VERIFY(next == sv.begin() + erasedPos, caseLabel);
+         VERIFY(sv.onHeap(), caseLabel);
+         verifyVector(sv, expected, caseLabel);
+      });
    }
    {
       const std::string caseLabel{"SvoVector::erase element of heap instance that "
                                   "makes elements fit into buffer"};
 
       constexpr std::size_t BufCap = 5;
-      constexpr std::size_t NumElems = 6;
       using Elem = Element;
       using SV = SboVector<Elem, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::initializer_list<Elem> values{1, 2, 3, 4, 5, 6};
+      const std::size_t initialSize = values.size();
+      const std::size_t erasedPos = 1;
+      const std::initializer_list<Elem> expected{1, 3, 4, 5, 6};
 
-      SV sv{1, 2, 3, 4, 5, 6};
-      const std::size_t origSize = sv.size();
-      const std::size_t erasedElemIdx = sv.size() - 1;
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = initialSize;
+      metrics.moveCtorCalls = initialSize - erasedPos - 1;
+      metrics.dtorCalls = initialSize;
 
-      // Preconditions.
-      VERIFY(sv.onHeap(), caseLabel);
-      VERIFY(sv.size() == BufCap + 1, caseLabel);
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv{values};
+         VERIFY(sv.onHeap(), caseLabel);
+         VERIFY(initialSize == BufCap + 1, caseLabel);
 
-      {
-         // Element instrumentation for tested call only.
-         Elem::Metrics expected;
-         expected.moveCtorCalls = 0;
-         expected.dtorCalls = 1;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+         SV::iterator next = sv.erase(sv.begin() + erasedPos);
 
-         // Test.
-         SV::iterator next = sv.erase(sv.begin() + erasedElemIdx);
-
-         // Verify returned value.
-         VERIFY(next == sv.end(), caseLabel);
-      }
-
-      // Verify vector state.
-      // Data is still on heap even though it would fit into buffer.
-      VERIFY(sv.onHeap(), caseLabel);
-      VERIFY(sv.size() == origSize - 1, caseLabel);
-      for (int i = 0; i < sv.size(); ++i)
-         VERIFY(sv[i].i == i + 1, caseLabel);
+         VERIFY(next == sv.begin() + erasedPos, caseLabel);
+         // Data is still on heap even though it would fit into buffer.
+         VERIFY(sv.onHeap(), caseLabel);
+         VERIFY(sv.size() == BufCap, caseLabel);
+         verifyVector(sv, expected, caseLabel);
+      });
    }
    {
       const std::string caseLabel{"SvoVector::erase all elements of heap instance"};
 
-      constexpr std::size_t BufCap = 3;
-      constexpr std::size_t NumElems = 4;
+      constexpr std::size_t BufCap = 5;
       using Elem = Element;
       using SV = SboVector<Elem, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::initializer_list<Elem> values{1, 2, 3, 4, 5, 6};
+      const std::size_t initialSize = values.size();
 
-      SV sv{1, 2, 3, 4};
-      const std::size_t origSize = sv.size();
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = initialSize;
+      metrics.dtorCalls = initialSize;
 
-      // Preconditions.
-      VERIFY(sv.onHeap(), caseLabel);
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv{values};
+         VERIFY(sv.onHeap(), caseLabel);
 
-      {
-         // Element instrumentation for tested call only.
-         Elem::Metrics expected;
-         expected.moveCtorCalls = 0;
-         expected.dtorCalls = sv.size();
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
-
-         // Test.
          while (!sv.empty())
             sv.erase(sv.begin() + sv.size() - 1);
-      }
 
-      // Verify vector state.
       // Allocation is still on heap even though it is empty.
-      VERIFY(sv.onHeap(), caseLabel);
-      VERIFY(sv.empty(), caseLabel);
+         VERIFY(sv.onHeap(), caseLabel);
+         VERIFY(sv.empty(), caseLabel);
+      });
    }
    {
-      const std::string caseLabel{"SvoVector::erase inner non-moveable element type"};
+      const std::string caseLabel{"SvoVector::erase non-moveable element type"};
 
-      constexpr std::size_t BufCap = 10;
-      constexpr std::size_t NumElems = 5;
+      constexpr std::size_t BufCap = 5;
       using Elem = NotMoveableElement;
       using SV = SboVector<Elem, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::initializer_list<Elem> values{1, 2, 3, 4, 5, 6, 7};
+      const std::size_t initialSize = values.size();
+      constexpr int erasedPos = 1;
+      const std::initializer_list<Elem> expected{1, 3, 4, 5, 6, 7};
 
-      SV sv{1, 2, 3, 4, 5};
-      const std::size_t origSize = sv.size();
-      constexpr std::size_t erasedElemIdx = 1;
-      const std::size_t numRelocated = sv.size() - erasedElemIdx - 1;
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = initialSize + initialSize - erasedPos - 1;
+      metrics.dtorCalls = metrics.copyCtorCalls;
 
-      // Preconditions.
-      VERIFY(sv.inBuffer(), caseLabel);
-      VERIFY(!sv.empty(), caseLabel);
-      VERIFY(erasedElemIdx > 0 && erasedElemIdx < sv.size() - 1, caseLabel);
-      static_assert(!std::is_move_constructible_v<Elem>);
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv{values};
+         VERIFY(sv.onHeap(), caseLabel);
+         VERIFY(!std::is_move_constructible_v<Elem>, caseLabel);
 
-      {
-         // Element instrumentation for tested call only.
-         Elem::Metrics expected;
-         expected.copyCtorCalls = numRelocated;
-         expected.dtorCalls = numRelocated + 1;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+         SV::iterator next = sv.erase(sv.begin() + erasedPos);
 
-         // Test.
-         SV::iterator next = sv.erase(sv.begin() + erasedElemIdx);
-
-         // Verify returned value.
-         VERIFY(next == sv.begin() + erasedElemIdx, caseLabel);
-      }
-
-      // Verify vector state.
-      VERIFY(sv.inBuffer(), caseLabel);
-      VERIFY(sv.size() == origSize - 1, caseLabel);
-      for (int i = 0; i < sv.size(); ++i)
-         VERIFY(sv[i].i == (i < erasedElemIdx) ? i + 1 : i + 2, caseLabel);
+         VERIFY(next == sv.begin() + erasedPos, caseLabel);
+         VERIFY(sv.onHeap(), caseLabel);
+         verifyVector(sv, expected, caseLabel);
+      });
    }
 }
 
