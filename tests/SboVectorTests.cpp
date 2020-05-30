@@ -141,6 +141,10 @@ struct NotMoveableElement
       return *this;
    }
    NotMoveableElement& operator=(NotMoveableElement&& other) = delete;
+   friend bool operator==(const NotMoveableElement& a, const NotMoveableElement& b)
+   {
+      return (a.d == b.d && a.i == b.i && a.b == b.b);
+   }
 
    double d = 1.0;
    int i = 1;
@@ -3238,176 +3242,138 @@ void TestReserve()
       const std::string caseLabel{"SvoVector::reserve for capacity less than current"};
 
       constexpr std::size_t BufCap = 5;
-      constexpr std::size_t OrigCap = 10;
-      constexpr std::size_t NewCap = 9;
       using Elem = Element;
       using SV = SboVector<Elem, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::initializer_list<Elem> values{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+      const std::size_t initialCap = values.size();
+      constexpr std::size_t reserveCap = 9;
 
-      SV sv(OrigCap, {5});
+      Element::Metrics metrics;
+      metrics.copyCtorCalls = initialCap;
+      metrics.dtorCalls = initialCap;
 
-      // Preconditions.
-      VERIFY(NewCap < sv.capacity(), caseLabel);
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv{values};
+         VERIFY(reserveCap < sv.capacity(), caseLabel);
 
-      {
-         // Element instrumentation for tested call only.
-         Elem::Metrics expected;
-         // All expected values are zero because the reserve call is a no-op.
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+         sv.reserve(reserveCap);
 
-         // Test.
-         sv.reserve(NewCap);
-      }
-
-      // Verify vector state.
-      VERIFY(sv.capacity() == OrigCap, caseLabel);
-      VERIFY(sv.size() == OrigCap, caseLabel);
-      for (int i = 0; i < sv.size(); ++i)
-         VERIFY(sv[i].i == 5, caseLabel);
+         VERIFY(sv.capacity() == initialCap, caseLabel);
+         verifyVector(sv, values, caseLabel);
+      });
    }
    {
       const std::string caseLabel{"SvoVector::reserve for capacity larger than max size"};
 
       constexpr std::size_t BufCap = 5;
-      constexpr std::size_t OrigCap = 10;
       using Elem = Element;
       using SV = SboVector<Elem, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::initializer_list<Elem> values{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+      const std::size_t initialCap = values.size();
 
-      SV sv(OrigCap, {5});
+      Element::Metrics metrics;
+      metrics.copyCtorCalls = initialCap;
+      metrics.dtorCalls = initialCap;
 
-      {
-         // Element instrumentation for tested call only.
-         Elem::Metrics expected;
-         // All expected values are zero because the reserve call throws without
-         // making. changes.
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
-
-         // Test.
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv{values};
          VERIFY_THROW(([&sv]() { sv.reserve(sv.max_size() + 1); }), std::length_error,
                       caseLabel);
-      }
+      });
    }
    {
       const std::string caseLabel{"SvoVector::reserve for capacity larger than current "
                                   "with type that is moveable"};
 
       constexpr std::size_t BufCap = 5;
-      constexpr std::size_t OrigCap = 10;
-      constexpr std::size_t NewCap = 15;
       using Elem = Element;
       using SV = SboVector<Elem, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::initializer_list<Elem> values{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+      const std::size_t initialCap = values.size();
+      constexpr std::size_t reserveCap = 15;
 
-      SV sv(OrigCap, 5);
+      Element::Metrics metrics;
+      metrics.copyCtorCalls = initialCap;
+      metrics.moveCtorCalls = initialCap;
+      metrics.dtorCalls = initialCap;
 
-      // Preconditions.
-      VERIFY(OrigCap > BufCap, caseLabel);
-      VERIFY(NewCap > sv.capacity(), caseLabel);
-      VERIFY(std::is_move_constructible_v<Elem>, caseLabel);
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv{values};
+         VERIFY(initialCap > BufCap, caseLabel);
+         VERIFY(reserveCap > sv.capacity(), caseLabel);
+         VERIFY(std::is_move_constructible_v<Elem>, caseLabel);
 
-      {
-         // Element instrumentation for tested call only.
-         Elem::Metrics expected;
-         // Elements are moved.
-         expected.moveCtorCalls = OrigCap;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+         sv.reserve(reserveCap);
 
-         // Test.
-         sv.reserve(NewCap);
-      }
-
-      // Verify vector state.
-      VERIFY(sv.capacity() == NewCap, caseLabel);
-      VERIFY(sv.size() == OrigCap, caseLabel);
-      for (int i = 0; i < sv.size(); ++i)
-         VERIFY(sv[i].i == 5, caseLabel);
+         VERIFY(sv.capacity() == reserveCap, caseLabel);
+         verifyVector(sv, values, caseLabel);
+      });
    }
    {
       const std::string caseLabel{"SvoVector::reserve for capacity larger than current "
                                   "with type that is not moveable"};
 
       constexpr std::size_t BufCap = 5;
-      constexpr std::size_t OrigCap = 10;
-      constexpr std::size_t NewCap = 15;
       using Elem = NotMoveableElement;
       using SV = SboVector<Elem, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::initializer_list<Elem> values{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+      const std::size_t initialCap = values.size();
+      constexpr std::size_t reserveCap = 15;
 
-      SV sv(OrigCap, 5);
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = 2 * initialCap;
+      metrics.dtorCalls = 2 * initialCap;
 
-      // Preconditions.
-      VERIFY(OrigCap > BufCap, caseLabel);
-      VERIFY(NewCap > sv.capacity(), caseLabel);
-      VERIFY(sv.onHeap(), caseLabel);
-      VERIFY(!std::is_move_constructible_v<Elem>, caseLabel);
+      Test<Elem, BufCap> test(caseLabel, metrics);
+      test.run([&]() {
+         SV sv{values};
+         VERIFY(initialCap > BufCap, caseLabel);
+         VERIFY(reserveCap > sv.capacity(), caseLabel);
+         VERIFY(!std::is_move_constructible_v<Elem>, caseLabel);
 
-      {
-         // Element instrumentation for tested call only.
-         Elem::Metrics expected;
-         // Copy elements to larger allocation.
-         expected.copyCtorCalls = OrigCap;
-         // Destroy previous elements.
-         expected.dtorCalls = OrigCap;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+         sv.reserve(reserveCap);
 
-         // Test.
-         sv.reserve(NewCap);
-      }
-
-      // Verify vector state.
-      VERIFY(sv.capacity() == NewCap, caseLabel);
-      VERIFY(sv.size() == OrigCap, caseLabel);
-      VERIFY(sv.onHeap(), caseLabel);
-      for (int i = 0; i < sv.size(); ++i)
-         VERIFY(sv[i].i == 5, caseLabel);
+         VERIFY(sv.capacity() == reserveCap, caseLabel);
+         verifyVector(sv, values, caseLabel);
+      });
    }
    {
       const std::string caseLabel{"SvoVector::reserve for capacity larger than current "
                                   "where current data is in buffer"};
 
       constexpr std::size_t BufCap = 10;
-      constexpr std::size_t OrigCap = 5;
-      constexpr std::size_t NewCap = 15;
       using Elem = Element;
       using SV = SboVector<Elem, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::initializer_list<Elem> values{1, 2, 3, 4, 5};
+      const std::size_t initialCap = values.size();
+      constexpr std::size_t reserveCap = 15;
 
-      SV sv(OrigCap, 5);
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = initialCap;
+      metrics.moveCtorCalls = initialCap;
+      metrics.dtorCalls = initialCap;
 
-      // Preconditions.
-      VERIFY(OrigCap < BufCap, caseLabel);
-      VERIFY(NewCap > BufCap, caseLabel);
-      VERIFY(NewCap > sv.capacity(), caseLabel);
-      VERIFY(sv.inBuffer(), caseLabel);
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv{values};
+         VERIFY(initialCap < BufCap, caseLabel);
+         VERIFY(reserveCap > initialCap, caseLabel);
+         VERIFY(reserveCap > sv.capacity(), caseLabel);
 
-      {
-         // Element instrumentation for tested call only.
-         Elem::Metrics expected;
-         // Elements are moved.
-         expected.moveCtorCalls = OrigCap;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+         sv.reserve(reserveCap);
 
-         // Test.
-         sv.reserve(NewCap);
-      }
-
-      // Verify vector state.
-      VERIFY(sv.capacity() == NewCap, caseLabel);
-      VERIFY(sv.size() == OrigCap, caseLabel);
-      VERIFY(sv.onHeap(), caseLabel);
-      for (int i = 0; i < sv.size(); ++i)
-         VERIFY(sv[i].i == 5, caseLabel);
+         VERIFY(sv.capacity() == reserveCap, caseLabel);
+         VERIFY(sv.onHeap(), caseLabel);
+         verifyVector(sv, values, caseLabel);
+      });
    }
    {
       const std::string caseLabel{
@@ -3415,79 +3381,62 @@ void TestReserve()
          "where current data is in buffer with type that is not moveable"};
 
       constexpr std::size_t BufCap = 10;
-      constexpr std::size_t OrigCap = 5;
-      constexpr std::size_t NewCap = 15;
       using Elem = NotMoveableElement;
       using SV = SboVector<Elem, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::initializer_list<Elem> values{1, 2, 3, 4, 5};
+      const std::size_t initialCap = values.size();
+      constexpr std::size_t reserveCap = 15;
 
-      SboVector<NotMoveableElement, BufCap> sv(OrigCap, 5);
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = 2 * initialCap;
+      metrics.dtorCalls = 2 * initialCap;
 
-      // Preconditions.
-      VERIFY(OrigCap < BufCap, caseLabel);
-      VERIFY(NewCap > BufCap, caseLabel);
-      VERIFY(NewCap > sv.capacity(), caseLabel);
-      VERIFY(sv.inBuffer(), caseLabel);
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv{values};
+         VERIFY(initialCap < BufCap, caseLabel);
+         VERIFY(reserveCap > initialCap, caseLabel);
+         VERIFY(reserveCap > sv.capacity(), caseLabel);
+         VERIFY(!std::is_move_constructible_v<Elem>, caseLabel);
 
-      {
-         // Element instrumentation for tested call only.
-         Elem::Metrics expected;
-         // Copy elements to larger allocation.
-         expected.copyCtorCalls = OrigCap;
-         // Destroy previous elements.
-         expected.dtorCalls = OrigCap;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+         sv.reserve(reserveCap);
 
-         // Test.
-         sv.reserve(NewCap);
-      }
-
-      // Verify vector state.
-      VERIFY(sv.capacity() == NewCap, caseLabel);
-      VERIFY(sv.size() == OrigCap, caseLabel);
-      VERIFY(sv.onHeap(), caseLabel);
-      for (int i = 0; i < sv.size(); ++i)
-         VERIFY(sv[i].i == 5, caseLabel);
+         VERIFY(sv.capacity() == reserveCap, caseLabel);
+         VERIFY(sv.onHeap(), caseLabel);
+         verifyVector(sv, values, caseLabel);
+      });
    }
    {
       const std::string caseLabel{"SvoVector::reserve for capacity larger than current "
                                   "but smaller than buffer"};
 
       constexpr std::size_t BufCap = 10;
-      constexpr std::size_t OrigCap = 5;
-      constexpr std::size_t NewCap = 8;
       using Elem = Element;
       using SV = SboVector<Elem, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::initializer_list<Elem> values{1, 2, 3, 4, 5};
+      const std::size_t initialCap = values.size();
+      constexpr std::size_t reserveCap = 8;
 
-      SV sv(OrigCap, 5);
+      // Reserve call is a no-op but vector needs to be constructed and destroyed.
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = initialCap;
+      metrics.dtorCalls = initialCap;
 
-      // Preconditions.
-      VERIFY(OrigCap < BufCap, caseLabel);
-      VERIFY(NewCap < BufCap, caseLabel);
-      VERIFY(NewCap > OrigCap, caseLabel);
-      VERIFY(sv.inBuffer(), caseLabel);
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv{values};
+         VERIFY(initialCap < BufCap, caseLabel);
+         VERIFY(reserveCap < BufCap, caseLabel);
+         VERIFY(reserveCap > initialCap, caseLabel);
 
-      {
-         // Element instrumentation for tested call only.
-         Elem::Metrics expected;
-         // It's a no-op.
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+         sv.reserve(reserveCap);
 
-         // Test.
-         sv.reserve(NewCap);
-      }
-
-      // Verify vector state.
-      VERIFY(sv.capacity() == BufCap, caseLabel);
-      VERIFY(sv.size() == OrigCap, caseLabel);
-      VERIFY(sv.inBuffer(), caseLabel);
-      for (int i = 0; i < sv.size(); ++i)
-         VERIFY(sv[i].i == 5, caseLabel);
+         VERIFY(sv.capacity() == BufCap, caseLabel);
+         VERIFY(sv.inBuffer(), caseLabel);
+         verifyVector(sv, values, caseLabel);
+      });
    }
 }
 
