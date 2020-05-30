@@ -3641,96 +3641,75 @@ void TestClear()
    {
       const std::string caseLabel{"SvoVector::clear for empty vector"};
 
-      constexpr std::size_t BufCap = 10;
+      constexpr std::size_t BufCap = 5;
       using Elem = Element;
       using SV = SboVector<Elem, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      Elem::Metrics zeros;
 
-      SV sv;
-      const auto origCap = sv.capacity();
+      Test<Elem, BufCap> test{caseLabel, zeros};
+      test.run([&]() {
+         SV sv;
+         VERIFY(sv.empty(), caseLabel);
 
-      // Preconditions.
-      VERIFY(sv.empty(), caseLabel);
-
-      {
-         // Element instrumentation for tested call only.
-         Elem::Metrics expected;
-         // It's a no-op
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
-
-         // Test.
          sv.clear();
-      }
 
-      // Verify vector state.
-      VERIFY(sv.capacity() == origCap, caseLabel);
-      VERIFY(sv.size() == 0, caseLabel);
+         VERIFY(sv.capacity() == BufCap, caseLabel);
+         VERIFY(sv.empty(), caseLabel);
+      });
    }
    {
       const std::string caseLabel{"SvoVector::clear for buffer instance"};
 
-      constexpr std::size_t BufCap = 10;
-      constexpr std::size_t NumElems = 5;
+      constexpr std::size_t BufCap = 5;
       using Elem = Element;
       using SV = SboVector<Elem, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::initializer_list<Elem> values{1, 2, 3, 4};
+      const std::size_t initialSize = values.size();
 
-      SV sv(NumElems, Elem{5});
-      const auto origCap = sv.capacity();
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = initialSize;
+      metrics.dtorCalls = initialSize;
 
-      // Preconditions.
-      VERIFY(sv.inBuffer(), caseLabel);
-      VERIFY(!sv.empty(), caseLabel);
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv{values};
+         VERIFY(sv.inBuffer(), caseLabel);
+         VERIFY(!sv.empty(), caseLabel);
 
-      {
-         // Element instrumentation for tested call only.
-         Elem::Metrics expected;
-         expected.dtorCalls = NumElems;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
-
-         // Test.
          sv.clear();
-      }
 
-      // Verify vector state.
-      VERIFY(sv.capacity() == origCap, caseLabel);
-      VERIFY(sv.size() == 0, caseLabel);
+         VERIFY(sv.capacity() == BufCap, caseLabel);
+         VERIFY(sv.empty(), caseLabel);
+      });
    }
    {
       const std::string caseLabel{"SvoVector::clear for heap instance"};
 
-      constexpr std::size_t BufCap = 10;
-      constexpr std::size_t NumElems = 15;
+      constexpr std::size_t BufCap = 5;
       using Elem = Element;
       using SV = SboVector<Elem, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::initializer_list<Elem> values{1, 2, 3, 4, 5, 6, 7};
+      const std::size_t initialSize = values.size();
 
-      SV sv(NumElems, Elem{5});
-      const auto origCap = sv.capacity();
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = initialSize;
+      metrics.dtorCalls = initialSize;
 
-      // Preconditions.
-      VERIFY(sv.onHeap(), caseLabel);
-      VERIFY(!sv.empty(), caseLabel);
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv{values};
+         VERIFY(sv.onHeap(), caseLabel);
+         VERIFY(!sv.empty(), caseLabel);
 
-      {
-         // Element instrumentation for tested call only.
-         Elem::Metrics expected;
-         expected.dtorCalls = NumElems;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
-
-         // Test.
          sv.clear();
-      }
 
-      // Verify vector state.
-      VERIFY(sv.capacity() == origCap, caseLabel);
-      VERIFY(sv.size() == 0, caseLabel);
+         VERIFY(sv.onHeap(), caseLabel);
+         VERIFY(sv.capacity() == initialSize, caseLabel);
+         VERIFY(sv.empty(), caseLabel);
+      });
    }
 }
 
