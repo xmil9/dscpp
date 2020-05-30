@@ -364,7 +364,7 @@ void TestDefaultCtor()
 
    constexpr std::size_t BufCap = 10;
    using Elem = Element;
-   using SV = SboVector<Element, BufCap>;
+   using SV = SboVector<Elem, BufCap>;
 
    const Elem::Metrics zeros;
 
@@ -386,7 +386,7 @@ void TestCtorForElementCountAndValue()
 
       constexpr std::size_t BufCap = 10;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       constexpr std::size_t numElems = 5;
       const Elem initVal{2};
@@ -411,7 +411,7 @@ void TestCtorForElementCountAndValue()
 
       constexpr std::size_t BufCap = 10;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       constexpr std::size_t numElems = 12;
       const Elem initVal{2};
@@ -442,7 +442,7 @@ void TestIteratorCtor()
 
       constexpr std::size_t BufCap = 10;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const std::initializer_list<Elem> values{1, 2, 3, 4, 5};
       const std::size_t numElems = values.size();
@@ -466,7 +466,7 @@ void TestIteratorCtor()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const std::initializer_list<Elem> values{1, 2, 3, 4, 5, 6, 7};
       const std::size_t numElems = values.size();
@@ -490,7 +490,7 @@ void TestIteratorCtor()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const std::initializer_list<Elem> values{1, 2, 3, 4, 5, 6, 7};
       const std::size_t numElems = values.size();
@@ -514,7 +514,7 @@ void TestIteratorCtor()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       std::vector<Elem> from;
       Elem::Metrics zeros;
@@ -533,7 +533,7 @@ void TestIteratorCtor()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const std::size_t numElems = 3;
       InputIter fromFirst = inputBegin();
@@ -565,7 +565,7 @@ void TestInitializerListCtor()
 
       constexpr std::size_t BufCap = 10;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const std::initializer_list<Elem> values{1, 2, 3, 4, 5};
       const std::size_t numElems = values.size();
@@ -588,7 +588,7 @@ void TestInitializerListCtor()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const std::initializer_list<Elem> values{1, 2, 3, 4, 5, 6, 7};
       const std::size_t numElems = values.size();
@@ -616,7 +616,7 @@ void TestCopyCtor()
 
       constexpr std::size_t BufCap = 10;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const std::initializer_list<Elem> values{1, 2, 3, 4, 5};
       const std::size_t numElems = values.size();
@@ -641,7 +641,7 @@ void TestCopyCtor()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const std::initializer_list<Elem> values{1, 2, 3, 4, 5, 6, 7};
       const std::size_t numElems = values.size();
@@ -671,7 +671,7 @@ void TestMoveCtor()
 
       constexpr std::size_t BufCap = 10;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const std::initializer_list<Elem> values{1, 2, 3, 4, 5};
       const std::size_t numElems = values.size();
@@ -702,7 +702,7 @@ void TestMoveCtor()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const std::initializer_list<Elem> values{1, 2, 3, 4, 5, 6, 7};
       const std::size_t numElems = values.size();
@@ -805,7 +805,7 @@ void TestCopyAssignment()
 
       constexpr std::size_t BufCap = 10;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const std::initializer_list<Elem> fromValues{1, 2, 3, 4, 5};
       const std::size_t numFrom = fromValues.size();
@@ -833,7 +833,7 @@ void TestCopyAssignment()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const std::initializer_list<Elem> fromValues{1, 2, 3, 4, 5, 6, 7};
       const std::size_t numFrom = fromValues.size();
@@ -861,7 +861,7 @@ void TestCopyAssignment()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const std::initializer_list<Elem> fromValues{1, 2, 3};
       const std::size_t numFrom = fromValues.size();
@@ -889,7 +889,7 @@ void TestCopyAssignment()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const std::initializer_list<Elem> fromValues{1, 2, 3, 4, 5, 6, 7, 8, 9};
       const std::size_t numFrom = fromValues.size();
@@ -920,7 +920,7 @@ void TestCopyAssignment()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const std::initializer_list<Elem> fromValues{1, 2, 3, 4, 5, 6};
       const std::size_t numFrom = fromValues.size();
@@ -975,7 +975,7 @@ void TestMoveAssignment()
 
       constexpr std::size_t BufCap = 10;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const std::initializer_list<Elem> fromValues{1, 2, 3};
       const std::size_t numFrom = fromValues.size();
@@ -1003,7 +1003,7 @@ void TestMoveAssignment()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const std::initializer_list<Elem> fromValues{1, 2, 3, 4, 5, 6, 7};
       const std::size_t numFrom = fromValues.size();
@@ -1031,7 +1031,7 @@ void TestMoveAssignment()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const std::initializer_list<Elem> fromValues{1, 2, 3};
       const std::size_t numFrom = fromValues.size();
@@ -1059,7 +1059,7 @@ void TestMoveAssignment()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const std::initializer_list<Elem> fromValues{1, 2, 3, 4, 5, 6};
       const std::size_t numFrom = fromValues.size();
@@ -1089,7 +1089,7 @@ void TestMoveAssignment()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const std::initializer_list<Elem> fromValues{1, 2, 3, 4, 5, 6, 7, 8, 9};
       const std::size_t numFrom = fromValues.size();
@@ -1133,7 +1133,7 @@ void TestInitializerListAssignment()
 
       constexpr std::size_t BufCap = 10;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const std::initializer_list<Elem> fromValues{1, 2};
       const std::size_t numFrom = fromValues.size();
@@ -1160,7 +1160,7 @@ void TestInitializerListAssignment()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const std::initializer_list<Elem> fromValues{1, 2, 3, 4, 5, 6, 7};
       const std::size_t numFrom = fromValues.size();
@@ -1187,7 +1187,7 @@ void TestInitializerListAssignment()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const std::initializer_list<Elem> fromValues{1, 2, 3};
       const std::size_t numFrom = fromValues.size();
@@ -1214,7 +1214,7 @@ void TestInitializerListAssignment()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const std::initializer_list<Elem> fromValues{1, 2, 3, 4, 5, 6, 7};
       const std::size_t numFrom = fromValues.size();
@@ -1243,7 +1243,7 @@ void TestInitializerListAssignment()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const std::initializer_list<Elem> fromValues{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
       const std::size_t numFrom = fromValues.size();
@@ -1287,7 +1287,7 @@ void TestAssignElementValue()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const std::initializer_list<Elem> initial{1, 2, 3};
       const std::size_t numInitial = initial.size();
@@ -1316,7 +1316,7 @@ void TestAssignElementValue()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const std::initializer_list<Elem> initial{1, 2, 3};
       const std::size_t numInitial = initial.size();
@@ -1345,7 +1345,7 @@ void TestAssignElementValue()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const std::initializer_list<Elem> initial{1, 2, 3, 4, 5, 6, 7};
       const std::size_t numInitial = initial.size();
@@ -1374,7 +1374,7 @@ void TestAssignElementValue()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const std::initializer_list<Elem> initial{1, 2, 3, 4, 5, 6, 7};
       const std::size_t numInitial = initial.size();
@@ -1406,7 +1406,7 @@ void TestAssignElementValue()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const std::initializer_list<Elem> initial{1, 2, 3, 4, 5, 6, 7, 8, 9};
       const std::size_t numInitial = initial.size();
@@ -1451,7 +1451,7 @@ void TestAssignIteratorRange()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const std::initializer_list<Elem> initial{1, 2};
       const std::size_t numInitial = initial.size();
@@ -1480,7 +1480,7 @@ void TestAssignIteratorRange()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const std::initializer_list<Elem> initial{1, 2};
       const std::size_t numInitial = initial.size();
@@ -1509,7 +1509,7 @@ void TestAssignIteratorRange()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const std::initializer_list<Elem> initial{1, 2, 3, 4, 5, 6, 7, 8};
       const std::size_t numInitial = initial.size();
@@ -1538,7 +1538,7 @@ void TestAssignIteratorRange()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const std::initializer_list<Elem> initial{1, 2, 3, 4, 5, 6, 7};
       const std::size_t numInitial = initial.size();
@@ -1569,7 +1569,7 @@ void TestAssignIteratorRange()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const std::initializer_list<Elem> initial{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
       const std::size_t numInitial = initial.size();
@@ -1614,7 +1614,7 @@ void TestAssignInitializerList()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const std::initializer_list<Elem> initial{1, 2, 3, 4};
       const std::size_t numInitial = initial.size();
@@ -1642,7 +1642,7 @@ void TestAssignInitializerList()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const std::initializer_list<Elem> initial{1, 2, 3, 4};
       const std::size_t numInitial = initial.size();
@@ -1670,7 +1670,7 @@ void TestAssignInitializerList()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const std::initializer_list<Elem> initial{1, 2, 3, 4, 5, 6};
       const std::size_t numInitial = initial.size();
@@ -1698,7 +1698,7 @@ void TestAssignInitializerList()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const std::initializer_list<Elem> initial{1, 2, 3, 4, 5, 6};
       const std::size_t numInitial = initial.size();
@@ -1728,7 +1728,7 @@ void TestAssignInitializerList()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const std::initializer_list<Elem> initial{1, 2, 3, 4, 5, 6, 7, 8};
       const std::size_t numInitial = initial.size();
@@ -1761,7 +1761,7 @@ void TestAt()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const std::size_t numElems = 4;
       const Elem val = 10;
@@ -1791,7 +1791,7 @@ void TestAt()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const std::size_t numElems = 7;
       const Elem val = 10;
@@ -1821,7 +1821,7 @@ void TestAt()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const std::size_t numElems = 4;
       const Elem val = 10;
@@ -1844,7 +1844,7 @@ void TestAtConst()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const std::size_t numElems = 4;
       const Elem val = 10;
@@ -1868,7 +1868,7 @@ void TestAtConst()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const std::size_t numElems = 12;
       const Elem val = 10;
@@ -1892,7 +1892,7 @@ void TestAtConst()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const std::size_t numElems = 7;
       const Elem val = 10;
@@ -1918,7 +1918,7 @@ void TestSubscriptOperator()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const std::size_t numElems = 4;
       const Elem val = 10;
@@ -1948,7 +1948,7 @@ void TestSubscriptOperator()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const std::size_t numElems = 7;
       const Elem val = 10;
@@ -1983,7 +1983,7 @@ void TestSubscriptOperatorConst()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const std::size_t numElems = 4;
       const Elem val = 10;
@@ -2004,7 +2004,7 @@ void TestSubscriptOperatorConst()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const std::size_t numElems = 7;
       const Elem val = 10;
@@ -2030,7 +2030,7 @@ void TestFront()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       SV sv{1, 2, 3, 4};
 
@@ -2055,7 +2055,7 @@ void TestFront()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       SV sv{1, 2, 3, 4, 5, 6, 7};
 
@@ -2085,7 +2085,7 @@ void TestFrontConst()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const SV sv{1, 2, 3, 4};
       Elem::Metrics zeros;
@@ -2104,7 +2104,7 @@ void TestFrontConst()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const SV sv{1, 2, 3, 4, 5, 6, 7};
 
@@ -2129,7 +2129,7 @@ void TestBack()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       SV sv{1, 2, 3, 4};
 
@@ -2154,7 +2154,7 @@ void TestBack()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       SV sv{1, 2, 3, 4, 5, 6, 7};
 
@@ -2184,7 +2184,7 @@ void TestBackConst()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const SV sv{1, 2, 3, 4};
       Elem::Metrics zeros;
@@ -2203,7 +2203,7 @@ void TestBackConst()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const SV sv{1, 2, 3, 4, 5, 6, 7};
       Elem::Metrics zeros;
@@ -2227,7 +2227,7 @@ void TestData()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       SV sv{1, 2, 3, 4};
       const std::size_t numElems = sv.size();
@@ -2256,7 +2256,7 @@ void TestData()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       SV sv{1, 2, 3, 4, 5, 6, 7};
       const std::size_t numElems = sv.size();
@@ -2290,7 +2290,7 @@ void TestDataConst()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const SV sv{1, 2, 3, 4};
       Elem::Metrics zeros;
@@ -2310,7 +2310,7 @@ void TestDataConst()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const SV sv{1, 2, 3, 4, 5, 6, 7};
       Elem::Metrics zeros;
@@ -2335,7 +2335,7 @@ void TestBegin()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       SV sv{1, 2, 3, 4};
       Elem::Metrics zeros;
@@ -2353,7 +2353,7 @@ void TestBegin()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       SV sv{1, 2, 3, 4, 5, 6, 7};
       Elem::Metrics zeros;
@@ -2371,7 +2371,7 @@ void TestBegin()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       SV sv;
       Elem::Metrics zeros;
@@ -2394,7 +2394,7 @@ void TestEnd()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       SV sv{1, 2, 3, 4};
       Elem::Metrics zeros;
@@ -2412,7 +2412,7 @@ void TestEnd()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       SV sv{1, 2, 3, 4, 5, 6, 7};
       Elem::Metrics zeros;
@@ -2430,7 +2430,7 @@ void TestEnd()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       SV sv;
       Elem::Metrics zeros;
@@ -2453,7 +2453,7 @@ void TestBeginConst()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const SV sv{1, 2, 3, 4};
       Elem::Metrics zeros;
@@ -2473,7 +2473,7 @@ void TestBeginConst()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const SV sv{1, 2, 3, 4, 5, 6, 7};
       Elem::Metrics zeros;
@@ -2493,7 +2493,7 @@ void TestBeginConst()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const SV sv;
       Elem::Metrics zeros;
@@ -2518,7 +2518,7 @@ void TestEndConst()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const SV sv{1, 2, 3, 4};
       Elem::Metrics zeros;
@@ -2538,7 +2538,7 @@ void TestEndConst()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const SV sv{1, 2, 3, 4, 5, 6, 7};
       Elem::Metrics zeros;
@@ -2558,7 +2558,7 @@ void TestEndConst()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const SV sv;
       Elem::Metrics zeros;
@@ -2583,7 +2583,7 @@ void TestCBegin()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       SV sv{1, 2, 3, 4};
       Elem::Metrics zeros;
@@ -2601,7 +2601,7 @@ void TestCBegin()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       SV sv{1, 2, 3, 4, 5, 6, 7};
       Elem::Metrics zeros;
@@ -2619,7 +2619,7 @@ void TestCBegin()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       SV sv;
       Elem::Metrics zeros;
@@ -2642,7 +2642,7 @@ void TestCEnd()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       SV sv{1, 2, 3, 4};
       Elem::Metrics zeros;
@@ -2660,7 +2660,7 @@ void TestCEnd()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       SV sv{1, 2, 3, 4, 5, 6, 7};
       Elem::Metrics zeros;
@@ -2678,7 +2678,7 @@ void TestCEnd()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       SV sv;
       Elem::Metrics zeros;
@@ -2701,7 +2701,7 @@ void TestRBegin()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       SV sv{1, 2, 3, 4};
       Elem::Metrics zeros;
@@ -2719,7 +2719,7 @@ void TestRBegin()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       SV sv{1, 2, 3, 4, 5, 6, 7};
       Elem::Metrics zeros;
@@ -2737,7 +2737,7 @@ void TestRBegin()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       SV sv;
       Elem::Metrics zeros;
@@ -2760,7 +2760,7 @@ void TestREnd()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       SV sv{1, 2, 3, 4};
       Elem::Metrics zeros;
@@ -2778,7 +2778,7 @@ void TestREnd()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       SV sv{1, 2, 3, 4, 5, 6, 7};
       Elem::Metrics zeros;
@@ -2796,7 +2796,7 @@ void TestREnd()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       SV sv;
       Elem::Metrics zeros;
@@ -2819,7 +2819,7 @@ void TestRBeginConst()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const SV sv{1, 2, 3, 4};
       Elem::Metrics zeros;
@@ -2839,7 +2839,7 @@ void TestRBeginConst()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const SV sv{1, 2, 3, 4, 5, 6, 7};
       Elem::Metrics zeros;
@@ -2859,7 +2859,7 @@ void TestRBeginConst()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const SV sv;
       Elem::Metrics zeros;
@@ -2884,7 +2884,7 @@ void TestREndConst()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const SV sv{1, 2, 3, 4};
       Elem::Metrics zeros;
@@ -2904,7 +2904,7 @@ void TestREndConst()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const SV sv{1, 2, 3, 4, 5, 6, 7};
       Elem::Metrics zeros;
@@ -2924,7 +2924,7 @@ void TestREndConst()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const SV sv;
       Elem::Metrics zeros;
@@ -2949,7 +2949,7 @@ void TestCRBegin()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       SV sv{1, 2, 3, 4};
       Elem::Metrics zeros;
@@ -2967,7 +2967,7 @@ void TestCRBegin()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       SV sv{1, 2, 3, 4, 5, 6, 7};
       Elem::Metrics zeros;
@@ -2985,7 +2985,7 @@ void TestCRBegin()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       SV sv;
       Elem::Metrics zeros;
@@ -3008,7 +3008,7 @@ void TestCREnd()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       SV sv{1, 2, 3, 4};
       Elem::Metrics zeros;
@@ -3026,7 +3026,7 @@ void TestCREnd()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       SV sv{1, 2, 3, 4, 5, 6, 7};
       Elem::Metrics zeros;
@@ -3044,7 +3044,7 @@ void TestCREnd()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       SV sv;
       Elem::Metrics zeros;
@@ -3067,7 +3067,7 @@ void TestEmpty()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       SV sv;
       Elem::Metrics zeros;
@@ -3084,7 +3084,7 @@ void TestEmpty()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       SV sv{1, 2, 3};
       Elem::Metrics zeros;
@@ -3102,7 +3102,7 @@ void TestEmpty()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       SV sv{1, 2, 3, 4, 5, 6};
       Elem::Metrics zeros;
@@ -3125,7 +3125,7 @@ void TestSize()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       SV sv;
       Elem::Metrics zeros;
@@ -3142,7 +3142,7 @@ void TestSize()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const std::initializer_list<Elem> values{1, 2, 3};
       SV sv{values};
@@ -3161,7 +3161,7 @@ void TestSize()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       const std::initializer_list<Elem> values{1, 2, 3, 4, 5, 6};
       SV sv{values};
@@ -3185,7 +3185,7 @@ void TestMaxSize()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       SV sv{1, 2, 3};
       Elem::Metrics zeros;
@@ -3203,7 +3203,7 @@ void TestMaxSize()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       SV sv{1, 2, 3, 4, 5, 6};
       Elem::Metrics zeros;
@@ -3221,7 +3221,7 @@ void TestMaxSize()
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
-      using SV = SboVector<Element, BufCap>;
+      using SV = SboVector<Elem, BufCap>;
 
       SV sv;
       Elem::Metrics zeros;
@@ -3249,7 +3249,7 @@ void TestReserve()
       const std::size_t initialCap = values.size();
       constexpr std::size_t reserveCap = 9;
 
-      Element::Metrics metrics;
+      Elem::Metrics metrics;
       metrics.copyCtorCalls = initialCap;
       metrics.dtorCalls = initialCap;
 
@@ -3274,7 +3274,7 @@ void TestReserve()
       const std::initializer_list<Elem> values{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
       const std::size_t initialCap = values.size();
 
-      Element::Metrics metrics;
+      Elem::Metrics metrics;
       metrics.copyCtorCalls = initialCap;
       metrics.dtorCalls = initialCap;
 
@@ -3297,7 +3297,7 @@ void TestReserve()
       const std::size_t initialCap = values.size();
       constexpr std::size_t reserveCap = 15;
 
-      Element::Metrics metrics;
+      Elem::Metrics metrics;
       metrics.copyCtorCalls = initialCap;
       metrics.moveCtorCalls = initialCap;
       metrics.dtorCalls = initialCap;
