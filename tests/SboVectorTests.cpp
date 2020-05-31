@@ -4875,556 +4875,346 @@ void TestInsertSingleRValue()
 void TestInsertValueMultipleTimes()
 {
    {
-      const std::string caseLabel{
-         "SvoVector::insert value multiple times in middle of buffer "
-         "instance with enough capacity to fit into buffer"};
+      const std::string caseLabel{"SvoVector::insert value multiple times into buffer "
+                                  "instance with enough capacity to remain in buffer"};
 
       constexpr std::size_t BufCap = 10;
-      constexpr std::size_t Cap = BufCap;
-      constexpr std::size_t NumElems = 5;
       using Elem = Element;
       using SV = SboVector<Elem, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
-
-      SV sv{1, 2, 3, 4, 5};
-      const std::size_t origSize = sv.size();
-      const Elem insertedVal = 100;
+      const std::initializer_list<Elem> values{0, 1, 2, 3, 4};
+      const std::size_t initialSize = values.size();
+      Elem insertedElem = 100;
+      constexpr std::size_t insertPos = 3;
       constexpr std::size_t numInserted = 4;
-      constexpr std::size_t insertedBefore = 3;
-      const std::size_t numRelocated = origSize - insertedBefore;
+      const std::size_t numRelocated = initialSize - insertPos;
+      const std::initializer_list<Elem> expected{0, 1, 2, 100, 100, 100, 100, 3, 4};
 
-      // Preconditions.
-      VERIFY(sv.inBuffer(), caseLabel);
-      VERIFY(!sv.empty(), caseLabel);
-      VERIFY(insertedBefore > 0 && insertedBefore < origSize - 1, caseLabel);
-      VERIFY(Cap > origSize + numInserted, caseLabel);
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = initialSize + numInserted;
+      metrics.moveCtorCalls = numRelocated;
+      metrics.dtorCalls = initialSize + numInserted;
 
-      {
-         // Element instrumentation for tested call only.
-         Elem::Metrics expected;
-         expected.moveCtorCalls = numRelocated;
-         expected.copyCtorCalls = numInserted;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv{values};
+         VERIFY(sv.inBuffer(), caseLabel);
+         VERIFY(!sv.empty(), caseLabel);
+         VERIFY(sv.size() + numInserted <= BufCap, caseLabel);
 
-         // Test.
-         SV::iterator insertedElem =
-            sv.insert(sv.begin() + insertedBefore, numInserted, insertedVal);
+         SV::iterator inserted =
+            sv.insert(sv.begin() + insertPos, numInserted, insertedElem);
 
-         // Verify returned value.
-         VERIFY(insertedElem->i == insertedVal.i, caseLabel);
-      }
-
-      // Verify vector state.
-      VERIFY(sv.inBuffer(), caseLabel);
-      VERIFY(sv.size() == origSize + numInserted, caseLabel);
-      VERIFY(sv.capacity() == Cap, caseLabel);
-      for (int i = 0; i < sv.size(); ++i)
-      {
-         int expected = i + 1;
-         if (i >= insertedBefore && i < insertedBefore + numInserted)
-            expected = insertedVal.i;
-         else if (i >= insertedBefore + numInserted)
-            expected = i - numInserted + 1;
-
-         VERIFY(sv[i].i == expected, caseLabel);
-      }
+         VERIFY(inserted == sv.begin() + insertPos, caseLabel);
+         VERIFY(sv.inBuffer(), caseLabel);
+         VERIFY(sv.capacity() == BufCap, caseLabel);
+         verifyVector(sv, expected, caseLabel);
+      });
    }
    {
-      const std::string caseLabel{
-         "SvoVector::insert value multiple times at front of buffer "
-         "instance with enough capacity to fit into buffer"};
+      const std::string caseLabel{"SvoVector::insert value multiple times into buffer "
+                                  "instance with not enough buffer capacity left"};
 
-      constexpr std::size_t BufCap = 10;
-      constexpr std::size_t Cap = BufCap;
-      constexpr std::size_t NumElems = 5;
+      constexpr std::size_t BufCap = 7;
       using Elem = Element;
       using SV = SboVector<Elem, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
-
-      SV sv{1, 2, 3, 4, 5};
-      const std::size_t origSize = sv.size();
-      const Elem insertedVal = 100;
+      const std::initializer_list<Elem> values{0, 1, 2, 3, 4};
+      const std::size_t initialSize = values.size();
+      Elem insertedElem = 100;
+      constexpr std::size_t insertPos = 3;
       constexpr std::size_t numInserted = 4;
-      constexpr std::size_t insertedBefore = 0;
-      const std::size_t numRelocated = origSize - insertedBefore;
+      const std::size_t numRelocated = initialSize - insertPos;
+      const std::initializer_list<Elem> expected{0, 1, 2, 100, 100, 100, 100, 3, 4};
 
-      // Preconditions.
-      VERIFY(sv.inBuffer(), caseLabel);
-      VERIFY(!sv.empty(), caseLabel);
-      VERIFY(insertedBefore == 0, caseLabel);
-      VERIFY(Cap > origSize + numInserted, caseLabel);
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = initialSize + numInserted;
+      metrics.moveCtorCalls = initialSize;
+      metrics.dtorCalls = initialSize + numInserted;
 
-      {
-         // Element instrumentation for tested call only.
-         Elem::Metrics expected;
-         expected.moveCtorCalls = numRelocated;
-         expected.copyCtorCalls = numInserted;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv{values};
+         VERIFY(sv.inBuffer(), caseLabel);
+         VERIFY(!sv.empty(), caseLabel);
+         VERIFY(sv.size() + numInserted > BufCap, caseLabel);
 
-         // Test.
-         SV::iterator insertedElem =
-            sv.insert(sv.begin() + insertedBefore, numInserted, insertedVal);
+         SV::iterator inserted =
+            sv.insert(sv.begin() + insertPos, numInserted, insertedElem);
 
-         // Verify returned value.
-         VERIFY(insertedElem->i == insertedVal.i, caseLabel);
-      }
-
-      // Verify vector state.
-      VERIFY(sv.inBuffer(), caseLabel);
-      VERIFY(sv.size() == origSize + numInserted, caseLabel);
-      VERIFY(sv.capacity() == Cap, caseLabel);
-      for (int i = 0; i < sv.size(); ++i)
-      {
-         int expected = i + 1;
-         if (i >= insertedBefore && i < insertedBefore + numInserted)
-            expected = insertedVal.i;
-         else if (i >= insertedBefore + numInserted)
-            expected = i - numInserted + 1;
-
-         VERIFY(sv[i].i == expected, caseLabel);
-      }
-   }
-   {
-      const std::string caseLabel{
-         "SvoVector::insert value multiple times at rear of buffer "
-         "instance with enough capacity to fit into buffer"};
-
-      constexpr std::size_t BufCap = 10;
-      constexpr std::size_t Cap = BufCap;
-      constexpr std::size_t NumElems = 5;
-      using Elem = Element;
-      using SV = SboVector<Elem, BufCap>;
-
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
-
-      SV sv{1, 2, 3, 4, 5};
-      const std::size_t origSize = sv.size();
-      const Elem insertedVal = 100;
-      constexpr std::size_t numInserted = 4;
-      const std::size_t insertedBefore = sv.size();
-      const std::size_t numRelocated = origSize - insertedBefore;
-
-      // Preconditions.
-      VERIFY(sv.inBuffer(), caseLabel);
-      VERIFY(!sv.empty(), caseLabel);
-      VERIFY(insertedBefore == sv.size(), caseLabel);
-      VERIFY(Cap > origSize + numInserted, caseLabel);
-
-      {
-         // Element instrumentation for tested call only.
-         Elem::Metrics expected;
-         expected.moveCtorCalls = numRelocated;
-         expected.copyCtorCalls = numInserted;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
-
-         // Test.
-         SV::iterator insertedElem =
-            sv.insert(sv.begin() + insertedBefore, numInserted, insertedVal);
-
-         // Verify returned value.
-         VERIFY(insertedElem->i == insertedVal.i, caseLabel);
-      }
-
-      // Verify vector state.
-      VERIFY(sv.inBuffer(), caseLabel);
-      VERIFY(sv.size() == origSize + numInserted, caseLabel);
-      VERIFY(sv.capacity() == Cap, caseLabel);
-      for (int i = 0; i < sv.size(); ++i)
-      {
-         int expected = i + 1;
-         if (i >= insertedBefore && i < insertedBefore + numInserted)
-            expected = insertedVal.i;
-         else if (i >= insertedBefore + numInserted)
-            expected = i - numInserted + 1;
-
-         VERIFY(sv[i].i == expected, caseLabel);
-      }
-   }
-   {
-      const std::string caseLabel{
-         "SvoVector::insert value multiple times in middle of buffer "
-         "instance with max-ed out buffer capacity"};
-
-      constexpr std::size_t BufCap = 5;
-      constexpr std::size_t Cap = BufCap;
-      constexpr std::size_t NumElems = 5;
-      using Elem = Element;
-      using SV = SboVector<Elem, BufCap>;
-
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
-
-      SV sv{1, 2, 3, 4, 5};
-      const std::size_t origSize = sv.size();
-      const Elem insertedVal = 100;
-      constexpr std::size_t numInserted = 2;
-      constexpr std::size_t insertedBefore = 3;
-      const std::size_t numRelocated = sv.size();
-
-      // Preconditions.
-      VERIFY(sv.inBuffer(), caseLabel);
-      VERIFY(!sv.empty(), caseLabel);
-      VERIFY(insertedBefore > 0 && insertedBefore < origSize - 1, caseLabel);
-      VERIFY(Cap == origSize, caseLabel);
-
-      {
-         // Element instrumentation for tested call only.
-         Elem::Metrics expected;
-         expected.moveCtorCalls = numRelocated;
-         expected.copyCtorCalls = numInserted;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
-
-         // Test.
-         SV::iterator insertedElem =
-            sv.insert(sv.begin() + insertedBefore, numInserted, insertedVal);
-
-         // Verify returned value.
-         VERIFY(insertedElem->i == insertedVal.i, caseLabel);
-      }
-
-      // Verify vector state.
-      VERIFY(sv.onHeap(), caseLabel);
-      VERIFY(sv.size() == origSize + numInserted, caseLabel);
-      VERIFY(sv.capacity() > Cap, caseLabel);
-      for (int i = 0; i < sv.size(); ++i)
-      {
-         int expected = i + 1;
-         if (i >= insertedBefore && i < insertedBefore + numInserted)
-            expected = insertedVal.i;
-         else if (i >= insertedBefore + numInserted)
-            expected = i - numInserted + 1;
-
-         VERIFY(sv[i].i == expected, caseLabel);
-      }
+         VERIFY(inserted == sv.begin() + insertPos, caseLabel);
+         VERIFY(sv.onHeap(), caseLabel);
+         VERIFY(sv.capacity() > BufCap, caseLabel);
+         verifyVector(sv, expected, caseLabel);
+      });
    }
    {
       const std::string caseLabel{"SvoVector::insert value multiple times into heap "
                                   "instance with unused capacity left"};
 
       constexpr std::size_t BufCap = 5;
-      constexpr std::size_t Cap = 10;
-      constexpr std::size_t NumElems = 7;
       using Elem = Element;
       using SV = SboVector<Elem, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::initializer_list<Elem> values{0, 1, 2, 3, 4, 5, 6};
+      const std::size_t initialSize = values.size();
+      constexpr std::size_t initialCap = 15;
+      Elem insertedElem = 100;
+      constexpr std::size_t insertPos = 3;
+      constexpr std::size_t numInserted = 4;
+      const std::size_t numRelocated = initialSize - insertPos;
+      const std::initializer_list<Elem> expected{0, 1, 2, 100, 100, 100, 100, 3, 4, 5, 6};
 
-      SV sv{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-      while (sv.size() > NumElems)
-         sv.erase(sv.begin() + sv.size() - 1);
-      const Elem insertedVal = 100;
-      constexpr std::size_t numInserted = 2;
-      constexpr std::size_t insertedBefore = 3;
-      const std::size_t numRelocated = NumElems - insertedBefore;
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = initialSize + numInserted;
+      metrics.moveCtorCalls = initialSize + numRelocated;
+      metrics.dtorCalls = initialSize + numInserted;
 
-      // Preconditions.
-      VERIFY(sv.onHeap(), caseLabel);
-      VERIFY(sv.size() == NumElems, caseLabel);
-      VERIFY(sv.capacity() == Cap, caseLabel);
-      VERIFY(insertedBefore > 0 && insertedBefore < NumElems - 1, caseLabel);
-      VERIFY(sv.size() < sv.capacity(), caseLabel);
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv{values};
+         sv.reserve(initialCap);
+         VERIFY(sv.onHeap(), caseLabel);
+         VERIFY(!sv.empty(), caseLabel);
+         VERIFY(sv.size() + numInserted <= sv.capacity(), caseLabel);
 
-      {
-         // Element instrumentation for tested call only.
-         Elem::Metrics expected;
-         expected.moveCtorCalls = numRelocated;
-         expected.copyCtorCalls = numInserted;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+         SV::iterator inserted =
+            sv.insert(sv.begin() + insertPos, numInserted, insertedElem);
 
-         // Test.
-         SV::iterator insertedElem =
-            sv.insert(sv.begin() + insertedBefore, numInserted, insertedVal);
-
-         // Verify returned value.
-         VERIFY(insertedElem->i == insertedVal.i, caseLabel);
-      }
-
-      // Verify vector state.
-      VERIFY(sv.onHeap(), caseLabel);
-      VERIFY(sv.size() == NumElems + numInserted, caseLabel);
-      VERIFY(sv.capacity() == Cap, caseLabel);
-      for (int i = 0; i < sv.size(); ++i)
-      {
-         int expected = i + 1;
-         if (i >= insertedBefore && i < insertedBefore + numInserted)
-            expected = insertedVal.i;
-         else if (i >= insertedBefore + numInserted)
-            expected = i - numInserted + 1;
-
-         VERIFY(sv[i].i == expected, caseLabel);
-      }
+         VERIFY(inserted == sv.begin() + insertPos, caseLabel);
+         VERIFY(sv.onHeap(), caseLabel);
+         VERIFY(sv.capacity() == initialCap, caseLabel);
+         verifyVector(sv, expected, caseLabel);
+      });
    }
    {
       const std::string caseLabel{"SvoVector::insert value multiple times into heap "
-                                  "instance with max-ed out capacity"};
+                                  "instance not enough capacity left"};
 
       constexpr std::size_t BufCap = 5;
-      constexpr std::size_t Cap = 8;
-      constexpr std::size_t NumElems = 8;
       using Elem = Element;
       using SV = SboVector<Elem, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::initializer_list<Elem> values{0, 1, 2, 3, 4, 5, 6};
+      const std::size_t initialSize = values.size();
+      const std::size_t initialCap = initialSize;
+      Elem insertedElem = 100;
+      constexpr std::size_t insertPos = 3;
+      constexpr std::size_t numInserted = 4;
+      const std::size_t numRelocated = initialSize - insertPos;
+      const std::initializer_list<Elem> expected{0, 1, 2, 100, 100, 100, 100, 3, 4, 5, 6};
 
-      SV sv{1, 2, 3, 4, 5, 6, 7, 8};
-      const Elem insertedVal = 100;
-      constexpr std::size_t numInserted = 2;
-      constexpr std::size_t insertedBefore = 3;
-      const std::size_t numRelocated = sv.size();
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = initialSize + numInserted;
+      metrics.moveCtorCalls = initialSize;
+      metrics.dtorCalls = initialSize + numInserted;
 
-      // Preconditions.
-      VERIFY(sv.onHeap(), caseLabel);
-      VERIFY(sv.size() == NumElems, caseLabel);
-      VERIFY(sv.capacity() == Cap, caseLabel);
-      VERIFY(insertedBefore > 0 && insertedBefore < NumElems - 1, caseLabel);
-      VERIFY(sv.size() == sv.capacity(), caseLabel);
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv{values};
+         VERIFY(sv.onHeap(), caseLabel);
+         VERIFY(!sv.empty(), caseLabel);
+         VERIFY(sv.size() + numInserted > sv.capacity(), caseLabel);
 
-      {
-         // Element instrumentation for tested call only.
-         Elem::Metrics expected;
-         expected.moveCtorCalls = numRelocated;
-         expected.copyCtorCalls = numInserted;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+         SV::iterator inserted =
+            sv.insert(sv.begin() + insertPos, numInserted, insertedElem);
 
-         // Test.
-         SV::iterator insertedElem =
-            sv.insert(sv.begin() + insertedBefore, numInserted, insertedVal);
-
-         // Verify returned value.
-         VERIFY(insertedElem->i == insertedVal.i, caseLabel);
-      }
-
-      // Verify vector state.
-      VERIFY(sv.onHeap(), caseLabel);
-      VERIFY(sv.size() == NumElems + numInserted, caseLabel);
-      VERIFY(sv.capacity() > Cap, caseLabel);
-      for (int i = 0; i < sv.size(); ++i)
-      {
-         int expected = i + 1;
-         if (i >= insertedBefore && i < insertedBefore + numInserted)
-            expected = insertedVal.i;
-         else if (i >= insertedBefore + numInserted)
-            expected = i - numInserted + 1;
-
-         VERIFY(sv[i].i == expected, caseLabel);
-      }
+         VERIFY(inserted == sv.begin() + insertPos, caseLabel);
+         VERIFY(sv.onHeap(), caseLabel);
+         VERIFY(sv.capacity() > initialCap, caseLabel);
+         verifyVector(sv, expected, caseLabel);
+      });
    }
    {
-      const std::string caseLabel{"SvoVector::insert value multiple times into heap "
-                                  "instance using a const-iterator"};
+      const std::string caseLabel{"SvoVector::insert value multiple times at front"};
 
-
-      constexpr std::size_t BufCap = 5;
-      constexpr std::size_t Cap = 10;
-      constexpr std::size_t NumElems = 7;
+      constexpr std::size_t BufCap = 10;
       using Elem = Element;
       using SV = SboVector<Elem, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::initializer_list<Elem> values{0, 1, 2, 3, 4};
+      const std::size_t initialSize = values.size();
+      Elem insertedElem = 100;
+      constexpr std::size_t numInserted = 4;
+      const std::size_t numRelocated = initialSize;
+      const std::initializer_list<Elem> expected{100, 100, 100, 100, 0, 1, 2, 3, 4};
 
-      SV sv{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-      while (sv.size() > NumElems)
-         sv.erase(sv.begin() + sv.size() - 1);
-      const Elem insertedVal = 100;
-      constexpr std::size_t numInserted = 2;
-      constexpr std::size_t insertedBefore = 3;
-      const std::size_t numRelocated = NumElems - insertedBefore;
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = initialSize + numInserted;
+      metrics.moveCtorCalls = numRelocated;
+      metrics.dtorCalls = initialSize + numInserted;
 
-      // Preconditions.
-      VERIFY(sv.onHeap(), caseLabel);
-      VERIFY(sv.size() == NumElems, caseLabel);
-      VERIFY(sv.capacity() == Cap, caseLabel);
-      VERIFY(insertedBefore > 0 && insertedBefore < NumElems - 1, caseLabel);
-      VERIFY(sv.size() < sv.capacity(), caseLabel);
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv{values};
+         VERIFY(sv.inBuffer(), caseLabel);
+         VERIFY(!sv.empty(), caseLabel);
+         VERIFY(sv.size() + numInserted <= BufCap, caseLabel);
 
-      {
-         // Element instrumentation for tested call only.
-         Elem::Metrics expected;
-         expected.moveCtorCalls = numRelocated;
-         expected.copyCtorCalls = numInserted;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+         SV::iterator inserted = sv.insert(sv.begin(), numInserted, insertedElem);
 
-         // Test.
-         SV::iterator insertedElem =
-            sv.insert(sv.cbegin() + insertedBefore, numInserted, insertedVal);
+         VERIFY(inserted == sv.begin(), caseLabel);
+         VERIFY(sv.inBuffer(), caseLabel);
+         VERIFY(sv.capacity() == BufCap, caseLabel);
+         verifyVector(sv, expected, caseLabel);
+      });
+   }
+   {
+      const std::string caseLabel{"SvoVector::insert value multiple times at end"};
 
-         // Verify returned value.
-         VERIFY(insertedElem->i == insertedVal.i, caseLabel);
-      }
+      constexpr std::size_t BufCap = 10;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
 
-      // Verify vector state.
-      VERIFY(sv.onHeap(), caseLabel);
-      VERIFY(sv.size() == NumElems + numInserted, caseLabel);
-      VERIFY(sv.capacity() == Cap, caseLabel);
-      for (int i = 0; i < sv.size(); ++i)
-      {
-         int expected = i + 1;
-         if (i >= insertedBefore && i < insertedBefore + numInserted)
-            expected = insertedVal.i;
-         else if (i >= insertedBefore + numInserted)
-            expected = i - numInserted + 1;
+      const std::initializer_list<Elem> values{0, 1, 2, 3, 4};
+      const std::size_t initialSize = values.size();
+      Elem insertedElem = 100;
+      const std::size_t insertPos = initialSize;
+      constexpr std::size_t numInserted = 4;
+      const std::size_t numRelocated = initialSize - insertPos;
+      const std::initializer_list<Elem> expected{0, 1, 2, 3, 4, 100, 100, 100, 100};
 
-         VERIFY(sv[i].i == expected, caseLabel);
-      }
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = initialSize + numInserted;
+      metrics.moveCtorCalls = numRelocated;
+      metrics.dtorCalls = initialSize + numInserted;
+
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv{values};
+         VERIFY(sv.inBuffer(), caseLabel);
+         VERIFY(!sv.empty(), caseLabel);
+         VERIFY(sv.size() + numInserted <= BufCap, caseLabel);
+
+         SV::iterator inserted =
+            sv.insert(sv.begin() + insertPos, numInserted, insertedElem);
+
+         VERIFY(inserted == sv.begin() + insertPos, caseLabel);
+         VERIFY(sv.inBuffer(), caseLabel);
+         VERIFY(sv.capacity() == BufCap, caseLabel);
+         verifyVector(sv, expected, caseLabel);
+      });
+   }
+   {
+      const std::string caseLabel{
+         "SvoVector::insert value multiple times using a const-iterator"};
+
+      constexpr std::size_t BufCap = 10;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      const std::initializer_list<Elem> values{0, 1, 2, 3, 4};
+      const std::size_t initialSize = values.size();
+      Elem insertedElem = 100;
+      constexpr std::size_t insertPos = 3;
+      constexpr std::size_t numInserted = 4;
+      const std::size_t numRelocated = initialSize - insertPos;
+      const std::initializer_list<Elem> expected{0, 1, 2, 100, 100, 100, 100, 3, 4};
+
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = initialSize + numInserted;
+      metrics.moveCtorCalls = numRelocated;
+      metrics.dtorCalls = initialSize + numInserted;
+
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv{values};
+         VERIFY(!sv.empty(), caseLabel);
+
+         SV::iterator inserted =
+            sv.insert(sv.cbegin() + insertPos, numInserted, insertedElem);
+
+         VERIFY(inserted == sv.begin() + insertPos, caseLabel);
+         verifyVector(sv, expected, caseLabel);
+      });
    }
    {
       const std::string caseLabel{
          "SvoVector::insert value multiple times into empty vector"};
 
-      constexpr std::size_t BufCap = 5;
-      constexpr std::size_t Cap = BufCap;
-      constexpr std::size_t NumElems = 0;
+      constexpr std::size_t BufCap = 10;
       using Elem = Element;
       using SV = SboVector<Elem, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
-
-      SV sv;
-      const Elem insertedVal = 100;
+      Elem insertedElem = 100;
       constexpr std::size_t numInserted = 4;
-      constexpr std::size_t insertedBefore = 0;
-      const std::size_t numRelocated = 0;
+      const std::initializer_list<Elem> expected{100, 100, 100, 100};
 
-      // Preconditions.
-      VERIFY(sv.inBuffer(), caseLabel);
-      VERIFY(sv.size() == NumElems, caseLabel);
-      VERIFY(sv.capacity() == Cap, caseLabel);
-      VERIFY(insertedBefore == 0, caseLabel);
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = numInserted;
+      metrics.dtorCalls = numInserted;
 
-      {
-         // Element instrumentation for tested call only.
-         Elem::Metrics expected;
-         expected.copyCtorCalls = numInserted;
-         expected.dtorCalls = 0;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv;
+         VERIFY(sv.empty(), caseLabel);
 
-         // Test.
-         SV::iterator insertedElem =
-            sv.insert(sv.begin() + insertedBefore, numInserted, insertedVal);
+         SV::iterator inserted = sv.insert(sv.begin(), numInserted, insertedElem);
 
-         // Verify returned value.
-         VERIFY(insertedElem->i == insertedVal.i, caseLabel);
-      }
-
-      // Verify vector state.
-      VERIFY(sv.inBuffer(), caseLabel);
-      VERIFY(sv.size() == NumElems + numInserted, caseLabel);
-      VERIFY(sv.capacity() == Cap, caseLabel);
-      for (int i = 0; i < sv.size(); ++i)
-         VERIFY(sv[0].i == 100, caseLabel);
+         VERIFY(inserted == sv.begin(), caseLabel);
+         verifyVector(sv, expected, caseLabel);
+      });
    }
    {
       const std::string caseLabel{
          "SvoVector::insert value multiple times for non-moveable element type"};
 
-      constexpr std::size_t BufCap = 5;
-      constexpr std::size_t Cap = 10;
-      constexpr std::size_t NumElems = 7;
+      constexpr std::size_t BufCap = 10;
       using Elem = NotMoveableElement;
       using SV = SboVector<Elem, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::initializer_list<Elem> values{0, 1, 2, 3, 4};
+      const std::size_t initialSize = values.size();
+      Elem insertedElem = 100;
+      constexpr std::size_t insertPos = 3;
+      constexpr std::size_t numInserted = 4;
+      const std::size_t numRelocated = initialSize - insertPos;
+      const std::initializer_list<Elem> expected{0, 1, 2, 100, 100, 100, 100, 3, 4};
 
-      SV sv{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-      while (sv.size() > NumElems)
-         sv.erase(sv.begin() + sv.size() - 1);
-      const Elem insertedVal = 100;
-      constexpr std::size_t numInserted = 2;
-      constexpr std::size_t insertedBefore = 3;
-      const std::size_t numRelocated = NumElems - insertedBefore;
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = initialSize + numRelocated + numInserted;
+      metrics.dtorCalls = metrics.copyCtorCalls;
 
-      // Preconditions.
-      VERIFY(sv.onHeap(), caseLabel);
-      VERIFY(sv.size() == NumElems, caseLabel);
-      VERIFY(sv.capacity() == Cap, caseLabel);
-      VERIFY(insertedBefore > 0 && insertedBefore < NumElems - 1, caseLabel);
-      VERIFY(sv.size() < sv.capacity(), caseLabel);
-      static_assert(!std::is_move_constructible_v<Elem>);
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv{values};
+         VERIFY(!sv.empty(), caseLabel);
+         VERIFY(!std::is_move_constructible_v<Elem>, caseLabel);
 
-      {
-         // Element instrumentation for tested call only.
-         Elem::Metrics expected;
-         expected.copyCtorCalls = numRelocated + numInserted;
-         expected.dtorCalls = numRelocated;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+         SV::iterator inserted =
+            sv.insert(sv.begin() + insertPos, numInserted, insertedElem);
 
-         // Test.
-         SV::iterator insertedElem =
-            sv.insert(sv.begin() + insertedBefore, numInserted, insertedVal);
-
-         // Verify returned value.
-         VERIFY(insertedElem->i == insertedVal.i, caseLabel);
-      }
-
-      // Verify vector state.
-      VERIFY(sv.onHeap(), caseLabel);
-      VERIFY(sv.size() == NumElems + numInserted, caseLabel);
-      VERIFY(sv.capacity() == Cap, caseLabel);
-      for (int i = 0; i < sv.size(); ++i)
-      {
-         int expected = i + 1;
-         if (i >= insertedBefore && i < insertedBefore + numInserted)
-            expected = insertedVal.i;
-         else if (i >= insertedBefore + numInserted)
-            expected = i - numInserted + 1;
-
-         VERIFY(sv[i].i == expected, caseLabel);
-      }
+         VERIFY(inserted == sv.begin() + insertPos, caseLabel);
+         verifyVector(sv, expected, caseLabel);
+      });
    }
    {
       const std::string caseLabel{"SvoVector::insert value zero times into vector"};
 
       constexpr std::size_t BufCap = 10;
-      constexpr std::size_t Cap = BufCap;
-      constexpr std::size_t NumElems = 5;
       using Elem = Element;
       using SV = SboVector<Elem, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::initializer_list<Elem> values{0, 1, 2, 3, 4};
+      const std::size_t initialSize = values.size();
+      Elem insertedElem = 100;
+      constexpr std::size_t insertPos = 3;
 
-      SV sv{1, 2, 3, 4, 5};
-      const Elem insertedVal = 100;
-      constexpr std::size_t numInserted = 0;
-      constexpr std::size_t insertedBefore = 2;
-      const std::size_t numRelocated = 0;
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = initialSize;
+      metrics.dtorCalls = metrics.copyCtorCalls;
 
-      // Preconditions.
-      VERIFY(sv.inBuffer(), caseLabel);
-      VERIFY(sv.size() == NumElems, caseLabel);
-      VERIFY(sv.capacity() == Cap, caseLabel);
-      VERIFY(numInserted == 0, caseLabel);
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv{values};
+         VERIFY(!sv.empty(), caseLabel);
 
-      {
-         // Element instrumentation for tested call only.
-         Elem::Metrics expected;
-         expected.copyCtorCalls = 0;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+         SV::iterator expectedIter = sv.begin() + insertPos;
+         SV::iterator inserted = sv.insert(sv.begin() + insertPos, 0, insertedElem);
 
-         // Test.
-         SV::iterator insertPos = sv.begin() + insertedBefore;
-         SV::iterator insertedElem = sv.insert(insertPos, numInserted, insertedVal);
-
-         // Verify returned value.
-         VERIFY(insertedElem == insertPos, caseLabel);
-      }
-
-      // Verify vector state.
-      VERIFY(sv.inBuffer(), caseLabel);
-      VERIFY(sv.size() == NumElems + numInserted, caseLabel);
-      VERIFY(sv.capacity() == Cap, caseLabel);
-      for (int i = 0; i < sv.size(); ++i)
-         VERIFY(sv[i].i == i + 1, caseLabel);
+         VERIFY(inserted == expectedIter, caseLabel);
+         verifyVector(sv, values, caseLabel);
+      });
    }
 }
 
