@@ -7593,72 +7593,8 @@ void TestConstIteratorGreaterOrEqualThan()
 
 ///////////////////
 
-struct E
-{
-   E()
-   {
-      p = new int(5);
-      instances++;
-   }
-   E(const E& e)
-   {
-      p = new int(*e.p);
-      instances++;
-   }
-   E(E&& e)
-   {
-      p = e.p;
-      e.p = nullptr;
-      instances++;
-   }
-   ~E()
-   {
-      delete p;
-      instances--;
-   }
-   E& operator=(const E& e)
-   {
-      delete p;
-      p = new int(*e.p);
-      return *this;
-   }
-   E& operator=(E&& e)
-   {
-      delete p;
-      p = e.p;
-      e.p = nullptr;
-      return *this;
-   }
-
-   int* p = nullptr;
-
-   inline static size_t instances = 0;
-};
-
-void Experiment()
-{
-   {
-      E* mem = (E*)malloc(sizeof(E) * 10);
-
-      E val;
-
-      std::uninitialized_fill_n(mem, 1, val);
-      // std::uninitialized_default_construct_n(mem, 1);
-      // std::uninitialized_copy_n(mem, 1, mem + 5);
-      // std::destroy_n(mem + 5, 1);
-
-      free(mem);
-   }
-
-   size_t balance = E::instances;
-   balance;
-}
-
-
 void TestSboVector()
 {
-   // Experiment();
-
    TestDefaultCtor();
    TestCtorForElementCountAndValue();
    TestIteratorCtor();
