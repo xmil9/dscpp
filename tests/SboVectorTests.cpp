@@ -5603,544 +5603,331 @@ void TestInsertRange()
 }
 
 
-template <typename Elem> struct ExpectedResult
-{
-   ExpectedResult(bool inBuf, std::function<bool(std::size_t)> capVerifier_,
-                  std::initializer_list<Elem> values_)
-   : isInBuffer{inBuf}, capVerifier{capVerifier_}, values(values_)
-   {
-   }
-
-   template <typename SV> void verify(const SV& sv, const std::string& caseLabel) const
-   {
-      VERIFY(sv.inBuffer() == isInBuffer, caseLabel);
-      VERIFY(capVerifier(sv.capacity()), caseLabel);
-      VERIFY(sv.size() == values.size(), caseLabel);
-      for (int i = 0; i < values.size(); ++i)
-         VERIFY(sv[i] == values[i], caseLabel);
-   }
-
-   bool isInBuffer = false;
-   std::function<bool(std::size_t)> capVerifier;
-   std::vector<Elem> values;
-};
-
-
-template <typename Elem, std::size_t BufCap, std::size_t Cap>
-class SboVectorInsertInitializerListTest
-{
- public:
-   using SV = SboVector<Elem, BufCap>;
-
- public:
-   SboVectorInsertInitializerListTest(const std::string& caseLabel,
-                                      std::initializer_list<Elem> elems)
-   : m_caseLabel{caseLabel}, m_elems(elems)
-   {
-   }
-   SboVectorInsertInitializerListTest(const SboVectorInsertInitializerListTest&) = delete;
-   SboVectorInsertInitializerListTest(SboVectorInsertInitializerListTest&&) = delete;
-
-   void run(std::initializer_list<Elem> inserted, std::size_t insertAt,
-            const typename Elem::Metrics& metrics, const ExpectedResult<Elem>& res);
-
- private:
-   SV makeVector();
-
- private:
-   const std::string m_caseLabel;
-   const std::initializer_list<Elem> m_elems;
-};
-
-
-template <typename Elem, std::size_t BufCap, std::size_t Cap>
-void SboVectorInsertInitializerListTest<Elem, BufCap, Cap>::run(
-   std::initializer_list<Elem> inserted, std::size_t insertAt,
-   const typename Elem::Metrics& metrics, const ExpectedResult<Elem>& result)
-{
-   // Memory instrumentation for entire scope.
-   const MemVerifier<SV> memCheck{m_caseLabel};
-
-   SV sv = makeVector();
-
-   {
-      // Element instrumentation for tested call only.
-      const ElementVerifier<Elem> elemCheck{metrics, m_caseLabel};
-
-      // Test.
-      typename SV::iterator insertedElem = sv.insert(sv.begin() + insertAt, inserted);
-
-      // Verify returned value.
-      VERIFY(insertedElem == sv.begin() + insertAt, m_caseLabel);
-   }
-
-   // Verify vector state.
-   result.verify(sv, m_caseLabel);
-}
-
-
-template <typename Elem, std::size_t BufCap, std::size_t Cap>
-typename SboVectorInsertInitializerListTest<Elem, BufCap, Cap>::SV
-SboVectorInsertInitializerListTest<Elem, BufCap, Cap>::makeVector()
-{
-   SV sv;
-   sv.reserve(Cap);
-   for (const auto& elem : m_elems)
-      sv.push_back(elem);
-   return sv;
-}
-
-
 void TestInsertInitializerList()
 {
    {
-      const std::string caseLabel{
-         "SvoVector::insert initializer list in middle of buffer "
-         "instance with enough capacity to fit into buffer"};
+      const std::string caseLabel{"SvoVector::insert initializer list into buffer "
+                                  "instance with enough capacity to remain in buffer"};
 
-      using Elem = Element;
       constexpr std::size_t BufCap = 10;
-      constexpr std::size_t Cap = BufCap;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
 
-      const std::initializer_list<Elem> initial = {1, 2, 3, 4, 5};
-      const std::size_t numElems = initial.size();
-      constexpr std::size_t insertAt = 3;
-
-      const std::initializer_list<Elem> inserted = {101, 102, 103};
-      const std::size_t numInserted = inserted.size();
-      const std::size_t numRelocated = numElems - insertAt;
-
-      SboVectorInsertInitializerListTest<Elem, BufCap, Cap> test(caseLabel, initial);
+      const std::initializer_list<Elem> values{0, 1, 2, 3, 4};
+      const std::size_t initialSize = values.size();
+      const std::initializer_list<Elem> src{100, 101, 102};
+      const std::size_t numInserted = src.size();
+      constexpr std::size_t insertPos = 3;
+      const std::size_t numRelocated = initialSize - insertPos;
+      const std::initializer_list<Elem> expected{0, 1, 2, 100, 101, 102, 3, 4};
 
       Elem::Metrics metrics;
+      metrics.copyCtorCalls = initialSize + numInserted;
       metrics.moveCtorCalls = numRelocated;
-      metrics.copyCtorCalls = numInserted;
+      metrics.dtorCalls = initialSize + numInserted;
 
-      ExpectedResult<Elem> result{
-         true,
-         [Cap](std::size_t resultCap) { return resultCap == Cap; },
-         {1, 2, 3, 101, 102, 103, 4, 5}};
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv{values};
+         VERIFY(sv.inBuffer(), caseLabel);
+         VERIFY(!sv.empty(), caseLabel);
+         VERIFY(sv.size() + numInserted <= BufCap, caseLabel);
 
-      // Preconditions.
-      VERIFY(0 < numElems && numElems <= BufCap, caseLabel);
-      VERIFY(insertAt > 0 && insertAt < numElems - 1, caseLabel);
-      VERIFY(BufCap > numElems + numInserted, caseLabel);
+         SV::iterator inserted = sv.insert(sv.begin() + insertPos, src);
 
-      test.run(inserted, insertAt, metrics, result);
-   }
-   {
-      const std::string caseLabel{"SvoVector::insert initializer list at front of buffer "
-                                  "instance with enough capacity to fit into buffer"};
-
-      using Elem = Element;
-      constexpr std::size_t BufCap = 10;
-      constexpr std::size_t Cap = BufCap;
-
-      const std::initializer_list<Elem> initial = {1, 2, 3, 4, 5};
-      const std::size_t numElems = initial.size();
-      constexpr std::size_t insertAt = 0;
-
-      const std::initializer_list<Elem> inserted = {101, 102, 103};
-      const std::size_t numInserted = inserted.size();
-      const std::size_t numRelocated = numElems - insertAt;
-
-      SboVectorInsertInitializerListTest<Elem, BufCap, Cap> test(caseLabel, initial);
-
-      Elem::Metrics metrics;
-      metrics.moveCtorCalls = numRelocated;
-      metrics.copyCtorCalls = numInserted;
-
-      ExpectedResult<Elem> result{
-         true,
-         [Cap](std::size_t resultCap) { return resultCap == Cap; },
-         {101, 102, 103, 1, 2, 3, 4, 5}};
-
-      // Preconditions.
-      VERIFY(0 < numElems && numElems <= BufCap, caseLabel);
-      VERIFY(insertAt == 0, caseLabel);
-      VERIFY(BufCap > numElems + numInserted, caseLabel);
-
-      test.run(inserted, insertAt, metrics, result);
-   }
-   {
-      const std::string caseLabel{"SvoVector::insert initializer list at rear of buffer "
-                                  "instance with enough capacity to fit into buffer"};
-
-      using Elem = Element;
-      constexpr std::size_t BufCap = 10;
-      constexpr std::size_t Cap = BufCap;
-
-      const std::initializer_list<Elem> initial = {1, 2, 3, 4, 5};
-      const std::size_t numElems = initial.size();
-      const std::size_t insertAt = numElems;
-
-      const std::initializer_list<Elem> inserted = {101, 102, 103};
-      const std::size_t numInserted = inserted.size();
-      const std::size_t numRelocated = numElems - insertAt;
-
-      SboVectorInsertInitializerListTest<Elem, BufCap, Cap> test(caseLabel, initial);
-
-      Elem::Metrics metrics;
-      metrics.moveCtorCalls = numRelocated;
-      metrics.copyCtorCalls = numInserted;
-
-      ExpectedResult<Elem> result{
-         true,
-         [Cap](std::size_t resultCap) { return resultCap == Cap; },
-         {1, 2, 3, 4, 5, 101, 102, 103}};
-
-      // Preconditions.
-      VERIFY(0 < numElems && numElems <= BufCap, caseLabel);
-      VERIFY(insertAt == numElems, caseLabel);
-      VERIFY(BufCap > numElems + numInserted, caseLabel);
-
-      test.run(inserted, insertAt, metrics, result);
+         VERIFY(inserted == sv.begin() + insertPos, caseLabel);
+         VERIFY(sv.inBuffer(), caseLabel);
+         VERIFY(sv.capacity() == BufCap, caseLabel);
+         verifyVector(sv, expected, caseLabel);
+      });
    }
    {
       const std::string caseLabel{
-         "SvoVector::insert initializer list in middle of buffer "
-         "instance with max-ed out buffer capacity"};
+         "SvoVector::insert initializer list at front of vector"};
 
+      constexpr std::size_t BufCap = 10;
       using Elem = Element;
-      constexpr std::size_t BufCap = 5;
-      constexpr std::size_t Cap = BufCap;
+      using SV = SboVector<Elem, BufCap>;
 
-      const std::initializer_list<Elem> initial = {1, 2, 3, 4, 5};
-      const std::size_t numElems = initial.size();
-      const std::size_t insertAt = 3;
-
-      const std::initializer_list<Elem> inserted = {101, 102, 103};
-      const std::size_t numInserted = inserted.size();
-      const std::size_t numRelocated = numElems;
-
-      SboVectorInsertInitializerListTest<Elem, BufCap, Cap> test(caseLabel, initial);
+      const std::initializer_list<Elem> values{0, 1, 2, 3, 4};
+      const std::size_t initialSize = values.size();
+      const std::initializer_list<Elem> src{100, 101, 102};
+      const std::size_t numInserted = src.size();
+      const std::initializer_list<Elem> expected{100, 101, 102, 0, 1, 2, 3, 4};
 
       Elem::Metrics metrics;
-      metrics.moveCtorCalls = numRelocated;
-      metrics.copyCtorCalls = numInserted;
+      metrics.copyCtorCalls = initialSize + numInserted;
+      metrics.moveCtorCalls = initialSize;
+      metrics.dtorCalls = initialSize + numInserted;
 
-      ExpectedResult<Elem> result{
-         false,
-         [Cap](std::size_t resultCap) { return resultCap > Cap; },
-         {1, 2, 3, 101, 102, 103, 4, 5}};
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv{values};
+         VERIFY(!sv.empty(), caseLabel);
 
-      // Preconditions.
-      VERIFY(0 < numElems && numElems <= BufCap, caseLabel);
-      VERIFY(insertAt > 0 && insertAt < numElems - 1, caseLabel);
-      VERIFY(Cap == numElems, caseLabel);
+         SV::iterator inserted = sv.insert(sv.begin(), src);
 
-      test.run(inserted, insertAt, metrics, result);
+         VERIFY(inserted == sv.begin(), caseLabel);
+         verifyVector(sv, expected, caseLabel);
+      });
+   }
+   {
+      const std::string caseLabel{"SvoVector::insert initializer list at end of vector"};
+
+      constexpr std::size_t BufCap = 10;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      const std::initializer_list<Elem> values{0, 1, 2, 3, 4};
+      const std::size_t initialSize = values.size();
+      const std::initializer_list<Elem> src{100, 101, 102};
+      const std::size_t numInserted = src.size();
+      const std::initializer_list<Elem> expected{0, 1, 2, 3, 4, 100, 101, 102};
+
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = initialSize + numInserted;
+      metrics.moveCtorCalls = 0;
+      metrics.dtorCalls = initialSize + numInserted;
+
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv{values};
+         VERIFY(!sv.empty(), caseLabel);
+
+         SV::iterator inserted = sv.insert(sv.end(), src);
+
+         VERIFY(inserted == sv.begin() + initialSize, caseLabel);
+         verifyVector(sv, expected, caseLabel);
+      });
+   }
+   {
+      const std::string caseLabel{"SvoVector::insert initializer list into buffer "
+                                  "instance with not enough capacity left"};
+
+      constexpr std::size_t BufCap = 6;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      const std::initializer_list<Elem> values{0, 1, 2, 3, 4};
+      const std::size_t initialSize = values.size();
+      const std::initializer_list<Elem> src{100, 101, 102};
+      const std::size_t numInserted = src.size();
+      constexpr std::size_t insertPos = 3;
+      const std::size_t numRelocated = initialSize - insertPos;
+      const std::initializer_list<Elem> expected{0, 1, 2, 100, 101, 102, 3, 4};
+
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = initialSize + numInserted;
+      metrics.moveCtorCalls = initialSize;
+      metrics.dtorCalls = initialSize + numInserted;
+
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv{values};
+         VERIFY(sv.inBuffer(), caseLabel);
+         VERIFY(!sv.empty(), caseLabel);
+         VERIFY(sv.size() + numInserted > BufCap, caseLabel);
+
+         SV::iterator inserted = sv.insert(sv.begin() + insertPos, src);
+
+         VERIFY(inserted == sv.begin() + insertPos, caseLabel);
+         VERIFY(sv.onHeap(), caseLabel);
+         VERIFY(sv.capacity() > BufCap, caseLabel);
+         verifyVector(sv, expected, caseLabel);
+      });
    }
    {
       const std::string caseLabel{"SvoVector::insert initializer list into heap "
                                   "instance with unused capacity left"};
 
-      using Elem = Element;
       constexpr std::size_t BufCap = 5;
-      constexpr std::size_t Cap = 10;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
 
-      const std::initializer_list<Elem> initial = {1, 2, 3, 4, 5, 6, 7};
-      const std::size_t numElems = initial.size();
-      const std::size_t insertAt = 3;
-
-      const std::initializer_list<Elem> inserted = {101, 102, 103};
-      const std::size_t numInserted = inserted.size();
-      const std::size_t numRelocated = numElems - insertAt;
-
-      SboVectorInsertInitializerListTest<Elem, BufCap, Cap> test(caseLabel, initial);
+      const std::initializer_list<Elem> values{0, 1, 2, 3, 4, 5, 6};
+      const std::size_t initialSize = values.size();
+      const std::size_t initialCap = 20;
+      const std::initializer_list<Elem> src{100, 101, 102};
+      const std::size_t numInserted = src.size();
+      constexpr std::size_t insertPos = 3;
+      const std::size_t numRelocated = initialSize - insertPos;
+      const std::initializer_list<Elem> expected{0, 1, 2, 100, 101, 102, 3, 4, 5, 6};
 
       Elem::Metrics metrics;
+      metrics.copyCtorCalls = initialSize + numInserted;
+      metrics.moveCtorCalls = initialSize + numRelocated;
+      metrics.dtorCalls = initialSize + numInserted;
+
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv{values};
+         sv.reserve(initialCap);
+         VERIFY(sv.onHeap(), caseLabel);
+         VERIFY(!sv.empty(), caseLabel);
+         VERIFY(sv.size() + numInserted <= sv.capacity(), caseLabel);
+
+         SV::iterator inserted = sv.insert(sv.begin() + insertPos, src);
+
+         VERIFY(inserted == sv.begin() + insertPos, caseLabel);
+         VERIFY(sv.onHeap(), caseLabel);
+         VERIFY(sv.capacity() == initialCap, caseLabel);
+         verifyVector(sv, expected, caseLabel);
+      });
+   }
+   {
+      const std::string caseLabel{"SvoVector::insert initializer list into heap "
+                                  "instance with not enough capacity left"};
+
+      constexpr std::size_t BufCap = 5;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      const std::initializer_list<Elem> values{0, 1, 2, 3, 4, 5, 6};
+      const std::size_t initialSize = values.size();
+      const std::size_t initialCap = initialSize;
+      const std::initializer_list<Elem> src{100, 101, 102};
+      const std::size_t numInserted = src.size();
+      constexpr std::size_t insertPos = 3;
+      const std::size_t numRelocated = initialSize - insertPos;
+      const std::initializer_list<Elem> expected{0, 1, 2, 100, 101, 102, 3, 4, 5, 6};
+
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = initialSize + numInserted;
+      metrics.moveCtorCalls = initialSize;
+      metrics.dtorCalls = initialSize + numInserted;
+
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv{values};
+         VERIFY(sv.onHeap(), caseLabel);
+         VERIFY(!sv.empty(), caseLabel);
+         VERIFY(sv.size() + numInserted > sv.capacity(), caseLabel);
+
+         SV::iterator inserted = sv.insert(sv.begin() + insertPos, src);
+
+         VERIFY(inserted == sv.begin() + insertPos, caseLabel);
+         VERIFY(sv.onHeap(), caseLabel);
+         VERIFY(sv.capacity() > initialCap, caseLabel);
+         verifyVector(sv, expected, caseLabel);
+      });
+   }
+   {
+      const std::string caseLabel{
+         "SvoVector::insert initializer list using a const-iterator"};
+
+      constexpr std::size_t BufCap = 10;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      const std::initializer_list<Elem> values{0, 1, 2, 3, 4};
+      const std::size_t initialSize = values.size();
+      const std::initializer_list<Elem> src{100, 101, 102};
+      const std::size_t numInserted = src.size();
+      constexpr std::size_t insertPos = 3;
+      const std::size_t numRelocated = initialSize - insertPos;
+      const std::initializer_list<Elem> expected{0, 1, 2, 100, 101, 102, 3, 4};
+
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = initialSize + numInserted;
       metrics.moveCtorCalls = numRelocated;
-      metrics.copyCtorCalls = numInserted;
+      metrics.dtorCalls = initialSize + numInserted;
 
-      ExpectedResult<Elem> result{
-         false,
-         [Cap](std::size_t resultCap) { return resultCap == Cap; },
-         {1, 2, 3, 101, 102, 103, 4, 5, 6, 7}};
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv{values};
+         VERIFY(!sv.empty(), caseLabel);
 
-      // Preconditions.
-      VERIFY(0 < numElems && numElems > BufCap, caseLabel);
-      VERIFY(insertAt > 0 && insertAt < numElems - 1, caseLabel);
-      VERIFY(Cap > BufCap, caseLabel);
-      VERIFY(numElems < Cap, caseLabel);
+         SV::iterator inserted = sv.insert(sv.cbegin() + insertPos, src);
 
-      test.run(inserted, insertAt, metrics, result);
-   }
-   {
-      const std::string caseLabel{"SvoVector::insert initializer list into heap "
-                                  "instance with max-ed out capacity"};
-
-      constexpr std::size_t BufCap = 5;
-      constexpr std::size_t Cap = 8;
-      constexpr std::size_t NumElems = 8;
-      using Elem = Element;
-      using SV = SboVector<Elem, BufCap>;
-
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
-
-      SV sv{1, 2, 3, 4, 5, 6, 7, 8};
-      const std::size_t numInserted = 3;
-      constexpr std::size_t insertedBefore = 3;
-      const std::size_t numRelocated = sv.size();
-
-      // Preconditions.
-      VERIFY(sv.onHeap(), caseLabel);
-      VERIFY(sv.size() == NumElems, caseLabel);
-      VERIFY(sv.capacity() == Cap, caseLabel);
-      VERIFY(insertedBefore > 0 && insertedBefore < NumElems - 1, caseLabel);
-      VERIFY(sv.size() == sv.capacity(), caseLabel);
-
-      {
-         // Element instrumentation for tested call only.
-         Elem::Metrics expected;
-         // Constructing the initializer list elements.
-         expected.ctorCalls = numInserted;
-         expected.moveCtorCalls = numRelocated;
-         expected.copyCtorCalls = numInserted;
-         // Destroying the initializer list elements.
-         expected.dtorCalls = numInserted;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
-
-         // Test.
-         SV::iterator insertedElem =
-            sv.insert(sv.begin() + insertedBefore, {101, 102, 103});
-
-         // Verify returned value.
-         VERIFY(insertedElem == sv.begin() + insertedBefore, caseLabel);
-      }
-
-      // Verify vector state.
-      VERIFY(sv.onHeap(), caseLabel);
-      VERIFY(sv.size() == NumElems + numInserted, caseLabel);
-      VERIFY(sv.capacity() > Cap, caseLabel);
-      VERIFY(sv[0].i == 1, caseLabel);
-      VERIFY(sv[1].i == 2, caseLabel);
-      VERIFY(sv[2].i == 3, caseLabel);
-      VERIFY(sv[3].i == 101, caseLabel);
-      VERIFY(sv[4].i == 102, caseLabel);
-      VERIFY(sv[5].i == 103, caseLabel);
-      VERIFY(sv[6].i == 4, caseLabel);
-      VERIFY(sv[7].i == 5, caseLabel);
-      VERIFY(sv[8].i == 6, caseLabel);
-      VERIFY(sv[9].i == 7, caseLabel);
-      VERIFY(sv[10].i == 8, caseLabel);
-   }
-   {
-      const std::string caseLabel{"SvoVector::insert initializer list into heap "
-                                  "instance using a const-iterator"};
-
-
-      constexpr std::size_t BufCap = 5;
-      constexpr std::size_t Cap = 10;
-      constexpr std::size_t NumElems = 7;
-      using Elem = Element;
-      using SV = SboVector<Elem, BufCap>;
-
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
-
-      SV sv{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-      while (sv.size() > NumElems)
-         sv.erase(sv.begin() + sv.size() - 1);
-      const std::size_t numInserted = 3;
-      constexpr std::size_t insertedBefore = 3;
-      const std::size_t numRelocated = NumElems - insertedBefore;
-
-      // Preconditions.
-      VERIFY(sv.onHeap(), caseLabel);
-      VERIFY(sv.size() == NumElems, caseLabel);
-      VERIFY(sv.capacity() == Cap, caseLabel);
-      VERIFY(insertedBefore > 0 && insertedBefore < NumElems - 1, caseLabel);
-      VERIFY(sv.size() < sv.capacity(), caseLabel);
-
-      {
-         // Element instrumentation for tested call only.
-         Elem::Metrics expected;
-         // Constructing the initializer list elements.
-         expected.ctorCalls = numInserted;
-         expected.moveCtorCalls = numRelocated;
-         expected.copyCtorCalls = numInserted;
-         // Destroying the initializer list elements.
-         expected.dtorCalls = numInserted;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
-
-         // Test.
-         SV::iterator insertedElem =
-            sv.insert(sv.cbegin() + insertedBefore, {101, 102, 103});
-
-         // Verify returned value.
-         VERIFY(insertedElem == sv.begin() + insertedBefore, caseLabel);
-      }
-
-      // Verify vector state.
-      VERIFY(sv.onHeap(), caseLabel);
-      VERIFY(sv.size() == NumElems + numInserted, caseLabel);
-      VERIFY(sv.capacity() == Cap, caseLabel);
-      VERIFY(sv[0].i == 1, caseLabel);
-      VERIFY(sv[1].i == 2, caseLabel);
-      VERIFY(sv[2].i == 3, caseLabel);
-      VERIFY(sv[3].i == 101, caseLabel);
-      VERIFY(sv[4].i == 102, caseLabel);
-      VERIFY(sv[5].i == 103, caseLabel);
-      VERIFY(sv[6].i == 4, caseLabel);
-      VERIFY(sv[7].i == 5, caseLabel);
-      VERIFY(sv[8].i == 6, caseLabel);
-      VERIFY(sv[9].i == 7, caseLabel);
+         VERIFY(inserted == sv.begin() + insertPos, caseLabel);
+         verifyVector(sv, expected, caseLabel);
+      });
    }
    {
       const std::string caseLabel{"SvoVector::insert initializer list into empty vector"};
 
-      constexpr std::size_t BufCap = 5;
-      constexpr std::size_t Cap = BufCap;
-      constexpr std::size_t NumElems = 0;
+      constexpr std::size_t BufCap = 10;
       using Elem = Element;
       using SV = SboVector<Elem, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::initializer_list<Elem> src{100, 101, 102};
+      const std::size_t numInserted = src.size();
 
-      SV sv;
-      const std::size_t numInserted = 3;
-      constexpr std::size_t insertedBefore = 0;
-      const std::size_t numRelocated = 0;
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = numInserted;
+      metrics.dtorCalls = numInserted;
 
-      // Preconditions.
-      VERIFY(sv.inBuffer(), caseLabel);
-      VERIFY(sv.size() == NumElems, caseLabel);
-      VERIFY(sv.capacity() == Cap, caseLabel);
-      VERIFY(insertedBefore == 0, caseLabel);
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv;
+         VERIFY(sv.empty(), caseLabel);
 
-      {
-         // Element instrumentation for tested call only.
-         Elem::Metrics expected;
-         // Constructing the initializer list elements.
-         expected.ctorCalls = numInserted;
-         expected.moveCtorCalls = numRelocated;
-         expected.copyCtorCalls = numInserted;
-         // Destroying the initializer list elements.
-         expected.dtorCalls = numInserted;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+         SV::iterator inserted = sv.insert(sv.begin(), src);
 
-         // Test.
-         SV::iterator insertedElem =
-            sv.insert(sv.begin() + insertedBefore, {101, 102, 103});
-
-         // Verify returned value.
-         VERIFY(insertedElem == sv.begin() + insertedBefore, caseLabel);
-      }
-
-      // Verify vector state.
-      VERIFY(sv.inBuffer(), caseLabel);
-      VERIFY(sv.size() == NumElems + numInserted, caseLabel);
-      VERIFY(sv.capacity() == Cap, caseLabel);
-      for (int i = 0; i < sv.size(); ++i)
-         VERIFY(sv[i].i == 101 + i, caseLabel);
+         VERIFY(inserted == sv.begin(), caseLabel);
+         verifyVector(sv, src, caseLabel);
+      });
    }
    {
       const std::string caseLabel{
          "SvoVector::insert initializer list for non-moveable element type"};
 
-      constexpr std::size_t BufCap = 5;
-      constexpr std::size_t Cap = 10;
-      constexpr std::size_t NumElems = 7;
+      constexpr std::size_t BufCap = 10;
       using Elem = NotMoveableElement;
       using SV = SboVector<Elem, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::initializer_list<Elem> values{0, 1, 2, 3, 4};
+      const std::size_t initialSize = values.size();
+      const std::initializer_list<Elem> src{100, 101, 102};
+      const std::size_t numInserted = src.size();
+      constexpr std::size_t insertPos = 3;
+      const std::size_t numRelocated = initialSize - insertPos;
+      const std::initializer_list<Elem> expected{0, 1, 2, 100, 101, 102, 3, 4};
 
-      SV sv{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-      while (sv.size() > NumElems)
-         sv.erase(sv.begin() + sv.size() - 1);
-      const std::size_t numInserted = 3;
-      constexpr std::size_t insertedBefore = 3;
-      const std::size_t numRelocated = NumElems - insertedBefore;
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = initialSize + numRelocated + numInserted;
+      metrics.dtorCalls = metrics.copyCtorCalls;
 
-      // Preconditions.
-      VERIFY(sv.onHeap(), caseLabel);
-      VERIFY(sv.size() == NumElems, caseLabel);
-      VERIFY(sv.capacity() == Cap, caseLabel);
-      VERIFY(insertedBefore > 0 && insertedBefore < NumElems - 1, caseLabel);
-      VERIFY(sv.size() < sv.capacity(), caseLabel);
-      static_assert(!std::is_move_constructible_v<Elem>);
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv{values};
+         VERIFY(!sv.empty(), caseLabel);
+         VERIFY(!std::is_move_constructible_v<Elem>, caseLabel);
 
-      {
-         // Element instrumentation for tested call only.
-         Elem::Metrics expected;
-         // Constructing the initializer list elements.
-         expected.ctorCalls = numInserted;
-         expected.copyCtorCalls = numRelocated + numInserted;
-         // Destroying the initializer list elements and the copied vector elements.
-         expected.dtorCalls = numRelocated + numInserted;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+         SV::iterator inserted = sv.insert(sv.begin() + insertPos, src);
 
-         // Test.
-         SV::iterator insertedElem =
-            sv.insert(sv.begin() + insertedBefore, {101, 102, 103});
-
-         // Verify returned value.
-         VERIFY(insertedElem == sv.begin() + insertedBefore, caseLabel);
-      }
-
-      // Verify vector state.
-      VERIFY(sv.onHeap(), caseLabel);
-      VERIFY(sv.size() == NumElems + numInserted, caseLabel);
-      VERIFY(sv.capacity() == Cap, caseLabel);
-      VERIFY(sv[0].i == 1, caseLabel);
-      VERIFY(sv[1].i == 2, caseLabel);
-      VERIFY(sv[2].i == 3, caseLabel);
-      VERIFY(sv[3].i == 101, caseLabel);
-      VERIFY(sv[4].i == 102, caseLabel);
-      VERIFY(sv[5].i == 103, caseLabel);
-      VERIFY(sv[6].i == 4, caseLabel);
-      VERIFY(sv[7].i == 5, caseLabel);
-      VERIFY(sv[8].i == 6, caseLabel);
-      VERIFY(sv[9].i == 7, caseLabel);
+         VERIFY(inserted == sv.begin() + insertPos, caseLabel);
+         verifyVector(sv, expected, caseLabel);
+      });
    }
    {
       const std::string caseLabel{"SvoVector::insert empty initializer list into vector"};
 
       constexpr std::size_t BufCap = 10;
-      constexpr std::size_t Cap = BufCap;
-      constexpr std::size_t NumElems = 5;
       using Elem = Element;
       using SV = SboVector<Elem, BufCap>;
 
-      // Memory instrumentation for entire scope.
-      const MemVerifier<SV> memCheck{caseLabel};
+      const std::initializer_list<Elem> values{0, 1, 2, 3, 4};
+      const std::size_t initialSize = values.size();
+      const std::initializer_list<Elem> src;
+      constexpr std::size_t insertPos = 3;
 
-      SV sv{1, 2, 3, 4, 5};
-      const std::size_t numInserted = 0;
-      constexpr std::size_t insertedBefore = 2;
-      const std::size_t numRelocated = 0;
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = initialSize;
+      metrics.dtorCalls = initialSize;
 
-      // Preconditions.
-      VERIFY(sv.inBuffer(), caseLabel);
-      VERIFY(sv.size() == NumElems, caseLabel);
-      VERIFY(sv.capacity() == Cap, caseLabel);
-      VERIFY(numInserted == 0, caseLabel);
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv{values};
+         VERIFY(!sv.empty(), caseLabel);
+         VERIFY(src.size() == 0, caseLabel);
 
-      {
-         // Element instrumentation for tested call only.
-         Elem::Metrics expected;
-         expected.copyCtorCalls = 0;
-         const ElementVerifier<Elem> elemCheck{expected, caseLabel};
+         SV::iterator expectedPos = sv.begin() + insertPos;
+         SV::iterator inserted = sv.insert(sv.begin() + insertPos, src);
 
-         // Test.
-         SV::iterator insertPos = sv.begin() + insertedBefore;
-         SV::iterator insertedElem = sv.insert(insertPos, {});
-
-         // Verify returned value.
-         VERIFY(insertedElem == insertPos, caseLabel);
-      }
-
-      // Verify vector state.
-      VERIFY(sv.inBuffer(), caseLabel);
-      VERIFY(sv.size() == NumElems + numInserted, caseLabel);
-      VERIFY(sv.capacity() == Cap, caseLabel);
-      for (int i = 0; i < sv.size(); ++i)
-         VERIFY(sv[i].i == i + 1, caseLabel);
+         VERIFY(inserted == expectedPos, caseLabel);
+         verifyVector(sv, values, caseLabel);
+      });
    }
 }
 
