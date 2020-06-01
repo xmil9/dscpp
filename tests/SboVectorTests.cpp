@@ -6338,6 +6338,201 @@ void TestEmplace()
 }
 
 
+void TestPushBackLValue()
+{
+   {
+      const std::string caseLabel{"SvoVector::push_back l-value into buffer "
+                                  "instance with enough capacity to remain in buffer"};
+
+      constexpr std::size_t BufCap = 10;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      const std::initializer_list<Elem> values{0, 1, 2, 3, 4};
+      const std::size_t initialSize = values.size();
+      const Elem insertedVal = 100;
+      const std::initializer_list<Elem> expected{0, 1, 2, 3, 4, 100};
+
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = initialSize + 1;
+      metrics.dtorCalls = initialSize + 1;
+
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv{values};
+         VERIFY(sv.inBuffer(), caseLabel);
+         VERIFY(!sv.empty(), caseLabel);
+         VERIFY(sv.size() + 1 <= BufCap, caseLabel);
+
+         sv.push_back(insertedVal);
+
+         VERIFY(sv.inBuffer(), caseLabel);
+         VERIFY(sv.capacity() == BufCap, caseLabel);
+         verifyVector(sv, expected, caseLabel);
+      });
+   }
+   {
+      const std::string caseLabel{"SvoVector::push_back l-value into buffer "
+                                  "instance with max-ed out buffer capacity"};
+
+      constexpr std::size_t BufCap = 5;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      const std::initializer_list<Elem> values{0, 1, 2, 3, 4};
+      const std::size_t initialSize = values.size();
+      const Elem insertedVal = 100;
+      const std::initializer_list<Elem> expected{0, 1, 2, 3, 4, 100};
+
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = initialSize + 1;
+      metrics.moveCtorCalls = initialSize;
+      metrics.dtorCalls = initialSize + 1;
+
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv{values};
+         VERIFY(sv.inBuffer(), caseLabel);
+         VERIFY(!sv.empty(), caseLabel);
+         VERIFY(sv.size() == BufCap, caseLabel);
+
+         sv.push_back(insertedVal);
+
+         VERIFY(sv.onHeap(), caseLabel);
+         VERIFY(sv.capacity() > BufCap, caseLabel);
+         verifyVector(sv, expected, caseLabel);
+      });
+   }
+   {
+      const std::string caseLabel{"SvoVector::push_back l-value into heap "
+                                  "instance with unused capacity left"};
+
+      constexpr std::size_t BufCap = 5;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      const std::initializer_list<Elem> values{0, 1, 2, 3, 4, 5, 6};
+      const std::size_t initialSize = values.size();
+      const std::size_t initialCap = initialSize + 5;
+      const Elem insertedVal = 100;
+      const std::initializer_list<Elem> expected{0, 1, 2, 3, 4, 5, 6, 100};
+
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = initialSize + 1;
+      metrics.moveCtorCalls = initialSize;
+      metrics.dtorCalls = initialSize + 1;
+
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv{values};
+         sv.reserve(initialCap);
+         VERIFY(sv.onHeap(), caseLabel);
+         VERIFY(!sv.empty(), caseLabel);
+         VERIFY(sv.size() + 1 <= initialCap, caseLabel);
+
+         sv.push_back(insertedVal);
+
+         VERIFY(sv.onHeap(), caseLabel);
+         VERIFY(sv.capacity() == initialCap, caseLabel);
+         verifyVector(sv, expected, caseLabel);
+      });
+   }
+   {
+      const std::string caseLabel{"SvoVector::push_back l-value into heap "
+                                  "instance with max-ed out capacity"};
+
+      constexpr std::size_t BufCap = 5;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      const std::initializer_list<Elem> values{0, 1, 2, 3, 4, 5, 6};
+      const std::size_t initialSize = values.size();
+      const Elem insertedVal = 100;
+      const std::initializer_list<Elem> expected{0, 1, 2, 3, 4, 5, 6, 100};
+
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = initialSize + 1;
+      metrics.moveCtorCalls = initialSize;
+      metrics.dtorCalls = initialSize + 1;
+
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv{values};
+         VERIFY(sv.onHeap(), caseLabel);
+         VERIFY(!sv.empty(), caseLabel);
+         VERIFY(sv.size() + 1 > sv.capacity(), caseLabel);
+
+         sv.push_back(insertedVal);
+
+         VERIFY(sv.onHeap(), caseLabel);
+         VERIFY(sv.capacity() > initialSize, caseLabel);
+         verifyVector(sv, expected, caseLabel);
+      });
+   }
+   {
+      const std::string caseLabel{"SvoVector::push_back l-value into empty vector"};
+
+      constexpr std::size_t BufCap = 5;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      const Elem insertedVal = 100;
+      const std::initializer_list<Elem> expected{100};
+
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = 1;
+      metrics.dtorCalls = 1;
+
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv;
+         VERIFY(sv.empty(), caseLabel);
+
+         sv.push_back(insertedVal);
+
+         VERIFY(sv.inBuffer(), caseLabel);
+         verifyVector(sv, expected, caseLabel);
+      });
+   }
+   {
+      const std::string caseLabel{
+         "SvoVector::push_back l-value for non-moveable element type"};
+
+      constexpr std::size_t BufCap = 10;
+      using Elem = NotMoveableElement;
+      using SV = SboVector<Elem, BufCap>;
+
+      const std::initializer_list<Elem> values{0, 1, 2, 3, 4};
+      const std::size_t initialSize = values.size();
+      const Elem insertedVal = 100;
+      const std::initializer_list<Elem> expected{0, 1, 2, 3, 4, 100};
+
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = initialSize + 1;
+      metrics.dtorCalls = initialSize + 1;
+
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv{values};
+         VERIFY(sv.inBuffer(), caseLabel);
+         VERIFY(!sv.empty(), caseLabel);
+         VERIFY(sv.size() + 1 <= BufCap, caseLabel);
+
+         sv.push_back(insertedVal);
+
+         VERIFY(sv.inBuffer(), caseLabel);
+         VERIFY(sv.capacity() == BufCap, caseLabel);
+         verifyVector(sv, expected, caseLabel);
+      });
+   }
+}
+
+
+void TestPushBackRValue()
+{
+}
+
+
 ///////////////////
 
 void TestIteratorCopyCtor()
@@ -8050,6 +8245,8 @@ void TestSboVector()
    TestInsertRange();
    TestInsertInitializerList();
    TestEmplace();
+   TestPushBackLValue();
+   TestPushBackRValue();
 
    TestIteratorCopyCtor();
    TestIteratorMoveCtor();
