@@ -1225,6 +1225,18 @@ typename SboVector<T, N>::iterator SboVector<T, N>::insert(const_iterator pos,
 }
 
 
+template <typename T, std::size_t N> void SboVector<T, N>::push_back(const T& value)
+{
+   insert(begin() + size(), value);
+}
+
+
+template <typename T, std::size_t N> void SboVector<T, N>::push_back(T&& value)
+{
+   insert(begin() + size(), std::move(value));
+}
+
+
 template <typename T, std::size_t N>
 template <typename... Args>
 typename SboVector<T, N>::iterator SboVector<T, N>::emplace(const_iterator pos,
@@ -1300,18 +1312,6 @@ template <typename... Args>
 typename SboVector<T, N>::reference SboVector<T, N>::emplace_back(Args&&... args)
 {
    insert(begin() + size(), std::forward<Args>(args)...);
-}
-
-
-template <typename T, std::size_t N> void SboVector<T, N>::push_back(const T& value)
-{
-   insert(begin() + size(), value);
-}
-
-
-template <typename T, std::size_t N> void SboVector<T, N>::push_back(T&& value)
-{
-   insert(begin() + size(), std::move(value));
 }
 
 
