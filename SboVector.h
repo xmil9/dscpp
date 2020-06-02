@@ -139,9 +139,10 @@ template <typename T, std::size_t N> class SboVector
    template <typename InputIt>
    iterator insert(const_iterator pos, InputIt first, InputIt last);
    iterator insert(const_iterator pos, std::initializer_list<T> ilist);
-   template <typename... Args> iterator emplace(const_iterator pos, Args&&... args);
    void push_back(const T& value);
    void push_back(T&& value);
+   template <typename... Args> iterator emplace(const_iterator pos, Args&&... args);
+   template <typename... Args> reference emplace_back(Args&&... args);
 
    bool inBuffer() const noexcept;
    bool onHeap() const noexcept;
@@ -232,7 +233,7 @@ template <typename T> void overlappedMoveBackwards(T* first, std::size_t count, 
 
 
 // Available in C++20.
-template <typename T, class... Args> constexpr T* construct_at(T* p, Args&&... args)
+template <typename T, typename... Args> constexpr T* construct_at(T* p, Args&&... args)
 {
    return ::new (p) T(std::forward<Args>(args)...);
 }
@@ -1262,7 +1263,7 @@ typename SboVector<T, N>::iterator SboVector<T, N>::emplace(const_iterator pos,
          svinternal::overlappedCopyAndDestroyBackward(tailSrc, tailSize, tailDest);
    }
 
-   svinternal::construct_at(dest + posOffset, args...);
+   svinternal::construct_at(dest + posOffset, std::forward<Args>(args)...);
 
    const bool relocateFront = allocHeap;
    if (frontSize > 0 && relocateFront)
@@ -1291,6 +1292,14 @@ typename SboVector<T, N>::iterator SboVector<T, N>::emplace(const_iterator pos,
    }
 
    return begin() + posOffset;
+}
+
+
+template <typename T, std::size_t N>
+template <typename... Args>
+typename SboVector<T, N>::reference SboVector<T, N>::emplace_back(Args&&... args)
+{
+   insert(begin() + size(), std::forward<Args>(args)...);
 }
 
 
