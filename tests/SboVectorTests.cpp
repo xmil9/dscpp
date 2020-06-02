@@ -6319,6 +6319,131 @@ void TestPushBackRValue()
 }
 
 
+void TestPopBack()
+{
+   {
+      const std::string caseLabel{"SvoVector::pop_back for buffer "
+                                  "instance with more than one element"};
+
+      constexpr std::size_t BufCap = 10;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      const std::initializer_list<Elem> values{0, 1, 2, 3, 4};
+      const std::size_t initialSize = values.size();
+      const std::initializer_list<Elem> expected{0, 1, 2, 3};
+
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = initialSize;
+      metrics.dtorCalls = initialSize;
+
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv{values};
+         VERIFY(sv.inBuffer(), caseLabel);
+         VERIFY(sv.size() > 1, caseLabel);
+
+         sv.pop_back();
+
+         VERIFY(sv.inBuffer(), caseLabel);
+         VERIFY(sv.capacity() == BufCap, caseLabel);
+         verifyVector(sv, expected, caseLabel);
+      });
+   }
+   {
+      const std::string caseLabel{"SvoVector::pop_back for vector with one element"};
+
+      constexpr std::size_t BufCap = 10;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      const std::initializer_list<Elem> values{0};
+
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = 1;
+      metrics.dtorCalls = 1;
+
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv{values};
+         VERIFY(sv.inBuffer(), caseLabel);
+         VERIFY(sv.size() == 1, caseLabel);
+
+         sv.pop_back();
+
+         VERIFY(sv.inBuffer(), caseLabel);
+         VERIFY(sv.capacity() == BufCap, caseLabel);
+         VERIFY(sv.empty(), caseLabel);
+      });
+   }
+   {
+      const std::string caseLabel{"SvoVector::pop_back for empty vector"};
+      // Standard: This is UB.
+   }
+   {
+      const std::string caseLabel{"SvoVector::pop_back for heap instance with more than "
+                                  "one element above buffer capacity"};
+
+      constexpr std::size_t BufCap = 5;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      const std::initializer_list<Elem> values{0, 1, 2, 3, 4, 5, 6, 7, 8};
+      const std::size_t initialSize = values.size();
+      const std::initializer_list<Elem> expected{0, 1, 2, 3, 4, 5, 6, 7};
+
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = initialSize;
+      metrics.dtorCalls = initialSize;
+
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv{values};
+         VERIFY(sv.onHeap(), caseLabel);
+         VERIFY(sv.size() > BufCap + 1, caseLabel);
+
+         sv.pop_back();
+
+         VERIFY(sv.onHeap(), caseLabel);
+         VERIFY(sv.capacity() > BufCap, caseLabel);
+         verifyVector(sv, expected, caseLabel);
+      });
+   }
+   {
+      const std::string caseLabel{"SvoVector::pop_back for removing elements until heap "
+                                  "instance is within buffer capacity"};
+
+      constexpr std::size_t BufCap = 5;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      const std::initializer_list<Elem> values{0, 1, 2, 3, 4, 5};
+      const std::size_t initialSize = values.size();
+      const std::size_t numPops = 2;
+      const std::initializer_list<Elem> expected{0, 1, 2, 3};
+
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = initialSize;
+      metrics.dtorCalls = initialSize;
+
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv{values};
+         VERIFY(sv.onHeap(), caseLabel);
+         VERIFY(sv.size() - numPops < BufCap, caseLabel);
+
+         for (int i = 0; i < numPops; ++i)
+            sv.pop_back();
+
+         // Remains on heap.
+         VERIFY(sv.onHeap(), caseLabel);
+         VERIFY(sv.capacity() > BufCap, caseLabel);
+         verifyVector(sv, expected, caseLabel);
+      });
+   }
+}
+
+
 void TestEmplace()
 {
    {
@@ -6619,14 +6744,11 @@ void TestEmplace()
       });
    }
    {
-      const std::string caseLabel{
-         "SvoVector::emplace elements with reference argument"};
+      const std::string caseLabel{"SvoVector::emplace elements with reference argument"};
 
       struct A
       {
-         A(const std::string& s_)
-            : s{s_}
-         {}
+         A(const std::string& s_) : s{s_} {}
          std::string s;
       };
 
@@ -6639,14 +6761,11 @@ void TestEmplace()
       VERIFY(sv[0].s == "abc", caseLabel);
    }
    {
-      const std::string caseLabel{
-         "SvoVector::emplace elements with pointer argument"};
+      const std::string caseLabel{"SvoVector::emplace elements with pointer argument"};
 
       struct A
       {
-         A(const char* s_)
-            : s{s_}
-         {}
+         A(const char* s_) : s{s_} {}
          std::string s;
       };
 
@@ -6659,14 +6778,11 @@ void TestEmplace()
       VERIFY(sv[0].s == "abc", caseLabel);
    }
    {
-      const std::string caseLabel{
-         "SvoVector::emplace elements with array argument"};
+      const std::string caseLabel{"SvoVector::emplace elements with array argument"};
 
       struct A
       {
-         A(const char s_[10])
-            : s{s_}
-         {}
+         A(const char s_[10]) : s{s_} {}
          std::string s;
       };
 
@@ -6680,14 +6796,11 @@ void TestEmplace()
       VERIFY(sv[0].s == "abc", caseLabel);
    }
    {
-      const std::string caseLabel{
-         "SvoVector::emplace elements with multiple arguments"};
+      const std::string caseLabel{"SvoVector::emplace elements with multiple arguments"};
 
       struct A
       {
-         A(const std::string& s_, int i_, double d_)
-            : s{s_}, i{i_}, d{d_}
-         {}
+         A(const std::string& s_, int i_, double d_) : s{s_}, i{i_}, d{d_} {}
          std::string s;
          int i;
          double d;
@@ -6704,14 +6817,11 @@ void TestEmplace()
       VERIFY(sv[0].d == 3.14, caseLabel);
    }
    {
-      const std::string caseLabel{
-         "SvoVector::emplace elements with r-value argument"};
+      const std::string caseLabel{"SvoVector::emplace elements with r-value argument"};
 
       struct A
       {
-         A(std::string&& s_)
-            : s{std::move(s_)}
-         {}
+         A(std::string&& s_) : s{std::move(s_)} {}
          std::string s;
       };
 
@@ -6963,9 +7073,7 @@ void TestEmplaceBack()
 
       struct A
       {
-         A(const std::string& s_)
-            : s{s_}
-         {}
+         A(const std::string& s_) : s{s_} {}
          std::string s;
       };
 
@@ -6983,9 +7091,7 @@ void TestEmplaceBack()
 
       struct A
       {
-         A(const char* s_)
-            : s{s_}
-         {}
+         A(const char* s_) : s{s_} {}
          std::string s;
       };
 
@@ -6998,14 +7104,11 @@ void TestEmplaceBack()
       VERIFY(sv[0].s == "abc", caseLabel);
    }
    {
-      const std::string caseLabel{
-         "SvoVector::emplace_back elements with array argument"};
+      const std::string caseLabel{"SvoVector::emplace_back elements with array argument"};
 
       struct A
       {
-         A(const char s_[10])
-            : s{s_}
-         {}
+         A(const char s_[10]) : s{s_} {}
          std::string s;
       };
 
@@ -7024,9 +7127,7 @@ void TestEmplaceBack()
 
       struct A
       {
-         A(const std::string& s_, int i_, double d_)
-            : s{s_}, i{i_}, d{d_}
-         {}
+         A(const std::string& s_, int i_, double d_) : s{s_}, i{i_}, d{d_} {}
          std::string s;
          int i;
          double d;
@@ -7048,9 +7149,7 @@ void TestEmplaceBack()
 
       struct A
       {
-         A(std::string&& s_)
-            : s{std::move(s_)}
-         {}
+         A(std::string&& s_) : s{std::move(s_)} {}
          std::string s;
       };
 
@@ -8778,6 +8877,7 @@ void TestSboVector()
    TestInsertInitializerList();
    TestPushBackLValue();
    TestPushBackRValue();
+   TestPopBack();
    TestEmplace();
    TestEmplaceBack();
 
