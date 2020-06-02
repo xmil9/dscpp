@@ -141,6 +141,7 @@ template <typename T, std::size_t N> class SboVector
    iterator insert(const_iterator pos, std::initializer_list<T> ilist);
    void push_back(const T& value);
    void push_back(T&& value);
+   void pop_back();
    template <typename... Args> iterator emplace(const_iterator pos, Args&&... args);
    template <typename... Args> reference emplace_back(Args&&... args);
 
@@ -1234,6 +1235,15 @@ template <typename T, std::size_t N> void SboVector<T, N>::push_back(const T& va
 template <typename T, std::size_t N> void SboVector<T, N>::push_back(T&& value)
 {
    insert(begin() + size(), std::move(value));
+}
+
+
+template <typename T, std::size_t N>
+void SboVector<T, N>::pop_back()
+{
+   // Standard: Calling pop_back on empty vector is UB.
+   --m_size;
+   std::destroy_at(data() + m_size);
 }
 
 
