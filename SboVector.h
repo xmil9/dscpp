@@ -1311,7 +1311,8 @@ template <typename T, std::size_t N>
 template <typename... Args>
 typename SboVector<T, N>::reference SboVector<T, N>::emplace_back(Args&&... args)
 {
-   insert(begin() + size(), std::forward<Args>(args)...);
+   emplace(begin() + size(), std::forward<Args>(args)...);
+   return *(begin() + size() - 1);
 }
 
 
