@@ -1367,13 +1367,13 @@ template <typename T, std::size_t N>
 void SboVector<T, N>::resize(size_type count, const value_type& value)
 {
    // Cases:
-   // - New size == old size: done
+   // - New size == old size: Done.
    // - New size > old size:
-   //    - New size > cap:
-   //       - Buffer -> Heap: alloc heap, relocate elems
-   //       - Heap -> Heap: alloc heap, relocate elems
-   //    - New size <= cap: no alloc, remain in cur storage
-   // - New size < old size: remove elems, don't alloc, remain in cur storage
+   //    - In buffer and enough capacity to stay in buffer.
+   //    - In buffer and not enough capacity. Allocate heap.
+   //    - On heap and enough capacity.
+   //    - On heap and not enough capacity. Need to reallocate.
+   // - New size < old size: Remove elements. Keep storage.
 
    if (count == m_size)
       return;
