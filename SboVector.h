@@ -144,6 +144,8 @@ template <typename T, std::size_t N> class SboVector
    void pop_back();
    template <typename... Args> iterator emplace(const_iterator pos, Args&&... args);
    template <typename... Args> reference emplace_back(Args&&... args);
+   void resize(size_type count);
+   void resize(size_type count, const value_type& value);
 
    bool inBuffer() const noexcept;
    bool onHeap() const noexcept;
@@ -1323,6 +1325,76 @@ typename SboVector<T, N>::reference SboVector<T, N>::emplace_back(Args&&... args
 {
    emplace(begin() + size(), std::forward<Args>(args)...);
    return *(begin() + size() - 1);
+}
+
+
+template <typename T, std::size_t N>
+void SboVector<T, N>::resize(size_type count)
+{
+   // Cases:
+   // - New size == old size: done
+   // - New size > old size:
+   //    - New size > cap:
+   //       - Buffer -> Heap: alloc heap, relocate elems
+   //       - Heap -> Heap: alloc heap, relocate elems
+   //    - New size <= cap: no alloc, remain in cur storage
+   // - New size < old size: remove elems, don't alloc, remain in cur storage
+
+   if (count == m_size)
+      return;
+
+   if (count > m_size)
+   {
+      const bool fitsBuffer = fitsIntoBuffer(count);
+      const bool canReuseHeap = onHeap() && m_capacity >= count;
+      const bool allocHeap = !fitsBuffer && !canReuseHeap;
+
+      if (allocHeap)
+         reallocate(count);
+
+      std::uninitialized_default_construct_n(data() + size(), count - size());
+      m_size = count;
+   }
+   else
+   {
+      std::destroy_n(data() + count, size() - count);
+      m_size = count;
+   }
+}
+
+
+template <typename T, std::size_t N>
+void SboVector<T, N>::resize(size_type count, const value_type& value)
+{
+   // Cases:
+   // - New size == old size: done
+   // - New size > old size:
+   //    - New size > cap:
+   //       - Buffer -> Heap: alloc heap, relocate elems
+   //       - Heap -> Heap: alloc heap, relocate elems
+   //    - New size <= cap: no alloc, remain in cur storage
+   // - New size < old size: remove elems, don't alloc, remain in cur storage
+
+   if (count == m_size)
+      return;
+
+   if (count > m_size)
+   {
+      const bool fitsBuffer = fitsIntoBuffer(count);
+      const bool canReuseHeap = onHeap() && m_capacity >= count;
+      const bool allocHeap = !fitsBuffer && !canReuseHeap;
+
+      if (allocHeap)
+         reallocate(count);
+
+      std::uninitialized_fill_n(data() + size(), count - size(), value);
+      m_size = count;
+   }
+   else
+   {
+      std::destroy_n(data() + count, size() - count);
+      m_size = count;
+   }
 }
 
 
