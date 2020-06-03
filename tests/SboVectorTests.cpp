@@ -7164,6 +7164,341 @@ void TestEmplaceBack()
 }
 
 
+void TestResizeWithDefaultValue()
+{
+   {
+      const std::string caseLabel{"SvoVector::resize with default value to same size"};
+
+      constexpr std::size_t BufCap = 10;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      const std::initializer_list<Elem> values{0, 1, 2, 3, 4};
+      const std::size_t initialSize = values.size();
+      const std::size_t resizeTo = initialSize;
+      const std::initializer_list<Elem> expected{0, 1, 2, 3, 4};
+
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = initialSize;
+      metrics.dtorCalls = initialSize;
+
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv{values};
+         const std::size_t initialCap = sv.capacity();
+         VERIFY(!sv.empty(), caseLabel);
+         VERIFY(resizeTo == sv.size(), caseLabel);
+
+         sv.resize(resizeTo);
+
+         VERIFY(sv.inBuffer(), caseLabel);
+         VERIFY(sv.capacity() == initialCap, caseLabel);
+         verifyVector(sv, expected, caseLabel);
+      });
+   }
+   {
+      const std::string caseLabel{"SvoVector::resize with default value for buffer "
+                                  "instance to larger size that still fits into buffer"};
+
+      constexpr std::size_t BufCap = 10;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      const std::initializer_list<Elem> values{0, 1, 2, 3, 4};
+      const std::size_t initialSize = values.size();
+      const std::size_t resizeTo = 8;
+      const std::initializer_list<Elem> expected{0, 1, 2, 3, 4, 1, 1, 1};
+
+      Elem::Metrics metrics;
+      metrics.defaultCtorCalls = resizeTo - initialSize;
+      metrics.copyCtorCalls = initialSize;
+      metrics.dtorCalls = resizeTo;
+
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv{values};
+         VERIFY(sv.inBuffer(), caseLabel);
+         VERIFY(!sv.empty(), caseLabel);
+         VERIFY(resizeTo > sv.size(), caseLabel);
+         VERIFY(resizeTo <= BufCap, caseLabel);
+
+         sv.resize(resizeTo);
+
+         VERIFY(sv.inBuffer(), caseLabel);
+         verifyVector(sv, expected, caseLabel);
+      });
+   }
+   {
+      const std::string caseLabel{"SvoVector::resize with default value for buffer "
+                                  "instance to larger size that needs heap"};
+
+      constexpr std::size_t BufCap = 5;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      const std::initializer_list<Elem> values{0, 1, 2, 3};
+      const std::size_t initialSize = values.size();
+      const std::size_t resizeTo = 8;
+      const std::initializer_list<Elem> expected{0, 1, 2, 3, 1, 1, 1, 1};
+
+      Elem::Metrics metrics;
+      metrics.defaultCtorCalls = resizeTo - initialSize;
+      metrics.moveCtorCalls = initialSize;
+      metrics.copyCtorCalls = initialSize;
+      metrics.dtorCalls = resizeTo;
+
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv{values};
+         VERIFY(sv.inBuffer(), caseLabel);
+         VERIFY(!sv.empty(), caseLabel);
+         VERIFY(resizeTo > sv.size(), caseLabel);
+         VERIFY(resizeTo > BufCap, caseLabel);
+
+         sv.resize(resizeTo);
+
+         VERIFY(sv.onHeap(), caseLabel);
+         verifyVector(sv, expected, caseLabel);
+      });
+   }
+   {
+      const std::string caseLabel{
+         "SvoVector::resize with default value for heap "
+         "instance to larger size that fits into the current capacity"};
+
+      constexpr std::size_t BufCap = 5;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      const std::initializer_list<Elem> values{0, 1, 2, 3, 4, 5, 6};
+      const std::size_t initialSize = values.size();
+      const std::size_t initialCap = 15;
+      const std::size_t resizeTo = 10;
+      const std::initializer_list<Elem> expected{0, 1, 2, 3, 4, 5, 6, 1, 1, 1};
+
+      Elem::Metrics metrics;
+      metrics.defaultCtorCalls = resizeTo - initialSize;
+      metrics.moveCtorCalls = initialSize;
+      metrics.copyCtorCalls = initialSize;
+      metrics.dtorCalls = resizeTo;
+
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv{values};
+         sv.reserve(initialCap);
+         VERIFY(sv.onHeap(), caseLabel);
+         VERIFY(!sv.empty(), caseLabel);
+         VERIFY(resizeTo > sv.size(), caseLabel);
+         VERIFY(resizeTo < initialCap, caseLabel);
+
+         sv.resize(resizeTo);
+
+         VERIFY(sv.onHeap(), caseLabel);
+         VERIFY(sv.capacity() == initialCap, caseLabel);
+         verifyVector(sv, expected, caseLabel);
+      });
+   }
+   {
+      const std::string caseLabel{
+         "SvoVector::resize with default value for heap "
+         "instance to larger size fits that doesn't fit into the current capacity"};
+
+      constexpr std::size_t BufCap = 5;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      const std::initializer_list<Elem> values{0, 1, 2, 3, 4, 5, 6};
+      const std::size_t initialSize = values.size();
+      const std::size_t initialCap = initialSize;
+      const std::size_t resizeTo = 10;
+      const std::initializer_list<Elem> expected{0, 1, 2, 3, 4, 5, 6, 1, 1, 1};
+
+      Elem::Metrics metrics;
+      metrics.defaultCtorCalls = resizeTo - initialSize;
+      metrics.moveCtorCalls = initialSize;
+      metrics.copyCtorCalls = initialSize;
+      metrics.dtorCalls = resizeTo;
+
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv{values};
+         VERIFY(sv.onHeap(), caseLabel);
+         VERIFY(!sv.empty(), caseLabel);
+         VERIFY(resizeTo > sv.size(), caseLabel);
+         VERIFY(resizeTo > initialCap, caseLabel);
+
+         sv.resize(resizeTo);
+
+         VERIFY(sv.onHeap(), caseLabel);
+         VERIFY(sv.capacity() > initialCap, caseLabel);
+         verifyVector(sv, expected, caseLabel);
+      });
+   }
+   {
+      const std::string caseLabel{"SvoVector::resize with default value for buffer "
+                                  "instance to smaller size"};
+
+      constexpr std::size_t BufCap = 10;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      const std::initializer_list<Elem> values{0, 1, 2, 3, 4, 5, 6, 7};
+      const std::size_t initialSize = values.size();
+      const std::size_t resizeTo = 5;
+      const std::initializer_list<Elem> expected{0, 1, 2, 3, 4};
+
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = initialSize;
+      metrics.dtorCalls = initialSize;
+
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv{values};
+         VERIFY(sv.inBuffer(), caseLabel);
+         VERIFY(!sv.empty(), caseLabel);
+         VERIFY(resizeTo < sv.size(), caseLabel);
+         VERIFY(resizeTo <= BufCap, caseLabel);
+
+         sv.resize(resizeTo);
+
+         VERIFY(sv.inBuffer(), caseLabel);
+         verifyVector(sv, expected, caseLabel);
+      });
+   }
+   {
+      const std::string caseLabel{
+         "SvoVector::resize with default value for heap "
+         "instance to smaller size that fits into buffer"};
+
+      constexpr std::size_t BufCap = 5;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      const std::initializer_list<Elem> values{0, 1, 2, 3, 4, 5, 6};
+      const std::size_t initialSize = values.size();
+      const std::size_t resizeTo = 4;
+      const std::initializer_list<Elem> expected{0, 1, 2, 3};
+
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = initialSize;
+      metrics.dtorCalls = initialSize;
+
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv{values};
+         const std::size_t initialCap = sv.capacity();
+         VERIFY(sv.onHeap(), caseLabel);
+         VERIFY(!sv.empty(), caseLabel);
+         VERIFY(resizeTo < sv.size(), caseLabel);
+         VERIFY(resizeTo < BufCap, caseLabel);
+
+         sv.resize(resizeTo);
+
+         // Remains on heap.
+         VERIFY(sv.onHeap(), caseLabel);
+         VERIFY(sv.capacity() == initialCap, caseLabel);
+         verifyVector(sv, expected, caseLabel);
+      });
+   }
+   {
+      const std::string caseLabel{
+         "SvoVector::resize with default value for heap "
+         "instance to smaller size that still needs heap"};
+
+      constexpr std::size_t BufCap = 5;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      const std::initializer_list<Elem> values{0, 1, 2, 3, 4, 5, 6, 7, 8};
+      const std::size_t initialSize = values.size();
+      const std::size_t resizeTo = 7;
+      const std::initializer_list<Elem> expected{0, 1, 2, 3, 4, 5, 6};
+
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = initialSize;
+      metrics.dtorCalls = initialSize;
+
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv{values};
+         const std::size_t initialCap = sv.capacity();
+         VERIFY(sv.onHeap(), caseLabel);
+         VERIFY(!sv.empty(), caseLabel);
+         VERIFY(resizeTo < sv.size(), caseLabel);
+         VERIFY(resizeTo > BufCap, caseLabel);
+
+         sv.resize(resizeTo);
+
+         VERIFY(sv.onHeap(), caseLabel);
+         VERIFY(sv.capacity() == initialCap, caseLabel);
+         verifyVector(sv, expected, caseLabel);
+      });
+   }
+   {
+      const std::string caseLabel{
+         "SvoVector::resize with default value for buffer "
+         "instance to zero size"};
+
+      constexpr std::size_t BufCap = 5;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      const std::initializer_list<Elem> values{0, 1, 2, 3};
+      const std::size_t initialSize = values.size();
+
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = initialSize;
+      metrics.dtorCalls = initialSize;
+
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv{values};
+         VERIFY(sv.inBuffer(), caseLabel);
+         VERIFY(!sv.empty(), caseLabel);
+
+         sv.resize(0);
+
+         VERIFY(sv.inBuffer(), caseLabel);
+         VERIFY(sv.empty(), caseLabel);
+      });
+   }
+   {
+      const std::string caseLabel{
+         "SvoVector::resize with default value for heap "
+         "instance to zero size"};
+
+      constexpr std::size_t BufCap = 5;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      const std::initializer_list<Elem> values{0, 1, 2, 3, 4, 5, 6, 7};
+      const std::size_t initialSize = values.size();
+
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = initialSize;
+      metrics.dtorCalls = initialSize;
+
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV sv{values};
+         VERIFY(sv.onHeap(), caseLabel);
+         VERIFY(!sv.empty(), caseLabel);
+
+         sv.resize(0);
+
+         // Remains on heap.
+         VERIFY(sv.onHeap(), caseLabel);
+         VERIFY(sv.empty(), caseLabel);
+      });
+   }
+}
+
+
+void TestResizeWithValue()
+{
+}
+
+
 ///////////////////
 
 void TestIteratorCopyCtor()
@@ -8880,6 +9215,8 @@ void TestSboVector()
    TestPopBack();
    TestEmplace();
    TestEmplaceBack();
+   TestResizeWithDefaultValue();
+   TestResizeWithValue();
 
    TestIteratorCopyCtor();
    TestIteratorMoveCtor();
