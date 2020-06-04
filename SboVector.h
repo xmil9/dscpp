@@ -257,6 +257,19 @@ template <typename Iter> void relocateLeftOverlapped(Iter first, Iter last, Iter
       overlappedCopyAndDestroy(first, last - first, dest);
 }
 
+
+// Depending on the element type moves or copies a possibly overlapping range of elements
+// to the right (from lower to higher memory addresses).
+template <typename Iter> void relocateRightOverlapped(Iter first, Iter last, Iter dest)
+{
+   using value_type = typename std::iterator_traits<Iter>::value_type;
+
+   if constexpr (std::is_move_constructible_v<value_type>)
+      overlappedMoveBackwards(first, last - first, dest);
+   else
+      overlappedCopyAndDestroyBackward(first, last - first, dest);
+}
+
 } // namespace internals
 
 
@@ -911,10 +924,7 @@ typename SboVector<T, N>::iterator SboVector<T, N>::insert(const_iterator pos,
    {
       T* tailSrc = data() + posOffset;
       T* tailDest = dest + posOffset + count;
-      if constexpr (std::is_move_constructible_v<T>)
-         internals::overlappedMoveBackwards(tailSrc, tailSize, tailDest);
-      else
-         internals::overlappedCopyAndDestroyBackward(tailSrc, tailSize, tailDest);
+      internals::relocateRightOverlapped(tailSrc, tailSrc + tailSize, tailDest);
    }
 
    std::uninitialized_copy_n(&value, 1, dest + posOffset);
@@ -979,10 +989,7 @@ typename SboVector<T, N>::iterator SboVector<T, N>::insert(const_iterator pos, T
    {
       T* tailSrc = data() + posOffset;
       T* tailDest = dest + posOffset + count;
-      if constexpr (std::is_move_constructible_v<T>)
-         internals::overlappedMoveBackwards(tailSrc, tailSize, tailDest);
-      else
-         internals::overlappedCopyAndDestroyBackward(tailSrc, tailSize, tailDest);
+      internals::relocateRightOverlapped(tailSrc, tailSrc + tailSize, tailDest);
    }
 
    std::uninitialized_move_n(&value, 1, dest + posOffset);
@@ -1050,10 +1057,7 @@ SboVector<T, N>::insert(const_iterator pos, size_type count, const T& value)
    {
       T* tailSrc = data() + posOffset;
       T* tailDest = dest + posOffset + count;
-      if constexpr (std::is_move_constructible_v<T>)
-         internals::overlappedMoveBackwards(tailSrc, tailSize, tailDest);
-      else
-         internals::overlappedCopyAndDestroyBackward(tailSrc, tailSize, tailDest);
+      internals::relocateRightOverlapped(tailSrc, tailSrc + tailSize, tailDest);
    }
 
    for (int i = 0; i < count; ++i)
@@ -1124,10 +1128,7 @@ typename SboVector<T, N>::iterator SboVector<T, N>::insert(const_iterator pos,
    {
       T* tailSrc = data() + posOffset;
       T* tailDest = dest + posOffset + count;
-      if constexpr (std::is_move_constructible_v<T>)
-         internals::overlappedMoveBackwards(tailSrc, tailSize, tailDest);
-      else
-         internals::overlappedCopyAndDestroyBackward(tailSrc, tailSize, tailDest);
+      internals::relocateRightOverlapped(tailSrc, tailSrc + tailSize, tailDest);
    }
 
    std::uninitialized_copy(first, last, dest + posOffset);
@@ -1196,10 +1197,7 @@ typename SboVector<T, N>::iterator SboVector<T, N>::insert(const_iterator pos,
    {
       T* tailSrc = data() + posOffset;
       T* tailDest = dest + posOffset + count;
-      if constexpr (std::is_move_constructible_v<T>)
-         internals::overlappedMoveBackwards(tailSrc, tailSize, tailDest);
-      else
-         internals::overlappedCopyAndDestroyBackward(tailSrc, tailSize, tailDest);
+      internals::relocateRightOverlapped(tailSrc, tailSrc + tailSize, tailDest);
    }
 
    std::uninitialized_copy_n(ilist.begin(), count, dest + posOffset);
@@ -1286,10 +1284,7 @@ typename SboVector<T, N>::iterator SboVector<T, N>::emplace(const_iterator pos,
    {
       T* tailSrc = data() + posOffset;
       T* tailDest = dest + posOffset + count;
-      if constexpr (std::is_move_constructible_v<T>)
-         internals::overlappedMoveBackwards(tailSrc, tailSize, tailDest);
-      else
-         internals::overlappedCopyAndDestroyBackward(tailSrc, tailSize, tailDest);
+      internals::relocateRightOverlapped(tailSrc, tailSrc + tailSize, tailDest);
    }
 
    internals::construct_at(dest + posOffset, std::forward<Args>(args)...);
