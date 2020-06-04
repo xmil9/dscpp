@@ -8321,6 +8321,46 @@ void TestGreaterOrEqualThan()
 }
 
 
+void TestStandaloneSwap()
+{
+   {
+      const std::string caseLabel{"Standalone swap"};
+
+      constexpr std::size_t BufCap = 5;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      const std::initializer_list<Elem> valuesA{0, 1, 3};
+      const std::size_t sizeA = valuesA.size();
+      const std::initializer_list<Elem> valuesB{100, 101, 102, 103, 104, 105, 106};
+      const std::size_t sizeB = valuesB.size();
+
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = sizeA + sizeB;
+      metrics.moveCtorCalls = sizeA;
+      metrics.dtorCalls = sizeA + sizeB;
+
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV svA{valuesA};
+         VERIFY(svA.inBuffer(), caseLabel);
+         SV svB{valuesB};
+         const std::size_t heapCap = svB.capacity();
+         VERIFY(svB.onHeap(), caseLabel);
+
+         swap(svA, svB);
+
+         VERIFY(svA.onHeap(), caseLabel);
+         VERIFY(svA.capacity() == heapCap, caseLabel);
+         verifyVector(svA, valuesB, caseLabel);
+         VERIFY(svB.inBuffer(), caseLabel);
+         VERIFY(svB.capacity() == BufCap, caseLabel);
+         verifyVector(svB, valuesA, caseLabel);
+      });
+   }
+}
+
+
 ///////////////////
 
 void TestIteratorCopyCtor()
@@ -10046,6 +10086,7 @@ void TestSboVector()
    TestGreaterThan();
    TestLessOrEqualThan();
    TestGreaterOrEqualThan();
+   TestStandaloneSwap();
 
    TestIteratorCopyCtor();
    TestIteratorMoveCtor();
