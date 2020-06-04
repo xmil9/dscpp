@@ -2,11 +2,13 @@
 #define SBOVEC_MEM_INSTR
 #include "SboVector.h"
 #include "TestUtil.h"
+#include <algorithm>
 #include <functional>
 #include <iostream>
 #include <list>
 #include <string>
 #include <vector>
+#define NOMINMAX
 #include <Windows.h>
 
 
@@ -181,6 +183,14 @@ struct NotMoveableElement
       VERIFY(expected.dtorCalls == m_metrics.dtorCalls, caseLabel);
    }
 };
+
+
+void swap(NotMoveableElement& a, NotMoveableElement& b)
+{
+   std::swap(a.d, b.d);
+   std::swap(a.i, b.i);
+   std::swap(a.b, b.b);
+}
 
 
 ///////////////////
@@ -7366,9 +7376,8 @@ void TestResizeWithDefaultValue()
       });
    }
    {
-      const std::string caseLabel{
-         "SvoVector::resize with default value for heap "
-         "instance to smaller size that fits into buffer"};
+      const std::string caseLabel{"SvoVector::resize with default value for heap "
+                                  "instance to smaller size that fits into buffer"};
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
@@ -7401,9 +7410,8 @@ void TestResizeWithDefaultValue()
       });
    }
    {
-      const std::string caseLabel{
-         "SvoVector::resize with default value for heap "
-         "instance to smaller size that still needs heap"};
+      const std::string caseLabel{"SvoVector::resize with default value for heap "
+                                  "instance to smaller size that still needs heap"};
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
@@ -7435,9 +7443,8 @@ void TestResizeWithDefaultValue()
       });
    }
    {
-      const std::string caseLabel{
-         "SvoVector::resize with default value for buffer "
-         "instance to zero size"};
+      const std::string caseLabel{"SvoVector::resize with default value for buffer "
+                                  "instance to zero size"};
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
@@ -7463,9 +7470,8 @@ void TestResizeWithDefaultValue()
       });
    }
    {
-      const std::string caseLabel{
-         "SvoVector::resize with default value for heap "
-         "instance to zero size"};
+      const std::string caseLabel{"SvoVector::resize with default value for heap "
+                                  "instance to zero size"};
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
@@ -7698,9 +7704,8 @@ void TestResizeWithValue()
       });
    }
    {
-      const std::string caseLabel{
-         "SvoVector::resize with given value for heap "
-         "instance to smaller size that fits into buffer"};
+      const std::string caseLabel{"SvoVector::resize with given value for heap "
+                                  "instance to smaller size that fits into buffer"};
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
@@ -7734,9 +7739,8 @@ void TestResizeWithValue()
       });
    }
    {
-      const std::string caseLabel{
-         "SvoVector::resize with given value for heap "
-         "instance to smaller size that still needs heap"};
+      const std::string caseLabel{"SvoVector::resize with given value for heap "
+                                  "instance to smaller size that still needs heap"};
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
@@ -7769,9 +7773,8 @@ void TestResizeWithValue()
       });
    }
    {
-      const std::string caseLabel{
-         "SvoVector::resize with given value for buffer "
-         "instance to zero size"};
+      const std::string caseLabel{"SvoVector::resize with given value for buffer "
+                                  "instance to zero size"};
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
@@ -7798,9 +7801,8 @@ void TestResizeWithValue()
       });
    }
    {
-      const std::string caseLabel{
-         "SvoVector::resize with given value for heap "
-         "instance to zero size"};
+      const std::string caseLabel{"SvoVector::resize with given value for heap "
+                                  "instance to zero size"};
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
@@ -7825,6 +7827,277 @@ void TestResizeWithValue()
          // Remains on heap.
          VERIFY(sv.onHeap(), caseLabel);
          VERIFY(sv.empty(), caseLabel);
+      });
+   }
+}
+
+
+void TestSwap()
+{
+   {
+      const std::string caseLabel{"SvoVector::swap of two heap instances"};
+
+      constexpr std::size_t BufCap = 5;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      const std::initializer_list<Elem> valuesA{0, 1, 2, 3, 4, 5, 6};
+      const std::size_t sizeA = valuesA.size();
+      const std::initializer_list<Elem> valuesB{100, 101, 102, 103, 104,
+                                                105, 106, 107, 108};
+      const std::size_t sizeB = valuesB.size();
+
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = sizeA + sizeB;
+      metrics.dtorCalls = sizeA + sizeB;
+
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV svA{valuesA};
+         const std::size_t capA = svA.capacity();
+         VERIFY(svA.onHeap(), caseLabel);
+         SV svB{valuesB};
+         const std::size_t capB = svB.capacity();
+         VERIFY(svB.onHeap(), caseLabel);
+
+         svA.swap(svB);
+
+         VERIFY(svA.onHeap(), caseLabel);
+         VERIFY(svA.capacity() == capB, caseLabel);
+         verifyVector(svA, valuesB, caseLabel);
+         VERIFY(svB.onHeap(), caseLabel);
+         VERIFY(svB.capacity() == capA, caseLabel);
+         verifyVector(svB, valuesA, caseLabel);
+      });
+   }
+   {
+      const std::string caseLabel{"SvoVector::swap of two buffer instances"};
+
+      constexpr std::size_t BufCap = 5;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      const std::initializer_list<Elem> valuesA{0, 1};
+      const std::size_t sizeA = valuesA.size();
+      const std::initializer_list<Elem> valuesB{100, 101, 102, 103};
+      const std::size_t sizeB = valuesB.size();
+
+      const std::size_t numElemSwaps = std::min(sizeA, sizeB);
+      const std::size_t numElemMoves = std::max(sizeA, sizeB) - numElemSwaps;
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = sizeA + sizeB;
+      metrics.moveCtorCalls = numElemSwaps + numElemMoves;
+      metrics.moveAssignmentCalls = 2 * numElemSwaps;
+      metrics.dtorCalls = sizeA + sizeB + numElemSwaps;
+
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV svA{valuesA};
+         VERIFY(svA.inBuffer(), caseLabel);
+         SV svB{valuesB};
+         VERIFY(svB.inBuffer(), caseLabel);
+
+         svA.swap(svB);
+
+         VERIFY(svA.inBuffer(), caseLabel);
+         VERIFY(svA.capacity() == BufCap, caseLabel);
+         verifyVector(svA, valuesB, caseLabel);
+         VERIFY(svB.inBuffer(), caseLabel);
+         VERIFY(svB.capacity() == BufCap, caseLabel);
+         verifyVector(svB, valuesA, caseLabel);
+      });
+   }
+   {
+      const std::string caseLabel{
+         "SvoVector::swap of two buffer instances with a non-moveable element type"};
+
+      constexpr std::size_t BufCap = 5;
+      using Elem = NotMoveableElement;
+      using SV = SboVector<Elem, BufCap>;
+
+      const std::initializer_list<Elem> valuesA{0, 1};
+      const std::size_t sizeA = valuesA.size();
+      const std::initializer_list<Elem> valuesB{100, 101, 102, 103};
+      const std::size_t sizeB = valuesB.size();
+
+      // NotMoveableElement provides a swap overload, so not ctors or assignments
+      // are made for a swap.
+      const std::size_t numElemCopies = std::max(sizeA, sizeB) - std::min(sizeA, sizeB);
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = sizeA + sizeB + numElemCopies;
+      metrics.dtorCalls = sizeA + sizeB + numElemCopies;
+
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV svA{valuesA};
+         VERIFY(svA.inBuffer(), caseLabel);
+         SV svB{valuesB};
+         VERIFY(svB.inBuffer(), caseLabel);
+         VERIFY(!std::is_move_constructible_v<Elem>, caseLabel);
+
+         svA.swap(svB);
+
+         VERIFY(svA.inBuffer(), caseLabel);
+         VERIFY(svA.capacity() == BufCap, caseLabel);
+         verifyVector(svA, valuesB, caseLabel);
+         VERIFY(svB.inBuffer(), caseLabel);
+         VERIFY(svB.capacity() == BufCap, caseLabel);
+         verifyVector(svB, valuesA, caseLabel);
+      });
+   }
+   {
+      const std::string caseLabel{"SvoVector::swap of between buffer and heap instance"};
+
+      constexpr std::size_t BufCap = 5;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      const std::initializer_list<Elem> valuesA{0, 1, 3};
+      const std::size_t sizeA = valuesA.size();
+      const std::initializer_list<Elem> valuesB{100, 101, 102, 103, 104, 105, 106};
+      const std::size_t sizeB = valuesB.size();
+
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = sizeA + sizeB;
+      metrics.moveCtorCalls = sizeA;
+      metrics.dtorCalls = sizeA + sizeB;
+
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV svA{valuesA};
+         VERIFY(svA.inBuffer(), caseLabel);
+         SV svB{valuesB};
+         const std::size_t heapCap = svB.capacity();
+         VERIFY(svB.onHeap(), caseLabel);
+
+         svA.swap(svB);
+
+         VERIFY(svA.onHeap(), caseLabel);
+         VERIFY(svA.capacity() == heapCap, caseLabel);
+         verifyVector(svA, valuesB, caseLabel);
+         VERIFY(svB.inBuffer(), caseLabel);
+         VERIFY(svB.capacity() == BufCap, caseLabel);
+         verifyVector(svB, valuesA, caseLabel);
+      });
+   }
+   {
+      const std::string caseLabel{"SvoVector::swap of between buffer and heap instance "
+                                  "with a non-moveable element type"};
+
+      constexpr std::size_t BufCap = 5;
+      using Elem = NotMoveableElement;
+      using SV = SboVector<Elem, BufCap>;
+
+      const std::initializer_list<Elem> valuesA{0, 1, 3};
+      const std::size_t sizeA = valuesA.size();
+      const std::initializer_list<Elem> valuesB{100, 101, 102, 103, 104, 105, 106};
+      const std::size_t sizeB = valuesB.size();
+
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = 2 * sizeA + sizeB;
+      metrics.dtorCalls = 2 * sizeA + sizeB;
+
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV svA{valuesA};
+         VERIFY(svA.inBuffer(), caseLabel);
+         SV svB{valuesB};
+         const std::size_t heapCap = svB.capacity();
+         VERIFY(svB.onHeap(), caseLabel);
+         VERIFY(!std::is_move_constructible_v<Elem>, caseLabel);
+
+         svA.swap(svB);
+
+         VERIFY(svA.onHeap(), caseLabel);
+         VERIFY(svA.capacity() == heapCap, caseLabel);
+         verifyVector(svA, valuesB, caseLabel);
+         VERIFY(svB.inBuffer(), caseLabel);
+         VERIFY(svB.capacity() == BufCap, caseLabel);
+         verifyVector(svB, valuesA, caseLabel);
+      });
+   }
+   {
+      const std::string caseLabel{"SvoVector::swap of between empty and heap instance"};
+
+      constexpr std::size_t BufCap = 5;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      const std::initializer_list<Elem> valuesB{100, 101, 102, 103, 104, 105, 106};
+      const std::size_t sizeB = valuesB.size();
+
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = sizeB;
+      metrics.dtorCalls = sizeB;
+
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV svA;
+         VERIFY(svA.empty(), caseLabel);
+         SV svB{valuesB};
+         const std::size_t heapCap = svB.capacity();
+         VERIFY(svB.onHeap(), caseLabel);
+
+         svA.swap(svB);
+
+         VERIFY(svA.onHeap(), caseLabel);
+         VERIFY(svA.capacity() == heapCap, caseLabel);
+         verifyVector(svA, valuesB, caseLabel);
+         VERIFY(svB.inBuffer(), caseLabel);
+         VERIFY(svB.capacity() == BufCap, caseLabel);
+         VERIFY(svB.empty(), caseLabel);
+      });
+   }
+   {
+      const std::string caseLabel{"SvoVector::swap of between empty and buffer instance"};
+
+      constexpr std::size_t BufCap = 5;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      const std::initializer_list<Elem> valuesB{100, 101};
+      const std::size_t sizeB = valuesB.size();
+
+      Elem::Metrics metrics;
+      metrics.copyCtorCalls = sizeB;
+      metrics.moveCtorCalls = sizeB;
+      metrics.dtorCalls = sizeB;
+
+      Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run([&]() {
+         SV svA;
+         VERIFY(svA.empty(), caseLabel);
+         SV svB{valuesB};
+         VERIFY(svB.inBuffer(), caseLabel);
+
+         svA.swap(svB);
+
+         VERIFY(svA.inBuffer(), caseLabel);
+         verifyVector(svA, valuesB, caseLabel);
+         VERIFY(svB.inBuffer(), caseLabel);
+         VERIFY(svB.empty(), caseLabel);
+      });
+   }
+   {
+      const std::string caseLabel{"SvoVector::swap of two empty vectors"};
+
+      constexpr std::size_t BufCap = 5;
+      using Elem = Element;
+      using SV = SboVector<Elem, BufCap>;
+
+      Elem::Metrics zeros;
+
+      Test<Elem, BufCap> test{caseLabel, zeros};
+      test.run([&]() {
+         SV svA;
+         VERIFY(svA.empty(), caseLabel);
+         SV svB;
+         VERIFY(svB.empty(), caseLabel);
+
+         svA.swap(svB);
+
+         VERIFY(svA.empty(), caseLabel);
+         VERIFY(svB.empty(), caseLabel);
       });
    }
 }
@@ -9548,6 +9821,7 @@ void TestSboVector()
    TestEmplaceBack();
    TestResizeWithDefaultValue();
    TestResizeWithValue();
+   TestSwap();
 
    TestIteratorCopyCtor();
    TestIteratorMoveCtor();
