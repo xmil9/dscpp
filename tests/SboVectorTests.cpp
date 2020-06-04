@@ -8103,6 +8103,224 @@ void TestSwap()
 }
 
 
+void TestEquality()
+{
+   {
+      const std::string caseLabel{"Equality of equal vectors"};
+
+      SboVector<int, 5> a{0, 1, 2, 3};
+      SboVector<int, 5> b{0, 1, 2, 3};
+
+      VERIFY(a == b, caseLabel);
+   }
+   {
+      const std::string caseLabel{"Equality of empty vectors"};
+
+      SboVector<int, 5> a;
+      SboVector<int, 5> b;
+
+      VERIFY(a == b, caseLabel);
+   }
+   {
+      const std::string caseLabel{"Equality of vectors with unequal sizes"};
+
+      SboVector<int, 5> a{0, 1, 2, 3};
+      SboVector<int, 5> b{0, 1, 2, 3, 4};
+
+      VERIFY(!(a == b), caseLabel);
+   }
+   {
+      const std::string caseLabel{"Equality of vectors with unequal elements"};
+
+      SboVector<int, 5> a{0, 1, 2, 3};
+      SboVector<int, 5> b{0, 1, 10, 3};
+
+      VERIFY(!(a == b), caseLabel);
+   }
+   {
+      const std::string caseLabel{"Equality of non-empty with empty vector"};
+
+      SboVector<int, 5> a{0, 1, 2, 3};
+      SboVector<int, 5> b;
+
+      VERIFY(!(a == b), caseLabel);
+   }
+}
+
+
+void TestInequality()
+{
+   {
+      const std::string caseLabel{"Inequality of equal vectors"};
+
+      SboVector<int, 5> a{0, 1, 2, 3};
+      SboVector<int, 5> b{0, 1, 2, 3};
+
+      VERIFY(!(a != b), caseLabel);
+   }
+   {
+      const std::string caseLabel{"Inequality of empty vectors"};
+
+      SboVector<int, 5> a;
+      SboVector<int, 5> b;
+
+      VERIFY(!(a != b), caseLabel);
+   }
+   {
+      const std::string caseLabel{"Inequality of vectors with unequal sizes"};
+
+      SboVector<int, 5> a{0, 1, 2, 3};
+      SboVector<int, 5> b{0, 1, 2, 3, 4};
+
+      VERIFY(a != b, caseLabel);
+   }
+   {
+      const std::string caseLabel{"Inequality of vectors with unequal elements"};
+
+      SboVector<int, 5> a{0, 1, 2, 3};
+      SboVector<int, 5> b{0, 1, 10, 3};
+
+      VERIFY(a != b, caseLabel);
+   }
+   {
+      const std::string caseLabel{"Inequality of non-empty with empty vector"};
+
+      SboVector<int, 5> a{0, 1, 2, 3};
+      SboVector<int, 5> b;
+
+      VERIFY(a != b, caseLabel);
+   }
+}
+
+
+
+void TestLessThan()
+{
+   {
+      const std::string caseLabel{"Less-than for vectors with different sizes"};
+
+      SboVector<int, 5> a{0, 1, 2};
+      SboVector<int, 5> b{0, 1, 2, 3};
+
+      VERIFY(a < b, caseLabel);
+      VERIFY(!(b < a), caseLabel);
+   }
+   {
+      const std::string caseLabel{"Less-than for vectors with different elements"};
+
+      SboVector<int, 5> a{0, 1, 2, 3};
+      SboVector<int, 5> b{0, 10, 2, 3};
+
+      VERIFY(a < b, caseLabel);
+      VERIFY(!(b < a), caseLabel);
+   }
+   {
+      const std::string caseLabel{"Less-than for equal vectors"};
+
+      SboVector<int, 5> a{0, 1, 2, 3};
+      SboVector<int, 5> b{0, 1, 2, 3};
+
+      VERIFY(!(a < b), caseLabel);
+   }
+}
+
+
+
+void TestGreaterThan()
+{
+   {
+      const std::string caseLabel{"Greater-than for vectors with different sizes"};
+
+      SboVector<int, 5> a{0, 1, 2};
+      SboVector<int, 5> b{0, 1, 2, 3};
+
+      VERIFY(!(a > b), caseLabel);
+      VERIFY(b > a, caseLabel);
+   }
+   {
+      const std::string caseLabel{"Greater-than for vectors with different elements"};
+
+      SboVector<int, 5> a{0, 1, 2, 3};
+      SboVector<int, 5> b{0, 10, 2, 3};
+
+      VERIFY(!(a > b), caseLabel);
+      VERIFY(b > a, caseLabel);
+   }
+   {
+      const std::string caseLabel{"Greater-than for equal vectors"};
+
+      SboVector<int, 5> a{0, 1, 2, 3};
+      SboVector<int, 5> b{0, 1, 2, 3};
+
+      VERIFY(!(a > b), caseLabel);
+   }
+}
+
+
+
+void TestLessOrEqualThan()
+{
+   {
+      const std::string caseLabel{"Less-or-equal-than for vectors with different sizes"};
+
+      SboVector<int, 5> a{0, 1, 2};
+      SboVector<int, 5> b{0, 1, 2, 3};
+
+      VERIFY(a <= b, caseLabel);
+      VERIFY(!(b <= a), caseLabel);
+   }
+   {
+      const std::string caseLabel{"Less-or-equal-than for vectors with different elements"};
+
+      SboVector<int, 5> a{0, 1, 2, 3};
+      SboVector<int, 5> b{0, 10, 2, 3};
+
+      VERIFY(a <= b, caseLabel);
+      VERIFY(!(b <= a), caseLabel);
+   }
+   {
+      const std::string caseLabel{"Less-or-equal-than for equal vectors"};
+
+      SboVector<int, 5> a{0, 1, 2, 3};
+      SboVector<int, 5> b{0, 1, 2, 3};
+
+      VERIFY(a <= b, caseLabel);
+   }
+}
+
+
+
+void TestGreaterOrEqualThan()
+{
+   {
+      const std::string caseLabel{"Greater-or-equal-than for vectors with different sizes"};
+
+      SboVector<int, 5> a{0, 1, 2};
+      SboVector<int, 5> b{0, 1, 2, 3};
+
+      VERIFY(!(a >= b), caseLabel);
+      VERIFY(b >= a, caseLabel);
+   }
+   {
+      const std::string caseLabel{"Greater-or-equal-than for vectors with different elements"};
+
+      SboVector<int, 5> a{0, 1, 2, 3};
+      SboVector<int, 5> b{0, 10, 2, 3};
+
+      VERIFY(!(a >= b), caseLabel);
+      VERIFY(b >= a, caseLabel);
+   }
+   {
+      const std::string caseLabel{"Greater-or-equal-than for equal vectors"};
+
+      SboVector<int, 5> a{0, 1, 2, 3};
+      SboVector<int, 5> b{0, 1, 2, 3};
+
+      VERIFY(a >= b, caseLabel);
+   }
+}
+
+
 ///////////////////
 
 void TestIteratorCopyCtor()
@@ -9822,6 +10040,12 @@ void TestSboVector()
    TestResizeWithDefaultValue();
    TestResizeWithValue();
    TestSwap();
+   TestEquality();
+   TestInequality();
+   TestLessThan();
+   TestGreaterThan();
+   TestLessOrEqualThan();
+   TestGreaterOrEqualThan();
 
    TestIteratorCopyCtor();
    TestIteratorMoveCtor();
