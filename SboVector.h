@@ -2162,3 +2162,9 @@ bool operator>=(const SboVector<T, N>& a, const SboVector<T, N>& b)
 {
    return !(a < b);
 }
+
+
+template <typename T, std::size_t N> void swap(SboVector<T, N>& a, SboVector<T, N>& b)
+{
+   a.swap(b);
+}
