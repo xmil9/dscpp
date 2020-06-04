@@ -1720,6 +1720,56 @@ void SboVector<T, N>::deallocateMem(T* mem, std::size_t cap)
 
 ///////////////////
 
+template <typename T, std::size_t N>
+bool operator==(const SboVector<T, N>& a, const SboVector<T, N>& b)
+{
+   return a.size() == b.size() && std::equal(a.begin(), a.end(), b.begin());
+}
+
+
+template <typename T, std::size_t N>
+bool operator!=(const SboVector<T, N>& a, const SboVector<T, N>& b)
+{
+   return !(a == b);
+}
+
+
+template <typename T, std::size_t N>
+bool operator<(const SboVector<T, N>& a, const SboVector<T, N>& b)
+{
+   return std::lexicographical_compare(a.begin(), a.end(), b.begin(), b.end());
+}
+
+
+template <typename T, std::size_t N>
+bool operator>(const SboVector<T, N>& a, const SboVector<T, N>& b)
+{
+   return b < a;
+}
+
+
+template <typename T, std::size_t N>
+bool operator<=(const SboVector<T, N>& a, const SboVector<T, N>& b)
+{
+   return !(a > b);
+}
+
+
+template <typename T, std::size_t N>
+bool operator>=(const SboVector<T, N>& a, const SboVector<T, N>& b)
+{
+   return !(a < b);
+}
+
+
+template <typename T, std::size_t N> void swap(SboVector<T, N>& a, SboVector<T, N>& b)
+{
+   a.swap(b);
+}
+
+
+///////////////////
+
 // Const iterator for SboVector.
 template <typename T, std::size_t N> class SboVectorConstIterator
 {
@@ -2117,54 +2167,4 @@ SboVectorIterator<T, N>& SboVectorIterator<T, N>::operator-=(difference_type off
 {
    this->m_elem -= offset;
    return *this;
-}
-
-
-///////////////////
-
-template <typename T, std::size_t N>
-bool operator==(const SboVector<T, N>& a, const SboVector<T, N>& b)
-{
-   return a.size() == b.size() && std::equal(a.begin(), a.end(), b.begin());
-}
-
-
-template <typename T, std::size_t N>
-bool operator!=(const SboVector<T, N>& a, const SboVector<T, N>& b)
-{
-   return !(a == b);
-}
-
-
-template <typename T, std::size_t N>
-bool operator<(const SboVector<T, N>& a, const SboVector<T, N>& b)
-{
-   return std::lexicographical_compare(a.begin(), a.end(), b.begin(), b.end());
-}
-
-
-template <typename T, std::size_t N>
-bool operator>(const SboVector<T, N>& a, const SboVector<T, N>& b)
-{
-   return b < a;
-}
-
-
-template <typename T, std::size_t N>
-bool operator<=(const SboVector<T, N>& a, const SboVector<T, N>& b)
-{
-   return !(a > b);
-}
-
-
-template <typename T, std::size_t N>
-bool operator>=(const SboVector<T, N>& a, const SboVector<T, N>& b)
-{
-   return !(a < b);
-}
-
-
-template <typename T, std::size_t N> void swap(SboVector<T, N>& a, SboVector<T, N>& b)
-{
-   a.swap(b);
 }
