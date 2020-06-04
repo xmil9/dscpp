@@ -242,6 +242,21 @@ template <typename T, typename... Args> constexpr T* construct_at(T* p, Args&&..
    return ::new (p) T(std::forward<Args>(args)...);
 }
 
+
+///////////////////
+
+// Depending on the element type moves or copies a possibly overlapping range of elements
+// to the left (from higher to lower memory addresses).
+template <typename Iter> void relocateLeftOverlapped(Iter first, Iter last, Iter dest)
+{
+   using value_type = typename std::iterator_traits<Iter>::value_type;
+
+   if constexpr (std::is_move_constructible_v<value_type>)
+      std::uninitialized_move(first, last, dest);
+   else
+      overlappedCopyAndDestroy(first, last - first, dest);
+}
+
 } // namespace svinternal
 
 
@@ -831,12 +846,7 @@ typename SboVector<T, N>::iterator SboVector<T, N>::erase(const_iterator pos)
 
    const auto offset = pos - cbegin();
    T* erasedElem = data() + offset;
-
-   if constexpr (std::is_move_constructible_v<T>)
-      std::uninitialized_move(erasedElem + 1, data() + size(), erasedElem);
-   else
-      svinternal::overlappedCopyAndDestroy(erasedElem + 1, size() - offset - 1,
-                                           erasedElem);
+   svinternal::relocateLeftOverlapped(erasedElem + 1, data() + size(), erasedElem);
 
    --m_size;
 
@@ -862,12 +872,7 @@ typename SboVector<T, N>::iterator SboVector<T, N>::erase(const_iterator first,
 
    const bool relocateTail = last < cend();
    if (relocateTail)
-   {
-      if constexpr (std::is_move_constructible_v<T>)
-         std::uninitialized_move(last.m_elem, data() + size(), first.m_elem);
-      else
-         svinternal::overlappedCopyAndDestroy(last.m_elem, cend() - last, first.m_elem);
-   }
+      svinternal::relocateLeftOverlapped(last.m_elem, data() + size(), first.m_elem);
 
    m_size -= count;
 
