@@ -201,7 +201,7 @@ template <typename T, std::size_t N> class SboVector
 namespace internals
 {
 
-template <typename T> void overlappedCopyAndDestroy(T* first, std::size_t count, T* dest)
+template <typename T> void copyAndDestroyOverlapped(T* first, std::size_t count, T* dest)
 {
    T* last = first + count;
    for (; first < last; ++first, ++dest)
@@ -213,7 +213,7 @@ template <typename T> void overlappedCopyAndDestroy(T* first, std::size_t count,
 
 
 template <typename T>
-void overlappedCopyAndDestroyBackward(T* first, std::size_t count, T* dest)
+void copyAndDestroyOverlappedBackward(T* first, std::size_t count, T* dest)
 {
    T* rFirst = first + count - 1;
    T* rLast = first - 1;
@@ -226,7 +226,7 @@ void overlappedCopyAndDestroyBackward(T* first, std::size_t count, T* dest)
 }
 
 
-template <typename T> void overlappedMoveBackwards(T* first, std::size_t count, T* dest)
+template <typename T> void moveOverlappedBackwards(T* first, std::size_t count, T* dest)
 {
    T* rFirst = first + count - 1;
    T* rLast = first - 1;
@@ -254,7 +254,7 @@ template <typename Iter> void relocateLeftOverlapped(Iter first, Iter last, Iter
    if constexpr (std::is_move_constructible_v<value_type>)
       std::uninitialized_move(first, last, dest);
    else
-      overlappedCopyAndDestroy(first, last - first, dest);
+      copyAndDestroyOverlapped(first, last - first, dest);
 }
 
 
@@ -265,9 +265,9 @@ template <typename Iter> void relocateRightOverlapped(Iter first, Iter last, Ite
    using value_type = typename std::iterator_traits<Iter>::value_type;
 
    if constexpr (std::is_move_constructible_v<value_type>)
-      overlappedMoveBackwards(first, last - first, dest);
+      moveOverlappedBackwards(first, last - first, dest);
    else
-      overlappedCopyAndDestroyBackward(first, last - first, dest);
+      copyAndDestroyOverlappedBackward(first, last - first, dest);
 }
 
 } // namespace internals
