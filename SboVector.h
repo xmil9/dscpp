@@ -146,6 +146,7 @@ template <typename T, std::size_t N> class SboVector
    template <typename... Args> reference emplace_back(Args&&... args);
    void resize(size_type count);
    void resize(size_type count, const value_type& value);
+   void swap(SboVector& other);
 
    bool inBuffer() const noexcept;
    bool onHeap() const noexcept;
@@ -1240,8 +1241,7 @@ template <typename T, std::size_t N> void SboVector<T, N>::push_back(T&& value)
 }
 
 
-template <typename T, std::size_t N>
-void SboVector<T, N>::pop_back()
+template <typename T, std::size_t N> void SboVector<T, N>::pop_back()
 {
    // Standard: Calling pop_back on empty vector is UB.
    --m_size;
@@ -1328,8 +1328,7 @@ typename SboVector<T, N>::reference SboVector<T, N>::emplace_back(Args&&... args
 }
 
 
-template <typename T, std::size_t N>
-void SboVector<T, N>::resize(size_type count)
+template <typename T, std::size_t N> void SboVector<T, N>::resize(size_type count)
 {
    // Cases:
    // - New size == old size: Done.
@@ -1395,6 +1394,67 @@ void SboVector<T, N>::resize(size_type count, const value_type& value)
       std::destroy_n(data() + count, size() - count);
       m_size = count;
    }
+}
+
+
+template <typename T, std::size_t N> void SboVector<T, N>::swap(SboVector& other)
+{
+   const bool thisOnHeap = onHeap();
+   const bool otherOnHeap = other.onHeap();
+
+   if (thisOnHeap && otherOnHeap)
+   {
+      std::swap(m_data, other.m_data);
+   }
+   else if (!thisOnHeap && !otherOnHeap)
+   {
+      SboVector& larger = size() >= other.size() ? *this : other;
+      SboVector& smaller = size() >= other.size() ? other : *this;
+      const std::size_t commonSize = smaller.size();
+
+      for (std::size_t i = 0; i < commonSize; ++i)
+      {
+         using std::swap; // Enable ADL.
+         swap(smaller.m_data[i], larger.m_data[i]);
+      }
+
+      T* src = larger.data() + commonSize;
+      T* dest = smaller.data() + commonSize;
+      const std::size_t numRelocate = larger.size() - commonSize;
+      if constexpr (std::is_move_constructible_v<T>)
+      {
+         std::uninitialized_move_n(src, numRelocate, dest);
+      }
+      else
+      {
+         std::uninitialized_copy_n(src, numRelocate, dest);
+         std::destroy_n(src, numRelocate);
+      }
+
+      m_data = buffer();
+      other.m_data = other.buffer();
+   }
+   else // One on heap, one in buffer.
+   {
+      SboVector& heap = onHeap() ? *this : other;
+      SboVector& buffer = onHeap() ? other : *this;
+
+      if constexpr (std::is_move_constructible_v<T>)
+      {
+         std::uninitialized_move_n(buffer.buffer(), buffer.size(), heap.buffer());
+      }
+      else
+      {
+         std::uninitialized_copy_n(buffer.buffer(), buffer.size(), heap.buffer());
+         std::destroy_n(buffer.buffer(), buffer.size());
+      }
+
+      buffer.m_data = heap.m_data;
+      heap.m_data = heap.buffer();
+   }
+
+   std::swap(m_size, other.m_size);
+   std::swap(m_capacity, other.m_capacity);
 }
 
 
