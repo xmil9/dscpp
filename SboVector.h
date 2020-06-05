@@ -155,14 +155,14 @@ template <typename T, std::size_t N> class SboVector
    constexpr T* buffer();
    constexpr const T* buffer() const;
 
-   template <typename U, typename ElemIter>
-   void construct_from(const U& other, ElemIter first);
+   void constructFrom(std::size_t n, const T& value);
+   template <typename Iter> void constructFrom(Iter first, std::size_t n);
    template <typename U, typename ElemIter>
    void copy_from(const U& other, ElemIter first);
    void move_from(SboVector&& other);
 
    static constexpr bool fitsIntoBuffer(std::size_t size);
-   void allocate_or_reuse(std::size_t cap);
+   void allocateIfNeeded(std::size_t size);
    void allocate(std::size_t cap);
    void deallocate();
    void reallocate(std::size_t newCap);
@@ -296,18 +296,7 @@ template <typename Iter> void relocateRightOverlapped(Iter first, Iter last, Ite
 template <typename T, std::size_t N>
 SboVector<T, N>::SboVector(std::size_t count, const T& value)
 {
-   // Available strategies are to use the buffer or make a new heap allocation.
-
-   const bool allocHeap = !fitsIntoBuffer(count);
-
-   if (allocHeap)
-   {
-      allocate(count);
-      m_capacity = count;
-   }
-
-   std::uninitialized_fill_n(m_data, count, value);
-   m_size = count;
+   constructFrom(count, value);
 }
 
 
@@ -315,56 +304,20 @@ template <typename T, std::size_t N>
 template <typename InputIt, typename>
 SboVector<T, N>::SboVector(InputIt first, InputIt last)
 {
-   // Available strategies are to use the buffer or make a new heap allocation.
-
-   const std::size_t srcSize = std::distance(first, last);
-   const bool allocHeap = !fitsIntoBuffer(srcSize);
-
-   if (allocHeap)
-   {
-      allocate(srcSize);
-      m_capacity = srcSize;
-   }
-
-   std::uninitialized_copy(first, last, m_data);
-   m_size = srcSize;
+   constructFrom(first, std::distance(first, last));
 }
 
 
 template <typename T, std::size_t N>
 SboVector<T, N>::SboVector(std::initializer_list<T> ilist)
 {
-   // Available strategies are to use the buffer or make a new heap allocation.
-
-   const auto srcSize = ilist.size();
-   const bool allocHeap = !fitsIntoBuffer(srcSize);
-
-   if (allocHeap)
-   {
-      allocate(srcSize);
-      m_capacity = srcSize;
-   }
-
-   std::uninitialized_copy_n(ilist.begin(), srcSize, m_data);
-   m_size = srcSize;
+   constructFrom(ilist.begin(), ilist.size());
 }
 
 
 template <typename T, std::size_t N> SboVector<T, N>::SboVector(const SboVector& other)
 {
-   // Available strategies are to use the buffer or make a new heap allocation.
-
-   const auto srcSize = other.size();
-   const bool allocHeap = !fitsIntoBuffer(srcSize);
-
-   if (allocHeap)
-   {
-      allocate(srcSize);
-      m_capacity = srcSize;
-   }
-
-   std::uninitialized_copy_n(other.m_data, srcSize, m_data);
-   m_size = srcSize;
+   constructFrom(other.data(), other.size());
 }
 
 
@@ -1423,13 +1376,21 @@ template <typename T, std::size_t N> constexpr const T* SboVector<T, N>::buffer(
 
 
 template <typename T, std::size_t N>
-template <typename U, typename ElemIter>
-void SboVector<T, N>::construct_from(const U& other, ElemIter first)
+void SboVector<T, N>::constructFrom(std::size_t n, const T& value)
 {
-   if (other.size() > BufferCapacity)
-      allocate(other.size());
-   std::uninitialized_copy_n(first, other.size(), m_data);
-   m_size = other.size();
+   allocateIfNeeded(n);
+   std::uninitialized_fill_n(m_data, n, value);
+   m_size = n;
+}
+
+
+template <typename T, std::size_t N>
+template <typename Iter>
+void SboVector<T, N>::constructFrom(Iter first, std::size_t n)
+{
+   allocateIfNeeded(n);
+   std::uninitialized_copy_n(first, n, m_data);
+   m_size = n;
 }
 
 
@@ -1495,9 +1456,13 @@ constexpr bool SboVector<T, N>::fitsIntoBuffer(std::size_t size)
 
 
 template <typename T, std::size_t N>
-void SboVector<T, N>::allocate_or_reuse(std::size_t cap)
+void SboVector<T, N>::allocateIfNeeded(std::size_t size)
 {
-   m_data = allocate_or_reuse_mem(cap, m_capacity);
+   if (!fitsIntoBuffer(size))
+   {
+      allocate(size);
+      m_capacity = size;
+   }
 }
 
 
