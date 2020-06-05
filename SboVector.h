@@ -84,8 +84,9 @@ template <typename T, std::size_t N> class SboVector
  public:
    SboVector() = default;
    explicit SboVector(std::size_t count, const T& value);
-   template <typename InputIt, typename = std::enable_if_t<IsIterator_v<InputIt>, void>>
-   SboVector(InputIt first, InputIt last);
+   template <typename InputIter,
+             typename = std::enable_if_t<IsIterator_v<InputIter>, void>>
+   SboVector(InputIter first, InputIter last);
    SboVector(std::initializer_list<T> ilist);
    SboVector(const SboVector& other);
    SboVector(SboVector&& other);
@@ -136,8 +137,8 @@ template <typename T, std::size_t N> class SboVector
    iterator insert(const_iterator pos, const T& value);
    iterator insert(const_iterator pos, T&& value);
    iterator insert(const_iterator pos, size_type count, const T& value);
-   template <typename InputIt>
-   iterator insert(const_iterator pos, InputIt first, InputIt last);
+   template <typename InputIter>
+   iterator insert(const_iterator pos, InputIter first, InputIter last);
    iterator insert(const_iterator pos, std::initializer_list<T> ilist);
    void push_back(const T& value);
    void push_back(T&& value);
@@ -156,7 +157,7 @@ template <typename T, std::size_t N> class SboVector
    constexpr const T* buffer() const;
 
    void constructFrom(std::size_t n, const T& value);
-   template <typename Iter> void constructFrom(Iter first, std::size_t n);
+   template <typename InputIter> void constructFrom(InputIter first, std::size_t n);
 
    static constexpr bool fitsIntoBuffer(std::size_t size);
    void allocateIfNeeded(std::size_t size);
@@ -297,8 +298,8 @@ SboVector<T, N>::SboVector(std::size_t count, const T& value)
 
 
 template <typename T, std::size_t N>
-template <typename InputIt, typename>
-SboVector<T, N>::SboVector(InputIt first, InputIt last)
+template <typename InputIter, typename>
+SboVector<T, N>::SboVector(InputIter first, InputIter last)
 {
    constructFrom(first, std::distance(first, last));
 }
@@ -1031,9 +1032,9 @@ SboVector<T, N>::insert(const_iterator pos, size_type count, const T& value)
 
 
 template <typename T, std::size_t N>
-template <typename InputIt>
-typename SboVector<T, N>::iterator SboVector<T, N>::insert(const_iterator pos,
-                                                           InputIt first, InputIt last)
+template <typename InputIter>
+typename SboVector<T, N>::iterator
+SboVector<T, N>::insert(const_iterator pos, InputIter first, InputIter last)
 {
    // Cases:
    // - In buffer and enough capacity to stay in buffer.
@@ -1381,8 +1382,8 @@ void SboVector<T, N>::constructFrom(std::size_t n, const T& value)
 
 
 template <typename T, std::size_t N>
-template <typename Iter>
-void SboVector<T, N>::constructFrom(Iter first, std::size_t n)
+template <typename InputIter>
+void SboVector<T, N>::constructFrom(InputIter first, std::size_t n)
 {
    allocateIfNeeded(n);
    std::uninitialized_copy_n(first, n, m_data);
