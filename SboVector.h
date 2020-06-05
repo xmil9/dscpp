@@ -159,6 +159,7 @@ template <typename T, std::size_t N> class SboVector
    void constructFrom(std::size_t n, const T& value);
    template <typename InputIter> void constructFrom(InputIter first, std::size_t n);
    template <typename FwdIter> void assignFrom(FwdIter first, std::size_t n);
+   void moveFrom(SboVector&& other);
 
    static constexpr bool fitsIntoBuffer(std::size_t size);
    void allocateIfNeeded(std::size_t size);
@@ -321,30 +322,7 @@ template <typename T, std::size_t N> SboVector<T, N>::SboVector(const SboVector&
 
 template <typename T, std::size_t N> SboVector<T, N>::SboVector(SboVector&& other)
 {
-   // Available strategies are to use steal the heap allocation or use the buffer.
-   // A heap allocations does't make sense as strategys since stealing is faster.
-
-   const auto srcSize = other.size();
-   const bool canSteal = other.onHeap();
-
-   if (canSteal)
-   {
-      m_data = other.m_data;
-      m_capacity = other.m_capacity;
-      // Reset other data to prevent deallocation of the stolen memory below.
-      other.m_data = other.buffer();
-   }
-   else
-   {
-      // Elements must fit into the buffer.
-      assert(fitsIntoBuffer(srcSize));
-      std::uninitialized_move_n(other.m_data, srcSize, m_data);
-      m_capacity = BufferCapacity;
-   }
-
-   m_size = srcSize;
-   // Reset other size to prevent destruction of the stolen or moved objects.
-   other.m_size = 0;
+   moveFrom(std::move(other));
 }
 
 
@@ -366,37 +344,12 @@ SboVector<T, N>& SboVector<T, N>::operator=(const SboVector& other)
 template <typename T, std::size_t N>
 SboVector<T, N>& SboVector<T, N>::operator=(SboVector&& other)
 {
-   // Available strategies are to steal the heap allocation or to use the buffer.
-   // Heap reuse or a allocation don't make sense as strategies since stealing
-   // is faster.
-
-   const auto srcSize = other.size();
-   const bool canSteal = other.onHeap();
-
    // Clean up existing data.
    std::destroy_n(m_data, size());
    deallocate();
 
    // Set up new data.
-   if (canSteal)
-   {
-      m_data = other.m_data;
-      m_capacity = other.m_capacity;
-      // Reset source object to buffer to prevent deallocation of the
-      // stolen memory.
-      other.m_data = other.buffer();
-   }
-   else
-   {
-      // Elements must fit into the buffer.
-      assert(fitsIntoBuffer(srcSize));
-      std::uninitialized_move_n(other.m_data, srcSize, m_data);
-      m_capacity = BufferCapacity;
-   }
-
-   m_size = srcSize;
-   // Reset other size to prevent destruction of the stolen or moved objects.
-   other.m_size = 0;
+   moveFrom(std::move(other));
 
    return *this;
 }
@@ -1288,6 +1241,37 @@ void SboVector<T, N>::assignFrom(FwdIter first, std::size_t n)
 
    std::uninitialized_copy_n(first, n, m_data);
    m_size = n;
+}
+
+
+template <typename T, std::size_t N>
+void SboVector<T, N>::moveFrom(SboVector&& other)
+{
+   // Cases:
+   // - Steal heap allocation.
+   // - Use buffer.
+
+   const auto srcSize = other.size();
+   const bool canSteal = other.onHeap();
+
+   if (canSteal)
+   {
+      m_data = other.m_data;
+      m_capacity = other.m_capacity;
+      // Reset other's data to prevent deallocation of the stolen memory below.
+      other.m_data = other.buffer();
+   }
+   else
+   {
+      // Elements must fit into the buffer.
+      assert(fitsIntoBuffer(srcSize));
+      std::uninitialized_move_n(other.m_data, srcSize, m_data);
+      m_capacity = BufferCapacity;
+   }
+
+   m_size = srcSize;
+   // Reset other size to prevent destruction of the stolen or moved objects.
+   other.m_size = 0;
 }
 
 
