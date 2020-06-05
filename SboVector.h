@@ -158,6 +158,7 @@ template <typename T, std::size_t N> class SboVector
 
    void constructFrom(std::size_t n, const T& value);
    template <typename InputIter> void constructFrom(InputIter first, std::size_t n);
+   template <typename FwdIter> void assignFrom(FwdIter first, std::size_t n);
 
    static constexpr bool fitsIntoBuffer(std::size_t size);
    void allocateIfNeeded(std::size_t size);
@@ -357,44 +358,7 @@ template <typename T, std::size_t N> SboVector<T, N>::~SboVector()
 template <typename T, std::size_t N>
 SboVector<T, N>& SboVector<T, N>::operator=(const SboVector& other)
 {
-   // Available strategies are to use the buffer, to reuse an existing heap
-   // allocation, or make a new heap allocation.
-
-   const auto srcSize = other.size();
-   const bool fitsBuffer = fitsIntoBuffer(srcSize);
-   const bool canReuseHeap = onHeap() && m_capacity >= srcSize;
-   const bool allocHeap = !fitsBuffer && !canReuseHeap;
-
-   // Perform allocation up front to prevent inconsistencies if allocation
-   // fails.
-   T* newData = nullptr;
-   if (allocHeap)
-      newData = allocateMem(srcSize);
-
-   // Clean up existing data.
-   std::destroy_n(m_data, size());
-   if (fitsBuffer || allocHeap)
-      deallocate();
-
-   // Set up new data.
-   if (fitsBuffer)
-   {
-      m_capacity = BufferCapacity;
-   }
-   else if (canReuseHeap)
-   {
-      // Capacity stays the same.
-   }
-   else
-   {
-      assert(allocHeap && newData);
-      m_data = newData;
-      m_capacity = srcSize;
-   }
-
-   std::uninitialized_copy_n(other.m_data, srcSize, m_data);
-   m_size = srcSize;
-
+   assignFrom(other.begin(), other.size());
    return *this;
 }
 
@@ -441,44 +405,7 @@ SboVector<T, N>& SboVector<T, N>::operator=(SboVector&& other)
 template <typename T, std::size_t N>
 SboVector<T, N>& SboVector<T, N>::operator=(std::initializer_list<T> ilist)
 {
-   // Available strategies are to use the buffer, to reuse an existing heap
-   // allocation, or make a new heap allocation.
-
-   const auto srcSize = ilist.size();
-   const bool fitsBuffer = fitsIntoBuffer(srcSize);
-   const bool canReuseHeap = onHeap() && m_capacity >= srcSize;
-   const bool allocHeap = !fitsBuffer && !canReuseHeap;
-
-   // Perform allocation up front to prevent inconsistencies if allocation
-   // fails.
-   T* newData = nullptr;
-   if (allocHeap)
-      newData = allocateMem(srcSize);
-
-   // Clean up existing data.
-   std::destroy_n(m_data, size());
-   if (fitsBuffer || allocHeap)
-      deallocate();
-
-   // Set up new data.
-   if (fitsBuffer)
-   {
-      m_capacity = BufferCapacity;
-   }
-   else if (canReuseHeap)
-   {
-      // Capacity stays the same.
-   }
-   else
-   {
-      assert(allocHeap && newData);
-      m_data = newData;
-      m_capacity = srcSize;
-   }
-
-   std::uninitialized_copy_n(ilist.begin(), srcSize, m_data);
-   m_size = srcSize;
-
+   assignFrom(ilist.begin(), ilist.size());
    return *this;
 }
 
@@ -533,86 +460,14 @@ void SboVector<T, N>::assign(FwdIter first, FwdIter last)
    // permit only a single pass over the elements. The accepted iterator type here is
    // more relaxed, it is a forward iterator that allows multiple passes.
 
-   // Available strategies are to use the buffer, to reuse an existing heap
-   // allocation, or make a new heap allocation.
-
-   const std::size_t count = std::distance(first, last);
-   const bool fitsBuffer = fitsIntoBuffer(count);
-   const bool canReuseHeap = onHeap() && m_capacity >= count;
-   const bool allocHeap = !fitsBuffer && !canReuseHeap;
-
-   // Perform allocation up front to prevent inconsistencies if allocation
-   // fails.
-   T* newData = nullptr;
-   if (allocHeap)
-      newData = allocateMem(count);
-
-   // Clean up existing data.
-   std::destroy_n(m_data, size());
-   if (fitsBuffer || allocHeap)
-      deallocate();
-
-   // Set up new data.
-   if (fitsBuffer)
-   {
-      m_capacity = BufferCapacity;
-   }
-   else if (canReuseHeap)
-   {
-      // Capacity stays the same.
-   }
-   else
-   {
-      assert(allocHeap && newData);
-      m_data = newData;
-      m_capacity = count;
-   }
-
-   std::uninitialized_copy_n(first, count, m_data);
-   m_size = count;
+   assignFrom(first, std::distance(first, last));
 }
 
 
 template <typename T, std::size_t N>
 void SboVector<T, N>::assign(std::initializer_list<T> ilist)
 {
-   // Available strategies are to use the buffer, to reuse an existing heap
-   // allocation, or make a new heap allocation.
-
-   const std::size_t count = ilist.size();
-   const bool fitsBuffer = fitsIntoBuffer(count);
-   const bool canReuseHeap = onHeap() && m_capacity >= count;
-   const bool allocHeap = !fitsBuffer && !canReuseHeap;
-
-   // Perform allocation up front to prevent inconsistencies if allocation
-   // fails.
-   T* newData = nullptr;
-   if (allocHeap)
-      newData = allocateMem(count);
-
-   // Clean up existing data.
-   std::destroy_n(m_data, size());
-   if (fitsBuffer || allocHeap)
-      deallocate();
-
-   // Set up new data.
-   if (fitsBuffer)
-   {
-      m_capacity = BufferCapacity;
-   }
-   else if (canReuseHeap)
-   {
-      // Capacity stays the same.
-   }
-   else
-   {
-      assert(allocHeap && newData);
-      m_data = newData;
-      m_capacity = count;
-   }
-
-   std::uninitialized_copy_n(ilist.begin(), count, m_data);
-   m_size = count;
+   assignFrom(ilist.begin(), ilist.size());
 }
 
 
@@ -1386,6 +1241,51 @@ template <typename InputIter>
 void SboVector<T, N>::constructFrom(InputIter first, std::size_t n)
 {
    allocateIfNeeded(n);
+   std::uninitialized_copy_n(first, n, m_data);
+   m_size = n;
+}
+
+
+template <typename T, std::size_t N>
+template <typename FwdIter>
+void SboVector<T, N>::assignFrom(FwdIter first, std::size_t n)
+{
+   // Cases:
+   // - Use the buffer.
+   // - Reuse an existing heap allocation.
+   // - Make a new heap allocation.
+
+   const bool fitsBuffer = fitsIntoBuffer(n);
+   const bool canReuseHeap = onHeap() && m_capacity >= n;
+   const bool allocHeap = !fitsBuffer && !canReuseHeap;
+
+   // Perform allocation up front to prevent inconsistencies if allocation
+   // fails.
+   T* newData = nullptr;
+   if (allocHeap)
+      newData = allocateMem(n);
+
+   // Clean up existing data.
+   std::destroy_n(m_data, size());
+   if (fitsBuffer || allocHeap)
+      deallocate();
+
+   // Set up new data.
+   if (fitsBuffer)
+   {
+      m_capacity = BufferCapacity;
+   }
+   else if (canReuseHeap)
+   {
+      // Capacity stays the same.
+   }
+   else
+   {
+      assert(allocHeap && newData);
+      m_data = newData;
+      m_capacity = n;
+   }
+
    std::uninitialized_copy_n(first, n, m_data);
    m_size = n;
 }
