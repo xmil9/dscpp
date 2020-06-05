@@ -157,9 +157,6 @@ template <typename T, std::size_t N> class SboVector
 
    void constructFrom(std::size_t n, const T& value);
    template <typename Iter> void constructFrom(Iter first, std::size_t n);
-   template <typename U, typename ElemIter>
-   void copy_from(const U& other, ElemIter first);
-   void move_from(SboVector&& other);
 
    static constexpr bool fitsIntoBuffer(std::size_t size);
    void allocateIfNeeded(std::size_t size);
@@ -170,7 +167,6 @@ template <typename T, std::size_t N> class SboVector
    void reallocateLess(std::size_t newCap);
    std::size_t recalcCapacity(std::size_t minCap) const;
 
-   static T* allocate_or_reuse_mem(std::size_t cap, std::size_t availCap);
    static T* allocateMem(std::size_t cap);
    static void deallocateMem(T* mem, std::size_t cap);
 
@@ -1395,60 +1391,6 @@ void SboVector<T, N>::constructFrom(Iter first, std::size_t n)
 
 
 template <typename T, std::size_t N>
-template <typename U, typename ElemIter>
-void SboVector<T, N>::copy_from(const U& other, ElemIter first)
-{
-   // Perform allocation up front.
-   T* newData = allocate_or_reuse_mem(other.size(), m_capacity);
-   const bool dealloc = newData != nullptr;
-
-   // Clean up old data.
-   std::destroy_n(m_data, size());
-   if (onHeap() && dealloc)
-      deallocate();
-
-   // Set up new data.
-   const bool fitsIntoBuffer = other.size() <= BufferCapacity;
-   if (fitsIntoBuffer)
-   {
-      m_data = buffer();
-      m_capacity = BufferCapacity;
-   }
-   else
-   {
-      if (newData)
-      {
-         m_data = newData;
-         m_capacity = other.size();
-      }
-   }
-   std::uninitialized_copy_n(first, other.size(), m_data);
-   m_size = other.size();
-}
-
-
-template <typename T, std::size_t N> void SboVector<T, N>::move_from(SboVector&& other)
-{
-   if (other.onHeap())
-   {
-      // Steal heap memory.
-      m_data = other.m_data;
-   }
-   else
-   {
-      std::uninitialized_move_n(other.buffer(), other.size(), buffer());
-   }
-   m_capacity = other.m_capacity;
-   m_size = other.m_size;
-
-   // Clear other.
-   other.m_data = other.buffer();
-   other.m_capacity = BufferCapacity;
-   other.m_size = 0;
-}
-
-
-template <typename T, std::size_t N>
 constexpr bool SboVector<T, N>::fitsIntoBuffer(std::size_t size)
 {
    return size <= BufferCapacity;
@@ -1555,20 +1497,6 @@ std::size_t SboVector<T, N>::recalcCapacity(std::size_t minCap) const
    if (m_capacity > maxCap / 2)
       return maxCap;
    return std::max(2 * m_capacity, minCap);
-}
-
-
-template <typename T, std::size_t N>
-T* SboVector<T, N>::allocate_or_reuse_mem(std::size_t cap, std::size_t availCap)
-{
-   if (fitsIntoBuffer(cap))
-      return nullptr;
-
-   const bool fitsIntoExistingMem = cap <= availCap;
-   if (fitsIntoExistingMem)
-      return nullptr;
-
-   return allocateMem(cap);
 }
 
 
