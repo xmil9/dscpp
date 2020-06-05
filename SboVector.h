@@ -245,6 +245,24 @@ template <typename T, typename... Args> constexpr T* construct_at(T* p, Args&&..
 
 ///////////////////
 
+// Depending on the element type moves or copies a of elements.
+// Does not make accomodations for overlapping ranges.
+template <typename Iter> void relocate_n(Iter first, std::size_t n, Iter dest)
+{
+   using value_type = typename std::iterator_traits<Iter>::value_type;
+
+   if constexpr (std::is_move_constructible_v<value_type>)
+   {
+      std::uninitialized_move_n(first, n, dest);
+   }
+   else
+   {
+      std::uninitialized_copy_n(first, n, dest);
+      std::destroy_n(first, n);
+   }
+}
+
+
 // Depending on the element type moves or copies a possibly overlapping range of elements
 // to the left (from higher to lower memory addresses).
 template <typename Iter> void relocateLeftOverlapped(Iter first, Iter last, Iter dest)
@@ -934,17 +952,7 @@ typename SboVector<T, N>::iterator SboVector<T, N>::insert(const_iterator pos,
    {
       // Relocating the front only happens for reallocations, so we don't need to
       // worry about overlaps.
-      T* frontSrc = data();
-      T* frontDest = dest;
-      if constexpr (std::is_move_constructible_v<T>)
-      {
-         std::uninitialized_move_n(frontSrc, frontSize, frontDest);
-      }
-      else
-      {
-         std::uninitialized_copy_n(frontSrc, frontSize, frontDest);
-         std::destroy_n(frontSrc, frontSize);
-      }
+      internals::relocate_n(data(), frontSize, dest);
    }
 
    m_size = newSize;
@@ -999,17 +1007,7 @@ typename SboVector<T, N>::iterator SboVector<T, N>::insert(const_iterator pos, T
    {
       // Relocating the front only happens for reallocations, so we don't need to
       // worry about overlaps.
-      T* frontSrc = data();
-      T* frontDest = dest;
-      if constexpr (std::is_move_constructible_v<T>)
-      {
-         std::uninitialized_move_n(frontSrc, frontSize, frontDest);
-      }
-      else
-      {
-         std::uninitialized_copy_n(frontSrc, frontSize, frontDest);
-         std::destroy_n(frontSrc, frontSize);
-      }
+      internals::relocate_n(data(), frontSize, dest);
    }
 
    m_size = newSize;
@@ -1068,17 +1066,7 @@ SboVector<T, N>::insert(const_iterator pos, size_type count, const T& value)
    {
       // Relocating the front only happens for reallocations, so we don't need to
       // worry about overlaps.
-      T* frontSrc = data();
-      T* frontDest = dest;
-      if constexpr (std::is_move_constructible_v<T>)
-      {
-         std::uninitialized_move_n(frontSrc, frontSize, frontDest);
-      }
-      else
-      {
-         std::uninitialized_copy_n(frontSrc, frontSize, frontDest);
-         std::destroy_n(frontSrc, frontSize);
-      }
+      internals::relocate_n(data(), frontSize, dest);
    }
 
    m_size = newSize;
@@ -1138,17 +1126,7 @@ typename SboVector<T, N>::iterator SboVector<T, N>::insert(const_iterator pos,
    {
       // Relocating the front only happens for reallocations, so we don't need to
       // worry about overlaps.
-      T* frontSrc = data();
-      T* frontDest = dest;
-      if constexpr (std::is_move_constructible_v<T>)
-      {
-         std::uninitialized_move_n(frontSrc, frontSize, frontDest);
-      }
-      else
-      {
-         std::uninitialized_copy_n(frontSrc, frontSize, frontDest);
-         std::destroy_n(frontSrc, frontSize);
-      }
+      internals::relocate_n(data(), frontSize, dest);
    }
 
    m_size = newSize;
@@ -1207,17 +1185,7 @@ typename SboVector<T, N>::iterator SboVector<T, N>::insert(const_iterator pos,
    {
       // Relocating the front only happens for reallocations, so we don't need to
       // worry about overlaps.
-      T* frontSrc = data();
-      T* frontDest = dest;
-      if constexpr (std::is_move_constructible_v<T>)
-      {
-         std::uninitialized_move_n(frontSrc, frontSize, frontDest);
-      }
-      else
-      {
-         std::uninitialized_copy_n(frontSrc, frontSize, frontDest);
-         std::destroy_n(frontSrc, frontSize);
-      }
+      internals::relocate_n(data(), frontSize, dest);
    }
 
    m_size = newSize;
@@ -1294,17 +1262,7 @@ typename SboVector<T, N>::iterator SboVector<T, N>::emplace(const_iterator pos,
    {
       // Relocating the front only happens for reallocations, so we don't need to
       // worry about overlaps.
-      T* frontSrc = data();
-      T* frontDest = dest;
-      if constexpr (std::is_move_constructible_v<T>)
-      {
-         std::uninitialized_move_n(frontSrc, frontSize, frontDest);
-      }
-      else
-      {
-         std::uninitialized_copy_n(frontSrc, frontSize, frontDest);
-         std::destroy_n(frontSrc, frontSize);
-      }
+      internals::relocate_n(data(), frontSize, dest);
    }
 
    m_size = newSize;
@@ -1421,16 +1379,7 @@ template <typename T, std::size_t N> void SboVector<T, N>::swap(SboVector& other
       T* src = larger.data() + commonSize;
       T* dest = smaller.data() + commonSize;
       const std::size_t numRelocate = larger.size() - commonSize;
-      if constexpr (std::is_move_constructible_v<T>)
-      {
-         std::uninitialized_move_n(src, numRelocate, dest);
-      }
-      else
-      {
-         std::uninitialized_copy_n(src, numRelocate, dest);
-         std::destroy_n(src, numRelocate);
-      }
-
+      internals::relocate_n(src, numRelocate, dest);
       m_data = buffer();
       other.m_data = other.buffer();
    }
@@ -1439,16 +1388,7 @@ template <typename T, std::size_t N> void SboVector<T, N>::swap(SboVector& other
       SboVector& heap = onHeap() ? *this : other;
       SboVector& buffer = onHeap() ? other : *this;
 
-      if constexpr (std::is_move_constructible_v<T>)
-      {
-         std::uninitialized_move_n(buffer.buffer(), buffer.size(), heap.buffer());
-      }
-      else
-      {
-         std::uninitialized_copy_n(buffer.buffer(), buffer.size(), heap.buffer());
-         std::destroy_n(buffer.buffer(), buffer.size());
-      }
-
+      internals::relocate_n(buffer.buffer(), buffer.size(), heap.buffer());
       buffer.m_data = heap.m_data;
       heap.m_data = heap.buffer();
    }
@@ -1602,16 +1542,7 @@ void SboVector<T, N>::reallocateMore(std::size_t newCap)
       return;
 
    T* newData = allocateMem(newCap);
-
-   if constexpr (std::is_move_constructible_v<T>)
-   {
-      std::uninitialized_move_n(data(), size(), newData);
-   }
-   else
-   {
-      std::uninitialized_copy_n(data(), size(), newData);
-      std::destroy_n(m_data, size());
-   }
+   internals::relocate_n(data(), size(), newData);
 
    // Will only dealloc if current data is on heap.
    deallocate();
@@ -1642,15 +1573,7 @@ void SboVector<T, N>::reallocateLess(std::size_t newCap)
    const bool allocHeap = newCap > BufferCapacity;
    T* newData = allocHeap ? allocateMem(newCap) : buffer();
 
-   if constexpr (std::is_move_constructible_v<T>)
-   {
-      std::uninitialized_move_n(data(), size(), newData);
-   }
-   else
-   {
-      std::uninitialized_copy_n(data(), size(), newData);
-      std::destroy_n(m_data, size());
-   }
+   internals::relocate_n(data(), size(), newData);
 
    // Will only dealloc if current data is on heap.
    deallocate();
