@@ -37,7 +37,7 @@ template <typename T, std::size_t N> class SboVectorConstIterator;
 //
 // The accepted iterator type for operations that use iterators into other containers
 // is a Forward iterator. std::vector accepts Input iterators that permit only a single
-// pass over the elements. The accepted iterator type for SboVectors is more relaxed
+// pass over the elements. The accepted iterator type for SboVectors is more strict
 // to allow multiple passes.
 //
 // When transfering elements from one SboVector to another there are multiple possible
