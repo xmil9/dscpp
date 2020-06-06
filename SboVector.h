@@ -158,7 +158,9 @@ template <typename T, std::size_t N> class SboVector
 
    void constructFrom(std::size_t n, const T& value);
    template <typename InputIter> void constructFrom(InputIter first, std::size_t n);
+   void assignFrom(std::size_t n, const T& value);
    template <typename FwdIter> void assignFrom(FwdIter first, std::size_t n);
+   void prepareAssignment(std::size_t n);
    void moveFrom(SboVector&& other);
 
    static constexpr bool fitsIntoBuffer(std::size_t size);
@@ -366,42 +368,7 @@ SboVector<T, N>& SboVector<T, N>::operator=(std::initializer_list<T> ilist)
 template <typename T, std::size_t N>
 void SboVector<T, N>::assign(size_type count, const T& value)
 {
-   // Available strategies are to use the buffer, to reuse an existing heap
-   // allocation, or make a new heap allocation.
-
-   const bool fitsBuffer = fitsIntoBuffer(count);
-   const bool canReuseHeap = onHeap() && m_capacity >= count;
-   const bool allocHeap = !fitsBuffer && !canReuseHeap;
-
-   // Perform allocation up front to prevent inconsistencies if allocation
-   // fails.
-   T* newData = nullptr;
-   if (allocHeap)
-      newData = allocateMem(count);
-
-   // Clean up existing data.
-   std::destroy_n(m_data, size());
-   if (fitsBuffer || allocHeap)
-      deallocate();
-
-   // Set up new data.
-   if (fitsBuffer)
-   {
-      m_capacity = BufferCapacity;
-   }
-   else if (canReuseHeap)
-   {
-      // Capacity stays the same.
-   }
-   else
-   {
-      assert(allocHeap && newData);
-      m_data = newData;
-      m_capacity = count;
-   }
-
-   std::uninitialized_fill_n(m_data, count, value);
-   m_size = count;
+   assignFrom(count, value);
 }
 
 
@@ -1200,8 +1167,24 @@ void SboVector<T, N>::constructFrom(InputIter first, std::size_t n)
 
 
 template <typename T, std::size_t N>
+void SboVector<T, N>::assignFrom(std::size_t n, const T& value)
+{
+   prepareAssignment(n);
+   std::uninitialized_fill_n(m_data, n, value);
+}
+
+
+template <typename T, std::size_t N>
 template <typename FwdIter>
 void SboVector<T, N>::assignFrom(FwdIter first, std::size_t n)
+{
+   prepareAssignment(n);
+   std::uninitialized_copy_n(first, n, m_data);
+}
+
+
+template <typename T, std::size_t N>
+void SboVector<T, N>::prepareAssignment(std::size_t n)
 {
    // Cases:
    // - Use the buffer.
@@ -1239,7 +1222,6 @@ void SboVector<T, N>::assignFrom(FwdIter first, std::size_t n)
       m_capacity = n;
    }
 
-   std::uninitialized_copy_n(first, n, m_data);
    m_size = n;
 }
 
