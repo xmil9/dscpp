@@ -156,6 +156,7 @@ template <typename T, std::size_t N> class SboVector
    constexpr T* buffer();
    constexpr const T* buffer() const;
 
+   // Workflows - combinations of memory and data operations.
    void constructFrom(std::size_t n, const T& value);
    template <typename InputIter> void constructFrom(InputIter first, std::size_t n);
    void prepareMemoryForConstructing(std::size_t n);
@@ -163,10 +164,14 @@ template <typename T, std::size_t N> class SboVector
    template <typename FwdIter> void assignFrom(FwdIter first, std::size_t n);
    void prepareMemoryForAssignment(std::size_t n);
    void moveFrom(SboVector&& other);
+   void clean();
 
+   // Data operations.
    void populateWith(std::size_t n, const T& value);
    template <typename InputIter> void populateWith(InputIter first, std::size_t n);
+   void destroy();
 
+   // Memory operations.
    static constexpr bool fitsIntoBuffer(std::size_t size);
    void allocate(std::size_t cap);
    void deallocate();
@@ -333,8 +338,7 @@ template <typename T, std::size_t N> SboVector<T, N>::SboVector(SboVector&& othe
 
 template <typename T, std::size_t N> SboVector<T, N>::~SboVector()
 {
-   std::destroy_n(m_data, size());
-   deallocate();
+   clean();
 }
 
 
@@ -349,13 +353,8 @@ SboVector<T, N>& SboVector<T, N>::operator=(const SboVector& other)
 template <typename T, std::size_t N>
 SboVector<T, N>& SboVector<T, N>::operator=(SboVector&& other)
 {
-   // Clean up existing data.
-   std::destroy_n(m_data, size());
-   deallocate();
-
-   // Set up new data.
+   clean();
    moveFrom(std::move(other));
-
    return *this;
 }
 
@@ -590,7 +589,7 @@ template <typename T, std::size_t N> void SboVector<T, N>::shrink_to_fit()
 
 template <typename T, std::size_t N> void SboVector<T, N>::clear() noexcept
 {
-   std::destroy_n(m_data, size());
+   destroy();
    m_size = 0;
 }
 
@@ -1218,7 +1217,7 @@ void SboVector<T, N>::prepareMemoryForAssignment(std::size_t n)
       newData = allocateMem(n);
 
    // Clean up existing data.
-   std::destroy_n(m_data, size());
+   destroy();
    if (fitsBuffer || allocHeap)
       deallocate();
 
@@ -1271,6 +1270,14 @@ template <typename T, std::size_t N> void SboVector<T, N>::moveFrom(SboVector&& 
 
 
 template <typename T, std::size_t N>
+void SboVector<T, N>::clean()
+{
+   destroy();
+   deallocate();
+}
+
+
+template <typename T, std::size_t N>
 void SboVector<T, N>::populateWith(std::size_t n, const T& value)
 {
    std::uninitialized_fill_n(m_data, n, value);
@@ -1284,6 +1291,13 @@ void SboVector<T, N>::populateWith(InputIter first, std::size_t n)
 {
    std::uninitialized_copy_n(first, n, m_data);
    m_size = n;
+}
+
+
+template <typename T, std::size_t N>
+void SboVector<T, N>::destroy()
+{
+   std::destroy_n(m_data, size());
 }
 
 
