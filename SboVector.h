@@ -158,13 +158,16 @@ template <typename T, std::size_t N> class SboVector
 
    void constructFrom(std::size_t n, const T& value);
    template <typename InputIter> void constructFrom(InputIter first, std::size_t n);
+   void prepareMemoryForConstructing(std::size_t n);
    void assignFrom(std::size_t n, const T& value);
    template <typename FwdIter> void assignFrom(FwdIter first, std::size_t n);
-   void prepareDataForAssignment(std::size_t n);
+   void prepareMemoryForAssignment(std::size_t n);
    void moveFrom(SboVector&& other);
 
+   void populateWith(std::size_t n, const T& value);
+   template <typename InputIter> void populateWith(InputIter first, std::size_t n);
+
    static constexpr bool fitsIntoBuffer(std::size_t size);
-   void allocateIfNeeded(std::size_t size);
    void allocate(std::size_t cap);
    void deallocate();
    void reallocate(std::size_t newCap);
@@ -1150,9 +1153,8 @@ template <typename T, std::size_t N> constexpr const T* SboVector<T, N>::buffer(
 template <typename T, std::size_t N>
 void SboVector<T, N>::constructFrom(std::size_t n, const T& value)
 {
-   allocateIfNeeded(n);
-   std::uninitialized_fill_n(m_data, n, value);
-   m_size = n;
+   prepareMemoryForConstructing(n);
+   populateWith(n, value);
 }
 
 
@@ -1160,18 +1162,27 @@ template <typename T, std::size_t N>
 template <typename InputIter>
 void SboVector<T, N>::constructFrom(InputIter first, std::size_t n)
 {
-   allocateIfNeeded(n);
-   std::uninitialized_copy_n(first, n, m_data);
-   m_size = n;
+   prepareMemoryForConstructing(n);
+   populateWith(first, n);
+}
+
+
+template <typename T, std::size_t N>
+void SboVector<T, N>::prepareMemoryForConstructing(std::size_t n)
+{
+   if (!fitsIntoBuffer(n))
+   {
+      allocate(n);
+      m_capacity = n;
+   }
 }
 
 
 template <typename T, std::size_t N>
 void SboVector<T, N>::assignFrom(std::size_t n, const T& value)
 {
-   prepareDataForAssignment(n);
-   std::uninitialized_fill_n(m_data, n, value);
-   m_size = n;
+   prepareMemoryForAssignment(n);
+   populateWith(n, value);
 }
 
 
@@ -1179,14 +1190,13 @@ template <typename T, std::size_t N>
 template <typename FwdIter>
 void SboVector<T, N>::assignFrom(FwdIter first, std::size_t n)
 {
-   prepareDataForAssignment(n);
-   std::uninitialized_copy_n(first, n, m_data);
-   m_size = n;
+   prepareMemoryForAssignment(n);
+   populateWith(first, n);
 }
 
 
 template <typename T, std::size_t N>
-void SboVector<T, N>::prepareDataForAssignment(std::size_t n)
+void SboVector<T, N>::prepareMemoryForAssignment(std::size_t n)
 {
    // Cases:
    // - Use the buffer.
@@ -1226,8 +1236,7 @@ void SboVector<T, N>::prepareDataForAssignment(std::size_t n)
 }
 
 
-template <typename T, std::size_t N>
-void SboVector<T, N>::moveFrom(SboVector&& other)
+template <typename T, std::size_t N> void SboVector<T, N>::moveFrom(SboVector&& other)
 {
    // Cases:
    // - Steal heap allocation.
@@ -1258,20 +1267,26 @@ void SboVector<T, N>::moveFrom(SboVector&& other)
 
 
 template <typename T, std::size_t N>
-constexpr bool SboVector<T, N>::fitsIntoBuffer(std::size_t size)
+void SboVector<T, N>::populateWith(std::size_t n, const T& value)
 {
-   return size <= BufferCapacity;
+   std::uninitialized_fill_n(m_data, n, value);
+   m_size = n;
 }
 
 
 template <typename T, std::size_t N>
-void SboVector<T, N>::allocateIfNeeded(std::size_t size)
+template <typename InputIter>
+void SboVector<T, N>::populateWith(InputIter first, std::size_t n)
 {
-   if (!fitsIntoBuffer(size))
-   {
-      allocate(size);
-      m_capacity = size;
-   }
+   std::uninitialized_copy_n(first, n, m_data);
+   m_size = n;
+}
+
+
+template <typename T, std::size_t N>
+constexpr bool SboVector<T, N>::fitsIntoBuffer(std::size_t size)
+{
+   return size <= BufferCapacity;
 }
 
 
