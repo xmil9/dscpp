@@ -35,6 +35,11 @@ template <typename T, std::size_t N> class SboVectorConstIterator;
 // to T) being valid. This allows class types with accessible dtors and scalar types.
 // It excludes array types, function types, reference types, and void.
 //
+// The accepted iterator type for operations that use iterators into other containers
+// is a Forward iterator. std::vector accepts Input iterators that permit only a single
+// pass over the elements. The accepted iterator type for SboVectors is more relaxed
+// to allow multiple passes.
+//
 // When transfering elements from one SboVector to another there are multiple possible
 // strategies for where to place the elements and how to transfer their data:
 // 1. Steal the heap memory of the source SboVector if the source is not used anymore.
@@ -84,9 +89,9 @@ template <typename T, std::size_t N> class SboVector
  public:
    SboVector() = default;
    explicit SboVector(std::size_t count, const T& value);
-   template <typename InputIter,
-             typename = std::enable_if_t<IsIterator_v<InputIter>, void>>
-   SboVector(InputIter first, InputIter last);
+   template <typename FwdIter,
+             typename = std::enable_if_t<IsIterator_v<FwdIter>, void>>
+   SboVector(FwdIter first, FwdIter last);
    SboVector(std::initializer_list<T> ilist);
    SboVector(const SboVector& other);
    SboVector(SboVector&& other);
@@ -137,8 +142,8 @@ template <typename T, std::size_t N> class SboVector
    iterator insert(const_iterator pos, const T& value);
    iterator insert(const_iterator pos, T&& value);
    iterator insert(const_iterator pos, size_type count, const T& value);
-   template <typename InputIter>
-   iterator insert(const_iterator pos, InputIter first, InputIter last);
+   template <typename FwdIter>
+   iterator insert(const_iterator pos, FwdIter first, FwdIter last);
    iterator insert(const_iterator pos, std::initializer_list<T> ilist);
    void push_back(const T& value);
    void push_back(T&& value);
@@ -158,7 +163,7 @@ template <typename T, std::size_t N> class SboVector
 
    // Workflows - combinations of memory and data operations.
    void constructFrom(std::size_t n, const T& value);
-   template <typename InputIter> void constructFrom(InputIter first, std::size_t n);
+   template <typename FwdIter> void constructFrom(FwdIter first, std::size_t n);
    void prepareMemoryForConstructing(std::size_t n);
    void assignFrom(std::size_t n, const T& value);
    template <typename FwdIter> void assignFrom(FwdIter first, std::size_t n);
@@ -168,7 +173,7 @@ template <typename T, std::size_t N> class SboVector
 
    // Data operations.
    void populateWith(std::size_t n, const T& value);
-   template <typename InputIter> void populateWith(InputIter first, std::size_t n);
+   template <typename FwdIter> void populateWith(FwdIter first, std::size_t n);
    void destroy();
 
    // Memory operations.
@@ -310,8 +315,8 @@ SboVector<T, N>::SboVector(std::size_t count, const T& value)
 
 
 template <typename T, std::size_t N>
-template <typename InputIter, typename>
-SboVector<T, N>::SboVector(InputIter first, InputIter last)
+template <typename FwdIter, typename>
+SboVector<T, N>::SboVector(FwdIter first, FwdIter last)
 {
    constructFrom(first, std::distance(first, last));
 }
@@ -378,10 +383,6 @@ template <typename T, std::size_t N>
 template <typename FwdIter>
 void SboVector<T, N>::assign(FwdIter first, FwdIter last)
 {
-   // The accepted iterator type for std::vector is an input iterator. Input iterators
-   // permit only a single pass over the elements. The accepted iterator type here is
-   // more relaxed, it is a forward iterator that allows multiple passes.
-
    assignFrom(first, std::distance(first, last));
 }
 
@@ -761,9 +762,9 @@ SboVector<T, N>::insert(const_iterator pos, size_type count, const T& value)
 
 
 template <typename T, std::size_t N>
-template <typename InputIter>
+template <typename FwdIter>
 typename SboVector<T, N>::iterator
-SboVector<T, N>::insert(const_iterator pos, InputIter first, InputIter last)
+SboVector<T, N>::insert(const_iterator pos, FwdIter first, FwdIter last)
 {
    // Cases:
    // - In buffer and enough capacity to stay in buffer.
@@ -1059,8 +1060,8 @@ void SboVector<T, N>::constructFrom(std::size_t n, const T& value)
 
 
 template <typename T, std::size_t N>
-template <typename InputIter>
-void SboVector<T, N>::constructFrom(InputIter first, std::size_t n)
+template <typename FwdIter>
+void SboVector<T, N>::constructFrom(FwdIter first, std::size_t n)
 {
    prepareMemoryForConstructing(n);
    populateWith(first, n);
@@ -1187,8 +1188,8 @@ void SboVector<T, N>::populateWith(std::size_t n, const T& value)
 
 
 template <typename T, std::size_t N>
-template <typename InputIter>
-void SboVector<T, N>::populateWith(InputIter first, std::size_t n)
+template <typename FwdIter>
+void SboVector<T, N>::populateWith(FwdIter first, std::size_t n)
 {
    std::uninitialized_copy_n(first, n, m_data);
    m_size = n;

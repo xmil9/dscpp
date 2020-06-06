@@ -195,74 +195,78 @@ void swap(NotMoveableElement& a, NotMoveableElement& b)
 
 ///////////////////
 
-std::vector<int> InputSource = {1000, 1001, 1002, 1003, 1004,
-                                1005, 1006, 1007, 1008, 1009};
+std::vector<int> FwdIterSource = {1000, 1001, 1002, 1003, 1004,
+                                  1005, 1006, 1007, 1008, 1009};
 
-// Input iterator to simulated input source for test cases that require input iterators.
-class InputIter
+// Forward iterator to simulated input source for test cases that require forward
+// iterators.
+class ForwardIter
 {
  public:
-   using iterator_category = std::input_iterator_tag;
+   using iterator_category = std::forward_iterator_tag;
    using value_type = std::vector<int>::value_type;
    using difference_type = std::vector<int>::difference_type;
    using pointer = std::vector<int>::pointer;
    using reference = std::vector<int>::reference;
-   using iterator_category = std::input_iterator_tag;
+   using iterator_category = std::forward_iterator_tag;
 
  public:
-   InputIter() = default;
-   InputIter(std::size_t pos) : m_pos{pos} {}
-   InputIter(const InputIter&) = default;
-   InputIter& operator=(const InputIter&) = default;
+   ForwardIter() = default;
+   ForwardIter(std::size_t pos) : m_pos{pos} {}
+   ForwardIter(const ForwardIter&) = default;
+   ForwardIter& operator=(const ForwardIter&) = default;
 
-   value_type& operator*() { return InputSource[m_pos]; }
+   value_type& operator*() { return FwdIterSource[m_pos]; }
 
-   const value_type& operator*() const { return InputSource[m_pos]; }
+   const value_type& operator*() const { return FwdIterSource[m_pos]; }
 
-   value_type* operator->() { return &InputSource[m_pos]; }
+   value_type* operator->() { return &FwdIterSource[m_pos]; }
 
-   const value_type* operator->() const { return &InputSource[m_pos]; }
+   const value_type* operator->() const { return &FwdIterSource[m_pos]; }
 
-   InputIter& operator++()
+   ForwardIter& operator++()
    {
       ++m_pos;
       return *this;
    }
 
-   InputIter operator++(int)
+   ForwardIter operator++(int)
    {
       auto before = *this;
       ++(*this);
       return before;
    }
 
-   friend bool operator==(const InputIter& a, const InputIter& b)
+   friend bool operator==(const ForwardIter& a, const ForwardIter& b)
    {
       return a.m_pos == b.m_pos;
    }
 
-   friend bool operator!=(const InputIter& a, const InputIter& b) { return !(a == b); }
+   friend bool operator!=(const ForwardIter& a, const ForwardIter& b)
+   {
+      return !(a == b);
+   }
 
  private:
    std::size_t m_pos = 0;
 };
 
 
-InputIter inputBegin()
+ForwardIter inputBegin()
 {
-   return InputIter();
+   return ForwardIter();
 }
 
 
-InputIter inputEnd()
+ForwardIter inputEnd()
 {
-   return InputIter(InputSource.size());
+   return ForwardIter(FwdIterSource.size());
 }
 
 
-InputIter makeInputIter(std::size_t pos)
+ForwardIter makeForwardIter(std::size_t pos)
 {
-   return InputIter(pos);
+   return ForwardIter(pos);
 }
 
 
@@ -539,15 +543,15 @@ void TestIteratorCtor()
       });
    }
    {
-      const std::string caseLabel{"SboVector iterator ctor for input iterators"};
+      const std::string caseLabel{"SboVector iterator ctor for forward iterators"};
 
       constexpr std::size_t BufCap = 5;
       using Elem = Element;
       using SV = SboVector<Elem, BufCap>;
 
       const std::size_t numElems = 3;
-      InputIter fromFirst = inputBegin();
-      InputIter fromLast = makeInputIter(numElems);
+      ForwardIter fromFirst = inputBegin();
+      ForwardIter fromLast = makeForwardIter(numElems);
 
       Elem::Metrics metrics;
       metrics.ctorCalls = numElems;
@@ -556,7 +560,7 @@ void TestIteratorCtor()
       Test<Elem, BufCap> test{caseLabel, metrics};
       test.run([&, BufCap]() {
          static_assert(
-            std::is_same_v<InputIter::iterator_category, std::input_iterator_tag>);
+            std::is_same_v<ForwardIter::iterator_category, std::forward_iterator_tag>);
 
          SV sv{fromFirst, fromLast};
 
@@ -5575,7 +5579,7 @@ void TestInsertRange()
       });
    }
    {
-      const std::string caseLabel{"SvoVector::insert input iterator range"};
+      const std::string caseLabel{"SvoVector::insert forward iterator range"};
 
       constexpr std::size_t BufCap = 10;
       using Elem = Element;
@@ -5585,7 +5589,7 @@ void TestInsertRange()
       const std::size_t initialSize = values.size();
       const std::size_t numInserted = 3;
       auto srcFirst = inputBegin();
-      auto srcLast = makeInputIter(numInserted);
+      auto srcLast = makeForwardIter(numInserted);
       constexpr std::size_t insertPos = 3;
       const std::size_t numRelocated = initialSize - insertPos;
       const std::initializer_list<Elem> expected{0, 1, 2, 1000, 1001, 1002, 3, 4};
@@ -5602,6 +5606,8 @@ void TestInsertRange()
       test.run([&]() {
          SV sv{values};
          VERIFY(!sv.empty(), caseLabel);
+         static_assert(
+            std::is_same_v<ForwardIter::iterator_category, std::forward_iterator_tag>);
 
          SV::iterator inserted = sv.insert(sv.begin() + insertPos, srcFirst, srcLast);
 
@@ -8193,7 +8199,6 @@ void TestInequality()
 }
 
 
-
 void TestLessThan()
 {
    {
@@ -8223,7 +8228,6 @@ void TestLessThan()
       VERIFY(!(a < b), caseLabel);
    }
 }
-
 
 
 void TestGreaterThan()
@@ -8257,7 +8261,6 @@ void TestGreaterThan()
 }
 
 
-
 void TestLessOrEqualThan()
 {
    {
@@ -8270,7 +8273,8 @@ void TestLessOrEqualThan()
       VERIFY(!(b <= a), caseLabel);
    }
    {
-      const std::string caseLabel{"Less-or-equal-than for vectors with different elements"};
+      const std::string caseLabel{
+         "Less-or-equal-than for vectors with different elements"};
 
       SboVector<int, 5> a{0, 1, 2, 3};
       SboVector<int, 5> b{0, 10, 2, 3};
@@ -8289,11 +8293,11 @@ void TestLessOrEqualThan()
 }
 
 
-
 void TestGreaterOrEqualThan()
 {
    {
-      const std::string caseLabel{"Greater-or-equal-than for vectors with different sizes"};
+      const std::string caseLabel{
+         "Greater-or-equal-than for vectors with different sizes"};
 
       SboVector<int, 5> a{0, 1, 2};
       SboVector<int, 5> b{0, 1, 2, 3};
@@ -8302,7 +8306,8 @@ void TestGreaterOrEqualThan()
       VERIFY(b >= a, caseLabel);
    }
    {
-      const std::string caseLabel{"Greater-or-equal-than for vectors with different elements"};
+      const std::string caseLabel{
+         "Greater-or-equal-than for vectors with different elements"};
 
       SboVector<int, 5> a{0, 1, 2, 3};
       SboVector<int, 5> b{0, 10, 2, 3};
