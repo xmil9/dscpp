@@ -163,10 +163,10 @@ template <typename T, std::size_t N> class SboVector
    // Workflows - combinations of memory and data operations.
    void constructFrom(std::size_t n, const T& value);
    template <typename FwdIter> void constructFrom(FwdIter first, std::size_t n);
-   void prepareMemoryForConstructing(std::size_t n);
+   void prepareDataForConstructing(std::size_t n);
    void assignFrom(std::size_t n, const T& value);
    template <typename FwdIter> void assignFrom(FwdIter first, std::size_t n);
-   void prepareMemoryForAssignment(std::size_t n);
+   void prepareDataForAssignment(std::size_t n);
    void moveFrom(SboVector&& other);
    iterator insertFrom(const_iterator pos, T&& value);
    iterator insertFrom(const_iterator pos, std::size_t n, const T& value);
@@ -864,7 +864,7 @@ template <typename T, std::size_t N> constexpr const T* SboVector<T, N>::buffer(
 template <typename T, std::size_t N>
 void SboVector<T, N>::constructFrom(std::size_t n, const T& value)
 {
-   prepareMemoryForConstructing(n);
+   prepareDataForConstructing(n);
    populateWith(n, value);
 }
 
@@ -873,13 +873,13 @@ template <typename T, std::size_t N>
 template <typename FwdIter>
 void SboVector<T, N>::constructFrom(FwdIter first, std::size_t n)
 {
-   prepareMemoryForConstructing(n);
+   prepareDataForConstructing(n);
    populateWith(first, n);
 }
 
 
 template <typename T, std::size_t N>
-void SboVector<T, N>::prepareMemoryForConstructing(std::size_t n)
+void SboVector<T, N>::prepareDataForConstructing(std::size_t n)
 {
    // Cases:
    // - Use the buffer.
@@ -896,7 +896,7 @@ void SboVector<T, N>::prepareMemoryForConstructing(std::size_t n)
 template <typename T, std::size_t N>
 void SboVector<T, N>::assignFrom(std::size_t n, const T& value)
 {
-   prepareMemoryForAssignment(n);
+   prepareDataForAssignment(n);
    populateWith(n, value);
 }
 
@@ -905,13 +905,13 @@ template <typename T, std::size_t N>
 template <typename FwdIter>
 void SboVector<T, N>::assignFrom(FwdIter first, std::size_t n)
 {
-   prepareMemoryForAssignment(n);
+   prepareDataForAssignment(n);
    populateWith(first, n);
 }
 
 
 template <typename T, std::size_t N>
-void SboVector<T, N>::prepareMemoryForAssignment(std::size_t n)
+void SboVector<T, N>::prepareDataForAssignment(std::size_t n)
 {
    // Cases:
    // - Use the buffer.
