@@ -89,8 +89,7 @@ template <typename T, std::size_t N> class SboVector
  public:
    SboVector() = default;
    explicit SboVector(std::size_t count, const T& value);
-   template <typename FwdIter,
-             typename = std::enable_if_t<IsIterator_v<FwdIter>, void>>
+   template <typename FwdIter, typename = std::enable_if_t<IsIterator_v<FwdIter>, void>>
    SboVector(FwdIter first, FwdIter last);
    SboVector(std::initializer_list<T> ilist);
    SboVector(const SboVector& other);
@@ -169,6 +168,11 @@ template <typename T, std::size_t N> class SboVector
    template <typename FwdIter> void assignFrom(FwdIter first, std::size_t n);
    void prepareMemoryForAssignment(std::size_t n);
    void moveFrom(SboVector&& other);
+   iterator insertFrom(const_iterator pos, T&& value);
+   iterator insertFrom(const_iterator pos, std::size_t n, const T& value);
+   template <typename FwdIter>
+   iterator insertFrom(const_iterator pos, FwdIter first, std::size_t n);
+   void prepareDataForInsertion(const_iterator pos, std::size_t n);
    void clean();
 
    // Data operations.
@@ -643,62 +647,14 @@ template <typename T, std::size_t N>
 typename SboVector<T, N>::iterator SboVector<T, N>::insert(const_iterator pos,
                                                            const T& value)
 {
-   return insert(pos, 1, value);
+   return insertFrom(pos, 1, value);
 }
 
 
 template <typename T, std::size_t N>
 typename SboVector<T, N>::iterator SboVector<T, N>::insert(const_iterator pos, T&& value)
 {
-   // Cases:
-   // - In buffer and enough capacity to stay in buffer.
-   // - In buffer and not enough capacity. Allocate heap.
-   // - On heap and enough capacity.
-   // - On heap and not enough capacity. Need to reallocate.
-
-   const std::size_t count = 1;
-   const std::size_t newSize = size() + count;
-   const bool fitsBuffer = fitsIntoBuffer(newSize);
-   const bool canReuseHeap = onHeap() && m_capacity >= newSize;
-   const bool allocHeap = !fitsBuffer && !canReuseHeap;
-   const std::size_t newCap = allocHeap ? recalcCapacity(newSize) : capacity();
-
-   // Perform allocation up front to prevent inconsistencies if allocation
-   // fails.
-   T* dest = data();
-   if (allocHeap)
-      dest = allocateMem(newCap);
-
-   const std::size_t posOffset = pos - cbegin();
-   const std::size_t tailSize = cend() - pos;
-   const std::size_t frontSize = posOffset;
-
-   if (tailSize > 0)
-   {
-      T* tailSrc = data() + posOffset;
-      T* tailDest = dest + posOffset + count;
-      internals::relocateRightOverlapped(tailSrc, tailSrc + tailSize, tailDest);
-   }
-
-   std::uninitialized_move_n(&value, 1, dest + posOffset);
-
-   const bool relocateFront = allocHeap;
-   if (frontSize > 0 && relocateFront)
-   {
-      // Relocating the front only happens for reallocations, so we don't need to
-      // worry about overlaps.
-      internals::relocate_n(data(), frontSize, dest);
-   }
-
-   m_size = newSize;
-   if (allocHeap)
-   {
-      deallocate();
-      m_data = dest;
-      m_capacity = newCap;
-   }
-
-   return begin() + posOffset;
+   return insertFrom(pos, std::move(value));
 }
 
 
@@ -706,118 +662,16 @@ template <typename T, std::size_t N>
 typename SboVector<T, N>::iterator
 SboVector<T, N>::insert(const_iterator pos, size_type count, const T& value)
 {
-   // Cases:
-   // - In buffer and enough capacity to stay in buffer.
-   // - In buffer and not enough capacity. Allocate heap.
-   // - On heap and enough capacity.
-   // - On heap and not enough capacity. Need to reallocate.
-
-   const std::size_t posOffset = pos - cbegin();
-   if (count == 0)
-      return begin() + posOffset;
-
-   const std::size_t newSize = size() + count;
-   const bool fitsBuffer = fitsIntoBuffer(newSize);
-   const bool canReuseHeap = onHeap() && m_capacity >= newSize;
-   const bool allocHeap = !fitsBuffer && !canReuseHeap;
-   const std::size_t newCap = allocHeap ? recalcCapacity(newSize) : capacity();
-
-   // Perform allocation up front to prevent inconsistencies if allocation
-   // fails.
-   T* dest = data();
-   if (allocHeap)
-      dest = allocateMem(newCap);
-
-   const std::size_t tailSize = cend() - pos;
-   const std::size_t frontSize = posOffset;
-
-   if (tailSize > 0)
-   {
-      T* tailSrc = data() + posOffset;
-      T* tailDest = dest + posOffset + count;
-      internals::relocateRightOverlapped(tailSrc, tailSrc + tailSize, tailDest);
-   }
-
-   for (int i = 0; i < count; ++i)
-      std::uninitialized_copy_n(&value, 1, dest + posOffset + i);
-
-   const bool relocateFront = allocHeap;
-   if (frontSize > 0 && relocateFront)
-   {
-      // Relocating the front only happens for reallocations, so we don't need to
-      // worry about overlaps.
-      internals::relocate_n(data(), frontSize, dest);
-   }
-
-   m_size = newSize;
-   if (allocHeap)
-   {
-      deallocate();
-      m_data = dest;
-      m_capacity = newCap;
-   }
-
-   return begin() + posOffset;
+   return insertFrom(pos, count, value);
 }
 
 
 template <typename T, std::size_t N>
 template <typename FwdIter>
-typename SboVector<T, N>::iterator
-SboVector<T, N>::insert(const_iterator pos, FwdIter first, FwdIter last)
+typename SboVector<T, N>::iterator SboVector<T, N>::insert(const_iterator pos,
+                                                           FwdIter first, FwdIter last)
 {
-   // Cases:
-   // - In buffer and enough capacity to stay in buffer.
-   // - In buffer and not enough capacity. Allocate heap.
-   // - On heap and enough capacity.
-   // - On heap and not enough capacity. Need to reallocate.
-
-   const std::size_t count = std::distance(first, last);
-   const std::size_t posOffset = pos - cbegin();
-   if (count == 0)
-      return begin() + posOffset;
-
-   const std::size_t newSize = size() + count;
-   const bool fitsBuffer = fitsIntoBuffer(newSize);
-   const bool canReuseHeap = onHeap() && m_capacity >= newSize;
-   const bool allocHeap = !fitsBuffer && !canReuseHeap;
-   const std::size_t newCap = allocHeap ? recalcCapacity(newSize) : capacity();
-
-   // Perform allocation up front to prevent inconsistencies if allocation
-   // fails.
-   T* dest = data();
-   if (allocHeap)
-      dest = allocateMem(newCap);
-
-   const std::size_t tailSize = cend() - pos;
-   const std::size_t frontSize = posOffset;
-
-   if (tailSize > 0)
-   {
-      T* tailSrc = data() + posOffset;
-      T* tailDest = dest + posOffset + count;
-      internals::relocateRightOverlapped(tailSrc, tailSrc + tailSize, tailDest);
-   }
-
-   std::uninitialized_copy(first, last, dest + posOffset);
-
-   const bool relocateFront = allocHeap;
-   if (frontSize > 0 && relocateFront)
-   {
-      // Relocating the front only happens for reallocations, so we don't need to
-      // worry about overlaps.
-      internals::relocate_n(data(), frontSize, dest);
-   }
-
-   m_size = newSize;
-   if (allocHeap)
-   {
-      deallocate();
-      m_data = dest;
-      m_capacity = newCap;
-   }
-
-   return begin() + posOffset;
+   return insertFrom(pos, first, std::distance(first, last));
 }
 
 
@@ -825,7 +679,7 @@ template <typename T, std::size_t N>
 typename SboVector<T, N>::iterator SboVector<T, N>::insert(const_iterator pos,
                                                            std::initializer_list<T> ilist)
 {
-   return insert(pos, ilist.begin(), ilist.end());
+   return insertFrom(pos, ilist.begin(), ilist.size());
 }
 
 
@@ -1172,7 +1026,97 @@ template <typename T, std::size_t N> void SboVector<T, N>::moveFrom(SboVector&& 
 
 
 template <typename T, std::size_t N>
-void SboVector<T, N>::clean()
+typename SboVector<T, N>::iterator SboVector<T, N>::insertFrom(const_iterator pos,
+                                                               T&& value)
+{
+   const std::size_t diff = pos - cbegin();
+   prepareDataForInsertion(pos, 1);
+   std::uninitialized_move_n(&value, 1, data() + diff);
+   return begin() + diff;
+}
+
+
+template <typename T, std::size_t N>
+typename SboVector<T, N>::iterator
+SboVector<T, N>::insertFrom(const_iterator pos, std::size_t n, const T& value)
+{
+   const std::size_t diff = pos - cbegin();
+   if (n > 0)
+   {
+      prepareDataForInsertion(pos, n);
+      for (int i = 0; i < n; ++i)
+         std::uninitialized_copy_n(&value, 1, data() + diff + i);
+   }
+   return begin() + diff;
+}
+
+
+template <typename T, std::size_t N>
+template <typename FwdIter>
+typename SboVector<T, N>::iterator
+SboVector<T, N>::insertFrom(const_iterator pos, FwdIter first, std::size_t n)
+{
+   const std::size_t diff = pos - cbegin();
+   if (n > 0)
+   {
+      prepareDataForInsertion(pos, n);
+      std::uninitialized_copy_n(first, n, data() + diff);
+   }
+   return begin() + diff;
+}
+
+
+template <typename T, std::size_t N>
+void SboVector<T, N>::prepareDataForInsertion(const_iterator pos, std::size_t n)
+{
+   // Cases:
+   // - In buffer and enough capacity to stay in buffer.
+   // - In buffer and not enough capacity. Allocate heap.
+   // - On heap and enough capacity.
+   // - On heap and not enough capacity. Need to reallocate.
+
+   const std::size_t posOffset = pos - cbegin();
+   const std::size_t newSize = size() + n;
+   const bool fitsBuffer = fitsIntoBuffer(newSize);
+   const bool canReuseHeap = onHeap() && m_capacity >= newSize;
+   const bool allocHeap = !fitsBuffer && !canReuseHeap;
+   const std::size_t newCap = allocHeap ? recalcCapacity(newSize) : capacity();
+
+   // Perform allocation up front to prevent inconsistencies if allocation
+   // fails.
+   T* dest = data();
+   if (allocHeap)
+      dest = allocateMem(newCap);
+
+   const std::size_t tailSize = cend() - pos;
+   const std::size_t frontSize = posOffset;
+
+   if (tailSize > 0)
+   {
+      T* tailSrc = data() + posOffset;
+      T* tailDest = dest + posOffset + n;
+      internals::relocateRightOverlapped(tailSrc, tailSrc + tailSize, tailDest);
+   }
+
+   const bool relocateFront = allocHeap;
+   if (frontSize > 0 && relocateFront)
+   {
+      // Relocating the front only happens for reallocations, so we don't need to
+      // worry about overlaps.
+      internals::relocate_n(data(), frontSize, dest);
+   }
+
+   m_size = newSize;
+   if (allocHeap)
+   {
+      deallocate();
+      m_data = dest;
+      m_capacity = newCap;
+   }
+}
+
+
+template <typename T, std::size_t N> void SboVector<T, N>::clean()
 {
    destroy();
    deallocate();
@@ -1196,8 +1140,7 @@ void SboVector<T, N>::populateWith(FwdIter first, std::size_t n)
 }
 
 
-template <typename T, std::size_t N>
-void SboVector<T, N>::destroy()
+template <typename T, std::size_t N> void SboVector<T, N>::destroy()
 {
    std::destroy_n(m_data, size());
 }
