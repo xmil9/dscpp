@@ -1170,6 +1170,10 @@ void SboVector<T, N>::constructFrom(InputIter first, std::size_t n)
 template <typename T, std::size_t N>
 void SboVector<T, N>::prepareMemoryForConstructing(std::size_t n)
 {
+   // Cases:
+   // - Use the buffer.
+   // - Make a new heap allocation.
+
    if (!fitsIntoBuffer(n))
    {
       allocate(n);
