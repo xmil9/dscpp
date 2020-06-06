@@ -173,6 +173,7 @@ template <typename T, std::size_t N> class SboVector
    template <typename FwdIter>
    iterator insertFrom(const_iterator pos, FwdIter first, std::size_t n);
    void prepareDataForInsertion(const_iterator pos, std::size_t n);
+   void prepareDataForResize(std::size_t n);
    void clean();
 
    // Data operations.
@@ -727,70 +728,20 @@ typename SboVector<T, N>::reference SboVector<T, N>::emplace_back(Args&&... args
 
 template <typename T, std::size_t N> void SboVector<T, N>::resize(size_type count)
 {
-   // Cases:
-   // - New size == old size: Done.
-   // - New size > old size:
-   //    - In buffer and enough capacity to stay in buffer.
-   //    - In buffer and not enough capacity. Allocate heap.
-   //    - On heap and enough capacity.
-   //    - On heap and not enough capacity. Need to reallocate.
-   // - New size < old size: Remove elements. Keep storage.
-
-   if (count == m_size)
-      return;
-
+   prepareDataForResize(count);
    if (count > m_size)
-   {
-      const bool fitsBuffer = fitsIntoBuffer(count);
-      const bool canReuseHeap = onHeap() && m_capacity >= count;
-      const bool allocHeap = !fitsBuffer && !canReuseHeap;
-
-      if (allocHeap)
-         reallocate(count);
-
       std::uninitialized_default_construct_n(data() + size(), count - size());
-      m_size = count;
-   }
-   else
-   {
-      std::destroy_n(data() + count, size() - count);
-      m_size = count;
-   }
+   m_size = count;
 }
 
 
 template <typename T, std::size_t N>
 void SboVector<T, N>::resize(size_type count, const value_type& value)
 {
-   // Cases:
-   // - New size == old size: Done.
-   // - New size > old size:
-   //    - In buffer and enough capacity to stay in buffer.
-   //    - In buffer and not enough capacity. Allocate heap.
-   //    - On heap and enough capacity.
-   //    - On heap and not enough capacity. Need to reallocate.
-   // - New size < old size: Remove elements. Keep storage.
-
-   if (count == m_size)
-      return;
-
+   prepareDataForResize(count);
    if (count > m_size)
-   {
-      const bool fitsBuffer = fitsIntoBuffer(count);
-      const bool canReuseHeap = onHeap() && m_capacity >= count;
-      const bool allocHeap = !fitsBuffer && !canReuseHeap;
-
-      if (allocHeap)
-         reallocate(count);
-
       std::uninitialized_fill_n(data() + size(), count - size(), value);
-      m_size = count;
-   }
-   else
-   {
-      std::destroy_n(data() + count, size() - count);
-      m_size = count;
-   }
+   m_size = count;
 }
 
 
@@ -1068,6 +1019,32 @@ void SboVector<T, N>::prepareDataForInsertion(const_iterator pos, std::size_t n)
       deallocate();
       m_data = dest;
       m_capacity = newCap;
+   }
+}
+
+
+template <typename T, std::size_t N> void SboVector<T, N>::prepareDataForResize(std::size_t n)
+{
+   // Cases:
+   // - New size == old size: Nothing to do.
+   // - New size > old size:
+   //    - In buffer and enough capacity to stay in buffer.
+   //    - In buffer and not enough capacity. Allocate heap.
+   //    - On heap and enough capacity.
+   //    - On heap and not enough capacity. Need to reallocate.
+   // - New size < old size: Destroy elements. Keep storage.
+
+   if (n > m_size)
+   {
+      const bool fitsBuffer = fitsIntoBuffer(n);
+      const bool canReuseHeap = onHeap() && m_capacity >= n;
+      const bool allocHeap = !fitsBuffer && !canReuseHeap;
+      if (allocHeap)
+         reallocate(n);
+   }
+   else
+   {
+      std::destroy_n(data() + n, size() - n);
    }
 }
 
