@@ -697,7 +697,8 @@ template <typename T, std::size_t N> void SboVector<T, N>::push_back(T&& value)
 
 template <typename T, std::size_t N> void SboVector<T, N>::pop_back()
 {
-   // Standard: Calling pop_back on empty vector is UB.
+   // We don't need to worry about an empty vector case because calling pop_back on an
+   // empty vector is UB according to the standard.
    --m_size;
    std::destroy_at(data() + m_size);
 }
@@ -708,55 +709,10 @@ template <typename... Args>
 typename SboVector<T, N>::iterator SboVector<T, N>::emplace(const_iterator pos,
                                                             Args&&... args)
 {
-   // Cases:
-   // - In buffer and enough capacity to stay in buffer.
-   // - In buffer and not enough capacity. Allocate heap.
-   // - On heap and enough capacity.
-   // - On heap and not enough capacity. Need to reallocate.
-
-   const std::size_t count = 1;
-   const std::size_t newSize = size() + count;
-   const bool fitsBuffer = fitsIntoBuffer(newSize);
-   const bool canReuseHeap = onHeap() && m_capacity >= newSize;
-   const bool allocHeap = !fitsBuffer && !canReuseHeap;
-   const std::size_t newCap = allocHeap ? recalcCapacity(newSize) : capacity();
-
-   // Perform allocation up front to prevent inconsistencies if allocation
-   // fails.
-   T* dest = data();
-   if (allocHeap)
-      dest = allocateMem(newCap);
-
-   const std::size_t posOffset = pos - cbegin();
-   const std::size_t tailSize = cend() - pos;
-   const std::size_t frontSize = posOffset;
-
-   if (tailSize > 0)
-   {
-      T* tailSrc = data() + posOffset;
-      T* tailDest = dest + posOffset + count;
-      internals::relocateRightOverlapped(tailSrc, tailSrc + tailSize, tailDest);
-   }
-
-   internals::construct_at(dest + posOffset, std::forward<Args>(args)...);
-
-   const bool relocateFront = allocHeap;
-   if (frontSize > 0 && relocateFront)
-   {
-      // Relocating the front only happens for reallocations, so we don't need to
-      // worry about overlaps.
-      internals::relocate_n(data(), frontSize, dest);
-   }
-
-   m_size = newSize;
-   if (allocHeap)
-   {
-      deallocate();
-      m_data = dest;
-      m_capacity = newCap;
-   }
-
-   return begin() + posOffset;
+   const std::size_t diff = pos - cbegin();
+   prepareDataForInsertion(pos, 1);
+   internals::construct_at(data() + diff, std::forward<Args>(args)...);
+   return begin() + diff;
 }
 
 
