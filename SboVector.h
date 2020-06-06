@@ -160,7 +160,7 @@ template <typename T, std::size_t N> class SboVector
    template <typename InputIter> void constructFrom(InputIter first, std::size_t n);
    void assignFrom(std::size_t n, const T& value);
    template <typename FwdIter> void assignFrom(FwdIter first, std::size_t n);
-   void prepareAssignment(std::size_t n);
+   void prepareDataForAssignment(std::size_t n);
    void moveFrom(SboVector&& other);
 
    static constexpr bool fitsIntoBuffer(std::size_t size);
@@ -1169,8 +1169,9 @@ void SboVector<T, N>::constructFrom(InputIter first, std::size_t n)
 template <typename T, std::size_t N>
 void SboVector<T, N>::assignFrom(std::size_t n, const T& value)
 {
-   prepareAssignment(n);
+   prepareDataForAssignment(n);
    std::uninitialized_fill_n(m_data, n, value);
+   m_size = n;
 }
 
 
@@ -1178,13 +1179,14 @@ template <typename T, std::size_t N>
 template <typename FwdIter>
 void SboVector<T, N>::assignFrom(FwdIter first, std::size_t n)
 {
-   prepareAssignment(n);
+   prepareDataForAssignment(n);
    std::uninitialized_copy_n(first, n, m_data);
+   m_size = n;
 }
 
 
 template <typename T, std::size_t N>
-void SboVector<T, N>::prepareAssignment(std::size_t n)
+void SboVector<T, N>::prepareDataForAssignment(std::size_t n)
 {
    // Cases:
    // - Use the buffer.
@@ -1221,8 +1223,6 @@ void SboVector<T, N>::prepareAssignment(std::size_t n)
       m_data = newData;
       m_capacity = n;
    }
-
-   m_size = n;
 }
 
 
