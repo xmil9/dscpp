@@ -603,18 +603,7 @@ template <typename T, std::size_t N> void SboVector<T, N>::clear() noexcept
 template <typename T, std::size_t N>
 typename SboVector<T, N>::iterator SboVector<T, N>::erase(const_iterator pos)
 {
-   if (pos >= cend())
-      return end();
-
-   std::destroy_at(pos.m_elem);
-
-   const auto offset = pos - cbegin();
-   T* erasedElem = data() + offset;
-   internals::relocateLeftOverlapped(erasedElem + 1, data() + size(), erasedElem);
-
-   --m_size;
-
-   return begin() + offset;
+   return erase(pos, pos + 1);
 }
 
 
@@ -624,21 +613,21 @@ typename SboVector<T, N>::iterator SboVector<T, N>::erase(const_iterator first,
 {
    if (first >= cend())
       return end();
-   if (last >= cend())
+   if (last > cend())
       last = cend();
 
    const auto offset = first - cbegin();
    const auto count = last - first;
-   if (count == 0)
-      return begin() + offset + count;
+   if (count > 0)
+   {
+      std::destroy_n(first.m_elem, count);
 
-   std::destroy_n(first.m_elem, count);
+      const bool relocateTail = last < cend();
+      if (relocateTail)
+         internals::relocateLeftOverlapped(last.m_elem, data() + size(), first.m_elem);
 
-   const bool relocateTail = last < cend();
-   if (relocateTail)
-      internals::relocateLeftOverlapped(last.m_elem, data() + size(), first.m_elem);
-
-   m_size -= count;
+      m_size -= count;
+   }
 
    return begin() + offset;
 }
