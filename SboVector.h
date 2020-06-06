@@ -736,6 +736,14 @@ void SboVector<T, N>::resize(size_type count, const value_type& value)
 
 template <typename T, std::size_t N> void SboVector<T, N>::swap(SboVector& other)
 {
+   // Cases:
+   // - Both on heap: Swap heap pointers.
+   // - Both in buffer:
+   //   Swap elements up to size of smaller vector, relocate the rest from larger to
+   //   smaller vector.
+   // - One on heap, one in buffer:
+   //   Relocate buffered elements to buffer of heap vector, reassign heap pointer.
+
    const bool thisOnHeap = onHeap();
    const bool otherOnHeap = other.onHeap();
 
