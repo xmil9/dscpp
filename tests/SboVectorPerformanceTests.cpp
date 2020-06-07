@@ -77,7 +77,7 @@ void TestPushBackLValue()
       }
 
       printTestResult(caseLabel, svTime, stdTime);
-      VERIFY(svTime < stdTime, caseLabel);
+      VERIFY(svTime <= stdTime, caseLabel);
    }
    {
       const std::string caseLabel{"push_back - SboVector on heap vs std::vector"};
@@ -110,7 +110,7 @@ void TestPushBackLValue()
       }
 
       printTestResult(caseLabel, svTime, stdTime);
-      VERIFY(svTime < stdTime, caseLabel);
+      VERIFY(svTime <= stdTime, caseLabel);
    }
 }
 
@@ -149,7 +149,7 @@ void TestCopyIntoContainer()
       }
 
       printTestResult(caseLabel, svTime, stdTime);
-      VERIFY(svTime < stdTime, caseLabel);
+      VERIFY(svTime <= stdTime, caseLabel);
    }
    {
       const std::string caseLabel{"std::copy: SboVector on heap vs std::vector"};
@@ -183,7 +183,94 @@ void TestCopyIntoContainer()
       }
 
       printTestResult(caseLabel, svTime, stdTime);
-      VERIFY(svTime < stdTime, caseLabel);
+      VERIFY(svTime <= 1.1 * stdTime, caseLabel);
+   }
+}
+
+
+void TestAccessElementsByIndex()
+{
+   {
+      const std::string caseLabel{"Element access: SboVector in buffer vs std::vector"};
+
+      constexpr std::size_t numRuns = 1000;
+      constexpr std::size_t BufCap = 100;
+      constexpr std::size_t numElems = BufCap;
+      int64_t svTime = 0;
+      int64_t stdTime = 0;
+
+      int64_t svSum = 0;
+      int64_t stdSum = 0;
+
+      {
+         std::vector<int> v;
+         for (int i = 0; i < numElems; ++i)
+            v.push_back(i);
+
+         MicroBenchmark measure{stdTime};
+
+         for (int k = 0; k < numRuns; ++k)
+            for (int i = 0; i < numElems; ++i)
+               stdSum += v[i];
+      }
+      {
+         SboVector<int, BufCap> sv;
+         for (int i = 0; i < numElems; ++i)
+            sv.push_back(i);
+
+         MicroBenchmark measure{svTime};
+
+         for (int k = 0; k < numRuns; ++k)
+            for (int i = 0; i < numElems; ++i)
+               svSum += sv[i];
+      }
+
+      // To prevent compiler from optimizating element access away.
+      std::cerr << stdSum << svSum << '\n';
+
+      printTestResult(caseLabel, svTime, stdTime);
+      VERIFY(svTime <= 1.3 * stdTime, caseLabel);
+   }
+   {
+      const std::string caseLabel{"Element access: SboVector onheap vs std::vector"};
+
+      constexpr std::size_t numRuns = 1000;
+      constexpr std::size_t BufCap = 10;
+      constexpr std::size_t numElems = 100;
+      int64_t svTime = 0;
+      int64_t stdTime = 0;
+
+      int64_t svSum = 0;
+      int64_t stdSum = 0;
+
+      {
+         std::vector<int> v;
+         for (int i = 0; i < numElems; ++i)
+            v.push_back(i);
+
+         MicroBenchmark measure{stdTime};
+
+         for (int k = 0; k < numRuns; ++k)
+            for (int i = 0; i < numElems; ++i)
+               stdSum += v[i];
+      }
+      {
+         SboVector<int, BufCap> sv;
+         for (int i = 0; i < numElems; ++i)
+            sv.push_back(i);
+
+         MicroBenchmark measure{svTime};
+
+         for (int k = 0; k < numRuns; ++k)
+            for (int i = 0; i < numElems; ++i)
+               svSum += sv[i];
+      }
+
+      // To prevent compiler from optimizating element access away.
+      std::cerr << stdSum << svSum << '\n';
+
+      printTestResult(caseLabel, svTime, stdTime);
+      VERIFY(svTime <= 1.3 * stdTime, caseLabel);
    }
 }
 
@@ -197,6 +284,7 @@ void TestSboVectorPerformance()
 #ifdef NDEBUG
    TestPushBackLValue();
    TestCopyIntoContainer();
+   TestAccessElementsByIndex();
 #else  // !NDEBUG
    std::cout << "Performance tests skipped - Use Release config for performance tests.\n";
 #endif // NDEBUG
