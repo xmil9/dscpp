@@ -1206,6 +1206,8 @@ void SboVector<T, N>::deallocateMem(T* mem, std::size_t cap)
 
 #ifdef SBOVEC_MEM_INSTR
    m_allocatedCap -= cap;
+#else
+   (void)cap;
 #endif // SBOVEC_MEM_INSTR
 }
 
