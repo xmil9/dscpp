@@ -168,10 +168,10 @@ template <typename T, std::size_t N> class SboVector
    template <typename FwdIter> void assignFrom(FwdIter first, std::size_t n);
    void prepareDataForAssignment(std::size_t n);
    void moveFrom(SboVector&& other);
-   iterator insertFrom(const_iterator pos, T&& value);
-   iterator insertFrom(const_iterator pos, std::size_t n, const T& value);
+   iterator insertOf(const_iterator pos, T&& value);
+   iterator insertOf(const_iterator pos, std::size_t n, const T& value);
    template <typename FwdIter>
-   iterator insertFrom(const_iterator pos, FwdIter first, std::size_t n);
+   iterator insertOf(const_iterator pos, FwdIter first, std::size_t n);
    void prepareDataForInsertion(const_iterator pos, std::size_t n);
    void prepareDataForResize(std::size_t n);
    void clean();
@@ -637,14 +637,14 @@ template <typename T, std::size_t N>
 typename SboVector<T, N>::iterator SboVector<T, N>::insert(const_iterator pos,
                                                            const T& value)
 {
-   return insertFrom(pos, 1, value);
+   return insertOf(pos, 1, value);
 }
 
 
 template <typename T, std::size_t N>
 typename SboVector<T, N>::iterator SboVector<T, N>::insert(const_iterator pos, T&& value)
 {
-   return insertFrom(pos, std::move(value));
+   return insertOf(pos, std::move(value));
 }
 
 
@@ -652,7 +652,7 @@ template <typename T, std::size_t N>
 typename SboVector<T, N>::iterator
 SboVector<T, N>::insert(const_iterator pos, size_type count, const T& value)
 {
-   return insertFrom(pos, count, value);
+   return insertOf(pos, count, value);
 }
 
 
@@ -661,7 +661,7 @@ template <typename FwdIter>
 typename SboVector<T, N>::iterator SboVector<T, N>::insert(const_iterator pos,
                                                            FwdIter first, FwdIter last)
 {
-   return insertFrom(pos, first, std::distance(first, last));
+   return insertOf(pos, first, std::distance(first, last));
 }
 
 
@@ -669,7 +669,7 @@ template <typename T, std::size_t N>
 typename SboVector<T, N>::iterator SboVector<T, N>::insert(const_iterator pos,
                                                            std::initializer_list<T> ilist)
 {
-   return insertFrom(pos, ilist.begin(), ilist.size());
+   return insertOf(pos, ilist.begin(), ilist.size());
 }
 
 
@@ -930,7 +930,7 @@ template <typename T, std::size_t N> void SboVector<T, N>::moveFrom(SboVector&& 
 
 
 template <typename T, std::size_t N>
-typename SboVector<T, N>::iterator SboVector<T, N>::insertFrom(const_iterator pos,
+typename SboVector<T, N>::iterator SboVector<T, N>::insertOf(const_iterator pos,
                                                                T&& value)
 {
    const std::size_t diff = pos - cbegin();
@@ -942,7 +942,7 @@ typename SboVector<T, N>::iterator SboVector<T, N>::insertFrom(const_iterator po
 
 template <typename T, std::size_t N>
 typename SboVector<T, N>::iterator
-SboVector<T, N>::insertFrom(const_iterator pos, std::size_t n, const T& value)
+SboVector<T, N>::insertOf(const_iterator pos, std::size_t n, const T& value)
 {
    const std::size_t diff = pos - cbegin();
    if (n > 0)
@@ -958,7 +958,7 @@ SboVector<T, N>::insertFrom(const_iterator pos, std::size_t n, const T& value)
 template <typename T, std::size_t N>
 template <typename FwdIter>
 typename SboVector<T, N>::iterator
-SboVector<T, N>::insertFrom(const_iterator pos, FwdIter first, std::size_t n)
+SboVector<T, N>::insertOf(const_iterator pos, FwdIter first, std::size_t n)
 {
    const std::size_t diff = pos - cbegin();
    if (n > 0)
