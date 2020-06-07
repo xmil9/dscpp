@@ -6135,6 +6135,13 @@ void TestPushBackLValue()
          verifyVector(sv, expected, caseLabel);
       });
    }
+   {
+      const std::string caseLabel{
+         "Detect ambiguity in SboVector::insertOf overloads. Will fail to compile"};
+
+      SboVector<int, 10> sv;
+      sv.push_back(1000);
+   }
 }
 
 
@@ -10038,7 +10045,7 @@ void TestPerformance()
 
       auto end = std::chrono::high_resolution_clock::now();
       auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
-      auto   ns = duration.count();
+      auto ns = duration.count();
       std::cout << ns << "\n";
    }
    {
