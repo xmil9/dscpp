@@ -163,17 +163,17 @@ template <typename T, std::size_t N> class SboVector
    // Workflows - combinations of memory and data operations.
    void constructFrom(std::size_t n, const T& value);
    template <typename FwdIter> void constructFrom(FwdIter first, std::size_t n);
-   void prepareDataForConstructing(std::size_t n);
+   void prepareDataForPopulating(std::size_t n);
    void assignFrom(std::size_t n, const T& value);
    template <typename FwdIter> void assignFrom(FwdIter first, std::size_t n);
-   void prepareDataForAssignment(std::size_t n);
+   void adjustDataForAssignment(std::size_t n);
    void moveFrom(SboVector&& other);
    iterator insertOf(const_iterator pos, T&& value);
    iterator insertOf(const_iterator pos, std::size_t n, const T& value);
    template <typename FwdIter>
    iterator insertOf(const_iterator pos, FwdIter first, std::size_t n);
-   void prepareDataForInsertion(const_iterator pos, std::size_t n);
-   void prepareDataForResize(std::size_t n);
+   void adjustDataForInsertion(const_iterator pos, std::size_t n);
+   void adjustDataForResize(std::size_t n);
    void clean();
 
    // Data operations.
@@ -700,7 +700,7 @@ typename SboVector<T, N>::iterator SboVector<T, N>::emplace(const_iterator pos,
                                                             Args&&... args)
 {
    const std::size_t diff = pos - cbegin();
-   prepareDataForInsertion(pos, 1);
+   adjustDataForInsertion(pos, 1);
    internals::construct_at(data() + diff, std::forward<Args>(args)...);
    return begin() + diff;
 }
@@ -717,7 +717,7 @@ typename SboVector<T, N>::reference SboVector<T, N>::emplace_back(Args&&... args
 
 template <typename T, std::size_t N> void SboVector<T, N>::resize(size_type count)
 {
-   prepareDataForResize(count);
+   adjustDataForResize(count);
    if (count > m_size)
       std::uninitialized_default_construct_n(data() + size(), count - size());
    m_size = count;
@@ -727,7 +727,7 @@ template <typename T, std::size_t N> void SboVector<T, N>::resize(size_type coun
 template <typename T, std::size_t N>
 void SboVector<T, N>::resize(size_type count, const value_type& value)
 {
-   prepareDataForResize(count);
+   adjustDataForResize(count);
    if (count > m_size)
       std::uninitialized_fill_n(data() + size(), count - size(), value);
    m_size = count;
@@ -812,7 +812,7 @@ template <typename T, std::size_t N> constexpr const T* SboVector<T, N>::buffer(
 template <typename T, std::size_t N>
 void SboVector<T, N>::constructFrom(std::size_t n, const T& value)
 {
-   prepareDataForConstructing(n);
+   prepareDataForPopulating(n);
    populateWith(n, value);
 }
 
@@ -821,13 +821,13 @@ template <typename T, std::size_t N>
 template <typename FwdIter>
 void SboVector<T, N>::constructFrom(FwdIter first, std::size_t n)
 {
-   prepareDataForConstructing(n);
+   prepareDataForPopulating(n);
    populateWith(first, n);
 }
 
 
 template <typename T, std::size_t N>
-void SboVector<T, N>::prepareDataForConstructing(std::size_t n)
+void SboVector<T, N>::prepareDataForPopulating(std::size_t n)
 {
    // Cases:
    // - Use the buffer.
@@ -844,7 +844,7 @@ void SboVector<T, N>::prepareDataForConstructing(std::size_t n)
 template <typename T, std::size_t N>
 void SboVector<T, N>::assignFrom(std::size_t n, const T& value)
 {
-   prepareDataForAssignment(n);
+   adjustDataForAssignment(n);
    populateWith(n, value);
 }
 
@@ -853,13 +853,13 @@ template <typename T, std::size_t N>
 template <typename FwdIter>
 void SboVector<T, N>::assignFrom(FwdIter first, std::size_t n)
 {
-   prepareDataForAssignment(n);
+   adjustDataForAssignment(n);
    populateWith(first, n);
 }
 
 
 template <typename T, std::size_t N>
-void SboVector<T, N>::prepareDataForAssignment(std::size_t n)
+void SboVector<T, N>::adjustDataForAssignment(std::size_t n)
 {
    // Cases:
    // - Use the buffer.
@@ -934,7 +934,7 @@ typename SboVector<T, N>::iterator SboVector<T, N>::insertOf(const_iterator pos,
                                                                T&& value)
 {
    const std::size_t diff = pos - cbegin();
-   prepareDataForInsertion(pos, 1);
+   adjustDataForInsertion(pos, 1);
    std::uninitialized_move_n(&value, 1, data() + diff);
    return begin() + diff;
 }
@@ -947,7 +947,7 @@ SboVector<T, N>::insertOf(const_iterator pos, std::size_t n, const T& value)
    const std::size_t diff = pos - cbegin();
    if (n > 0)
    {
-      prepareDataForInsertion(pos, n);
+      adjustDataForInsertion(pos, n);
       for (int i = 0; i < n; ++i)
          std::uninitialized_copy_n(&value, 1, data() + diff + i);
    }
@@ -963,7 +963,7 @@ SboVector<T, N>::insertOf(const_iterator pos, FwdIter first, std::size_t n)
    const std::size_t diff = pos - cbegin();
    if (n > 0)
    {
-      prepareDataForInsertion(pos, n);
+      adjustDataForInsertion(pos, n);
       std::uninitialized_copy_n(first, n, data() + diff);
    }
    return begin() + diff;
@@ -971,7 +971,7 @@ SboVector<T, N>::insertOf(const_iterator pos, FwdIter first, std::size_t n)
 
 
 template <typename T, std::size_t N>
-void SboVector<T, N>::prepareDataForInsertion(const_iterator pos, std::size_t n)
+void SboVector<T, N>::adjustDataForInsertion(const_iterator pos, std::size_t n)
 {
    // Cases:
    // - In buffer and enough capacity to stay in buffer.
@@ -1020,7 +1020,7 @@ void SboVector<T, N>::prepareDataForInsertion(const_iterator pos, std::size_t n)
 }
 
 
-template <typename T, std::size_t N> void SboVector<T, N>::prepareDataForResize(std::size_t n)
+template <typename T, std::size_t N> void SboVector<T, N>::adjustDataForResize(std::size_t n)
 {
    // Cases:
    // - New size == old size: Nothing to do.
