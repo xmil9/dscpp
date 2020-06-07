@@ -170,7 +170,7 @@ template <typename T, std::size_t N> class SboVector
    void moveFrom(SboVector&& other);
    iterator insertOf(const_iterator pos, T&& value);
    iterator insertOf(const_iterator pos, std::size_t n, const T& value);
-   template <typename FwdIter>
+   template <typename FwdIter, typename = std::enable_if_t<IsIterator_v<FwdIter>, void>>
    iterator insertOf(const_iterator pos, FwdIter first, std::size_t n);
    void adjustDataForInsertion(const_iterator pos, std::size_t n);
    void adjustDataForResize(std::size_t n);
@@ -931,7 +931,7 @@ template <typename T, std::size_t N> void SboVector<T, N>::moveFrom(SboVector&& 
 
 template <typename T, std::size_t N>
 typename SboVector<T, N>::iterator SboVector<T, N>::insertOf(const_iterator pos,
-                                                               T&& value)
+                                                             T&& value)
 {
    const std::size_t diff = pos - cbegin();
    adjustDataForInsertion(pos, 1);
@@ -956,9 +956,9 @@ SboVector<T, N>::insertOf(const_iterator pos, std::size_t n, const T& value)
 
 
 template <typename T, std::size_t N>
-template <typename FwdIter>
-typename SboVector<T, N>::iterator
-SboVector<T, N>::insertOf(const_iterator pos, FwdIter first, std::size_t n)
+template <typename FwdIter, typename>
+typename SboVector<T, N>::iterator SboVector<T, N>::insertOf(const_iterator pos,
+                                                             FwdIter first, std::size_t n)
 {
    const std::size_t diff = pos - cbegin();
    if (n > 0)
@@ -1020,7 +1020,8 @@ void SboVector<T, N>::adjustDataForInsertion(const_iterator pos, std::size_t n)
 }
 
 
-template <typename T, std::size_t N> void SboVector<T, N>::adjustDataForResize(std::size_t n)
+template <typename T, std::size_t N>
+void SboVector<T, N>::adjustDataForResize(std::size_t n)
 {
    // Cases:
    // - New size == old size: Nothing to do.

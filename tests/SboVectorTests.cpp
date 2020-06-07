@@ -3,6 +3,7 @@
 #include "SboVector.h"
 #include "TestUtil.h"
 #include <algorithm>
+#include <chrono>
 #include <functional>
 #include <iostream>
 #include <list>
@@ -10022,6 +10023,41 @@ void TestConstIteratorGreaterOrEqualThan()
    }
 }
 
+
+void TestPerformance()
+{
+   {
+      auto start = std::chrono::high_resolution_clock::now();
+
+      for (int k = 0; k < 1000; ++k)
+      {
+         std::vector<int> v;
+         for (int i = 0; i < v.size(); ++i)
+            v.push_back(i);
+      }
+
+      auto end = std::chrono::high_resolution_clock::now();
+      auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
+      auto   ns = duration.count();
+      std::cout << ns << "\n";
+   }
+   {
+      auto start = std::chrono::high_resolution_clock::now();
+
+      for (int k = 0; k < 1000; ++k)
+      {
+         SboVector<int, 100> sv;
+         for (int i = 0; i < sv.size(); ++i)
+            sv.push_back(i);
+      }
+
+      auto end = std::chrono::high_resolution_clock::now();
+      auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start);
+      auto ns = duration.count();
+      std::cout << ns << "\n";
+   }
+}
+
 } // namespace
 
 
@@ -10145,4 +10181,6 @@ void TestSboVector()
    TestConstIteratorLessOrEqualThan();
    TestConstIteratorGreaterThan();
    TestConstIteratorGreaterOrEqualThan();
+
+   TestPerformance();
 }
