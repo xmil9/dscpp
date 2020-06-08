@@ -12,26 +12,6 @@
 
 ///////////////////
 
-namespace rb_details
-{
-
-// Modulus N addition.
-inline constexpr int64_t addModN(int64_t val, int64_t offset, std::size_t n) noexcept
-{
-   return (val + offset) % n;
-}
-
-// Modulus N subtraction.
-inline constexpr int64_t subModN(int64_t val, int64_t offset, std::size_t n) noexcept
-{
-   return (val - offset) % n;
-}
-
-} // namespace rb_details
-
-
-///////////////////
-
 // Ring buffer of fixed size N.
 // Will overwrite oldest elements once full.
 template <typename T, std::size_t N> class RingBuffer
@@ -68,10 +48,10 @@ template <typename T, std::size_t N> class RingBuffer
    RingBuffer(RingBuffer&& from) = default;
    RingBuffer& operator=(RingBuffer&& from) = default;
 
-   size_type size() const;
-   constexpr size_type max_size() const;
-   bool empty() const;
-   bool full() const;
+   size_type size() const noexcept;
+   constexpr size_type capacity() const noexcept;
+   bool empty() const noexcept;
+   bool full() const noexcept;
    T& at(size_type idx);
    const T& at(size_type idx) const;
    T& operator[](size_type idx);
@@ -81,18 +61,18 @@ template <typename T, std::size_t N> class RingBuffer
    void clear();
    void swap(RingBuffer& other);
 
-   iterator begin();
-   iterator end();
-   const_iterator begin() const;
-   const_iterator end() const;
-   const_iterator cbegin() const;
-   const_iterator cend() const;
-   reverse_iterator rbegin();
-   reverse_iterator rend();
-   const_reverse_iterator rbegin() const;
-   const_reverse_iterator rend() const;
-   const_reverse_iterator crbegin() const;
-   const_reverse_iterator crend() const;
+   iterator begin() noexcept;
+   iterator end() noexcept;
+   const_iterator begin() const noexcept;
+   const_iterator end() const noexcept;
+   const_iterator cbegin() const noexcept;
+   const_iterator cend() const noexcept;
+   reverse_iterator rbegin() noexcept;
+   reverse_iterator rend() noexcept;
+   const_reverse_iterator rbegin() const noexcept;
+   const_reverse_iterator rend() const noexcept;
+   const_reverse_iterator crbegin() const noexcept;
+   const_reverse_iterator crend() const noexcept;
 
  private:
    using Index = size_type;
@@ -109,6 +89,30 @@ template <typename T, std::size_t N> class RingBuffer
    Index m_end = 0;
 };
 
+
+///////////////////
+
+namespace internals
+{
+
+// Modulus N addition.
+inline constexpr int64_t addModN(int64_t val, int64_t offset, std::size_t n) noexcept
+{
+   assert(n > 0);
+   return (val + offset) % n;
+}
+
+// Modulus N subtraction.
+inline constexpr int64_t subModN(int64_t val, int64_t offset, std::size_t n) noexcept
+{
+   assert(n > 0);
+   return (val - offset) % n;
+}
+
+} // namespace internals
+
+
+///////////////////
 
 template <typename T, std::size_t N>
 template <typename Iter>
@@ -154,27 +158,27 @@ RingBuffer<T, N>::RingBuffer(std::initializer_list<T> ilist)
 
 
 template <typename T, std::size_t N>
-typename RingBuffer<T, N>::size_type RingBuffer<T, N>::size() const
+typename RingBuffer<T, N>::size_type RingBuffer<T, N>::size() const noexcept
 {
    // Make sure the end is larger than the start index to avoid multiple cases.
-   return rb_details::subModN(m_end + M, m_start, M);
+   return internals::subModN(m_end + M, m_start, M);
 }
 
 
 template <typename T, std::size_t N>
-constexpr typename RingBuffer<T, N>::size_type RingBuffer<T, N>::max_size() const
+constexpr typename RingBuffer<T, N>::size_type RingBuffer<T, N>::capacity() const noexcept
 {
    return N;
 }
 
 
-template <typename T, std::size_t N> bool RingBuffer<T, N>::empty() const
+template <typename T, std::size_t N> bool RingBuffer<T, N>::empty() const noexcept
 {
    return (m_start == m_end);
 }
 
 
-template <typename T, std::size_t N> bool RingBuffer<T, N>::full() const
+template <typename T, std::size_t N> bool RingBuffer<T, N>::full() const noexcept
 {
    return (size() == N);
 }
@@ -184,7 +188,7 @@ template <typename T, std::size_t N> T& RingBuffer<T, N>::at(size_type idx)
 {
    if (idx >= size())
       throw std::out_of_range("Invalid index into ring buffer.");
-   return m_buffer[rb_details::addModN(m_start, idx, M)];
+   return m_buffer[internals::addModN(m_start, idx, M)];
 }
 
 
@@ -192,20 +196,20 @@ template <typename T, std::size_t N> const T& RingBuffer<T, N>::at(size_type idx
 {
    if (idx >= size())
       throw std::out_of_range("Invalid index into ring buffer.");
-   return m_buffer[rb_details::addModN(m_start, idx, M)];
+   return m_buffer[internals::addModN(m_start, idx, M)];
 }
 
 
 template <typename T, std::size_t N> T& RingBuffer<T, N>::operator[](size_type idx)
 {
-   return m_buffer[rb_details::addModN(m_start, idx, M)];
+   return m_buffer[internals::addModN(m_start, idx, M)];
 }
 
 
 template <typename T, std::size_t N>
 const T& RingBuffer<T, N>::operator[](size_type idx) const
 {
-   return m_buffer[rb_details::addModN(m_start, idx, M)];
+   return m_buffer[internals::addModN(m_start, idx, M)];
 }
 
 
@@ -219,11 +223,11 @@ template <typename T, std::size_t N> void RingBuffer<T, N>::push(const T& val)
    {
       // Get rid of first (oldest) element.
       m_end = m_start;
-      m_start = rb_details::addModN(m_start, 1, M);
+      m_start = internals::addModN(m_start, 1, M);
    }
    else
    {
-      m_end = rb_details::addModN(m_end, 1, M);
+      m_end = internals::addModN(m_end, 1, M);
    }
 }
 
@@ -256,56 +260,56 @@ template <typename T, std::size_t N> void RingBuffer<T, N>::swap(RingBuffer& oth
 
 
 template <typename T, std::size_t N>
-typename RingBuffer<T, N>::iterator RingBuffer<T, N>::begin()
+typename RingBuffer<T, N>::iterator RingBuffer<T, N>::begin() noexcept
 {
    return iterator(this, 0);
 }
 
 
 template <typename T, std::size_t N>
-typename RingBuffer<T, N>::iterator RingBuffer<T, N>::end()
+typename RingBuffer<T, N>::iterator RingBuffer<T, N>::end() noexcept
 {
    return iterator(this, size());
 }
 
 
 template <typename T, std::size_t N>
-typename RingBuffer<T, N>::const_iterator RingBuffer<T, N>::begin() const
+typename RingBuffer<T, N>::const_iterator RingBuffer<T, N>::begin() const noexcept
 {
    return cbegin();
 }
 
 
 template <typename T, std::size_t N>
-typename RingBuffer<T, N>::const_iterator RingBuffer<T, N>::end() const
+typename RingBuffer<T, N>::const_iterator RingBuffer<T, N>::end() const noexcept
 {
    return cend();
 }
 
 
 template <typename T, std::size_t N>
-typename RingBuffer<T, N>::const_iterator RingBuffer<T, N>::cbegin() const
+typename RingBuffer<T, N>::const_iterator RingBuffer<T, N>::cbegin() const noexcept
 {
    return const_iterator(this, 0);
 }
 
 
 template <typename T, std::size_t N>
-typename RingBuffer<T, N>::const_iterator RingBuffer<T, N>::cend() const
+typename RingBuffer<T, N>::const_iterator RingBuffer<T, N>::cend() const noexcept
 {
    return const_iterator(this, size());
 }
 
 
 template <typename T, std::size_t N>
-typename RingBuffer<T, N>::reverse_iterator RingBuffer<T, N>::rbegin()
+typename RingBuffer<T, N>::reverse_iterator RingBuffer<T, N>::rbegin() noexcept
 {
    return reverse_iterator(end());
 }
 
 
 template <typename T, std::size_t N>
-typename RingBuffer<T, N>::reverse_iterator RingBuffer<T, N>::rend()
+typename RingBuffer<T, N>::reverse_iterator RingBuffer<T, N>::rend() noexcept
 {
    return reverse_iterator(begin());
 }
@@ -313,13 +317,14 @@ typename RingBuffer<T, N>::reverse_iterator RingBuffer<T, N>::rend()
 
 template <typename T, std::size_t N>
 typename RingBuffer<T, N>::const_reverse_iterator RingBuffer<T, N>::rbegin() const
+   noexcept
 {
    return crbegin();
 }
 
 
 template <typename T, std::size_t N>
-typename RingBuffer<T, N>::const_reverse_iterator RingBuffer<T, N>::rend() const
+typename RingBuffer<T, N>::const_reverse_iterator RingBuffer<T, N>::rend() const noexcept
 {
    return crend();
 }
@@ -327,13 +332,14 @@ typename RingBuffer<T, N>::const_reverse_iterator RingBuffer<T, N>::rend() const
 
 template <typename T, std::size_t N>
 typename RingBuffer<T, N>::const_reverse_iterator RingBuffer<T, N>::crbegin() const
+   noexcept
 {
    return const_reverse_iterator(cend());
 }
 
 
 template <typename T, std::size_t N>
-typename RingBuffer<T, N>::const_reverse_iterator RingBuffer<T, N>::crend() const
+typename RingBuffer<T, N>::const_reverse_iterator RingBuffer<T, N>::crend() const noexcept
 {
    return const_reverse_iterator(cbegin());
 }
@@ -344,7 +350,7 @@ typename RingBuffer<T, N>::Index RingBuffer<T, N>::last() const
 {
    if (empty())
       return m_end;
-   return rb_details::subModN(m_end, 1, M);
+   return internals::subModN(m_end, 1, M);
 }
 
 
@@ -405,15 +411,15 @@ RingBufferConstIterator<RB>::RingBufferConstIterator(const RB* rb, std::size_t i
 }
 
 template <typename RB>
-const typename RingBufferConstIterator<RB>::value_type& RingBufferConstIterator<RB>::
-operator*() const
+const typename RingBufferConstIterator<RB>::value_type&
+   RingBufferConstIterator<RB>::operator*() const
 {
    return (*m_rb)[m_idx];
 }
 
 template <typename RB>
-const typename RingBufferConstIterator<RB>::value_type* RingBufferConstIterator<RB>::
-operator->() const
+const typename RingBufferConstIterator<RB>::value_type*
+   RingBufferConstIterator<RB>::operator->() const
 {
    return &((*m_rb)[m_idx]);
 }
@@ -449,40 +455,40 @@ RingBufferConstIterator<RB> RingBufferConstIterator<RB>::operator--(int)
 }
 
 template <typename RB>
-RingBufferConstIterator<RB>& RingBufferConstIterator<RB>::
-operator+=(const difference_type offset)
+RingBufferConstIterator<RB>&
+RingBufferConstIterator<RB>::operator+=(const difference_type offset)
 {
    m_idx += offset;
    return *this;
 }
 
 template <typename RB>
-RingBufferConstIterator<RB> RingBufferConstIterator<RB>::
-operator+(const difference_type offset) const
+RingBufferConstIterator<RB>
+RingBufferConstIterator<RB>::operator+(const difference_type offset) const
 {
    auto copy = *this;
    return (copy += offset);
 }
 
 template <typename RB>
-RingBufferConstIterator<RB>& RingBufferConstIterator<RB>::
-operator-=(const difference_type offset)
+RingBufferConstIterator<RB>&
+RingBufferConstIterator<RB>::operator-=(const difference_type offset)
 {
    m_idx -= offset;
    return *this;
 }
 
 template <typename RB>
-RingBufferConstIterator<RB> RingBufferConstIterator<RB>::
-operator-(const difference_type offset) const
+RingBufferConstIterator<RB>
+RingBufferConstIterator<RB>::operator-(const difference_type offset) const
 {
    auto copy = *this;
    return (copy -= offset);
 }
 
 template <typename RB>
-typename RingBufferConstIterator<RB>::difference_type RingBufferConstIterator<RB>::
-operator-(const RingBufferConstIterator& rhs) const
+typename RingBufferConstIterator<RB>::difference_type
+RingBufferConstIterator<RB>::operator-(const RingBufferConstIterator& rhs) const
 {
    assert(m_rb == rhs.m_rb);
    return m_idx - rhs.m_idx;
@@ -581,8 +587,8 @@ RingBufferIterator<RB>::RingBufferIterator(RB* rb, std::size_t idx) : m_rb{rb}, 
 }
 
 template <typename RB>
-const typename RingBufferIterator<RB>::value_type& RingBufferIterator<RB>::
-operator*() const
+const typename RingBufferIterator<RB>::value_type&
+   RingBufferIterator<RB>::operator*() const
 {
    return (*m_rb)[m_idx];
 }
@@ -594,8 +600,8 @@ typename RingBufferIterator<RB>::value_type& RingBufferIterator<RB>::operator*()
 }
 
 template <typename RB>
-const typename RingBufferIterator<RB>::value_type* RingBufferIterator<RB>::
-operator->() const
+const typename RingBufferIterator<RB>::value_type*
+   RingBufferIterator<RB>::operator->() const
 {
    return &((*m_rb)[m_idx]);
 }
@@ -640,8 +646,8 @@ RingBufferIterator<RB>& RingBufferIterator<RB>::operator+=(const difference_type
 }
 
 template <typename RB>
-RingBufferIterator<RB> RingBufferIterator<RB>::
-operator+(const difference_type offset) const
+RingBufferIterator<RB>
+RingBufferIterator<RB>::operator+(const difference_type offset) const
 {
    auto copy = *this;
    return (copy += offset);
@@ -655,16 +661,16 @@ RingBufferIterator<RB>& RingBufferIterator<RB>::operator-=(const difference_type
 }
 
 template <typename RB>
-RingBufferIterator<RB> RingBufferIterator<RB>::
-operator-(const difference_type offset) const
+RingBufferIterator<RB>
+RingBufferIterator<RB>::operator-(const difference_type offset) const
 {
    auto copy = *this;
    return (copy -= offset);
 }
 
 template <typename RB>
-typename RingBufferIterator<RB>::difference_type RingBufferIterator<RB>::
-operator-(const RingBufferIterator& rhs) const
+typename RingBufferIterator<RB>::difference_type
+RingBufferIterator<RB>::operator-(const RingBufferIterator& rhs) const
 {
    assert(m_rb == rhs.m_rb);
    return m_idx - rhs.m_idx;

@@ -15,13 +15,13 @@ void TestRingBufferDefaultCtor()
       const std::string caseLabel{"RingBuffer default ctor"};
       RingBuffer<int, 10> rb;
       VERIFY(rb.empty(), caseLabel);
-      VERIFY(rb.max_size() == 10, caseLabel);
+      VERIFY(rb.capacity() == 10, caseLabel);
    }
    {
       const std::string caseLabel{"RingBuffer default ctor for N=0"};
       RingBuffer<double, 0> rb;
       VERIFY(rb.empty(), caseLabel);
-      VERIFY(rb.max_size() == 0, caseLabel);
+      VERIFY(rb.capacity() == 0, caseLabel);
    }
 }
 
@@ -146,32 +146,32 @@ void TestRingBufferSize()
 }
 
 
-void TestRingBufferMaxSize()
+void TestRingBufferCapacity()
 {
    {
-      const std::string caseLabel{"RingBuffer::max_size() "};
+      const std::string caseLabel{"RingBuffer::capacity() "};
       RingBuffer<int, 10> rb{1, 2, 3};
-      VERIFY(rb.max_size() == 10, caseLabel);
+      VERIFY(rb.capacity() == 10, caseLabel);
    }
    {
-      const std::string caseLabel{"RingBuffer::max_size() for empty buffer"};
+      const std::string caseLabel{"RingBuffer::capacity() for empty buffer"};
       RingBuffer<bool, 10> rb;
-      VERIFY(rb.max_size() == 10, caseLabel);
+      VERIFY(rb.capacity() == 10, caseLabel);
    }
    {
-      const std::string caseLabel{"RingBuffer::max_size() for large size"};
+      const std::string caseLabel{"RingBuffer::capacity() for large size"};
       RingBuffer<int, 1000> rb;
-      VERIFY(rb.max_size() == 1000, caseLabel);
+      VERIFY(rb.capacity() == 1000, caseLabel);
    }
    {
-      const std::string caseLabel{"RingBuffer::max_size() for wrapped buffer"};
+      const std::string caseLabel{"RingBuffer::capacity() for wrapped buffer"};
       RingBuffer<int, 2> rb{1, 2, 3};
-      VERIFY(rb.max_size() == 2, caseLabel);
+      VERIFY(rb.capacity() == 2, caseLabel);
    }
    {
-      const std::string caseLabel{"RingBuffer::max_size() for N=0"};
+      const std::string caseLabel{"RingBuffer::capacity() for N=0"};
       RingBuffer<int, 0> rb;
-      VERIFY(rb.max_size() == 0, caseLabel);
+      VERIFY(rb.capacity() == 0, caseLabel);
    }
 }
 
@@ -3334,7 +3334,7 @@ void TestRingBuffer()
    TestRingBufferCopyAssignment();
    TestRingBufferMoveAssignment();
    TestRingBufferSize();
-   TestRingBufferMaxSize();
+   TestRingBufferCapacity();
    TestRingBufferEmpty();
    TestRingBufferFull();
    TestRingBufferAt();
