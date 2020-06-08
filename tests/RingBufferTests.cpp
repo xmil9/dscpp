@@ -812,31 +812,13 @@ void TestRingBufferConstIteratorCtor()
    }
 }
 
-void TestRingBufferConstIteratorRBAndIndexCtor()
-{
-   {
-      const std::string caseLabel{
-         "RingBufferConstIterator ctor for ring buffer and index"};
-      RingBuffer<int, 10> rb{1, 2, 3};
-      RingBufferConstIterator<RingBuffer<int, 10>> cit(&rb, 0);
-      VERIFY(*cit == 1, caseLabel);
-   }
-   {
-      const std::string caseLabel{
-         "RingBufferConstIterator ctor for ring buffer and last index"};
-      RingBuffer<int, 10> rb{1, 2, 3};
-      RingBufferConstIterator<RingBuffer<int, 10>> cit(&rb, 2);
-      VERIFY(*cit == 3, caseLabel);
-   }
-}
-
 
 void TestRingBufferConstIteratorCopyCtor()
 {
    {
       const std::string caseLabel{"RingBufferConstIterator copy ctor"};
       RingBuffer<int, 10> rb{1, 2, 3};
-      RingBufferConstIterator<RingBuffer<int, 10>> cit(&rb, 1);
+      RingBufferConstIterator<RingBuffer<int, 10>> cit{rb.cbegin() + 1};
       auto copy{cit};
       VERIFY(copy == cit, caseLabel);
    }
@@ -848,7 +830,7 @@ void TestRingBufferConstIteratorMoveCtor()
    {
       const std::string caseLabel{"RingBufferConstIterator move ctor"};
       RingBuffer<int, 10> rb{1, 2, 3};
-      RingBufferConstIterator<RingBuffer<int, 10>> cit(&rb, 1);
+      RingBufferConstIterator<RingBuffer<int, 10>> cit{rb.cbegin() + 1};
       auto moved{std::move(cit)};
       VERIFY(*moved == 2, caseLabel);
    }
@@ -859,7 +841,7 @@ void TestRingBufferConstIteratorCopyAssignment()
    {
       const std::string caseLabel{"RingBufferConstIterator copy assignment ctor"};
       RingBuffer<int, 10> rb{1, 2, 3};
-      RingBufferConstIterator<RingBuffer<int, 10>> cit(&rb, 1);
+      RingBufferConstIterator<RingBuffer<int, 10>> cit{rb.cbegin() + 1};
       auto copy = cit;
       VERIFY(copy == cit, caseLabel);
    }
@@ -871,7 +853,7 @@ void TestRingBufferConstIteratorMoveAssignment()
    {
       const std::string caseLabel{"RingBufferConstIterator move assignment ctor"};
       RingBuffer<int, 10> rb{1, 2, 3};
-      RingBufferConstIterator<RingBuffer<int, 10>> cit(&rb, 1);
+      RingBufferConstIterator<RingBuffer<int, 10>> cit{rb.cbegin() + 1};
       auto moved = std::move(cit);
       VERIFY(*moved == 2, caseLabel);
    }
@@ -883,14 +865,14 @@ void TestRingBufferConstIteratorDerefOperator()
    {
       const std::string caseLabel{"RingBufferConstIterator dereference operator"};
       RingBuffer<int, 10> rb{1, 2, 3};
-      RingBufferConstIterator<RingBuffer<int, 10>> cit(&rb, 1);
+      RingBufferConstIterator<RingBuffer<int, 10>> cit{rb.cbegin() + 1};
       VERIFY(*cit == 2, caseLabel);
    }
    {
       const std::string caseLabel{
          "RingBufferConstIterator dereference operator for wrapped buffer"};
       RingBuffer<int, 3> rb{1, 2, 3, 5, 6, 7, 8};
-      RingBufferConstIterator<RingBuffer<int, 3>> cit(&rb, 1);
+      RingBufferConstIterator<RingBuffer<int, 3>> cit{rb.cbegin() + 1};
       VERIFY(*cit == 7, caseLabel);
    }
 }
@@ -902,7 +884,7 @@ void TestRingBufferConstIteratorArrowOperator()
       const std::string caseLabel{"RingBufferConstIterator arrow operator"};
       const std::string s = "test a";
       RingBuffer<std::string, 10> rb{s, "b"};
-      RingBufferConstIterator<RingBuffer<std::string, 10>> cit(&rb, 0);
+      RingBufferConstIterator<RingBuffer<std::string, 10>> cit{rb.cbegin()};
       VERIFY(cit->length() == s.length(), caseLabel);
    }
    {
@@ -910,7 +892,7 @@ void TestRingBufferConstIteratorArrowOperator()
          "RingBufferConstIterator arrow operator for wrapped buffer"};
       const std::string s = "test a";
       RingBuffer<std::string, 3> rb{"aaa", "b", "cc", "dddd", s};
-      RingBufferConstIterator<RingBuffer<std::string, 3>> cit(&rb, 2);
+      RingBufferConstIterator<RingBuffer<std::string, 3>> cit{rb.cbegin() + 2};
       VERIFY(cit->length() == s.length(), caseLabel);
    }
 }
@@ -1419,14 +1401,14 @@ void TestRingBufferIteratorRBAndIndexCtor()
    {
       const std::string caseLabel{"RingBufferIterator ctor for ring buffer and index"};
       RingBuffer<int, 10> rb{1, 2, 3};
-      RingBufferIterator<RingBuffer<int, 10>> it(&rb, 0);
+      RingBufferIterator<RingBuffer<int, 10>> it{rb.begin()};
       VERIFY(*it == 1, caseLabel);
    }
    {
       const std::string caseLabel{
          "RingBufferIterator ctor for ring buffer and last index"};
       RingBuffer<int, 10> rb{1, 2, 3};
-      RingBufferIterator<RingBuffer<int, 10>> it(&rb, 2);
+      RingBufferIterator<RingBuffer<int, 10>> it{rb.begin() + 2};
       VERIFY(*it == 3, caseLabel);
    }
 }
@@ -1437,7 +1419,7 @@ void TestRingBufferIteratorCopyCtor()
    {
       const std::string caseLabel{"RingBufferIterator copy ctor"};
       RingBuffer<int, 10> rb{1, 2, 3};
-      RingBufferIterator<RingBuffer<int, 10>> it(&rb, 1);
+      RingBufferIterator<RingBuffer<int, 10>> it{rb.begin() + 1};
       auto copy{it};
       VERIFY(copy == it, caseLabel);
    }
@@ -1449,7 +1431,7 @@ void TestRingBufferIteratorMoveCtor()
    {
       const std::string caseLabel{"RingBufferIterator move ctor"};
       RingBuffer<int, 10> rb{1, 2, 3};
-      RingBufferIterator<RingBuffer<int, 10>> it(&rb, 1);
+      RingBufferIterator<RingBuffer<int, 10>> it{rb.begin() + 1};
       auto moved{std::move(it)};
       VERIFY(*moved == 2, caseLabel);
    }
@@ -1461,7 +1443,7 @@ void TestRingBufferIteratorCopyAssignment()
    {
       const std::string caseLabel{"RingBufferIterator copy assignment ctor"};
       RingBuffer<int, 10> rb{1, 2, 3};
-      RingBufferIterator<RingBuffer<int, 10>> it(&rb, 1);
+      RingBufferIterator<RingBuffer<int, 10>> it{rb.begin() + 1};
       auto copy = it;
       VERIFY(copy == it, caseLabel);
    }
@@ -1473,7 +1455,7 @@ void TestRingBufferIteratorMoveAssignment()
    {
       const std::string caseLabel{"RingBufferIterator move assignment ctor"};
       RingBuffer<int, 10> rb{1, 2, 3};
-      RingBufferIterator<RingBuffer<int, 10>> it(&rb, 1);
+      RingBufferIterator<RingBuffer<int, 10>> it{rb.begin() + 1};
       auto moved = std::move(it);
       VERIFY(*moved == 2, caseLabel);
    }
@@ -1485,14 +1467,14 @@ void TestRingBufferIteratorConstDerefOperator()
    {
       const std::string caseLabel{"RingBufferIterator const dereference operator"};
       RingBuffer<int, 10> rb{1, 2, 3};
-      RingBufferIterator<RingBuffer<int, 10>> it(&rb, 1);
+      RingBufferIterator<RingBuffer<int, 10>> it{rb.begin() + 1};
       VERIFY(*it == 2, caseLabel);
    }
    {
       const std::string caseLabel{
          "RingBufferIterator const dereference operator for wrapped buffer"};
       RingBuffer<int, 3> rb{1, 2, 3, 5, 6, 7, 8};
-      RingBufferIterator<RingBuffer<int, 3>> it(&rb, 1);
+      RingBufferIterator<RingBuffer<int, 3>> it{rb.begin() + 1};
       VERIFY(*it == 7, caseLabel);
    }
 }
@@ -1503,7 +1485,7 @@ void TestRingBufferIteratorDerefOperator()
    {
       const std::string caseLabel{"RingBufferIterator dereference operator"};
       RingBuffer<int, 10> rb{1, 2, 3};
-      RingBufferIterator<RingBuffer<int, 10>> it(&rb, 1);
+      RingBufferIterator<RingBuffer<int, 10>> it{rb.begin() + 1};
       *it = 10;
       VERIFY(*it == 10, caseLabel);
       VERIFY(rb[1] == 10, caseLabel);
@@ -1512,7 +1494,7 @@ void TestRingBufferIteratorDerefOperator()
       const std::string caseLabel{
          "RingBufferIterator dereference operator for wrapped buffer"};
       RingBuffer<int, 3> rb{1, 2, 3, 5, 6, 7, 8};
-      RingBufferIterator<RingBuffer<int, 3>> it(&rb, 1);
+      RingBufferIterator<RingBuffer<int, 3>> it{rb.begin() + 1};
       *it = 10;
       VERIFY(*it == 10, caseLabel);
       VERIFY(rb[1] == 10, caseLabel);
@@ -1526,7 +1508,7 @@ void TestRingBufferIteratorConstArrowOperator()
       const std::string caseLabel{"RingBufferIterator const arrow operator"};
       const std::string s = "test a";
       RingBuffer<std::string, 10> rb{s, "b"};
-      RingBufferIterator<RingBuffer<std::string, 10>> it(&rb, 0);
+      RingBufferIterator<RingBuffer<std::string, 10>> it{rb.begin()};
       VERIFY(it->length() == s.length(), caseLabel);
    }
    {
@@ -1534,7 +1516,7 @@ void TestRingBufferIteratorConstArrowOperator()
          "RingBufferIterator const arrow operator for wrapped buffer"};
       const std::string s = "test a";
       RingBuffer<std::string, 3> rb{"aaa", "b", "cc", "dddd", s};
-      RingBufferIterator<RingBuffer<std::string, 3>> it(&rb, 2);
+      RingBufferIterator<RingBuffer<std::string, 3>> it{rb.begin() + 2};
       VERIFY(it->length() == s.length(), caseLabel);
    }
 }
@@ -1546,7 +1528,7 @@ void TestRingBufferIteratorArrowOperator()
       const std::string caseLabel{"RingBufferIterator arrow operator"};
       const std::string s = "test a";
       RingBuffer<std::string, 10> rb{s, "b"};
-      RingBufferIterator<RingBuffer<std::string, 10>> it(&rb, 0);
+      RingBufferIterator<RingBuffer<std::string, 10>> it{rb.begin()};
       it->append("**");
       VERIFY(*it == "test a**", caseLabel);
       VERIFY(rb[0] == "test a**", caseLabel);
@@ -1555,7 +1537,7 @@ void TestRingBufferIteratorArrowOperator()
       const std::string caseLabel{
          "RingBufferIterator const arrow operator for wrapped buffer"};
       RingBuffer<std::string, 3> rb{"aaa", "b", "cc", "dddd", "ee"};
-      RingBufferIterator<RingBuffer<std::string, 3>> it(&rb, 2);
+      RingBufferIterator<RingBuffer<std::string, 3>> it{rb.begin() + 2};
       it->append("**");
       VERIFY(*it == "ee**", caseLabel);
       VERIFY(rb[2] == "ee**", caseLabel);
@@ -2060,7 +2042,7 @@ void TestRingBufferConstReverseIteratorFromIterator()
    {
       const std::string caseLabel{"RingBuffer::const_reverse_iterator ctor for iterator"};
       RingBuffer<int, 10> rb{1, 2, 3};
-      RingBufferConstIterator<RingBuffer<int, 10>> cit(&rb, 1);
+      RingBufferConstIterator<RingBuffer<int, 10>> cit{rb.cbegin() + 1};
       RingBuffer<int, 10>::const_reverse_iterator crit(cit);
       VERIFY(*crit == 1, caseLabel);
    }
@@ -2079,7 +2061,7 @@ void TestRingBufferConstReverseIteratorCopyCtor()
    {
       const std::string caseLabel{"RingBuffer::const_reverse_iterator copy ctor"};
       RingBuffer<int, 10> rb{1, 2, 3};
-      RingBufferConstIterator<RingBuffer<int, 10>> cit(&rb, 1);
+      RingBufferConstIterator<RingBuffer<int, 10>> cit{rb.cbegin() + 1};
       RingBuffer<int, 10>::const_reverse_iterator crit(cit);
       auto copy{crit};
       VERIFY(copy == crit, caseLabel);
@@ -2092,7 +2074,7 @@ void TestRingBufferConstReverseIteratorMoveCtor()
    {
       const std::string caseLabel{"RingBuffer::const_reverse_iterator move ctor"};
       RingBuffer<int, 10> rb{1, 2, 3};
-      RingBufferConstIterator<RingBuffer<int, 10>> cit(&rb, 1);
+      RingBufferConstIterator<RingBuffer<int, 10>> cit{rb.cbegin() + 1};
       RingBuffer<int, 10>::const_reverse_iterator crit(cit);
       auto moved{std::move(crit)};
       VERIFY(*moved == 1, caseLabel);
@@ -2105,7 +2087,7 @@ void TestRingBufferConstReverseIteratorCopyAssignment()
    {
       const std::string caseLabel{"RingBuffer::const_reverse_iterator copy assignment ctor"};
       RingBuffer<int, 10> rb{1, 2, 3};
-      RingBufferConstIterator<RingBuffer<int, 10>> cit(&rb, 1);
+      RingBufferConstIterator<RingBuffer<int, 10>> cit{rb.cbegin() + 1};
       RingBuffer<int, 10>::const_reverse_iterator crit(cit);
       auto copy = crit;
       VERIFY(copy == crit, caseLabel);
@@ -2118,7 +2100,7 @@ void TestRingBufferConstReverseIteratorMoveAssignment()
    {
       const std::string caseLabel{"RingBuffer::const_reverse_iterator move assignment ctor"};
       RingBuffer<int, 10> rb{1, 2, 3};
-      RingBufferConstIterator<RingBuffer<int, 10>> cit(&rb, 1);
+      RingBufferConstIterator<RingBuffer<int, 10>> cit{rb.cbegin() + 1};
       RingBuffer<int, 10>::const_reverse_iterator crit(cit);
       auto moved = std::move(crit);
       VERIFY(*moved == 1, caseLabel);
@@ -2131,7 +2113,7 @@ void TestRingBufferConstReverseIteratorDerefOperator()
    {
       const std::string caseLabel{"RingBuffer::const_reverse_iterator dereference operator"};
       RingBuffer<int, 10> rb{1, 2, 3};
-      RingBufferConstIterator<RingBuffer<int, 10>> cit(&rb, 1);
+      RingBufferConstIterator<RingBuffer<int, 10>> cit{rb.cbegin() + 1};
       RingBuffer<int, 10>::const_reverse_iterator crit(cit);
       VERIFY(*crit == 1, caseLabel);
    }
@@ -2139,7 +2121,7 @@ void TestRingBufferConstReverseIteratorDerefOperator()
       const std::string caseLabel{
          "RingBuffer::const_reverse_iterator dereference operator for wrapped buffer"};
       RingBuffer<int, 3> rb{1, 2, 3, 5, 6, 7, 8};
-      RingBufferConstIterator<RingBuffer<int, 3>> cit(&rb, 1);
+      RingBufferConstIterator<RingBuffer<int, 3>> cit{rb.cbegin() + 1};
       RingBuffer<int, 3>::const_reverse_iterator crit(cit);
       VERIFY(*crit == 6, caseLabel);
    }
@@ -2153,7 +2135,7 @@ void TestRingBufferConstReverseIteratorArrowOperator()
       using Rb_t = RingBuffer<std::string, 10>;
       const std::string s = "test a";
       Rb_t rb{s, "b"};
-      RingBufferConstIterator<Rb_t> cit(&rb, 1);
+      RingBufferConstIterator<Rb_t> cit{rb.cbegin() + 1};
       Rb_t::const_reverse_iterator crit(cit);
       VERIFY(crit->length() == s.length(), caseLabel);
    }
@@ -2678,7 +2660,7 @@ void TestRingBufferReverseIteratorFromIterator()
    {
       const std::string caseLabel{"RingBuffer::reverse_iterator ctor for iterator"};
       RingBuffer<int, 10> rb{1, 2, 3};
-      RingBufferIterator<RingBuffer<int, 10>> it(&rb, 1);
+      RingBufferIterator<RingBuffer<int, 10>> it{rb.begin() + 1};
       RingBuffer<int, 10>::reverse_iterator rit(it);
       VERIFY(*rit == 1, caseLabel);
    }
@@ -2697,7 +2679,7 @@ void TestRingBufferReverseIteratorCopyCtor()
    {
       const std::string caseLabel{"RingBuffer::reverse_iterator copy ctor"};
       RingBuffer<int, 10> rb{1, 2, 3};
-      RingBufferIterator<RingBuffer<int, 10>> it(&rb, 1);
+      RingBufferIterator<RingBuffer<int, 10>> it{rb.begin() + 1};
       RingBuffer<int, 10>::reverse_iterator rit(it);
       auto copy{rit};
       VERIFY(copy == rit, caseLabel);
@@ -2710,7 +2692,7 @@ void TestRingBufferReverseIteratorMoveCtor()
    {
       const std::string caseLabel{"RingBuffer::reverse_iterator move ctor"};
       RingBuffer<int, 10> rb{1, 2, 3};
-      RingBufferIterator<RingBuffer<int, 10>> it(&rb, 1);
+      RingBufferIterator<RingBuffer<int, 10>> it{rb.begin() + 1};
       RingBuffer<int, 10>::reverse_iterator rit(it);
       auto moved{std::move(rit)};
       VERIFY(*moved == 1, caseLabel);
@@ -2723,7 +2705,7 @@ void TestRingBufferReverseIteratorCopyAssignment()
    {
       const std::string caseLabel{"RingBuffer::reverse_iterator copy assignment ctor"};
       RingBuffer<int, 10> rb{1, 2, 3};
-      RingBufferIterator<RingBuffer<int, 10>> it(&rb, 1);
+      RingBufferIterator<RingBuffer<int, 10>> it{rb.begin() + 1};
       RingBuffer<int, 10>::reverse_iterator rit(it);
       auto copy = rit;
       VERIFY(copy == rit, caseLabel);
@@ -2736,7 +2718,7 @@ void TestRingBufferReverseIteratorMoveAssignment()
    {
       const std::string caseLabel{"RingBuffer::reverse_iterator move assignment ctor"};
       RingBuffer<int, 10> rb{1, 2, 3};
-      RingBufferIterator<RingBuffer<int, 10>> it(&rb, 1);
+      RingBufferIterator<RingBuffer<int, 10>> it{rb.begin() + 1};
       RingBuffer<int, 10>::reverse_iterator rit(it);
       auto moved = std::move(rit);
       VERIFY(*moved == 1, caseLabel);
@@ -2749,7 +2731,7 @@ void TestRingBufferReverseIteratorConstDerefOperator()
    {
       const std::string caseLabel{"RingBuffer::reverse_iterator const dereference operator"};
       RingBuffer<int, 10> rb{1, 2, 3};
-      RingBufferIterator<RingBuffer<int, 10>> it(&rb, 1);
+      RingBufferIterator<RingBuffer<int, 10>> it{rb.begin() + 1};
       RingBuffer<int, 10>::reverse_iterator rit(it);
       VERIFY(*rit == 1, caseLabel);
    }
@@ -2757,7 +2739,7 @@ void TestRingBufferReverseIteratorConstDerefOperator()
       const std::string caseLabel{
          "RingBuffer::reverse_iterator const dereference operator for wrapped buffer"};
       RingBuffer<int, 3> rb{1, 2, 3, 5, 6, 7, 8};
-      RingBufferIterator<RingBuffer<int, 3>> it(&rb, 1);
+      RingBufferIterator<RingBuffer<int, 3>> it{rb.begin() + 1};
       RingBuffer<int, 3>::reverse_iterator rit(it);
       VERIFY(*rit == 6, caseLabel);
    }
@@ -2768,7 +2750,7 @@ void TestRingBufferReverseIteratorDerefOperator()
    {
       const std::string caseLabel{"RingBuffer::reverse_iterator dereference operator"};
       RingBuffer<int, 10> rb{1, 2, 3};
-      RingBufferIterator<RingBuffer<int, 10>> it(&rb, 1);
+      RingBufferIterator<RingBuffer<int, 10>> it{rb.begin() + 1};
       RingBuffer<int, 10>::reverse_iterator rit(it);
       *rit = 10;
       VERIFY(*rit == 10, caseLabel);
@@ -2778,7 +2760,7 @@ void TestRingBufferReverseIteratorDerefOperator()
       const std::string caseLabel{
          "RingBuffer::reverse_iterator dereference operator for wrapped buffer"};
       RingBuffer<int, 3> rb{1, 2, 3, 5, 6, 7, 8};
-      RingBufferIterator<RingBuffer<int, 3>> it(&rb, 1);
+      RingBufferIterator<RingBuffer<int, 3>> it{rb.begin() + 1};
       RingBuffer<int, 3>::reverse_iterator rit(it);
       *rit = 0;
       VERIFY(*rit == 0, caseLabel);
@@ -2793,7 +2775,7 @@ void TestRingBufferReverseIteratorConstArrowOperator()
       using Rb_t = RingBuffer<std::string, 10>;
       const std::string s = "test a";
       Rb_t rb{s, "b"};
-      RingBufferIterator<Rb_t> it(&rb, 1);
+      RingBufferIterator<Rb_t> it{rb.begin() + 1};
       Rb_t::reverse_iterator rit(it);
       VERIFY(rit->length() == s.length(), caseLabel);
    }
@@ -2816,7 +2798,7 @@ void TestRingBufferReverseIteratorArrowOperator()
       using Rb_t = RingBuffer<std::string, 10>;
       const std::string s = "test a";
       Rb_t rb{s, "b"};
-      RingBufferIterator<Rb_t> it(&rb, 1);
+      RingBufferIterator<Rb_t> it{rb.begin() + 1};
       Rb_t::reverse_iterator rit(it);
       rit->append("**");
       VERIFY(*rit == "test a**", caseLabel);
@@ -3359,7 +3341,6 @@ void TestRingBuffer()
    TestRingBufferCREnd();
 
    TestRingBufferConstIteratorCtor();
-   TestRingBufferConstIteratorRBAndIndexCtor();
    TestRingBufferConstIteratorCopyCtor();
    TestRingBufferConstIteratorMoveCtor();
    TestRingBufferConstIteratorCopyAssignment();

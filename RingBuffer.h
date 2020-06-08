@@ -359,6 +359,8 @@ typename RingBuffer<T, N>::Index RingBuffer<T, N>::last() const
 // Const iterator for ring buffer. Does not allow changing elements.
 template <typename RB> class RingBufferConstIterator
 {
+   template <typename T, std::size_t N> friend class RingBuffer;
+
  public:
    using iterator_category = std::random_access_iterator_tag;
    using value_type = typename RB::value_type;
@@ -366,9 +368,12 @@ template <typename RB> class RingBufferConstIterator
    using pointer = typename RB::const_pointer;
    using reference = typename RB::const_reference;
 
+ protected:
+   // Only the ring buffer and non-const iterator classes need access to this ctor.
+   RingBufferConstIterator(const RB* rb, std::size_t idx);
+
  public:
    RingBufferConstIterator() = default;
-   RingBufferConstIterator(const RB* rb, std::size_t idx);
    ~RingBufferConstIterator() = default;
    RingBufferConstIterator(const RingBufferConstIterator&) = default;
    RingBufferConstIterator& operator=(const RingBufferConstIterator&) = default;
@@ -394,8 +399,8 @@ template <typename RB> class RingBufferConstIterator
    bool operator<=(const RingBufferConstIterator& rhs) const;
    bool operator>=(const RingBufferConstIterator& rhs) const;
 
- private:
-   const RB* m_rb = nullptr;
+ protected:
+   RB* m_rb = nullptr;
    // Index to ring buffer element. This is an abstracted index, i.e. an index that
    // should be used on an ring buffer object. It is not an index into the internal
    // buffer of the ring buffer.
@@ -405,7 +410,7 @@ template <typename RB> class RingBufferConstIterator
 
 template <typename RB>
 RingBufferConstIterator<RB>::RingBufferConstIterator(const RB* rb, std::size_t idx)
-: m_rb{rb}, m_idx{idx}
+   : m_rb{const_cast<RB*>(rb)}, m_idx{idx}
 {
    assert(m_rb);
 }
@@ -535,8 +540,12 @@ bool RingBufferConstIterator<RB>::operator>=(const RingBufferConstIterator& rhs)
 ///////////////////
 
 // Iterator for ring buffer. Does allow changing elements.
-template <typename RB> class RingBufferIterator
+// Needs to be derived from non-const iterator type, so that functions that take
+// const iterators can also be called with non-const iterators.
+template <typename RB> class RingBufferIterator : public RingBufferConstIterator<RB>
 {
+   template <typename T, std::size_t N> friend class RingBuffer;
+
  public:
    using iterator_category = std::random_access_iterator_tag;
    using value_type = typename RB::value_type;
@@ -544,9 +553,12 @@ template <typename RB> class RingBufferIterator
    using pointer = typename RB::pointer;
    using reference = typename RB::reference;
 
+ private:
+   // Only the ring buffer class needs access to ctor.
+   RingBufferIterator(RB* rb, std::size_t idx);
+
  public:
    RingBufferIterator() = default;
-   RingBufferIterator(RB* rb, std::size_t idx);
    ~RingBufferIterator() = default;
    RingBufferIterator(const RingBufferIterator&) = default;
    RingBufferIterator& operator=(const RingBufferIterator&) = default;
@@ -573,48 +585,44 @@ template <typename RB> class RingBufferIterator
    bool operator>(const RingBufferIterator& rhs) const;
    bool operator<=(const RingBufferIterator& rhs) const;
    bool operator>=(const RingBufferIterator& rhs) const;
-
- private:
-   RB* m_rb = nullptr;
-   typename RB::Index m_idx = 0;
 };
 
 
 template <typename RB>
-RingBufferIterator<RB>::RingBufferIterator(RB* rb, std::size_t idx) : m_rb{rb}, m_idx{idx}
+RingBufferIterator<RB>::RingBufferIterator(RB* rb, std::size_t idx)
+: RingBufferConstIterator<RB>{rb, idx}
 {
-   assert(m_rb);
 }
 
 template <typename RB>
 const typename RingBufferIterator<RB>::value_type&
    RingBufferIterator<RB>::operator*() const
 {
-   return (*m_rb)[m_idx];
+   return (*this->m_rb)[this->m_idx];
 }
 
 template <typename RB>
 typename RingBufferIterator<RB>::value_type& RingBufferIterator<RB>::operator*()
 {
-   return (*m_rb)[m_idx];
+   return (*this->m_rb)[this->m_idx];
 }
 
 template <typename RB>
 const typename RingBufferIterator<RB>::value_type*
    RingBufferIterator<RB>::operator->() const
 {
-   return &((*m_rb)[m_idx]);
+   return &((*this->m_rb)[this->m_idx]);
 }
 
 template <typename RB>
 typename RingBufferIterator<RB>::value_type* RingBufferIterator<RB>::operator->()
 {
-   return &((*m_rb)[m_idx]);
+   return &((*this->m_rb)[this->m_idx]);
 }
 
 template <typename RB> RingBufferIterator<RB>& RingBufferIterator<RB>::operator++()
 {
-   ++m_idx;
+   ++this->m_idx;
    return *this;
 }
 
@@ -627,7 +635,7 @@ template <typename RB> RingBufferIterator<RB> RingBufferIterator<RB>::operator++
 
 template <typename RB> RingBufferIterator<RB>& RingBufferIterator<RB>::operator--()
 {
-   --m_idx;
+   --this->m_idx;
    return *this;
 }
 
@@ -641,7 +649,7 @@ template <typename RB> RingBufferIterator<RB> RingBufferIterator<RB>::operator--
 template <typename RB>
 RingBufferIterator<RB>& RingBufferIterator<RB>::operator+=(const difference_type offset)
 {
-   m_idx += offset;
+   this->m_idx += offset;
    return *this;
 }
 
@@ -656,7 +664,7 @@ RingBufferIterator<RB>::operator+(const difference_type offset) const
 template <typename RB>
 RingBufferIterator<RB>& RingBufferIterator<RB>::operator-=(const difference_type offset)
 {
-   m_idx -= offset;
+   this->m_idx -= offset;
    return *this;
 }
 
@@ -672,14 +680,14 @@ template <typename RB>
 typename RingBufferIterator<RB>::difference_type
 RingBufferIterator<RB>::operator-(const RingBufferIterator& rhs) const
 {
-   assert(m_rb == rhs.m_rb);
-   return m_idx - rhs.m_idx;
+   assert(this->m_rb == rhs.m_rb);
+   return this->m_idx - rhs.m_idx;
 }
 
 template <typename RB>
 bool RingBufferIterator<RB>::operator==(const RingBufferIterator& rhs) const
 {
-   return (m_rb == rhs.m_rb && m_idx == rhs.m_idx);
+   return (this->m_rb == rhs.m_rb && this->m_idx == rhs.m_idx);
 }
 
 template <typename RB>
@@ -691,8 +699,8 @@ bool RingBufferIterator<RB>::operator!=(const RingBufferIterator& rhs) const
 template <typename RB>
 bool RingBufferIterator<RB>::operator<(const RingBufferIterator& rhs) const
 {
-   assert(m_rb == rhs.m_rb);
-   return (m_idx < rhs.m_idx);
+   assert(this->m_rb == rhs.m_rb);
+   return (this->m_idx < rhs.m_idx);
 }
 
 template <typename RB>
