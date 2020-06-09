@@ -382,6 +382,7 @@ template <typename RB> class RingBufferConstIterator
 
    const value_type& operator*() const;
    const value_type* operator->() const;
+   const value_type& operator[](difference_type offset) const;
    RingBufferConstIterator& operator++();
    RingBufferConstIterator operator++(int);
    RingBufferConstIterator& operator--();
@@ -410,7 +411,7 @@ template <typename RB> class RingBufferConstIterator
 
 template <typename RB>
 RingBufferConstIterator<RB>::RingBufferConstIterator(const RB* rb, std::size_t idx)
-   : m_rb{const_cast<RB*>(rb)}, m_idx{idx}
+: m_rb{const_cast<RB*>(rb)}, m_idx{idx}
 {
    assert(m_rb);
 }
@@ -427,6 +428,13 @@ const typename RingBufferConstIterator<RB>::value_type*
    RingBufferConstIterator<RB>::operator->() const
 {
    return &((*m_rb)[m_idx]);
+}
+
+template <typename RB>
+const typename RingBufferConstIterator<RB>::value_type&
+   RingBufferConstIterator<RB>::operator[](difference_type offset) const
+{
+   return (*m_rb)[m_idx + offset];
 }
 
 template <typename RB>
@@ -569,6 +577,8 @@ template <typename RB> class RingBufferIterator : public RingBufferConstIterator
    value_type& operator*();
    const value_type* operator->() const;
    value_type* operator->();
+   const value_type& operator[](difference_type offset) const;
+   value_type& operator[](difference_type offset);
    RingBufferIterator& operator++();
    RingBufferIterator operator++(int);
    RingBufferIterator& operator--();
@@ -618,6 +628,20 @@ template <typename RB>
 typename RingBufferIterator<RB>::value_type* RingBufferIterator<RB>::operator->()
 {
    return &((*this->m_rb)[this->m_idx]);
+}
+
+template <typename RB>
+typename RingBufferIterator<RB>::value_type&
+   RingBufferIterator<RB>::operator[](difference_type offset)
+{
+   return (*this->m_rb)[this->m_idx + offset];
+}
+
+template <typename RB>
+const typename RingBufferIterator<RB>::value_type&
+   RingBufferIterator<RB>::operator[](difference_type offset) const
+{
+   return (*this->m_rb)[this->m_idx + offset];
 }
 
 template <typename RB> RingBufferIterator<RB>& RingBufferIterator<RB>::operator++()

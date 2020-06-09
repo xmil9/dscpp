@@ -898,6 +898,26 @@ void TestRingBufferConstIteratorArrowOperator()
 }
 
 
+void TestRingBufferConstIteratorSubscriptOperator()
+{
+   {
+      const std::string caseLabel{"RingBufferConstIterator subscript operator"};
+      const std::string s = "test a";
+      RingBuffer<std::string, 10> rb{s, "b", "abc", "1234"};
+      const RingBufferConstIterator<RingBuffer<std::string, 10>> cit{rb.cbegin()};
+      VERIFY(cit[2] == "abc", caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "RingBufferConstIterator const subscript operator for wrapped buffer"};
+      const std::string s = "test a";
+      RingBuffer<std::string, 3> rb{s, "b", "abc", "1234", "xyz"};
+      const RingBufferConstIterator<RingBuffer<std::string, 3>> cit{rb.cbegin()};
+      VERIFY(cit[2] == "xyz", caseLabel);
+   }
+}
+
+
 void TestRingBufferConstIteratorPrefixIncOperator()
 {
    {
@@ -1545,6 +1565,50 @@ void TestRingBufferIteratorArrowOperator()
 }
 
 
+void TestRingBufferIteratorSubscriptOperator()
+{
+   {
+      const std::string caseLabel{"RingBufferIterator subscript operator"};
+      const std::string s = "test a";
+      RingBuffer<std::string, 10> rb{s, "b", "abc", "1234"};
+      RingBufferIterator<RingBuffer<std::string, 10>> cit{rb.begin()};
+      VERIFY(cit[2] == "abc", caseLabel);
+      cit[2] = std::string{"cba"};
+      VERIFY(cit[2] == "cba", caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "RingBufferConstIterator subscript operator for wrapped buffer"};
+      const std::string s = "test a";
+      RingBuffer<std::string, 3> rb{s, "b", "abc", "1234", "xyz"};
+      RingBufferIterator<RingBuffer<std::string, 3>> cit{rb.begin()};
+      VERIFY(cit[2] == "xyz", caseLabel);
+      cit[2] = "zyx";
+      VERIFY(cit[2] == "zyx", caseLabel);
+   }
+}
+
+
+void TestRingBufferIteratorConstSubscriptOperator()
+{
+   {
+      const std::string caseLabel{"RingBufferIterator const subscript operator"};
+      const std::string s = "test a";
+      RingBuffer<std::string, 10> rb{s, "b", "abc", "1234"};
+      const RingBufferIterator<RingBuffer<std::string, 10>> cit{rb.begin()};
+      VERIFY(cit[2] == "abc", caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "RingBufferConstIterator const subscript operator for wrapped buffer"};
+      const std::string s = "test a";
+      RingBuffer<std::string, 3> rb{s, "b", "abc", "1234", "xyz"};
+      const RingBufferIterator<RingBuffer<std::string, 3>> cit{rb.begin()};
+      VERIFY(cit[2] == "xyz", caseLabel);
+   }
+}
+
+
 void TestRingBufferIteratorPrefixIncOperator()
 {
    {
@@ -2085,7 +2149,8 @@ void TestRingBufferConstReverseIteratorMoveCtor()
 void TestRingBufferConstReverseIteratorCopyAssignment()
 {
    {
-      const std::string caseLabel{"RingBuffer::const_reverse_iterator copy assignment ctor"};
+      const std::string caseLabel{
+         "RingBuffer::const_reverse_iterator copy assignment ctor"};
       RingBuffer<int, 10> rb{1, 2, 3};
       RingBufferConstIterator<RingBuffer<int, 10>> cit{rb.cbegin() + 1};
       RingBuffer<int, 10>::const_reverse_iterator crit(cit);
@@ -2098,7 +2163,8 @@ void TestRingBufferConstReverseIteratorCopyAssignment()
 void TestRingBufferConstReverseIteratorMoveAssignment()
 {
    {
-      const std::string caseLabel{"RingBuffer::const_reverse_iterator move assignment ctor"};
+      const std::string caseLabel{
+         "RingBuffer::const_reverse_iterator move assignment ctor"};
       RingBuffer<int, 10> rb{1, 2, 3};
       RingBufferConstIterator<RingBuffer<int, 10>> cit{rb.cbegin() + 1};
       RingBuffer<int, 10>::const_reverse_iterator crit(cit);
@@ -2111,7 +2177,8 @@ void TestRingBufferConstReverseIteratorMoveAssignment()
 void TestRingBufferConstReverseIteratorDerefOperator()
 {
    {
-      const std::string caseLabel{"RingBuffer::const_reverse_iterator dereference operator"};
+      const std::string caseLabel{
+         "RingBuffer::const_reverse_iterator dereference operator"};
       RingBuffer<int, 10> rb{1, 2, 3};
       RingBufferConstIterator<RingBuffer<int, 10>> cit{rb.cbegin() + 1};
       RingBuffer<int, 10>::const_reverse_iterator crit(cit);
@@ -2154,8 +2221,8 @@ void TestRingBufferConstReverseIteratorArrowOperator()
 void TestRingBufferConstReverseIteratorPrefixIncOperator()
 {
    {
-      const std::string caseLabel{
-         "RingBuffer::const_reverse_iterator prefix behavior of prefix increment operator"};
+      const std::string caseLabel{"RingBuffer::const_reverse_iterator prefix behavior of "
+                                  "prefix increment operator"};
       const RingBuffer<int, 10> rb{10, 20};
       auto rit = rb.rbegin();
       auto res = ++rit;
@@ -2172,8 +2239,9 @@ void TestRingBufferConstReverseIteratorPrefixIncOperator()
          VERIFY(*rit == *dataRit, caseLabel);
    }
    {
-      const std::string caseLabel{"RingBuffer::const_reverse_iterator prefix increment operator for "
-                                  "iterating wrapped buffer"};
+      const std::string caseLabel{
+         "RingBuffer::const_reverse_iterator prefix increment operator for "
+         "iterating wrapped buffer"};
       const std::vector<int> data{10, 20, 30, 40, 50, 60, 70, 80};
       const RingBuffer<int, 5> rb{data.begin(), data.end()};
 
@@ -2188,8 +2256,8 @@ void TestRingBufferConstReverseIteratorPrefixIncOperator()
 void TestRingBufferConstReverseIteratorPostfixIncOperator()
 {
    {
-      const std::string caseLabel{
-         "RingBuffer::const_reverse_iterator postfix behavior of postfix increment operator"};
+      const std::string caseLabel{"RingBuffer::const_reverse_iterator postfix behavior "
+                                  "of postfix increment operator"};
       const RingBuffer<int, 10> rb{10, 20};
       auto rit = rb.rbegin();
       auto res = rit++;
@@ -2223,8 +2291,8 @@ void TestRingBufferConstReverseIteratorPostfixIncOperator()
 void TestRingBufferConstReverseIteratorPrefixDecOperator()
 {
    {
-      const std::string caseLabel{
-         "RingBuffer::const_reverse_iterator prefix behavior of prefix decrement operator"};
+      const std::string caseLabel{"RingBuffer::const_reverse_iterator prefix behavior of "
+                                  "prefix decrement operator"};
       const RingBuffer<int, 10> rb{10, 20};
       auto rit = rb.rbegin() + 1;
       auto res = --rit;
@@ -2244,8 +2312,9 @@ void TestRingBufferConstReverseIteratorPrefixDecOperator()
       }
    }
    {
-      const std::string caseLabel{"RingBuffer::const_reverse_iterator prefix decrement operator for "
-                                  "iterating wrapped buffer"};
+      const std::string caseLabel{
+         "RingBuffer::const_reverse_iterator prefix decrement operator for "
+         "iterating wrapped buffer"};
       std::vector<int> data{10, 20, 30, 40, 50, 60, 70, 80};
       const RingBuffer<int, 5> rb{data.begin(), data.end()};
 
@@ -2262,8 +2331,8 @@ void TestRingBufferConstReverseIteratorPrefixDecOperator()
 void TestRingBufferConstReverseIteratorPostfixDecOperator()
 {
    {
-      const std::string caseLabel{
-         "RingBuffer::const_reverse_iterator postfix behavior of postfix decrement operator"};
+      const std::string caseLabel{"RingBuffer::const_reverse_iterator postfix behavior "
+                                  "of postfix decrement operator"};
       const RingBuffer<int, 10> rb{10, 20};
       auto rit = rb.rbegin() + 1;
       auto res = rit--;
@@ -2303,22 +2372,22 @@ void TestRingBufferConstReverseIteratorPostfixDecOperator()
 void TestRingBufferConstReverseIteratorAddAssignmentOperator()
 {
    {
-      const std::string caseLabel{"RingBuffer::const_reverse_iterator assignment addition operator"};
+      const std::string caseLabel{
+         "RingBuffer::const_reverse_iterator assignment addition operator"};
       const RingBuffer<int, 10> rb{1, 2, 3, 4, 5};
       auto rit = rb.rbegin();
       rit += 3;
       VERIFY(*rit == 2, caseLabel);
    }
    {
-      const std::string caseLabel{
-         "RingBuffer::const_reverse_iterator assignment addition operator for negative value"};
+      const std::string caseLabel{"RingBuffer::const_reverse_iterator assignment "
+                                  "addition operator for negative value"};
       const RingBuffer<int, 10> rb{1, 2, 3, 4, 5};
       auto rit = rb.rbegin() + 3;
       rit += -2;
       VERIFY(*rit == 4, caseLabel);
    }
 }
-
 
 
 void TestRingBufferConstReverseIteratorAdditionOperator()
@@ -2352,8 +2421,8 @@ void TestRingBufferConstReverseIteratorSubAssignmentOperator()
       VERIFY(*rit == 3, caseLabel);
    }
    {
-      const std::string caseLabel{
-         "RingBuffer::const_reverse_iterator assignment subtraction operator for negative value"};
+      const std::string caseLabel{"RingBuffer::const_reverse_iterator assignment "
+                                  "subtraction operator for negative value"};
       const RingBuffer<int, 10> rb{1, 2, 3, 4, 5};
       auto rit = rb.rbegin();
       rit -= -3;
@@ -2365,7 +2434,8 @@ void TestRingBufferConstReverseIteratorSubAssignmentOperator()
 void TestRingBufferConstReverseIteratorSubtractionOperator()
 {
    {
-      const std::string caseLabel{"RingBuffer::const_reverse_iterator subtraction operator"};
+      const std::string caseLabel{
+         "RingBuffer::const_reverse_iterator subtraction operator"};
       const RingBuffer<int, 10> rb{1, 2, 3, 4, 5};
       auto rit = rb.rbegin() + 4;
       auto res = rit - 2;
@@ -2386,16 +2456,16 @@ void TestRingBufferConstReverseIteratorDifferenceOperator()
 {
    // Iterator difference does not seem to be defined for the reverse iterator adaptor.
    //{
-   //   const std::string caseLabel{"RingBuffer::const_reverse_iterator difference operator"};
-   //   const RingBuffer<int, 10> rb{1, 2, 3, 4, 5};
-   //   auto a = rb.rbegin() + 1;
+   //   const std::string caseLabel{"RingBuffer::const_reverse_iterator difference
+   //   operator"}; const RingBuffer<int, 10> rb{1, 2, 3, 4, 5}; auto a = rb.rbegin() + 1;
    //   auto b = rb.rbegin() + 3;
    //   auto diff = b - a;
    //   VERIFY(diff == 2, caseLabel);
    //}
    //{
    //   const std::string caseLabel{
-   //      "RingBuffer::const_reverse_iterator difference operator for negative differences"};
+   //      "RingBuffer::const_reverse_iterator difference operator for negative
+   //      differences"};
    //   const RingBuffer<int, 10> rb{1, 2, 3, 4, 5};
    //   auto a = rb.rbegin() + 1;
    //   auto b = rb.rbegin() + 3;
@@ -2441,8 +2511,8 @@ void TestRingBufferConstReverseIteratorEqualityOperator()
       VERIFY(a == b, caseLabel);
    }
    {
-      const std::string caseLabel{
-         "RingBuffer::const_reverse_iterator equality operator for end and last iterators"};
+      const std::string caseLabel{"RingBuffer::const_reverse_iterator equality operator "
+                                  "for end and last iterators"};
       const RingBuffer<int, 10> rb{1, 2, 3, 4, 5};
       auto a = rb.rbegin() + 4;
       auto b = rb.rend();
@@ -2485,8 +2555,8 @@ void TestRingBufferConstReverseIteratorInequalityOperator()
       VERIFY(a != b, caseLabel);
    }
    {
-      const std::string caseLabel{
-         "RingBuffer::const_reverse_iterator inequality operator for unassigned iterators"};
+      const std::string caseLabel{"RingBuffer::const_reverse_iterator inequality "
+                                  "operator for unassigned iterators"};
       RingBuffer<int, 10>::const_reverse_iterator a, b;
       VERIFY(!(a != b), caseLabel);
    }
@@ -2496,7 +2566,8 @@ void TestRingBufferConstReverseIteratorInequalityOperator()
 void TestRingBufferConstReverseIteratorLessThanOperator()
 {
    {
-      const std::string caseLabel{"RingBuffer::const_reverse_iterator less-than operator"};
+      const std::string caseLabel{
+         "RingBuffer::const_reverse_iterator less-than operator"};
       const RingBuffer<int, 10> rb{1, 2, 3, 4, 5};
       auto a = rb.rbegin() + 2;
       auto b = rb.rbegin() + 3;
@@ -2533,7 +2604,8 @@ void TestRingBufferConstReverseIteratorLessThanOperator()
 void TestRingBufferConstReverseIteratorGreaterThanOperator()
 {
    {
-      const std::string caseLabel{"RingBuffer::const_reverse_iterator greater-than operator"};
+      const std::string caseLabel{
+         "RingBuffer::const_reverse_iterator greater-than operator"};
       const RingBuffer<int, 10> rb{1, 2, 3, 4, 5};
       auto a = rb.rbegin() + 3;
       auto b = rb.rbegin() + 2;
@@ -2570,7 +2642,8 @@ void TestRingBufferConstReverseIteratorGreaterThanOperator()
 void TestRingBufferConstReverseIteratorLessThanEqualOperator()
 {
    {
-      const std::string caseLabel{"RingBuffer::const_reverse_iterator less-or-equal-than operator"};
+      const std::string caseLabel{
+         "RingBuffer::const_reverse_iterator less-or-equal-than operator"};
       const RingBuffer<int, 10> rb{1, 2, 3, 4, 5};
       auto a = rb.rbegin() + 2;
       auto b = rb.rbegin() + 3;
@@ -2578,8 +2651,8 @@ void TestRingBufferConstReverseIteratorLessThanEqualOperator()
       VERIFY(!(b <= a), caseLabel);
    }
    {
-      const std::string caseLabel{
-         "RingBuffer::const_reverse_iterator less-or-equal-than operator for same iterator"};
+      const std::string caseLabel{"RingBuffer::const_reverse_iterator less-or-equal-than "
+                                  "operator for same iterator"};
       const RingBuffer<int, 10> rb{1, 2, 3, 4, 5};
       auto a = rb.rbegin() + 2;
       auto b = a;
@@ -2587,8 +2660,8 @@ void TestRingBufferConstReverseIteratorLessThanEqualOperator()
       VERIFY(b <= a, caseLabel);
    }
    {
-      const std::string caseLabel{
-         "RingBuffer::const_reverse_iterator less-or-equal-than operator with end iterator"};
+      const std::string caseLabel{"RingBuffer::const_reverse_iterator less-or-equal-than "
+                                  "operator with end iterator"};
       const RingBuffer<int, 10> rb{1, 2, 3, 4, 5};
       auto a = rb.rbegin() + 2;
       auto b = rb.rbegin() + 4;
@@ -2617,8 +2690,8 @@ void TestRingBufferConstReverseIteratorGreaterThanEqualOperator()
       VERIFY(!(b >= a), caseLabel);
    }
    {
-      const std::string caseLabel{
-         "RingBuffer::const_reverse_iterator greater-or-equal-than operator for same iterator"};
+      const std::string caseLabel{"RingBuffer::const_reverse_iterator "
+                                  "greater-or-equal-than operator for same iterator"};
       const RingBuffer<int, 10> rb{1, 2, 3, 4, 5};
       auto a = rb.rbegin() + 2;
       auto b = a;
@@ -2626,8 +2699,8 @@ void TestRingBufferConstReverseIteratorGreaterThanEqualOperator()
       VERIFY(b >= a, caseLabel);
    }
    {
-      const std::string caseLabel{
-         "RingBuffer::const_reverse_iterator greater-or-equal-than operator with end iterator"};
+      const std::string caseLabel{"RingBuffer::const_reverse_iterator "
+                                  "greater-or-equal-than operator with end iterator"};
       const RingBuffer<int, 10> rb{1, 2, 3, 4, 5};
       auto a = rb.rbegin() + 2;
       auto b = rb.rbegin() + 4;
@@ -2665,8 +2738,7 @@ void TestRingBufferReverseIteratorFromIterator()
       VERIFY(*rit == 1, caseLabel);
    }
    {
-      const std::string caseLabel{
-         "RingBuffer::reverse_iterator ctor for end iterator"};
+      const std::string caseLabel{"RingBuffer::reverse_iterator ctor for end iterator"};
       RingBuffer<int, 10> rb{1, 2, 3};
       RingBuffer<int, 10>::reverse_iterator rit(rb.end());
       VERIFY(*rit == 3, caseLabel);
@@ -2729,7 +2801,8 @@ void TestRingBufferReverseIteratorMoveAssignment()
 void TestRingBufferReverseIteratorConstDerefOperator()
 {
    {
-      const std::string caseLabel{"RingBuffer::reverse_iterator const dereference operator"};
+      const std::string caseLabel{
+         "RingBuffer::reverse_iterator const dereference operator"};
       RingBuffer<int, 10> rb{1, 2, 3};
       RingBufferIterator<RingBuffer<int, 10>> it{rb.begin() + 1};
       RingBuffer<int, 10>::reverse_iterator rit(it);
@@ -2839,8 +2912,9 @@ void TestRingBufferReverseIteratorPrefixIncOperator()
          VERIFY(*rit == *dataRit, caseLabel);
    }
    {
-      const std::string caseLabel{"RingBuffer::reverse_iterator prefix increment operator for "
-                                  "iterating wrapped buffer"};
+      const std::string caseLabel{
+         "RingBuffer::reverse_iterator prefix increment operator for "
+         "iterating wrapped buffer"};
       const std::vector<int> data{10, 20, 30, 40, 50, 60, 70, 80};
       RingBuffer<int, 5> rb{data.begin(), data.end()};
 
@@ -2873,8 +2947,9 @@ void TestRingBufferReverseIteratorPostfixIncOperator()
          VERIFY(*rit == *dataRit, caseLabel);
    }
    {
-      const std::string caseLabel{"RingBuffer::reverse_iterator postfix increment operator for "
-                                  "iterating wrapped buffer"};
+      const std::string caseLabel{
+         "RingBuffer::reverse_iterator postfix increment operator for "
+         "iterating wrapped buffer"};
       const std::vector<int> data{10, 20, 30, 40, 50, 60, 70, 80};
       RingBuffer<int, 5> rb{data.begin(), data.end()};
 
@@ -2910,8 +2985,9 @@ void TestRingBufferReverseIteratorPrefixDecOperator()
       }
    }
    {
-      const std::string caseLabel{"RingBuffer::reverse_iterator prefix decrement operator for "
-                                  "iterating wrapped buffer"};
+      const std::string caseLabel{
+         "RingBuffer::reverse_iterator prefix decrement operator for "
+         "iterating wrapped buffer"};
       const std::vector<int> data{10, 20, 30, 40, 50, 60, 70, 80};
       RingBuffer<int, 5> rb{data.begin(), data.end()};
 
@@ -2949,8 +3025,9 @@ void TestRingBufferReverseIteratorPostfixDecOperator()
       }
    }
    {
-      const std::string caseLabel{"RingBuffer::reverse_iterator postfix decrement operator for "
-                                  "iterating wrapped buffer"};
+      const std::string caseLabel{
+         "RingBuffer::reverse_iterator postfix decrement operator for "
+         "iterating wrapped buffer"};
       const std::vector<int> data{10, 20, 30, 40, 50, 60, 70, 80};
       RingBuffer<int, 5> rb{data.begin(), data.end()};
 
@@ -2968,7 +3045,8 @@ void TestRingBufferReverseIteratorPostfixDecOperator()
 void TestRingBufferReverseIteratorAddAssignmentOperator()
 {
    {
-      const std::string caseLabel{"RingBuffer::reverse_iterator assignment addition operator"};
+      const std::string caseLabel{
+         "RingBuffer::reverse_iterator assignment addition operator"};
       RingBuffer<int, 10> rb{1, 2, 3, 4, 5};
       auto rit = rb.rbegin();
       rit += 3;
@@ -3008,15 +3086,16 @@ void TestRingBufferReverseIteratorAdditionOperator()
 void TestRingBufferReverseIteratorSubAssignmentOperator()
 {
    {
-      const std::string caseLabel{"RingBuffer::reverse_iterator assignment subtraction operator"};
+      const std::string caseLabel{
+         "RingBuffer::reverse_iterator assignment subtraction operator"};
       RingBuffer<int, 10> rb{1, 2, 3, 4, 5};
       auto rit = rb.rbegin() + 4;
       rit -= 2;
       VERIFY(*rit == 3, caseLabel);
    }
    {
-      const std::string caseLabel{
-         "RingBuffer::reverse_iterator assignment subtraction operator for negative value"};
+      const std::string caseLabel{"RingBuffer::reverse_iterator assignment subtraction "
+                                  "operator for negative value"};
       RingBuffer<int, 10> rb{1, 2, 3, 4, 5};
       auto rit = rb.rbegin();
       rit -= -3;
@@ -3071,7 +3150,8 @@ void TestRingBufferReverseIteratorDifferenceOperator()
 void TestRingBufferReverseIteratorEqualityOperator()
 {
    {
-      const std::string caseLabel{"RingBuffer::reverse_iterator equality operator for equality"};
+      const std::string caseLabel{
+         "RingBuffer::reverse_iterator equality operator for equality"};
       RingBuffer<int, 10> rb{1, 2, 3, 4, 5};
       auto a = rb.rbegin() + 2;
       auto b = rb.rbegin() + 2;
@@ -3130,7 +3210,8 @@ void TestRingBufferReverseIteratorInequalityOperator()
       VERIFY(a != b, caseLabel);
    }
    {
-      const std::string caseLabel{"RingBuffer::reverse_iterator inequality operator for equality"};
+      const std::string caseLabel{
+         "RingBuffer::reverse_iterator inequality operator for equality"};
       RingBuffer<int, 10> rb{1, 2, 3, 4, 5};
       auto a = rb.rbegin() + 2;
       auto b = rb.rbegin() + 2;
@@ -3231,7 +3312,8 @@ void TestRingBufferReverseIteratorGreaterThanOperator()
 void TestRingBufferReverseIteratorLessThanEqualOperator()
 {
    {
-      const std::string caseLabel{"RingBuffer::reverse_iterator less-or-equal-than operator"};
+      const std::string caseLabel{
+         "RingBuffer::reverse_iterator less-or-equal-than operator"};
       RingBuffer<int, 10> rb{1, 2, 3, 4, 5};
       auto a = rb.rbegin() + 2;
       auto b = rb.rbegin() + 3;
@@ -3269,7 +3351,8 @@ void TestRingBufferReverseIteratorLessThanEqualOperator()
 void TestRingBufferReverseIteratorGreaterThanEqualOperator()
 {
    {
-      const std::string caseLabel{"RingBuffer::reverse_iterator greater-or-equal-than operator"};
+      const std::string caseLabel{
+         "RingBuffer::reverse_iterator greater-or-equal-than operator"};
       RingBuffer<int, 10> rb{1, 2, 3, 4, 5};
       auto a = rb.rbegin() + 3;
       auto b = rb.rbegin() + 2;
@@ -3347,6 +3430,7 @@ void TestRingBuffer()
    TestRingBufferConstIteratorMoveAssignment();
    TestRingBufferConstIteratorDerefOperator();
    TestRingBufferConstIteratorArrowOperator();
+   TestRingBufferConstIteratorSubscriptOperator();
    TestRingBufferConstIteratorPrefixIncOperator();
    TestRingBufferConstIteratorPostfixIncOperator();
    TestRingBufferConstIteratorPrefixDecOperator();
@@ -3373,6 +3457,8 @@ void TestRingBuffer()
    TestRingBufferIteratorDerefOperator();
    TestRingBufferIteratorConstArrowOperator();
    TestRingBufferIteratorArrowOperator();
+   TestRingBufferIteratorSubscriptOperator();
+   TestRingBufferIteratorConstSubscriptOperator();
    TestRingBufferIteratorPrefixIncOperator();
    TestRingBufferIteratorPostfixIncOperator();
    TestRingBufferIteratorPrefixDecOperator();
