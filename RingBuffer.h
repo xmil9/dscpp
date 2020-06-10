@@ -388,17 +388,66 @@ template <typename RB> class RingBufferConstIterator
    RingBufferConstIterator& operator--();
    RingBufferConstIterator operator--(int);
    RingBufferConstIterator& operator+=(const difference_type offset);
-   RingBufferConstIterator operator+(const difference_type offset) const;
    RingBufferConstIterator& operator-=(const difference_type offset);
-   RingBufferConstIterator operator-(const difference_type offset) const;
-   // Difference of two iterators.
-   difference_type operator-(const RingBufferConstIterator& rhs) const;
-   bool operator==(const RingBufferConstIterator& rhs) const;
-   bool operator!=(const RingBufferConstIterator& rhs) const;
-   bool operator<(const RingBufferConstIterator& rhs) const;
-   bool operator>(const RingBufferConstIterator& rhs) const;
-   bool operator<=(const RingBufferConstIterator& rhs) const;
-   bool operator>=(const RingBufferConstIterator& rhs) const;
+
+   friend RingBufferConstIterator operator+(const RingBufferConstIterator& it,
+                                            difference_type offset)
+   {
+      auto copy = it;
+      return copy += offset;
+   }
+
+   friend RingBufferConstIterator operator-(const RingBufferConstIterator& it,
+                                            difference_type offset)
+   {
+      auto copy = it;
+      return copy -= offset;
+   }
+
+   friend difference_type operator-(const RingBufferConstIterator& a,
+                                    const RingBufferConstIterator& b)
+   {
+      assert(a.m_rb == b.m_rb);
+      return a.m_idx - b.m_idx;
+   }
+
+   friend bool operator==(const RingBufferConstIterator& a,
+                          const RingBufferConstIterator& b)
+   {
+      return a.m_rb == b.m_rb && a.m_idx == b.m_idx;
+   }
+
+   friend bool operator!=(const RingBufferConstIterator& a,
+                          const RingBufferConstIterator& b)
+   {
+      return !(a == b);
+   }
+
+   friend bool operator<(const RingBufferConstIterator& a,
+                         const RingBufferConstIterator& b)
+   {
+      assert(a.m_rb == b.m_rb);
+      return a.m_idx < b.m_idx;
+   }
+
+   friend bool operator>(const RingBufferConstIterator& a,
+                         const RingBufferConstIterator& b)
+   {
+      assert(a.m_rb == b.m_rb);
+      return a.m_idx > b.m_idx;
+   }
+
+   friend bool operator<=(const RingBufferConstIterator& a,
+                          const RingBufferConstIterator& b)
+   {
+      return !(a > b);
+   }
+
+   friend bool operator>=(const RingBufferConstIterator& a,
+                          const RingBufferConstIterator& b)
+   {
+      return !(a < b);
+   }
 
  protected:
    RB* m_rb = nullptr;
@@ -476,72 +525,11 @@ RingBufferConstIterator<RB>::operator+=(const difference_type offset)
 }
 
 template <typename RB>
-RingBufferConstIterator<RB>
-RingBufferConstIterator<RB>::operator+(const difference_type offset) const
-{
-   auto copy = *this;
-   return (copy += offset);
-}
-
-template <typename RB>
 RingBufferConstIterator<RB>&
 RingBufferConstIterator<RB>::operator-=(const difference_type offset)
 {
    m_idx -= offset;
    return *this;
-}
-
-template <typename RB>
-RingBufferConstIterator<RB>
-RingBufferConstIterator<RB>::operator-(const difference_type offset) const
-{
-   auto copy = *this;
-   return (copy -= offset);
-}
-
-template <typename RB>
-typename RingBufferConstIterator<RB>::difference_type
-RingBufferConstIterator<RB>::operator-(const RingBufferConstIterator& rhs) const
-{
-   assert(m_rb == rhs.m_rb);
-   return m_idx - rhs.m_idx;
-}
-
-template <typename RB>
-bool RingBufferConstIterator<RB>::operator==(const RingBufferConstIterator& rhs) const
-{
-   return (m_rb == rhs.m_rb && m_idx == rhs.m_idx);
-}
-
-template <typename RB>
-bool RingBufferConstIterator<RB>::operator!=(const RingBufferConstIterator& rhs) const
-{
-   return !(*this == rhs);
-}
-
-template <typename RB>
-bool RingBufferConstIterator<RB>::operator<(const RingBufferConstIterator& rhs) const
-{
-   assert(m_rb == rhs.m_rb);
-   return (m_idx < rhs.m_idx);
-}
-
-template <typename RB>
-bool RingBufferConstIterator<RB>::operator>(const RingBufferConstIterator& rhs) const
-{
-   return !(*this < rhs || *this == rhs);
-}
-
-template <typename RB>
-bool RingBufferConstIterator<RB>::operator<=(const RingBufferConstIterator& rhs) const
-{
-   return !(*this > rhs);
-}
-
-template <typename RB>
-bool RingBufferConstIterator<RB>::operator>=(const RingBufferConstIterator& rhs) const
-{
-   return !(*this < rhs);
 }
 
 
@@ -584,17 +572,57 @@ template <typename RB> class RingBufferIterator : public RingBufferConstIterator
    RingBufferIterator& operator--();
    RingBufferIterator operator--(int);
    RingBufferIterator& operator+=(const difference_type offset);
-   RingBufferIterator operator+(const difference_type offset) const;
    RingBufferIterator& operator-=(const difference_type offset);
-   RingBufferIterator operator-(const difference_type offset) const;
-   // Difference of two iterators.
-   difference_type operator-(const RingBufferIterator& rhs) const;
-   bool operator==(const RingBufferIterator& rhs) const;
-   bool operator!=(const RingBufferIterator& rhs) const;
-   bool operator<(const RingBufferIterator& rhs) const;
-   bool operator>(const RingBufferIterator& rhs) const;
-   bool operator<=(const RingBufferIterator& rhs) const;
-   bool operator>=(const RingBufferIterator& rhs) const;
+
+   friend RingBufferIterator operator+(const RingBufferIterator& it, difference_type offset)
+   {
+      auto copy = it;
+      return copy += offset;
+   }
+
+   friend RingBufferIterator operator-(const RingBufferIterator& it, difference_type offset)
+   {
+      auto copy = it;
+      return copy -= offset;
+   }
+
+   friend difference_type operator-(const RingBufferIterator& a, const RingBufferIterator& b)
+   {
+      assert(a.m_rb == b.m_rb);
+      return a.m_idx - b.m_idx;
+   }
+
+   friend bool operator==(const RingBufferIterator& a, const RingBufferIterator& b)
+   {
+      return (a.m_rb == b.m_rb && a.m_idx == b.m_idx);
+   }
+
+   friend bool operator!=(const RingBufferIterator& a, const RingBufferIterator& b)
+   {
+      return !(a == b);
+   }
+
+   friend bool operator<(const RingBufferIterator& a, const RingBufferIterator& b)
+   {
+      assert(a.m_rb == b.m_rb);
+      return (a.m_idx < b.m_idx);
+   }
+
+   friend bool operator>(const RingBufferIterator& a, const RingBufferIterator& b)
+   {
+      assert(a.m_rb == b.m_rb);
+      return (a.m_idx > b.m_idx);
+   }
+
+   friend bool operator<=(const RingBufferIterator& a, const RingBufferIterator& b)
+   {
+      return !(a > b);
+   }
+
+   friend bool operator>=(const RingBufferIterator& a, const RingBufferIterator& b)
+   {
+      return !(a < b);
+   }
 };
 
 
@@ -678,69 +706,8 @@ RingBufferIterator<RB>& RingBufferIterator<RB>::operator+=(const difference_type
 }
 
 template <typename RB>
-RingBufferIterator<RB>
-RingBufferIterator<RB>::operator+(const difference_type offset) const
-{
-   auto copy = *this;
-   return (copy += offset);
-}
-
-template <typename RB>
 RingBufferIterator<RB>& RingBufferIterator<RB>::operator-=(const difference_type offset)
 {
    this->m_idx -= offset;
    return *this;
-}
-
-template <typename RB>
-RingBufferIterator<RB>
-RingBufferIterator<RB>::operator-(const difference_type offset) const
-{
-   auto copy = *this;
-   return (copy -= offset);
-}
-
-template <typename RB>
-typename RingBufferIterator<RB>::difference_type
-RingBufferIterator<RB>::operator-(const RingBufferIterator& rhs) const
-{
-   assert(this->m_rb == rhs.m_rb);
-   return this->m_idx - rhs.m_idx;
-}
-
-template <typename RB>
-bool RingBufferIterator<RB>::operator==(const RingBufferIterator& rhs) const
-{
-   return (this->m_rb == rhs.m_rb && this->m_idx == rhs.m_idx);
-}
-
-template <typename RB>
-bool RingBufferIterator<RB>::operator!=(const RingBufferIterator& rhs) const
-{
-   return !(*this == rhs);
-}
-
-template <typename RB>
-bool RingBufferIterator<RB>::operator<(const RingBufferIterator& rhs) const
-{
-   assert(this->m_rb == rhs.m_rb);
-   return (this->m_idx < rhs.m_idx);
-}
-
-template <typename RB>
-bool RingBufferIterator<RB>::operator>(const RingBufferIterator& rhs) const
-{
-   return !(*this < rhs || *this == rhs);
-}
-
-template <typename RB>
-bool RingBufferIterator<RB>::operator<=(const RingBufferIterator& rhs) const
-{
-   return !(*this > rhs);
-}
-
-template <typename RB>
-bool RingBufferIterator<RB>::operator>=(const RingBufferIterator& rhs) const
-{
-   return !(*this < rhs);
 }
