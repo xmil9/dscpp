@@ -1100,6 +1100,22 @@ void TestRingBufferConstIteratorAdditionOperator()
       auto res = it + (-2);
       VERIFY(*res == 2, caseLabel);
    }
+   {
+      const std::string caseLabel{
+         "RingBufferConstIterator addition operator with difference as first operand"};
+      const RingBuffer<int, 10> rb{1, 2, 3, 4, 5};
+      auto it = rb.begin();
+      typename RingBuffer<int, 10>::const_iterator res = 2 + it;
+      VERIFY(*res == 3, caseLabel);
+   }
+   {
+      const std::string caseLabel{"RingBufferConstIterator addition operator for "
+                                  "negative value with difference as first operand"};
+      const RingBuffer<int, 10> rb{1, 2, 3, 4, 5};
+      auto it = rb.begin() + 3;
+      typename RingBuffer<int, 10>::const_iterator res = (-2) + it;
+      VERIFY(*res == 2, caseLabel);
+   }
 }
 
 
@@ -1785,9 +1801,25 @@ void TestRingBufferIteratorAdditionOperator()
    {
       const std::string caseLabel{
          "RingBufferIterator addition operator for negative value"};
-      const RingBuffer<int, 10> rb{1, 2, 3, 4, 5};
+      RingBuffer<int, 10> rb{1, 2, 3, 4, 5};
       auto it = rb.begin() + 3;
       auto res = it + (-2);
+      VERIFY(*res == 2, caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "RingBufferIterator addition operator with difference type as first operand"};
+      RingBuffer<int, 10> rb{1, 2, 3, 4, 5};
+      auto it = rb.begin();
+      typename RingBuffer<int, 10>::iterator res = 2 + it;
+      VERIFY(*res == 3, caseLabel);
+   }
+   {
+      const std::string caseLabel{"RingBufferIterator addition operator for negative "
+                                  "value with difference type as first operand"};
+      RingBuffer<int, 10> rb{1, 2, 3, 4, 5};
+      auto it = rb.begin() + 3;
+      typename RingBuffer<int, 10>::iterator res = (-2) + it;
       VERIFY(*res == 2, caseLabel);
    }
 }

@@ -397,6 +397,12 @@ template <typename RB> class RingBufferConstIterator
       return copy += offset;
    }
 
+   friend RingBufferConstIterator operator+(difference_type offset,
+                                            const RingBufferConstIterator& it)
+   {
+      return it + offset;
+   }
+
    friend RingBufferConstIterator operator-(const RingBufferConstIterator& it,
                                             difference_type offset)
    {
@@ -574,19 +580,28 @@ template <typename RB> class RingBufferIterator : public RingBufferConstIterator
    RingBufferIterator& operator+=(const difference_type offset);
    RingBufferIterator& operator-=(const difference_type offset);
 
-   friend RingBufferIterator operator+(const RingBufferIterator& it, difference_type offset)
+   friend RingBufferIterator operator+(const RingBufferIterator& it,
+                                       difference_type offset)
    {
       auto copy = it;
       return copy += offset;
    }
 
-   friend RingBufferIterator operator-(const RingBufferIterator& it, difference_type offset)
+   friend RingBufferIterator operator+(difference_type offset,
+                                       const RingBufferIterator& it)
+   {
+      return it + offset;
+   }
+
+   friend RingBufferIterator operator-(const RingBufferIterator& it,
+                                       difference_type offset)
    {
       auto copy = it;
       return copy -= offset;
    }
 
-   friend difference_type operator-(const RingBufferIterator& a, const RingBufferIterator& b)
+   friend difference_type operator-(const RingBufferIterator& a,
+                                    const RingBufferIterator& b)
    {
       assert(a.m_rb == b.m_rb);
       return a.m_idx - b.m_idx;
