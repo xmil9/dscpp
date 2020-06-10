@@ -1421,6 +1421,20 @@ void TestRingBufferConstIteratorGreaterThanEqualOperator()
 }
 
 
+void TestRingBufferConstIteratorSwap()
+{
+   {
+      const std::string caseLabel{"RingBufferConstIterator swap"};
+      const RingBuffer<int, 10> rb{1, 2, 3, 4, 5};
+      auto a = rb.begin() + 3;
+      auto b = rb.begin() + 2;
+      swap(a, b);
+      VERIFY(*a == 3, caseLabel);
+      VERIFY(*b == 4, caseLabel);
+   }
+}
+
+
 void TestRingBufferIteratorDefaultCtor()
 {
    {
@@ -2118,6 +2132,20 @@ void TestRingBufferIteratorGreaterThanEqualOperator()
      // Operation is not defined because there is no good solution.
      // Returning 'false' would leave the impression that the instances
      // are related by the opposite relation.
+   }
+}
+
+
+void TestRingBufferIteratorSwap()
+{
+   {
+      const std::string caseLabel{"RingBufferConstIterator swap"};
+      RingBuffer<int, 10> rb{1, 2, 3, 4, 5};
+      auto a = rb.begin() + 3;
+      auto b = rb.begin() + 2;
+      swap(a, b);
+      VERIFY(*a == 3, caseLabel);
+      VERIFY(*b == 4, caseLabel);
    }
 }
 
@@ -3478,6 +3506,7 @@ void TestRingBuffer()
    TestRingBufferConstIteratorGreaterThanOperator();
    TestRingBufferConstIteratorLessThanEqualOperator();
    TestRingBufferConstIteratorGreaterThanEqualOperator();
+   TestRingBufferConstIteratorSwap();
 
    TestRingBufferIteratorDefaultCtor();
    TestRingBufferIteratorRBAndIndexCtor();
@@ -3506,6 +3535,7 @@ void TestRingBuffer()
    TestRingBufferIteratorGreaterThanOperator();
    TestRingBufferIteratorLessThanEqualOperator();
    TestRingBufferIteratorGreaterThanEqualOperator();
+   TestRingBufferIteratorSwap();
 
    TestRingBufferConstReverseIteratorCtor();
    TestRingBufferConstReverseIteratorFromIterator();

@@ -455,6 +455,12 @@ template <typename RB> class RingBufferConstIterator
       return !(a < b);
    }
 
+   friend void swap(RingBufferConstIterator& a, RingBufferConstIterator& b)
+   {
+      std::swap(a.m_rb, b.m_rb);
+      std::swap(a.m_idx, b.m_idx);
+   }
+
  protected:
    RB* m_rb = nullptr;
    // Index to ring buffer element. This is an abstracted index, i.e. an index that
@@ -637,6 +643,12 @@ template <typename RB> class RingBufferIterator : public RingBufferConstIterator
    friend bool operator>=(const RingBufferIterator& a, const RingBufferIterator& b)
    {
       return !(a < b);
+   }
+
+   friend void swap(RingBufferIterator& a, RingBufferIterator& b)
+   {
+      std::swap(a.m_rb, b.m_rb);
+      std::swap(a.m_idx, b.m_idx);
    }
 };
 
