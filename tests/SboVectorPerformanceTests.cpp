@@ -8,6 +8,8 @@
 #include <list>
 #include <vector>
 
+using namespace ds;
+
 
 namespace
 {

@@ -3,6 +3,11 @@
 #include <type_traits>
 
 
+namespace ds
+{
+
+///////////////////
+
 template <typename T, typename = void> inline constexpr bool IsIterator_v = false;
 
 // Will only pass SFINAE, if the given type defines iterator_category.
@@ -14,3 +19,5 @@ inline constexpr bool
 template <typename T> struct IsIterator : std::bool_constant<IsIterator_v<T>>
 {
 };
+
+} // namespace ds

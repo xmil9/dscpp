@@ -8,8 +8,11 @@
 #include <initializer_list>
 #include <iterator>
 #include <vector>
+#include <stdexcept>
 
 
+namespace ds
+{
 ///////////////////
 
 // Ring buffer of fixed size N.
@@ -738,3 +741,5 @@ RingBufferIterator<RB>& RingBufferIterator<RB>::operator-=(const difference_type
    this->m_idx -= offset;
    return *this;
 }
+
+} // namespace ds

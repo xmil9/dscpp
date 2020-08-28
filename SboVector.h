@@ -17,6 +17,9 @@
 #include <type_traits>
 
 
+namespace ds
+{
+
 // Forward declarations for iterator class templates.
 template <typename T, std::size_t N> class SboVectorIterator;
 template <typename T, std::size_t N> class SboVectorConstIterator;
@@ -1662,3 +1665,5 @@ SboVectorIterator<T, N>& SboVectorIterator<T, N>::operator-=(difference_type off
    this->m_elem -= offset;
    return *this;
 }
+
+} // namespace ds
