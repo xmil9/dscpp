@@ -85,7 +85,6 @@ void TestPushBackLValue()
       const std::string caseLabel{"push_back - SboVector on heap vs std::vector"};
 
       constexpr std::size_t numRuns = 1000;
-      constexpr std::size_t BufCap = 10;
       constexpr std::size_t numElems = 100;
       int64_t svTime = 0;
       int64_t stdTime = 0;

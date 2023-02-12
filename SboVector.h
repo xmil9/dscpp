@@ -209,8 +209,8 @@ template <typename T, std::size_t N> class SboVector
    // Memory instrumentation.
 #ifdef SBOVEC_MEM_INSTR
  public:
-   static int64_t allocatedCapacity() { return m_allocatedCap; }
-   static void resetAllocatedCapacity() { m_allocatedCap = 0; }
+   static int64_t allocatedCapacity() noexcept { return m_allocatedCap; }
+   static void resetAllocatedCapacity() noexcept { m_allocatedCap = 0; }
 
  private:
    inline static int64_t m_allocatedCap = 0;

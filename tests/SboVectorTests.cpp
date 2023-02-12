@@ -25,17 +25,17 @@ struct Element
       if (!m_paused)
          ++m_metrics.defaultCtorCalls;
    }
-   Element(int i_) : i{i_}
+   Element(int i_) noexcept : i{i_}
    {
       if (!m_paused)
          ++m_metrics.ctorCalls;
    }
-   Element(const Element& other) : d{other.d}, i{other.i}, b{other.b}
+   Element(const Element& other) noexcept : d{other.d}, i{other.i}, b{other.b}
    {
       if (!m_paused)
          ++m_metrics.copyCtorCalls;
    }
-   Element(Element&& other)
+   Element(Element&& other) noexcept
    {
       std::swap(d, other.d);
       std::swap(i, other.i);
@@ -48,7 +48,7 @@ struct Element
       if (!m_paused)
          ++m_metrics.dtorCalls;
    }
-   Element& operator=(const Element& other)
+   Element& operator=(const Element& other) noexcept
    {
       d = other.d;
       i = other.i;
@@ -57,7 +57,7 @@ struct Element
          ++m_metrics.assignmentCalls;
       return *this;
    }
-   Element& operator=(Element&& other)
+   Element& operator=(Element&& other) noexcept
    {
       std::swap(d, other.d);
       std::swap(i, other.i);
@@ -66,7 +66,7 @@ struct Element
          ++m_metrics.moveAssignmentCalls;
       return *this;
    }
-   friend bool operator==(const Element& a, const Element& b)
+   friend bool operator==(const Element& a, const Element& b) noexcept
    {
       return (a.d == b.d && a.i == b.i && a.b == b.b);
    }
@@ -383,13 +383,15 @@ void TestDefaultCtor()
    const Elem::Metrics zeros;
 
    Test<Elem, BufCap> test{caseLabel, zeros};
-   test.run([&]() {
-      SV sv;
+   test.run(
+      [&]()
+      {
+         SV sv;
 
-      VERIFY(sv.empty(), caseLabel);
-      VERIFY(sv.capacity() == BufCap, caseLabel);
-      VERIFY(sv.inBuffer(), caseLabel);
-   });
+         VERIFY(sv.empty(), caseLabel);
+         VERIFY(sv.capacity() == BufCap, caseLabel);
+         VERIFY(sv.inBuffer(), caseLabel);
+      });
 }
 
 
@@ -412,13 +414,15 @@ void TestCtorForElementCountAndValue()
       metrics.dtorCalls = numElems;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&, BufCap]() {
-         SV sv(numElems, initVal);
+      test.run(
+         [&, BufCap]()
+         {
+            SV sv(numElems, initVal);
 
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(sv.capacity() == BufCap, caseLabel);
-         verifyVector(sv, expectedValues, caseLabel);
-      });
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(sv.capacity() == BufCap, caseLabel);
+            verifyVector(sv, expectedValues, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SboVector count-and-value ctor for heap instance"};
@@ -438,13 +442,15 @@ void TestCtorForElementCountAndValue()
       metrics.dtorCalls = numElems;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&, BufCap]() {
-         SV sv(numElems, initVal);
+      test.run(
+         [&, BufCap]()
+         {
+            SV sv(numElems, initVal);
 
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() == numElems, caseLabel);
-         verifyVector(sv, expectedValues, caseLabel);
-      });
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() == numElems, caseLabel);
+            verifyVector(sv, expectedValues, caseLabel);
+         });
    }
 }
 
@@ -467,13 +473,15 @@ void TestIteratorCtor()
       metrics.dtorCalls = numElems;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&, BufCap]() {
-         SV sv{from.begin(), from.end()};
+      test.run(
+         [&, BufCap]()
+         {
+            SV sv{from.begin(), from.end()};
 
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(sv.capacity() == BufCap, caseLabel);
-         verifyVector(sv, values, caseLabel);
-      });
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(sv.capacity() == BufCap, caseLabel);
+            verifyVector(sv, values, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SboVector iterator ctor for heap instance"};
@@ -491,13 +499,15 @@ void TestIteratorCtor()
       metrics.dtorCalls = numElems;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&, BufCap]() {
-         SV sv{from.begin(), from.end()};
+      test.run(
+         [&, BufCap]()
+         {
+            SV sv{from.begin(), from.end()};
 
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() == numElems, caseLabel);
-         verifyVector(sv, values, caseLabel);
-      });
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() == numElems, caseLabel);
+            verifyVector(sv, values, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SboVector iterator ctor for const iterator"};
@@ -515,13 +525,15 @@ void TestIteratorCtor()
       metrics.dtorCalls = numElems;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&, BufCap]() {
-         SV sv{from.cbegin(), from.cend()};
+      test.run(
+         [&, BufCap]()
+         {
+            SV sv{from.cbegin(), from.cend()};
 
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() == numElems, caseLabel);
-         verifyVector(sv, values, caseLabel);
-      });
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() == numElems, caseLabel);
+            verifyVector(sv, values, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SboVector iterator ctor empty iterator range"};
@@ -534,13 +546,15 @@ void TestIteratorCtor()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&, BufCap]() {
-         SV sv{from.begin(), from.end()};
+      test.run(
+         [&, BufCap]()
+         {
+            SV sv{from.begin(), from.end()};
 
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(sv.capacity() == BufCap, caseLabel);
-         VERIFY(sv.empty(), caseLabel);
-      });
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(sv.capacity() == BufCap, caseLabel);
+            VERIFY(sv.empty(), caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SboVector iterator ctor for forward iterators"};
@@ -558,16 +572,18 @@ void TestIteratorCtor()
       metrics.dtorCalls = numElems;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&, BufCap]() {
-         static_assert(
-            std::is_same_v<ForwardIter::iterator_category, std::forward_iterator_tag>);
+      test.run(
+         [&, BufCap]()
+         {
+            static_assert(
+               std::is_same_v<ForwardIter::iterator_category, std::forward_iterator_tag>);
 
-         SV sv{fromFirst, fromLast};
+            SV sv{fromFirst, fromLast};
 
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(sv.capacity() == BufCap, caseLabel);
-         VERIFY(sv.size() == numElems, caseLabel);
-      });
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(sv.capacity() == BufCap, caseLabel);
+            VERIFY(sv.size() == numElems, caseLabel);
+         });
    }
 }
 
@@ -589,13 +605,15 @@ void TestInitializerListCtor()
       metrics.dtorCalls = numElems;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&, BufCap]() {
-         SV sv{values};
+      test.run(
+         [&, BufCap]()
+         {
+            SV sv{values};
 
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(sv.capacity() == BufCap, caseLabel);
-         verifyVector(sv, values, caseLabel);
-      });
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(sv.capacity() == BufCap, caseLabel);
+            verifyVector(sv, values, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SboVector initializer list ctor for heap instance"};
@@ -612,13 +630,15 @@ void TestInitializerListCtor()
       metrics.dtorCalls = numElems;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&, BufCap]() {
-         SV sv{values};
+      test.run(
+         [&, BufCap]()
+         {
+            SV sv{values};
 
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() == numElems, caseLabel);
-         verifyVector(sv, values, caseLabel);
-      });
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() == numElems, caseLabel);
+            verifyVector(sv, values, caseLabel);
+         });
    }
 }
 
@@ -641,14 +661,16 @@ void TestCopyCtor()
       metrics.dtorCalls = 2 * numElems;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&, BufCap]() {
-         const SV src{values};
-         SV sv{src};
+      test.run(
+         [&, BufCap]()
+         {
+            const SV src{values};
+            SV sv{src};
 
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(sv.capacity() == BufCap, caseLabel);
-         verifyVector(sv, values, caseLabel);
-      });
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(sv.capacity() == BufCap, caseLabel);
+            verifyVector(sv, values, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SboVector copy ctor for heap instance"};
@@ -666,14 +688,16 @@ void TestCopyCtor()
       metrics.dtorCalls = 2 * numElems;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&, BufCap]() {
-         const SV src{values};
-         SV sv{src};
+      test.run(
+         [&, BufCap]()
+         {
+            const SV src{values};
+            SV sv{src};
 
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() == numElems, caseLabel);
-         verifyVector(sv, values, caseLabel);
-      });
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() == numElems, caseLabel);
+            verifyVector(sv, values, caseLabel);
+         });
    }
 }
 
@@ -700,16 +724,18 @@ void TestMoveCtor()
       metrics.dtorCalls = numElems;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&, BufCap]() {
-         SV src{values};
-         SV sv{std::move(src)};
+      test.run(
+         [&, BufCap]()
+         {
+            SV src{values};
+            SV sv{std::move(src)};
 
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(sv.capacity() == BufCap, caseLabel);
-         verifyVector(sv, values, caseLabel);
-         // Verify moved-from instance is empty.
-         VERIFY(src.size() == 0, caseLabel);
-      });
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(sv.capacity() == BufCap, caseLabel);
+            verifyVector(sv, values, caseLabel);
+            // Verify moved-from instance is empty.
+            VERIFY(src.size() == 0, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SboVector move ctor for heap instance"};
@@ -729,16 +755,18 @@ void TestMoveCtor()
       metrics.dtorCalls = numElems;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&, BufCap]() {
-         SV src{values};
-         SV sv{std::move(src)};
+      test.run(
+         [&, BufCap]()
+         {
+            SV src{values};
+            SV sv{std::move(src)};
 
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() == numElems, caseLabel);
-         verifyVector(sv, values, caseLabel);
-         // Verify moved-from instance is empty.
-         VERIFY(src.size() == 0, caseLabel);
-      });
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() == numElems, caseLabel);
+            verifyVector(sv, values, caseLabel);
+            // Verify moved-from instance is empty.
+            VERIFY(src.size() == 0, caseLabel);
+         });
    }
 }
 
@@ -805,7 +833,8 @@ void TestCopyAssignment()
 {
    // Local function to calculate the expected metrics for copy-assignments.
    auto expectedCopyMetrics = [](std::size_t numFrom,
-                                 std::size_t numTo) -> Element::Metrics {
+                                 std::size_t numTo) -> Element::Metrics
+   {
       Element::Metrics metrics;
       // For populating vectors and copying source to destination.
       metrics.copyCtorCalls = 2 * numFrom + numTo;
@@ -827,19 +856,21 @@ void TestCopyAssignment()
       const std::size_t numTo = toValues.size();
 
       Test<Elem, BufCap> test{caseLabel, expectedCopyMetrics(numFrom, numTo)};
-      test.run([&]() {
-         SV from{fromValues};
-         SV to{toValues};
+      test.run(
+         [&]()
+         {
+            SV from{fromValues};
+            SV to{toValues};
 
-         VERIFY(from.inBuffer(), caseLabel);
-         VERIFY(to.inBuffer(), caseLabel);
+            VERIFY(from.inBuffer(), caseLabel);
+            VERIFY(to.inBuffer(), caseLabel);
 
-         to = from;
+            to = from;
 
-         VERIFY(to.inBuffer(), caseLabel);
-         VERIFY(to.capacity() == BufCap, caseLabel);
-         verifyVector(to, fromValues, caseLabel);
-      });
+            VERIFY(to.inBuffer(), caseLabel);
+            VERIFY(to.capacity() == BufCap, caseLabel);
+            verifyVector(to, fromValues, caseLabel);
+         });
    }
    {
       const std::string caseLabel{
@@ -855,19 +886,21 @@ void TestCopyAssignment()
       const std::size_t numTo = toValues.size();
 
       Test<Elem, BufCap> test{caseLabel, expectedCopyMetrics(numFrom, numTo)};
-      test.run([&]() {
-         SV from{fromValues};
-         SV to{toValues};
+      test.run(
+         [&]()
+         {
+            SV from{fromValues};
+            SV to{toValues};
 
-         VERIFY(from.onHeap(), caseLabel);
-         VERIFY(to.inBuffer(), caseLabel);
+            VERIFY(from.onHeap(), caseLabel);
+            VERIFY(to.inBuffer(), caseLabel);
 
-         to = from;
+            to = from;
 
-         VERIFY(to.onHeap(), caseLabel);
-         VERIFY(to.capacity() == numFrom, caseLabel);
-         verifyVector(to, fromValues, caseLabel);
-      });
+            VERIFY(to.onHeap(), caseLabel);
+            VERIFY(to.capacity() == numFrom, caseLabel);
+            verifyVector(to, fromValues, caseLabel);
+         });
    }
    {
       const std::string caseLabel{
@@ -883,19 +916,21 @@ void TestCopyAssignment()
       const std::size_t numTo = toValues.size();
 
       Test<Elem, BufCap> test{caseLabel, expectedCopyMetrics(numFrom, numTo)};
-      test.run([&]() {
-         SV from{fromValues};
-         SV to{toValues};
+      test.run(
+         [&]()
+         {
+            SV from{fromValues};
+            SV to{toValues};
 
-         VERIFY(from.inBuffer(), caseLabel);
-         VERIFY(to.onHeap(), caseLabel);
+            VERIFY(from.inBuffer(), caseLabel);
+            VERIFY(to.onHeap(), caseLabel);
 
-         to = from;
+            to = from;
 
-         VERIFY(to.inBuffer(), caseLabel);
-         VERIFY(to.capacity() == BufCap, caseLabel);
-         verifyVector(to, fromValues, caseLabel);
-      });
+            VERIFY(to.inBuffer(), caseLabel);
+            VERIFY(to.capacity() == BufCap, caseLabel);
+            verifyVector(to, fromValues, caseLabel);
+         });
    }
    {
       const std::string caseLabel{
@@ -911,22 +946,24 @@ void TestCopyAssignment()
       const std::size_t numTo = toValues.size();
 
       Test<Elem, BufCap> test{caseLabel, expectedCopyMetrics(numFrom, numTo)};
-      test.run([&]() {
-         SV from{fromValues};
-         SV to{toValues};
+      test.run(
+         [&]()
+         {
+            SV from{fromValues};
+            SV to{toValues};
 
-         VERIFY(from.onHeap(), caseLabel);
-         VERIFY(to.onHeap(), caseLabel);
-         VERIFY(from.size() > to.size(), caseLabel);
+            VERIFY(from.onHeap(), caseLabel);
+            VERIFY(to.onHeap(), caseLabel);
+            VERIFY(from.size() > to.size(), caseLabel);
 
-         to = from;
+            to = from;
 
-         VERIFY(to.onHeap(), caseLabel);
-         // Assigning data that needs a larger heap allocation will reallocate
-         // heap memory.
-         VERIFY(to.capacity() == numFrom, caseLabel);
-         verifyVector(to, fromValues, caseLabel);
-      });
+            VERIFY(to.onHeap(), caseLabel);
+            // Assigning data that needs a larger heap allocation will reallocate
+            // heap memory.
+            VERIFY(to.capacity() == numFrom, caseLabel);
+            verifyVector(to, fromValues, caseLabel);
+         });
    }
    {
       const std::string caseLabel{
@@ -942,22 +979,24 @@ void TestCopyAssignment()
       const std::size_t numTo = toValues.size();
 
       Test<Elem, BufCap> test{caseLabel, expectedCopyMetrics(numFrom, numTo)};
-      test.run([&]() {
-         SV from{fromValues};
-         SV to{toValues};
+      test.run(
+         [&]()
+         {
+            SV from{fromValues};
+            SV to{toValues};
 
-         VERIFY(from.onHeap(), caseLabel);
-         VERIFY(to.onHeap(), caseLabel);
-         VERIFY(from.size() < to.size(), caseLabel);
+            VERIFY(from.onHeap(), caseLabel);
+            VERIFY(to.onHeap(), caseLabel);
+            VERIFY(from.size() < to.size(), caseLabel);
 
-         to = from;
+            to = from;
 
-         VERIFY(to.onHeap(), caseLabel);
-         // Assigning data that needs a smaller heap allocation will reuse the existing
-         // heap memory. Capacity will remain at previous (larger) size.
-         VERIFY(to.capacity() == numTo, caseLabel);
-         verifyVector(to, fromValues, caseLabel);
-      });
+            VERIFY(to.onHeap(), caseLabel);
+            // Assigning data that needs a smaller heap allocation will reuse the existing
+            // heap memory. Capacity will remain at previous (larger) size.
+            VERIFY(to.capacity() == numTo, caseLabel);
+            verifyVector(to, fromValues, caseLabel);
+         });
    }
 }
 
@@ -966,7 +1005,8 @@ void TestMoveAssignment()
 {
    // Local functions to calculate the expected metrics for move-assignments.
    auto expectedMoveHeapMetrics = [](std::size_t numFrom,
-                                     std::size_t numTo) -> Element::Metrics {
+                                     std::size_t numTo) -> Element::Metrics
+   {
       Element::Metrics metrics;
       metrics.copyCtorCalls = numFrom + numTo;
       // No moves because the heap allocations is stolen.
@@ -975,7 +1015,8 @@ void TestMoveAssignment()
       return metrics;
    };
    auto expectedMoveBufferMetrics = [](std::size_t numFrom,
-                                       std::size_t numTo) -> Element::Metrics {
+                                       std::size_t numTo) -> Element::Metrics
+   {
       Element::Metrics metrics;
       metrics.copyCtorCalls = numFrom + numTo;
       metrics.moveCtorCalls = numFrom;
@@ -997,19 +1038,21 @@ void TestMoveAssignment()
       const std::size_t numTo = toValues.size();
 
       Test<Elem, BufCap> test{caseLabel, expectedMoveBufferMetrics(numFrom, numTo)};
-      test.run([&]() {
-         SV from{fromValues};
-         SV to{toValues};
+      test.run(
+         [&]()
+         {
+            SV from{fromValues};
+            SV to{toValues};
 
-         VERIFY(from.inBuffer(), caseLabel);
-         VERIFY(to.inBuffer(), caseLabel);
+            VERIFY(from.inBuffer(), caseLabel);
+            VERIFY(to.inBuffer(), caseLabel);
 
-         to = std::move(from);
+            to = std::move(from);
 
-         VERIFY(to.inBuffer(), caseLabel);
-         VERIFY(to.capacity() == BufCap, caseLabel);
-         verifyVector(to, fromValues, caseLabel);
-      });
+            VERIFY(to.inBuffer(), caseLabel);
+            VERIFY(to.capacity() == BufCap, caseLabel);
+            verifyVector(to, fromValues, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SboVector move assignment from heap "
@@ -1025,19 +1068,21 @@ void TestMoveAssignment()
       const std::size_t numTo = toValues.size();
 
       Test<Elem, BufCap> test{caseLabel, expectedMoveHeapMetrics(numFrom, numTo)};
-      test.run([&]() {
-         SV from{fromValues};
-         SV to{toValues};
+      test.run(
+         [&]()
+         {
+            SV from{fromValues};
+            SV to{toValues};
 
-         VERIFY(from.onHeap(), caseLabel);
-         VERIFY(to.inBuffer(), caseLabel);
+            VERIFY(from.onHeap(), caseLabel);
+            VERIFY(to.inBuffer(), caseLabel);
 
-         to = std::move(from);
+            to = std::move(from);
 
-         VERIFY(to.onHeap(), caseLabel);
-         VERIFY(to.capacity() == numFrom, caseLabel);
-         verifyVector(to, fromValues, caseLabel);
-      });
+            VERIFY(to.onHeap(), caseLabel);
+            VERIFY(to.capacity() == numFrom, caseLabel);
+            verifyVector(to, fromValues, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SboVector move assignment from buffer "
@@ -1053,19 +1098,21 @@ void TestMoveAssignment()
       const std::size_t numTo = toValues.size();
 
       Test<Elem, BufCap> test{caseLabel, expectedMoveBufferMetrics(numFrom, numTo)};
-      test.run([&]() {
-         SV from{fromValues};
-         SV to{toValues};
+      test.run(
+         [&]()
+         {
+            SV from{fromValues};
+            SV to{toValues};
 
-         VERIFY(from.inBuffer(), caseLabel);
-         VERIFY(to.onHeap(), caseLabel);
+            VERIFY(from.inBuffer(), caseLabel);
+            VERIFY(to.onHeap(), caseLabel);
 
-         to = std::move(from);
+            to = std::move(from);
 
-         VERIFY(to.inBuffer(), caseLabel);
-         VERIFY(to.capacity() == BufCap, caseLabel);
-         verifyVector(to, fromValues, caseLabel);
-      });
+            VERIFY(to.inBuffer(), caseLabel);
+            VERIFY(to.capacity() == BufCap, caseLabel);
+            verifyVector(to, fromValues, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SboVector move assignment from smaller "
@@ -1081,21 +1128,23 @@ void TestMoveAssignment()
       const std::size_t numTo = toValues.size();
 
       Test<Elem, BufCap> test{caseLabel, expectedMoveHeapMetrics(numFrom, numTo)};
-      test.run([&]() {
-         SV from{fromValues};
-         SV to{toValues};
+      test.run(
+         [&]()
+         {
+            SV from{fromValues};
+            SV to{toValues};
 
-         VERIFY(from.onHeap(), caseLabel);
-         VERIFY(to.onHeap(), caseLabel);
-         VERIFY(from.size() < to.size(), caseLabel);
+            VERIFY(from.onHeap(), caseLabel);
+            VERIFY(to.onHeap(), caseLabel);
+            VERIFY(from.size() < to.size(), caseLabel);
 
-         to = std::move(from);
+            to = std::move(from);
 
-         VERIFY(to.onHeap(), caseLabel);
-         // Will take over the stolen capacity of the source.
-         VERIFY(to.capacity() == numFrom, caseLabel);
-         verifyVector(to, fromValues, caseLabel);
-      });
+            VERIFY(to.onHeap(), caseLabel);
+            // Will take over the stolen capacity of the source.
+            VERIFY(to.capacity() == numFrom, caseLabel);
+            verifyVector(to, fromValues, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SboVector move assignment from larger heap "
@@ -1111,21 +1160,23 @@ void TestMoveAssignment()
       const std::size_t numTo = toValues.size();
 
       Test<Elem, BufCap> test{caseLabel, expectedMoveHeapMetrics(numFrom, numTo)};
-      test.run([&]() {
-         SV from{fromValues};
-         SV to{toValues};
+      test.run(
+         [&]()
+         {
+            SV from{fromValues};
+            SV to{toValues};
 
-         VERIFY(from.onHeap(), caseLabel);
-         VERIFY(to.onHeap(), caseLabel);
-         VERIFY(from.size() > to.size(), caseLabel);
+            VERIFY(from.onHeap(), caseLabel);
+            VERIFY(to.onHeap(), caseLabel);
+            VERIFY(from.size() > to.size(), caseLabel);
 
-         to = std::move(from);
+            to = std::move(from);
 
-         VERIFY(to.onHeap(), caseLabel);
-         // Will take over the stolen capacity of the source.
-         VERIFY(to.capacity() == numFrom, caseLabel);
-         verifyVector(to, fromValues, caseLabel);
-      });
+            VERIFY(to.onHeap(), caseLabel);
+            // Will take over the stolen capacity of the source.
+            VERIFY(to.capacity() == numFrom, caseLabel);
+            verifyVector(to, fromValues, caseLabel);
+         });
    }
 }
 
@@ -1134,7 +1185,8 @@ void TestInitializerListAssignment()
 {
    // Local functions to calculate the expected metrics for assignment of
    // an initializer list.
-   auto expectedMetrics = [](std::size_t numFrom, std::size_t numTo) -> Element::Metrics {
+   auto expectedMetrics = [](std::size_t numFrom, std::size_t numTo) -> Element::Metrics
+   {
       Element::Metrics metrics;
       metrics.copyCtorCalls = numFrom + numTo;
       metrics.dtorCalls = numFrom + numTo;
@@ -1155,18 +1207,20 @@ void TestInitializerListAssignment()
       const std::size_t numTo = toValues.size();
 
       Test<Elem, BufCap> test{caseLabel, expectedMetrics(numFrom, numTo)};
-      test.run([&]() {
-         SV to{toValues};
+      test.run(
+         [&]()
+         {
+            SV to{toValues};
 
-         VERIFY(to.inBuffer(), caseLabel);
-         VERIFY(numFrom < BufCap, caseLabel);
+            VERIFY(to.inBuffer(), caseLabel);
+            VERIFY(numFrom < BufCap, caseLabel);
 
-         to = fromValues;
+            to = fromValues;
 
-         VERIFY(to.inBuffer(), caseLabel);
-         VERIFY(to.capacity() == BufCap, caseLabel);
-         verifyVector(to, fromValues, caseLabel);
-      });
+            VERIFY(to.inBuffer(), caseLabel);
+            VERIFY(to.capacity() == BufCap, caseLabel);
+            verifyVector(to, fromValues, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SboVector initializer list assignment that requires "
@@ -1182,18 +1236,20 @@ void TestInitializerListAssignment()
       const std::size_t numTo = toValues.size();
 
       Test<Elem, BufCap> test{caseLabel, expectedMetrics(numFrom, numTo)};
-      test.run([&]() {
-         SV to{toValues};
+      test.run(
+         [&]()
+         {
+            SV to{toValues};
 
-         VERIFY(to.inBuffer(), caseLabel);
-         VERIFY(numFrom > BufCap, caseLabel);
+            VERIFY(to.inBuffer(), caseLabel);
+            VERIFY(numFrom > BufCap, caseLabel);
 
-         to = fromValues;
+            to = fromValues;
 
-         VERIFY(to.onHeap(), caseLabel);
-         VERIFY(to.capacity() == numFrom, caseLabel);
-         verifyVector(to, fromValues, caseLabel);
-      });
+            VERIFY(to.onHeap(), caseLabel);
+            VERIFY(to.capacity() == numFrom, caseLabel);
+            verifyVector(to, fromValues, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SboVector initializer list assignment  "
@@ -1209,18 +1265,20 @@ void TestInitializerListAssignment()
       const std::size_t numTo = toValues.size();
 
       Test<Elem, BufCap> test{caseLabel, expectedMetrics(numFrom, numTo)};
-      test.run([&]() {
-         SV to{toValues};
+      test.run(
+         [&]()
+         {
+            SV to{toValues};
 
-         VERIFY(to.onHeap(), caseLabel);
-         VERIFY(numFrom < BufCap, caseLabel);
+            VERIFY(to.onHeap(), caseLabel);
+            VERIFY(numFrom < BufCap, caseLabel);
 
-         to = fromValues;
+            to = fromValues;
 
-         VERIFY(to.inBuffer(), caseLabel);
-         VERIFY(to.capacity() == BufCap, caseLabel);
-         verifyVector(to, fromValues, caseLabel);
-      });
+            VERIFY(to.inBuffer(), caseLabel);
+            VERIFY(to.capacity() == BufCap, caseLabel);
+            verifyVector(to, fromValues, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SboVector initializer list assignment that needs heap "
@@ -1236,20 +1294,22 @@ void TestInitializerListAssignment()
       const std::size_t numTo = toValues.size();
 
       Test<Elem, BufCap> test{caseLabel, expectedMetrics(numFrom, numTo)};
-      test.run([&]() {
-         SV to{toValues};
-         const std::size_t origCap = to.capacity();
+      test.run(
+         [&]()
+         {
+            SV to{toValues};
+            const std::size_t origCap = to.capacity();
 
-         VERIFY(to.onHeap(), caseLabel);
-         VERIFY(numFrom > BufCap, caseLabel);
-         VERIFY(numFrom < numTo, caseLabel);
+            VERIFY(to.onHeap(), caseLabel);
+            VERIFY(numFrom > BufCap, caseLabel);
+            VERIFY(numFrom < numTo, caseLabel);
 
-         to = fromValues;
+            to = fromValues;
 
-         VERIFY(to.onHeap(), caseLabel);
-         VERIFY(to.capacity() == origCap, caseLabel);
-         verifyVector(to, fromValues, caseLabel);
-      });
+            VERIFY(to.onHeap(), caseLabel);
+            VERIFY(to.capacity() == origCap, caseLabel);
+            verifyVector(to, fromValues, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SboVector initializer list assignment that needs heap "
@@ -1265,20 +1325,22 @@ void TestInitializerListAssignment()
       const std::size_t numTo = toValues.size();
 
       Test<Elem, BufCap> test{caseLabel, expectedMetrics(numFrom, numTo)};
-      test.run([&]() {
-         SV to{toValues};
-         const std::size_t origCap = to.capacity();
+      test.run(
+         [&]()
+         {
+            SV to{toValues};
+            const std::size_t origCap = to.capacity();
 
-         VERIFY(to.onHeap(), caseLabel);
-         VERIFY(numFrom > BufCap, caseLabel);
-         VERIFY(numFrom > numTo, caseLabel);
+            VERIFY(to.onHeap(), caseLabel);
+            VERIFY(numFrom > BufCap, caseLabel);
+            VERIFY(numFrom > numTo, caseLabel);
 
-         to = fromValues;
+            to = fromValues;
 
-         VERIFY(to.onHeap(), caseLabel);
-         VERIFY(to.capacity() > origCap, caseLabel);
-         verifyVector(to, fromValues, caseLabel);
-      });
+            VERIFY(to.onHeap(), caseLabel);
+            VERIFY(to.capacity() > origCap, caseLabel);
+            verifyVector(to, fromValues, caseLabel);
+         });
    }
 }
 
@@ -1287,7 +1349,8 @@ void TestAssignElementValue()
 {
    // Local functions to calculate the expected metrics.
    auto expectedMetrics = [](std::size_t numInitial,
-                             std::size_t numAssigned) -> Element::Metrics {
+                             std::size_t numAssigned) -> Element::Metrics
+   {
       Element::Metrics metrics;
       metrics.copyCtorCalls = numInitial + numAssigned;
       metrics.dtorCalls = numInitial + numAssigned;
@@ -1310,18 +1373,20 @@ void TestAssignElementValue()
       const std::initializer_list<Elem> expected{100, 100};
 
       Test<Elem, BufCap> test{caseLabel, expectedMetrics(numInitial, numAssigned)};
-      test.run([&]() {
-         SV sv{initial};
+      test.run(
+         [&]()
+         {
+            SV sv{initial};
 
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(numAssigned < BufCap, caseLabel);
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(numAssigned < BufCap, caseLabel);
 
-         sv.assign(numAssigned, assigned);
+            sv.assign(numAssigned, assigned);
 
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(sv.capacity() == BufCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(sv.capacity() == BufCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SboVector assign element value n-times. Assigned "
@@ -1339,19 +1404,21 @@ void TestAssignElementValue()
       const std::initializer_list<Elem> expected{100, 100, 100, 100, 100, 100, 100};
 
       Test<Elem, BufCap> test{caseLabel, expectedMetrics(numInitial, numAssigned)};
-      test.run([&]() {
-         SV sv{initial};
-         const std::size_t origCap = sv.capacity();
+      test.run(
+         [&]()
+         {
+            SV sv{initial};
+            const std::size_t origCap = sv.capacity();
 
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(numAssigned > BufCap, caseLabel);
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(numAssigned > BufCap, caseLabel);
 
-         sv.assign(numAssigned, assigned);
+            sv.assign(numAssigned, assigned);
 
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() > origCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() > origCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SboVector assign element value n-times. Assigned "
@@ -1368,18 +1435,20 @@ void TestAssignElementValue()
       const std::initializer_list<Elem> expected{100, 100, 100};
 
       Test<Elem, BufCap> test{caseLabel, expectedMetrics(numInitial, numAssigned)};
-      test.run([&]() {
-         SV sv{initial};
+      test.run(
+         [&]()
+         {
+            SV sv{initial};
 
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(numAssigned < BufCap, caseLabel);
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(numAssigned < BufCap, caseLabel);
 
-         sv.assign(numAssigned, assigned);
+            sv.assign(numAssigned, assigned);
 
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(sv.capacity() == BufCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(sv.capacity() == BufCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{
@@ -1398,20 +1467,22 @@ void TestAssignElementValue()
                                                  100, 100, 100, 100, 100};
 
       Test<Elem, BufCap> test{caseLabel, expectedMetrics(numInitial, numAssigned)};
-      test.run([&]() {
-         SV sv{initial};
-         const std::size_t origCap = sv.capacity();
+      test.run(
+         [&]()
+         {
+            SV sv{initial};
+            const std::size_t origCap = sv.capacity();
 
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(numAssigned > BufCap, caseLabel);
-         VERIFY(numAssigned > numInitial, caseLabel);
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(numAssigned > BufCap, caseLabel);
+            VERIFY(numAssigned > numInitial, caseLabel);
 
-         sv.assign(numAssigned, assigned);
+            sv.assign(numAssigned, assigned);
 
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() > origCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() > origCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{
@@ -1429,20 +1500,22 @@ void TestAssignElementValue()
       const std::initializer_list<Elem> expected{100, 100, 100, 100, 100, 100, 100};
 
       Test<Elem, BufCap> test{caseLabel, expectedMetrics(numInitial, numAssigned)};
-      test.run([&]() {
-         SV sv{initial};
-         const std::size_t origCap = sv.capacity();
+      test.run(
+         [&]()
+         {
+            SV sv{initial};
+            const std::size_t origCap = sv.capacity();
 
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(numAssigned > BufCap, caseLabel);
-         VERIFY(numAssigned < numInitial, caseLabel);
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(numAssigned > BufCap, caseLabel);
+            VERIFY(numAssigned < numInitial, caseLabel);
 
-         sv.assign(numAssigned, assigned);
+            sv.assign(numAssigned, assigned);
 
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() == origCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() == origCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
 }
 
@@ -1451,7 +1524,8 @@ void TestAssignIteratorRange()
 {
    // Local functions to calculate the expected metrics.
    auto expectedMetrics = [](std::size_t numInitial,
-                             std::size_t numAssigned) -> Element::Metrics {
+                             std::size_t numAssigned) -> Element::Metrics
+   {
       Element::Metrics metrics;
       metrics.copyCtorCalls = numInitial + numAssigned;
       metrics.dtorCalls = numInitial + numAssigned;
@@ -1474,18 +1548,20 @@ void TestAssignIteratorRange()
       const std::list<Element> from{assigned};
 
       Test<Elem, BufCap> test{caseLabel, expectedMetrics(numInitial, numAssigned)};
-      test.run([&]() {
-         SV sv{initial};
+      test.run(
+         [&]()
+         {
+            SV sv{initial};
 
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(numAssigned < BufCap, caseLabel);
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(numAssigned < BufCap, caseLabel);
 
-         sv.assign(from.begin(), from.end());
+            sv.assign(from.begin(), from.end());
 
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(sv.capacity() == BufCap, caseLabel);
-         verifyVector(sv, assigned, caseLabel);
-      });
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(sv.capacity() == BufCap, caseLabel);
+            verifyVector(sv, assigned, caseLabel);
+         });
    }
    {
       const std::string caseLabel{
@@ -1503,18 +1579,20 @@ void TestAssignIteratorRange()
       const std::list<Element> from{assigned};
 
       Test<Elem, BufCap> test{caseLabel, expectedMetrics(numInitial, numAssigned)};
-      test.run([&]() {
-         SV sv{initial};
+      test.run(
+         [&]()
+         {
+            SV sv{initial};
 
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(numAssigned > BufCap, caseLabel);
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(numAssigned > BufCap, caseLabel);
 
-         sv.assign(from.begin(), from.end());
+            sv.assign(from.begin(), from.end());
 
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() > BufCap, caseLabel);
-         verifyVector(sv, assigned, caseLabel);
-      });
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() > BufCap, caseLabel);
+            verifyVector(sv, assigned, caseLabel);
+         });
    }
    {
       const std::string caseLabel{
@@ -1532,18 +1610,20 @@ void TestAssignIteratorRange()
       const std::list<Element> from{assigned};
 
       Test<Elem, BufCap> test{caseLabel, expectedMetrics(numInitial, numAssigned)};
-      test.run([&]() {
-         SV sv{initial};
+      test.run(
+         [&]()
+         {
+            SV sv{initial};
 
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(numAssigned < BufCap, caseLabel);
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(numAssigned < BufCap, caseLabel);
 
-         sv.assign(from.begin(), from.end());
+            sv.assign(from.begin(), from.end());
 
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(sv.capacity() == BufCap, caseLabel);
-         verifyVector(sv, assigned, caseLabel);
-      });
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(sv.capacity() == BufCap, caseLabel);
+            verifyVector(sv, assigned, caseLabel);
+         });
    }
    {
       const std::string caseLabel{
@@ -1561,20 +1641,22 @@ void TestAssignIteratorRange()
       const std::list<Element> from{assigned};
 
       Test<Elem, BufCap> test{caseLabel, expectedMetrics(numInitial, numAssigned)};
-      test.run([&]() {
-         SV sv{initial};
-         const std::size_t origCap = sv.capacity();
+      test.run(
+         [&]()
+         {
+            SV sv{initial};
+            const std::size_t origCap = sv.capacity();
 
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(numAssigned > BufCap, caseLabel);
-         VERIFY(numAssigned > numInitial, caseLabel);
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(numAssigned > BufCap, caseLabel);
+            VERIFY(numAssigned > numInitial, caseLabel);
 
-         sv.assign(from.begin(), from.end());
+            sv.assign(from.begin(), from.end());
 
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() > origCap, caseLabel);
-         verifyVector(sv, assigned, caseLabel);
-      });
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() > origCap, caseLabel);
+            verifyVector(sv, assigned, caseLabel);
+         });
    }
    {
       const std::string caseLabel{
@@ -1592,20 +1674,22 @@ void TestAssignIteratorRange()
       const std::list<Element> from{assigned};
 
       Test<Elem, BufCap> test{caseLabel, expectedMetrics(numInitial, numAssigned)};
-      test.run([&]() {
-         SV sv{initial};
-         const std::size_t origCap = sv.capacity();
+      test.run(
+         [&]()
+         {
+            SV sv{initial};
+            const std::size_t origCap = sv.capacity();
 
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(numAssigned > BufCap, caseLabel);
-         VERIFY(numAssigned < numInitial, caseLabel);
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(numAssigned > BufCap, caseLabel);
+            VERIFY(numAssigned < numInitial, caseLabel);
 
-         sv.assign(from.begin(), from.end());
+            sv.assign(from.begin(), from.end());
 
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() == origCap, caseLabel);
-         verifyVector(sv, assigned, caseLabel);
-      });
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() == origCap, caseLabel);
+            verifyVector(sv, assigned, caseLabel);
+         });
    }
 }
 
@@ -1614,7 +1698,8 @@ void TestAssignInitializerList()
 {
    // Local functions to calculate the expected metrics.
    auto expectedMetrics = [](std::size_t numInitial,
-                             std::size_t numAssigned) -> Element::Metrics {
+                             std::size_t numAssigned) -> Element::Metrics
+   {
       Element::Metrics metrics;
       metrics.copyCtorCalls = numInitial + numAssigned;
       metrics.dtorCalls = numInitial + numAssigned;
@@ -1636,18 +1721,20 @@ void TestAssignInitializerList()
       const std::size_t numAssigned = assigned.size();
 
       Test<Elem, BufCap> test{caseLabel, expectedMetrics(numInitial, numAssigned)};
-      test.run([&]() {
-         SV sv{initial};
+      test.run(
+         [&]()
+         {
+            SV sv{initial};
 
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(numAssigned < BufCap, caseLabel);
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(numAssigned < BufCap, caseLabel);
 
-         sv.assign(assigned);
+            sv.assign(assigned);
 
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(sv.capacity() == BufCap, caseLabel);
-         verifyVector(sv, assigned, caseLabel);
-      });
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(sv.capacity() == BufCap, caseLabel);
+            verifyVector(sv, assigned, caseLabel);
+         });
    }
    {
       const std::string caseLabel{
@@ -1664,18 +1751,20 @@ void TestAssignInitializerList()
       const std::size_t numAssigned = assigned.size();
 
       Test<Elem, BufCap> test{caseLabel, expectedMetrics(numInitial, numAssigned)};
-      test.run([&]() {
-         SV sv{initial};
+      test.run(
+         [&]()
+         {
+            SV sv{initial};
 
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(numAssigned > BufCap, caseLabel);
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(numAssigned > BufCap, caseLabel);
 
-         sv.assign(assigned);
+            sv.assign(assigned);
 
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() > BufCap, caseLabel);
-         verifyVector(sv, assigned, caseLabel);
-      });
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() > BufCap, caseLabel);
+            verifyVector(sv, assigned, caseLabel);
+         });
    }
    {
       const std::string caseLabel{
@@ -1692,18 +1781,20 @@ void TestAssignInitializerList()
       const std::size_t numAssigned = assigned.size();
 
       Test<Elem, BufCap> test{caseLabel, expectedMetrics(numInitial, numAssigned)};
-      test.run([&]() {
-         SV sv{initial};
+      test.run(
+         [&]()
+         {
+            SV sv{initial};
 
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(numAssigned < BufCap, caseLabel);
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(numAssigned < BufCap, caseLabel);
 
-         sv.assign(assigned);
+            sv.assign(assigned);
 
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(sv.capacity() == BufCap, caseLabel);
-         verifyVector(sv, assigned, caseLabel);
-      });
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(sv.capacity() == BufCap, caseLabel);
+            verifyVector(sv, assigned, caseLabel);
+         });
    }
    {
       const std::string caseLabel{
@@ -1720,20 +1811,22 @@ void TestAssignInitializerList()
       const std::size_t numAssigned = assigned.size();
 
       Test<Elem, BufCap> test{caseLabel, expectedMetrics(numInitial, numAssigned)};
-      test.run([&]() {
-         SV sv{initial};
-         const std::size_t origCap = sv.capacity();
+      test.run(
+         [&]()
+         {
+            SV sv{initial};
+            const std::size_t origCap = sv.capacity();
 
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(numAssigned > BufCap, caseLabel);
-         VERIFY(numAssigned > numInitial, caseLabel);
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(numAssigned > BufCap, caseLabel);
+            VERIFY(numAssigned > numInitial, caseLabel);
 
-         sv.assign(assigned);
+            sv.assign(assigned);
 
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() > origCap, caseLabel);
-         verifyVector(sv, assigned, caseLabel);
-      });
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() > origCap, caseLabel);
+            verifyVector(sv, assigned, caseLabel);
+         });
    }
    {
       const std::string caseLabel{
@@ -1750,20 +1843,22 @@ void TestAssignInitializerList()
       const std::size_t numAssigned = assigned.size();
 
       Test<Elem, BufCap> test{caseLabel, expectedMetrics(numInitial, numAssigned)};
-      test.run([&]() {
-         SV sv{initial};
-         const std::size_t origCap = sv.capacity();
+      test.run(
+         [&]()
+         {
+            SV sv{initial};
+            const std::size_t origCap = sv.capacity();
 
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(numAssigned > BufCap, caseLabel);
-         VERIFY(numAssigned < numInitial, caseLabel);
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(numAssigned > BufCap, caseLabel);
+            VERIFY(numAssigned < numInitial, caseLabel);
 
-         sv.assign(assigned);
+            sv.assign(assigned);
 
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() == origCap, caseLabel);
-         verifyVector(sv, assigned, caseLabel);
-      });
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() == origCap, caseLabel);
+            verifyVector(sv, assigned, caseLabel);
+         });
    }
 }
 
@@ -1787,18 +1882,20 @@ void TestAt()
       metrics.dtorCalls = numElems;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         VERIFY(sv.inBuffer(), caseLabel);
-
-         for (int i = 0; i < sv.size(); ++i)
+      test.run(
+         [&]()
          {
-            VERIFY(sv.at(i) == val, caseLabel);
+            VERIFY(sv.inBuffer(), caseLabel);
 
-            const Elem newVal{i};
-            sv.at(i) = newVal;
-            VERIFY(sv.at(i) == newVal, caseLabel);
-         }
-      });
+            for (int i = 0; i < sv.size(); ++i)
+            {
+               VERIFY(sv.at(i) == val, caseLabel);
+
+               const Elem newVal{i};
+               sv.at(i) = newVal;
+               VERIFY(sv.at(i) == newVal, caseLabel);
+            }
+         });
    }
    {
       const std::string caseLabel{"SvoVector::at for heap instance"};
@@ -1817,18 +1914,20 @@ void TestAt()
       metrics.dtorCalls = numElems;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         VERIFY(sv.onHeap(), caseLabel);
-
-         for (int i = 0; i < sv.size(); ++i)
+      test.run(
+         [&]()
          {
-            VERIFY(sv.at(i) == val, caseLabel);
+            VERIFY(sv.onHeap(), caseLabel);
 
-            const Elem newVal{i};
-            sv.at(i) = newVal;
-            VERIFY(sv.at(i) == newVal, caseLabel);
-         }
-      });
+            for (int i = 0; i < sv.size(); ++i)
+            {
+               VERIFY(sv.at(i) == val, caseLabel);
+
+               const Elem newVal{i};
+               sv.at(i) = newVal;
+               VERIFY(sv.at(i) == newVal, caseLabel);
+            }
+         });
    }
    {
       const std::string caseLabel{"SvoVector::at for invalid index"};
@@ -1844,9 +1943,9 @@ void TestAt()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY_THROW(([&]() { sv.at(sv.size()); }), std::out_of_range, caseLabel);
-      });
+      test.run(
+         [&]()
+         { VERIFY_THROW(([&]() { sv.at(sv.size()); }), std::out_of_range, caseLabel); });
    }
 }
 
@@ -1867,15 +1966,17 @@ void TestAtConst()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.inBuffer(), caseLabel);
-         // Ref types are always non-const, so remove the reference.
-         static_assert(
-            std::is_const_v<typename std::remove_reference<decltype(sv)>::type>);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.inBuffer(), caseLabel);
+            // Ref types are always non-const, so remove the reference.
+            static_assert(
+               std::is_const_v<typename std::remove_reference<decltype(sv)>::type>);
 
-         for (int i = 0; i < sv.size(); ++i)
-            VERIFY(sv.at(i) == val, caseLabel);
-      });
+            for (int i = 0; i < sv.size(); ++i)
+               VERIFY(sv.at(i) == val, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::at const for heap instance"};
@@ -1891,15 +1992,17 @@ void TestAtConst()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.onHeap(), caseLabel);
-         // Ref types are always non-const, so remove the reference.
-         static_assert(
-            std::is_const_v<typename std::remove_reference<decltype(sv)>::type>);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.onHeap(), caseLabel);
+            // Ref types are always non-const, so remove the reference.
+            static_assert(
+               std::is_const_v<typename std::remove_reference<decltype(sv)>::type>);
 
-         for (int i = 0; i < sv.size(); ++i)
-            VERIFY(sv.at(i) == val, caseLabel);
-      });
+            for (int i = 0; i < sv.size(); ++i)
+               VERIFY(sv.at(i) == val, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::at const for invalid index"};
@@ -1915,12 +2018,14 @@ void TestAtConst()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         // Ref types are always non-const, so remove the reference.
-         static_assert(std::is_const_v<std::remove_reference<decltype(sv)>::type>);
+      test.run(
+         [&]()
+         {
+            // Ref types are always non-const, so remove the reference.
+            static_assert(std::is_const_v<std::remove_reference<decltype(sv)>::type>);
 
-         VERIFY_THROW(([&]() { sv.at(sv.size()); }), std::out_of_range, caseLabel);
-      });
+            VERIFY_THROW(([&]() { sv.at(sv.size()); }), std::out_of_range, caseLabel);
+         });
    }
 }
 
@@ -1944,18 +2049,20 @@ void TestSubscriptOperator()
       metrics.dtorCalls = numElems;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         VERIFY(sv.inBuffer(), caseLabel);
-
-         for (int i = 0; i < sv.size(); ++i)
+      test.run(
+         [&]()
          {
-            VERIFY(sv[i] == val, caseLabel);
+            VERIFY(sv.inBuffer(), caseLabel);
 
-            const Elem newVal{i};
-            sv[i] = newVal;
-            VERIFY(sv[i] == newVal, caseLabel);
-         }
-      });
+            for (int i = 0; i < sv.size(); ++i)
+            {
+               VERIFY(sv[i] == val, caseLabel);
+
+               const Elem newVal{i};
+               sv[i] = newVal;
+               VERIFY(sv[i] == newVal, caseLabel);
+            }
+         });
    }
    {
       const std::string caseLabel{"SvoVector::operator[] for heap instance"};
@@ -1974,18 +2081,20 @@ void TestSubscriptOperator()
       metrics.dtorCalls = numElems;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         VERIFY(sv.onHeap(), caseLabel);
-
-         for (int i = 0; i < sv.size(); ++i)
+      test.run(
+         [&]()
          {
-            VERIFY(sv[i] == val, caseLabel);
+            VERIFY(sv.onHeap(), caseLabel);
 
-            const Elem newVal{i};
-            sv[i] = newVal;
-            VERIFY(sv[i] == newVal, caseLabel);
-         }
-      });
+            for (int i = 0; i < sv.size(); ++i)
+            {
+               VERIFY(sv[i] == val, caseLabel);
+
+               const Elem newVal{i};
+               sv[i] = newVal;
+               VERIFY(sv[i] == newVal, caseLabel);
+            }
+         });
    }
 }
 
@@ -2006,12 +2115,14 @@ void TestSubscriptOperatorConst()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.inBuffer(), caseLabel);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.inBuffer(), caseLabel);
 
-         for (int i = 0; i < sv.size(); ++i)
-            VERIFY(sv[i] == val, caseLabel);
-      });
+            for (int i = 0; i < sv.size(); ++i)
+               VERIFY(sv[i] == val, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::operator[] const for heap instance"};
@@ -2027,12 +2138,14 @@ void TestSubscriptOperatorConst()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.onHeap(), caseLabel);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.onHeap(), caseLabel);
 
-         for (int i = 0; i < sv.size(); ++i)
-            VERIFY(sv[i] == val, caseLabel);
-      });
+            for (int i = 0; i < sv.size(); ++i)
+               VERIFY(sv[i] == val, caseLabel);
+         });
    }
 }
 
@@ -2054,15 +2167,17 @@ void TestFront()
       metrics.dtorCalls = 1;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         VERIFY(sv.inBuffer(), caseLabel);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.inBuffer(), caseLabel);
 
-         VERIFY(sv.front() == sv[0], caseLabel);
+            VERIFY(sv.front() == sv[0], caseLabel);
 
-         const Elem newVal{20};
-         sv.front() = newVal;
-         VERIFY(sv[0] == newVal, caseLabel);
-      });
+            const Elem newVal{20};
+            sv.front() = newVal;
+            VERIFY(sv[0] == newVal, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::front for heap instance"};
@@ -2079,15 +2194,17 @@ void TestFront()
       metrics.dtorCalls = 1;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         VERIFY(sv.onHeap(), caseLabel);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.onHeap(), caseLabel);
 
-         VERIFY(sv.front() == sv[0], caseLabel);
+            VERIFY(sv.front() == sv[0], caseLabel);
 
-         const Elem newVal{20};
-         sv.front() = newVal;
-         VERIFY(sv[0] == newVal, caseLabel);
-      });
+            const Elem newVal{20};
+            sv.front() = newVal;
+            VERIFY(sv[0] == newVal, caseLabel);
+         });
    }
 }
 
@@ -2105,13 +2222,15 @@ void TestFrontConst()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.inBuffer(), caseLabel);
-         // Ref types are always non-const, so remove the reference.
-         static_assert(std::is_const_v<std::remove_reference<decltype(sv)>::type>);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.inBuffer(), caseLabel);
+            // Ref types are always non-const, so remove the reference.
+            static_assert(std::is_const_v<std::remove_reference<decltype(sv)>::type>);
 
-         VERIFY(sv.front() == sv[0], caseLabel);
-      });
+            VERIFY(sv.front() == sv[0], caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::front const for heap instance"};
@@ -2125,13 +2244,15 @@ void TestFrontConst()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.onHeap(), caseLabel);
-         // Ref types are always non-const, so remove the reference.
-         static_assert(std::is_const_v<std::remove_reference<decltype(sv)>::type>);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.onHeap(), caseLabel);
+            // Ref types are always non-const, so remove the reference.
+            static_assert(std::is_const_v<std::remove_reference<decltype(sv)>::type>);
 
-         VERIFY(sv.front() == sv[0], caseLabel);
-      });
+            VERIFY(sv.front() == sv[0], caseLabel);
+         });
    }
 }
 
@@ -2153,15 +2274,17 @@ void TestBack()
       metrics.dtorCalls = 1;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         VERIFY(sv.inBuffer(), caseLabel);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.inBuffer(), caseLabel);
 
-         VERIFY(sv.back() == sv[sv.size() - 1], caseLabel);
+            VERIFY(sv.back() == sv[sv.size() - 1], caseLabel);
 
-         const Elem newVal{20};
-         sv.back() = newVal;
-         VERIFY(sv[sv.size() - 1] == newVal, caseLabel);
-      });
+            const Elem newVal{20};
+            sv.back() = newVal;
+            VERIFY(sv[sv.size() - 1] == newVal, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::back for heap instance"};
@@ -2178,15 +2301,17 @@ void TestBack()
       metrics.dtorCalls = 1;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         VERIFY(sv.onHeap(), caseLabel);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.onHeap(), caseLabel);
 
-         VERIFY(sv.back() == sv[sv.size() - 1], caseLabel);
+            VERIFY(sv.back() == sv[sv.size() - 1], caseLabel);
 
-         const Elem newVal{20};
-         sv.back() = newVal;
-         VERIFY(sv[sv.size() - 1] == newVal, caseLabel);
-      });
+            const Elem newVal{20};
+            sv.back() = newVal;
+            VERIFY(sv[sv.size() - 1] == newVal, caseLabel);
+         });
    }
 }
 
@@ -2204,13 +2329,15 @@ void TestBackConst()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.inBuffer(), caseLabel);
-         // Ref types are always non-const, so remove the reference.
-         static_assert(std::is_const_v<std::remove_reference<decltype(sv)>::type>);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.inBuffer(), caseLabel);
+            // Ref types are always non-const, so remove the reference.
+            static_assert(std::is_const_v<std::remove_reference<decltype(sv)>::type>);
 
-         VERIFY(sv.back() == sv[sv.size() - 1], caseLabel);
-      });
+            VERIFY(sv.back() == sv[sv.size() - 1], caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::back const for heap instance"};
@@ -2223,13 +2350,15 @@ void TestBackConst()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.onHeap(), caseLabel);
-         // Ref types are always non-const, so remove the reference.
-         static_assert(std::is_const_v<std::remove_reference<decltype(sv)>::type>);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.onHeap(), caseLabel);
+            // Ref types are always non-const, so remove the reference.
+            static_assert(std::is_const_v<std::remove_reference<decltype(sv)>::type>);
 
-         VERIFY(sv.back() == sv[sv.size() - 1], caseLabel);
-      });
+            VERIFY(sv.back() == sv[sv.size() - 1], caseLabel);
+         });
    }
 }
 
@@ -2252,18 +2381,20 @@ void TestData()
       metrics.dtorCalls = numElems;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         VERIFY(sv.inBuffer(), caseLabel);
-
-         for (int i = 0; i < sv.size(); ++i)
+      test.run(
+         [&]()
          {
-            VERIFY(sv.data()[i] == sv[i], caseLabel);
+            VERIFY(sv.inBuffer(), caseLabel);
 
-            const Elem newVal{100 + i};
-            sv.data()[i] = newVal;
-            VERIFY(sv[i] == newVal, caseLabel);
-         }
-      });
+            for (int i = 0; i < sv.size(); ++i)
+            {
+               VERIFY(sv.data()[i] == sv[i], caseLabel);
+
+               const Elem newVal{100 + i};
+               sv.data()[i] = newVal;
+               VERIFY(sv[i] == newVal, caseLabel);
+            }
+         });
    }
    {
       const std::string caseLabel{"SvoVector::data for heap instance"};
@@ -2281,18 +2412,20 @@ void TestData()
       metrics.dtorCalls = numElems;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         VERIFY(sv.onHeap(), caseLabel);
-
-         for (int i = 0; i < sv.size(); ++i)
+      test.run(
+         [&]()
          {
-            VERIFY(sv.data()[i] == sv[i], caseLabel);
+            VERIFY(sv.onHeap(), caseLabel);
 
-            const Elem newVal{100 + i};
-            sv.data()[i] = newVal;
-            VERIFY(sv[i] == newVal, caseLabel);
-         }
-      });
+            for (int i = 0; i < sv.size(); ++i)
+            {
+               VERIFY(sv.data()[i] == sv[i], caseLabel);
+
+               const Elem newVal{100 + i};
+               sv.data()[i] = newVal;
+               VERIFY(sv[i] == newVal, caseLabel);
+            }
+         });
    }
 }
 
@@ -2310,14 +2443,16 @@ void TestDataConst()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.inBuffer(), caseLabel);
-         // Ref types are always non-const, so remove the reference.
-         static_assert(std::is_const_v<std::remove_reference<decltype(sv)>::type>);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.inBuffer(), caseLabel);
+            // Ref types are always non-const, so remove the reference.
+            static_assert(std::is_const_v<std::remove_reference<decltype(sv)>::type>);
 
-         for (int i = 0; i < sv.size(); ++i)
-            VERIFY(sv.data()[i] == sv[i], caseLabel);
-      });
+            for (int i = 0; i < sv.size(); ++i)
+               VERIFY(sv.data()[i] == sv[i], caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::back const for heap instance"};
@@ -2330,14 +2465,16 @@ void TestDataConst()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.onHeap(), caseLabel);
-         // Ref types are always non-const, so remove the reference.
-         static_assert(std::is_const_v<std::remove_reference<decltype(sv)>::type>);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.onHeap(), caseLabel);
+            // Ref types are always non-const, so remove the reference.
+            static_assert(std::is_const_v<std::remove_reference<decltype(sv)>::type>);
 
-         for (int i = 0; i < sv.size(); ++i)
-            VERIFY(sv.data()[i] == sv[i], caseLabel);
-      });
+            for (int i = 0; i < sv.size(); ++i)
+               VERIFY(sv.data()[i] == sv[i], caseLabel);
+         });
    }
 }
 
@@ -2355,12 +2492,14 @@ void TestBegin()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.inBuffer(), caseLabel);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.inBuffer(), caseLabel);
 
-         SV::iterator first = sv.begin();
-         VERIFY(*first == sv[0], caseLabel);
-      });
+            SV::iterator first = sv.begin();
+            VERIFY(*first == sv[0], caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SboVector::begin for heap instance"};
@@ -2373,12 +2512,14 @@ void TestBegin()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.onHeap(), caseLabel);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.onHeap(), caseLabel);
 
-         SV::iterator first = sv.begin();
-         VERIFY(*first == sv[0], caseLabel);
-      });
+            SV::iterator first = sv.begin();
+            VERIFY(*first == sv[0], caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SboVector::begin for empty vector"};
@@ -2391,12 +2532,14 @@ void TestBegin()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.empty(), caseLabel);
 
-         SV::iterator first = sv.begin();
-         VERIFY(first == sv.end(), caseLabel);
-      });
+            SV::iterator first = sv.begin();
+            VERIFY(first == sv.end(), caseLabel);
+         });
    }
 }
 
@@ -2414,12 +2557,14 @@ void TestEnd()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.inBuffer(), caseLabel);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.inBuffer(), caseLabel);
 
-         SV::iterator last = sv.end();
-         VERIFY(last == sv.begin() + sv.size(), caseLabel);
-      });
+            SV::iterator last = sv.end();
+            VERIFY(last == sv.begin() + sv.size(), caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SboVector::end for heap instance"};
@@ -2432,12 +2577,14 @@ void TestEnd()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.onHeap(), caseLabel);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.onHeap(), caseLabel);
 
-         SV::iterator last = sv.end();
-         VERIFY(last == sv.begin() + sv.size(), caseLabel);
-      });
+            SV::iterator last = sv.end();
+            VERIFY(last == sv.begin() + sv.size(), caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SboVector::end for empty vector"};
@@ -2450,12 +2597,14 @@ void TestEnd()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.empty(), caseLabel);
 
-         SV::iterator last = sv.end();
-         VERIFY(last == sv.begin(), caseLabel);
-      });
+            SV::iterator last = sv.end();
+            VERIFY(last == sv.begin(), caseLabel);
+         });
    }
 }
 
@@ -2473,14 +2622,16 @@ void TestBeginConst()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.inBuffer(), caseLabel);
-         // Ref types are always non-const, so remove the reference.
-         static_assert(std::is_const_v<std::remove_reference<decltype(sv)>::type>);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.inBuffer(), caseLabel);
+            // Ref types are always non-const, so remove the reference.
+            static_assert(std::is_const_v<std::remove_reference<decltype(sv)>::type>);
 
-         SV::const_iterator first = sv.begin();
-         VERIFY(*first == sv[0], caseLabel);
-      });
+            SV::const_iterator first = sv.begin();
+            VERIFY(*first == sv[0], caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SboVector::begin for heap instance"};
@@ -2493,14 +2644,16 @@ void TestBeginConst()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.onHeap(), caseLabel);
-         // Ref types are always non-const, so remove the reference.
-         static_assert(std::is_const_v<std::remove_reference<decltype(sv)>::type>);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.onHeap(), caseLabel);
+            // Ref types are always non-const, so remove the reference.
+            static_assert(std::is_const_v<std::remove_reference<decltype(sv)>::type>);
 
-         SV::const_iterator first = sv.begin();
-         VERIFY(*first == sv[0], caseLabel);
-      });
+            SV::const_iterator first = sv.begin();
+            VERIFY(*first == sv[0], caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SboVector::begin for empty vector"};
@@ -2509,18 +2662,20 @@ void TestBeginConst()
       using Elem = Element;
       using SV = SboVector<Elem, BufCap>;
 
-      const SV sv;
+      const SV sv{};
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.empty(), caseLabel);
-         // Ref types are always non-const, so remove the reference.
-         static_assert(std::is_const_v<std::remove_reference<decltype(sv)>::type>);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.empty(), caseLabel);
+            // Ref types are always non-const, so remove the reference.
+            static_assert(std::is_const_v<std::remove_reference<decltype(sv)>::type>);
 
-         SV::const_iterator first = sv.begin();
-         VERIFY(first == sv.end(), caseLabel);
-      });
+            SV::const_iterator first = sv.begin();
+            VERIFY(first == sv.end(), caseLabel);
+         });
    }
 }
 
@@ -2538,14 +2693,16 @@ void TestEndConst()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.inBuffer(), caseLabel);
-         // Ref types are always non-const, so remove the reference.
-         static_assert(std::is_const_v<std::remove_reference<decltype(sv)>::type>);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.inBuffer(), caseLabel);
+            // Ref types are always non-const, so remove the reference.
+            static_assert(std::is_const_v<std::remove_reference<decltype(sv)>::type>);
 
-         SV::const_iterator last = sv.end();
-         VERIFY(last == sv.begin() + sv.size(), caseLabel);
-      });
+            SV::const_iterator last = sv.end();
+            VERIFY(last == sv.begin() + sv.size(), caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SboVector::end for heap instance"};
@@ -2558,14 +2715,16 @@ void TestEndConst()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.onHeap(), caseLabel);
-         // Ref types are always non-const, so remove the reference.
-         static_assert(std::is_const_v<std::remove_reference<decltype(sv)>::type>);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.onHeap(), caseLabel);
+            // Ref types are always non-const, so remove the reference.
+            static_assert(std::is_const_v<std::remove_reference<decltype(sv)>::type>);
 
-         SV::const_iterator last = sv.end();
-         VERIFY(last == sv.begin() + sv.size(), caseLabel);
-      });
+            SV::const_iterator last = sv.end();
+            VERIFY(last == sv.begin() + sv.size(), caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SboVector::end for empty vector"};
@@ -2574,18 +2733,20 @@ void TestEndConst()
       using Elem = Element;
       using SV = SboVector<Elem, BufCap>;
 
-      const SV sv;
+      const SV sv{};
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.empty(), caseLabel);
-         // Ref types are always non-const, so remove the reference.
-         static_assert(std::is_const_v<std::remove_reference<decltype(sv)>::type>);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.empty(), caseLabel);
+            // Ref types are always non-const, so remove the reference.
+            static_assert(std::is_const_v<std::remove_reference<decltype(sv)>::type>);
 
-         SV::const_iterator last = sv.end();
-         VERIFY(last == sv.begin(), caseLabel);
-      });
+            SV::const_iterator last = sv.end();
+            VERIFY(last == sv.begin(), caseLabel);
+         });
    }
 }
 
@@ -2603,12 +2764,14 @@ void TestCBegin()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.inBuffer(), caseLabel);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.inBuffer(), caseLabel);
 
-         SV::const_iterator first = sv.cbegin();
-         VERIFY(*first == sv[0], caseLabel);
-      });
+            SV::const_iterator first = sv.cbegin();
+            VERIFY(*first == sv[0], caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SboVector::cbegin for heap instance"};
@@ -2621,12 +2784,14 @@ void TestCBegin()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.onHeap(), caseLabel);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.onHeap(), caseLabel);
 
-         SV::const_iterator first = sv.cbegin();
-         VERIFY(*first == sv[0], caseLabel);
-      });
+            SV::const_iterator first = sv.cbegin();
+            VERIFY(*first == sv[0], caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SboVector::cbegin for empty vector"};
@@ -2639,12 +2804,14 @@ void TestCBegin()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.empty(), caseLabel);
 
-         SV::const_iterator first = sv.cbegin();
-         VERIFY(first == sv.cend(), caseLabel);
-      });
+            SV::const_iterator first = sv.cbegin();
+            VERIFY(first == sv.cend(), caseLabel);
+         });
    }
 }
 
@@ -2662,12 +2829,14 @@ void TestCEnd()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.inBuffer(), caseLabel);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.inBuffer(), caseLabel);
 
-         SV::const_iterator last = sv.cend();
-         VERIFY(last == sv.begin() + sv.size(), caseLabel);
-      });
+            SV::const_iterator last = sv.cend();
+            VERIFY(last == sv.begin() + sv.size(), caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SboVector::cend for heap instance"};
@@ -2680,12 +2849,14 @@ void TestCEnd()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.onHeap(), caseLabel);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.onHeap(), caseLabel);
 
-         SV::const_iterator last = sv.cend();
-         VERIFY(last == sv.begin() + sv.size(), caseLabel);
-      });
+            SV::const_iterator last = sv.cend();
+            VERIFY(last == sv.begin() + sv.size(), caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SboVector::cend for empty vector"};
@@ -2698,12 +2869,14 @@ void TestCEnd()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.empty(), caseLabel);
 
-         SV::const_iterator last = sv.cend();
-         VERIFY(last == sv.begin(), caseLabel);
-      });
+            SV::const_iterator last = sv.cend();
+            VERIFY(last == sv.begin(), caseLabel);
+         });
    }
 }
 
@@ -2721,12 +2894,14 @@ void TestRBegin()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.inBuffer(), caseLabel);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.inBuffer(), caseLabel);
 
-         SV::reverse_iterator rfirst = sv.rbegin();
-         VERIFY(*rfirst == sv.back(), caseLabel);
-      });
+            SV::reverse_iterator rfirst = sv.rbegin();
+            VERIFY(*rfirst == sv.back(), caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SboVector::rbegin for heap instance"};
@@ -2739,12 +2914,14 @@ void TestRBegin()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.onHeap(), caseLabel);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.onHeap(), caseLabel);
 
-         SV::reverse_iterator rfirst = sv.rbegin();
-         VERIFY(*rfirst == sv.back(), caseLabel);
-      });
+            SV::reverse_iterator rfirst = sv.rbegin();
+            VERIFY(*rfirst == sv.back(), caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SboVector::rbegin for empty vector"};
@@ -2757,12 +2934,14 @@ void TestRBegin()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.empty(), caseLabel);
 
-         SV::reverse_iterator rfirst = sv.rbegin();
-         VERIFY(rfirst == sv.rend(), caseLabel);
-      });
+            SV::reverse_iterator rfirst = sv.rbegin();
+            VERIFY(rfirst == sv.rend(), caseLabel);
+         });
    }
 }
 
@@ -2780,12 +2959,14 @@ void TestREnd()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.inBuffer(), caseLabel);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.inBuffer(), caseLabel);
 
-         SV::reverse_iterator rlast = sv.rend();
-         VERIFY(rlast == sv.rbegin() + sv.size(), caseLabel);
-      });
+            SV::reverse_iterator rlast = sv.rend();
+            VERIFY(rlast == sv.rbegin() + sv.size(), caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SboVector::rend for heap instance"};
@@ -2798,12 +2979,14 @@ void TestREnd()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.onHeap(), caseLabel);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.onHeap(), caseLabel);
 
-         SV::reverse_iterator rlast = sv.rend();
-         VERIFY(rlast == sv.rbegin() + sv.size(), caseLabel);
-      });
+            SV::reverse_iterator rlast = sv.rend();
+            VERIFY(rlast == sv.rbegin() + sv.size(), caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SboVector::rend for empty vector"};
@@ -2816,12 +2999,14 @@ void TestREnd()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.empty(), caseLabel);
 
-         SV::reverse_iterator rlast = sv.rend();
-         VERIFY(rlast == sv.rbegin(), caseLabel);
-      });
+            SV::reverse_iterator rlast = sv.rend();
+            VERIFY(rlast == sv.rbegin(), caseLabel);
+         });
    }
 }
 
@@ -2839,14 +3024,16 @@ void TestRBeginConst()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.inBuffer(), caseLabel);
-         // Ref types are always non-const, so remove the reference.
-         static_assert(std::is_const_v<std::remove_reference<decltype(sv)>::type>);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.inBuffer(), caseLabel);
+            // Ref types are always non-const, so remove the reference.
+            static_assert(std::is_const_v<std::remove_reference<decltype(sv)>::type>);
 
-         SV::const_reverse_iterator rfirst = sv.rbegin();
-         VERIFY(*rfirst == sv.back(), caseLabel);
-      });
+            SV::const_reverse_iterator rfirst = sv.rbegin();
+            VERIFY(*rfirst == sv.back(), caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SboVector::rbegin const for heap instance"};
@@ -2859,14 +3046,16 @@ void TestRBeginConst()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.onHeap(), caseLabel);
-         // Ref types are always non-const, so remove the reference.
-         static_assert(std::is_const_v<std::remove_reference<decltype(sv)>::type>);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.onHeap(), caseLabel);
+            // Ref types are always non-const, so remove the reference.
+            static_assert(std::is_const_v<std::remove_reference<decltype(sv)>::type>);
 
-         SV::const_reverse_iterator rfirst = sv.rbegin();
-         VERIFY(*rfirst == sv.back(), caseLabel);
-      });
+            SV::const_reverse_iterator rfirst = sv.rbegin();
+            VERIFY(*rfirst == sv.back(), caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SboVector::rbegin const for empty vector"};
@@ -2875,18 +3064,20 @@ void TestRBeginConst()
       using Elem = Element;
       using SV = SboVector<Elem, BufCap>;
 
-      const SV sv;
+      const SV sv{};
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.empty(), caseLabel);
-         // Ref types are always non-const, so remove the reference.
-         static_assert(std::is_const_v<std::remove_reference<decltype(sv)>::type>);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.empty(), caseLabel);
+            // Ref types are always non-const, so remove the reference.
+            static_assert(std::is_const_v<std::remove_reference<decltype(sv)>::type>);
 
-         SV::const_reverse_iterator rfirst = sv.rbegin();
-         VERIFY(rfirst == sv.rend(), caseLabel);
-      });
+            SV::const_reverse_iterator rfirst = sv.rbegin();
+            VERIFY(rfirst == sv.rend(), caseLabel);
+         });
    }
 }
 
@@ -2904,14 +3095,16 @@ void TestREndConst()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.inBuffer(), caseLabel);
-         // Ref types are always non-const, so remove the reference.
-         static_assert(std::is_const_v<std::remove_reference<decltype(sv)>::type>);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.inBuffer(), caseLabel);
+            // Ref types are always non-const, so remove the reference.
+            static_assert(std::is_const_v<std::remove_reference<decltype(sv)>::type>);
 
-         SV::const_reverse_iterator rlast = sv.rend();
-         VERIFY(rlast == sv.rbegin() + sv.size(), caseLabel);
-      });
+            SV::const_reverse_iterator rlast = sv.rend();
+            VERIFY(rlast == sv.rbegin() + sv.size(), caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SboVector::rend const for heap instance"};
@@ -2924,14 +3117,16 @@ void TestREndConst()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.onHeap(), caseLabel);
-         // Ref types are always non-const, so remove the reference.
-         static_assert(std::is_const_v<std::remove_reference<decltype(sv)>::type>);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.onHeap(), caseLabel);
+            // Ref types are always non-const, so remove the reference.
+            static_assert(std::is_const_v<std::remove_reference<decltype(sv)>::type>);
 
-         SV::const_reverse_iterator rlast = sv.rend();
-         VERIFY(rlast == sv.rbegin() + sv.size(), caseLabel);
-      });
+            SV::const_reverse_iterator rlast = sv.rend();
+            VERIFY(rlast == sv.rbegin() + sv.size(), caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SboVector::rend const for empty vector"};
@@ -2940,18 +3135,20 @@ void TestREndConst()
       using Elem = Element;
       using SV = SboVector<Elem, BufCap>;
 
-      const SV sv;
+      const SV sv{};
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.empty(), caseLabel);
-         // Ref types are always non-const, so remove the reference.
-         static_assert(std::is_const_v<std::remove_reference<decltype(sv)>::type>);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.empty(), caseLabel);
+            // Ref types are always non-const, so remove the reference.
+            static_assert(std::is_const_v<std::remove_reference<decltype(sv)>::type>);
 
-         SV::const_reverse_iterator rlast = sv.rend();
-         VERIFY(rlast == sv.rbegin(), caseLabel);
-      });
+            SV::const_reverse_iterator rlast = sv.rend();
+            VERIFY(rlast == sv.rbegin(), caseLabel);
+         });
    }
 }
 
@@ -2969,12 +3166,14 @@ void TestCRBegin()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.inBuffer(), caseLabel);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.inBuffer(), caseLabel);
 
-         SV::const_reverse_iterator rfirst = sv.crbegin();
-         VERIFY(*rfirst == sv.back(), caseLabel);
-      });
+            SV::const_reverse_iterator rfirst = sv.crbegin();
+            VERIFY(*rfirst == sv.back(), caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SboVector::crbegin for heap instance"};
@@ -2987,12 +3186,14 @@ void TestCRBegin()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.onHeap(), caseLabel);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.onHeap(), caseLabel);
 
-         SV::const_reverse_iterator rfirst = sv.crbegin();
-         VERIFY(*rfirst == sv.back(), caseLabel);
-      });
+            SV::const_reverse_iterator rfirst = sv.crbegin();
+            VERIFY(*rfirst == sv.back(), caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SboVector::crbegin for empty vector"};
@@ -3005,12 +3206,14 @@ void TestCRBegin()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.empty(), caseLabel);
 
-         SV::const_reverse_iterator rfirst = sv.crbegin();
-         VERIFY(rfirst == sv.crend(), caseLabel);
-      });
+            SV::const_reverse_iterator rfirst = sv.crbegin();
+            VERIFY(rfirst == sv.crend(), caseLabel);
+         });
    }
 }
 
@@ -3028,12 +3231,14 @@ void TestCREnd()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.inBuffer(), caseLabel);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.inBuffer(), caseLabel);
 
-         SV::const_reverse_iterator rlast = sv.crend();
-         VERIFY(rlast == sv.crbegin() + sv.size(), caseLabel);
-      });
+            SV::const_reverse_iterator rlast = sv.crend();
+            VERIFY(rlast == sv.crbegin() + sv.size(), caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SboVector::crend for heap instance"};
@@ -3046,12 +3251,14 @@ void TestCREnd()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.onHeap(), caseLabel);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.onHeap(), caseLabel);
 
-         SV::const_reverse_iterator rlast = sv.crend();
-         VERIFY(rlast == sv.crbegin() + sv.size(), caseLabel);
-      });
+            SV::const_reverse_iterator rlast = sv.crend();
+            VERIFY(rlast == sv.crbegin() + sv.size(), caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SboVector::crend for empty vector"};
@@ -3064,12 +3271,14 @@ void TestCREnd()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.empty(), caseLabel);
 
-         SV::const_reverse_iterator rlast = sv.crend();
-         VERIFY(rlast == sv.crbegin(), caseLabel);
-      });
+            SV::const_reverse_iterator rlast = sv.crend();
+            VERIFY(rlast == sv.crbegin(), caseLabel);
+         });
    }
 }
 
@@ -3087,11 +3296,13 @@ void TestEmpty()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.size() == 0, caseLabel);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.size() == 0, caseLabel);
 
-         VERIFY(sv.empty(), caseLabel);
-      });
+            VERIFY(sv.empty(), caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::empty for non-empty buffer instance"};
@@ -3104,12 +3315,14 @@ void TestEmpty()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(sv.size() > 0, caseLabel);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(sv.size() > 0, caseLabel);
 
-         VERIFY(!sv.empty(), caseLabel);
-      });
+            VERIFY(!sv.empty(), caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::empty for non-empty heap instance"};
@@ -3122,12 +3335,14 @@ void TestEmpty()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.size() > 0, caseLabel);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.size() > 0, caseLabel);
 
-         VERIFY(!sv.empty(), caseLabel);
-      });
+            VERIFY(!sv.empty(), caseLabel);
+         });
    }
 }
 
@@ -3145,11 +3360,13 @@ void TestSize()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.empty(), caseLabel);
 
-         VERIFY(sv.size() == 0, caseLabel);
-      });
+            VERIFY(sv.size() == 0, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::empty for non-empty buffer instance"};
@@ -3163,12 +3380,14 @@ void TestSize()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
 
-         VERIFY(sv.size() == values.size(), caseLabel);
-      });
+            VERIFY(sv.size() == values.size(), caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::empty for non-empty buffer instance"};
@@ -3182,12 +3401,14 @@ void TestSize()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
 
-         VERIFY(sv.size() == values.size(), caseLabel);
-      });
+            VERIFY(sv.size() == values.size(), caseLabel);
+         });
    }
 }
 
@@ -3205,12 +3426,14 @@ void TestMaxSize()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
 
-         VERIFY(sv.max_size() > 0, caseLabel);
-      });
+            VERIFY(sv.max_size() > 0, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::max_size for heap instance"};
@@ -3223,12 +3446,14 @@ void TestMaxSize()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
 
-         VERIFY(sv.max_size() > 0, caseLabel);
-      });
+            VERIFY(sv.max_size() > 0, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::max_size for empty instance"};
@@ -3241,11 +3466,13 @@ void TestMaxSize()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         VERIFY(sv.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            VERIFY(sv.empty(), caseLabel);
 
-         VERIFY(sv.max_size() > 0, caseLabel);
-      });
+            VERIFY(sv.max_size() > 0, caseLabel);
+         });
    }
 }
 
@@ -3268,15 +3495,17 @@ void TestReserve()
       metrics.dtorCalls = initialCap;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(reserveCap < sv.capacity(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(reserveCap < sv.capacity(), caseLabel);
 
-         sv.reserve(reserveCap);
+            sv.reserve(reserveCap);
 
-         VERIFY(sv.capacity() == initialCap, caseLabel);
-         verifyVector(sv, values, caseLabel);
-      });
+            VERIFY(sv.capacity() == initialCap, caseLabel);
+            verifyVector(sv, values, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::reserve for capacity larger than max size"};
@@ -3293,11 +3522,13 @@ void TestReserve()
       metrics.dtorCalls = initialCap;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY_THROW(([&sv]() { sv.reserve(sv.max_size() + 1); }), std::length_error,
-                      caseLabel);
-      });
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY_THROW(([&sv]() { sv.reserve(sv.max_size() + 1); }), std::length_error,
+                         caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::reserve for capacity larger than current "
@@ -3317,17 +3548,19 @@ void TestReserve()
       metrics.dtorCalls = initialCap;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(initialCap > BufCap, caseLabel);
-         VERIFY(reserveCap > sv.capacity(), caseLabel);
-         VERIFY(std::is_move_constructible_v<Elem>, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(initialCap > BufCap, caseLabel);
+            VERIFY(reserveCap > sv.capacity(), caseLabel);
+            VERIFY(std::is_move_constructible_v<Elem>, caseLabel);
 
-         sv.reserve(reserveCap);
+            sv.reserve(reserveCap);
 
-         VERIFY(sv.capacity() == reserveCap, caseLabel);
-         verifyVector(sv, values, caseLabel);
-      });
+            VERIFY(sv.capacity() == reserveCap, caseLabel);
+            verifyVector(sv, values, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::reserve for capacity larger than current "
@@ -3346,17 +3579,19 @@ void TestReserve()
       metrics.dtorCalls = 2 * initialCap;
 
       Test<Elem, BufCap> test(caseLabel, metrics);
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(initialCap > BufCap, caseLabel);
-         VERIFY(reserveCap > sv.capacity(), caseLabel);
-         VERIFY(!std::is_move_constructible_v<Elem>, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(initialCap > BufCap, caseLabel);
+            VERIFY(reserveCap > sv.capacity(), caseLabel);
+            VERIFY(!std::is_move_constructible_v<Elem>, caseLabel);
 
-         sv.reserve(reserveCap);
+            sv.reserve(reserveCap);
 
-         VERIFY(sv.capacity() == reserveCap, caseLabel);
-         verifyVector(sv, values, caseLabel);
-      });
+            VERIFY(sv.capacity() == reserveCap, caseLabel);
+            verifyVector(sv, values, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::reserve for capacity larger than current "
@@ -3376,18 +3611,20 @@ void TestReserve()
       metrics.dtorCalls = initialCap;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(initialCap < BufCap, caseLabel);
-         VERIFY(reserveCap > initialCap, caseLabel);
-         VERIFY(reserveCap > sv.capacity(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(initialCap < BufCap, caseLabel);
+            VERIFY(reserveCap > initialCap, caseLabel);
+            VERIFY(reserveCap > sv.capacity(), caseLabel);
 
-         sv.reserve(reserveCap);
+            sv.reserve(reserveCap);
 
-         VERIFY(sv.capacity() == reserveCap, caseLabel);
-         VERIFY(sv.onHeap(), caseLabel);
-         verifyVector(sv, values, caseLabel);
-      });
+            VERIFY(sv.capacity() == reserveCap, caseLabel);
+            VERIFY(sv.onHeap(), caseLabel);
+            verifyVector(sv, values, caseLabel);
+         });
    }
    {
       const std::string caseLabel{
@@ -3407,19 +3644,21 @@ void TestReserve()
       metrics.dtorCalls = 2 * initialCap;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(initialCap < BufCap, caseLabel);
-         VERIFY(reserveCap > initialCap, caseLabel);
-         VERIFY(reserveCap > sv.capacity(), caseLabel);
-         VERIFY(!std::is_move_constructible_v<Elem>, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(initialCap < BufCap, caseLabel);
+            VERIFY(reserveCap > initialCap, caseLabel);
+            VERIFY(reserveCap > sv.capacity(), caseLabel);
+            VERIFY(!std::is_move_constructible_v<Elem>, caseLabel);
 
-         sv.reserve(reserveCap);
+            sv.reserve(reserveCap);
 
-         VERIFY(sv.capacity() == reserveCap, caseLabel);
-         VERIFY(sv.onHeap(), caseLabel);
-         verifyVector(sv, values, caseLabel);
-      });
+            VERIFY(sv.capacity() == reserveCap, caseLabel);
+            VERIFY(sv.onHeap(), caseLabel);
+            verifyVector(sv, values, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::reserve for capacity larger than current "
@@ -3439,18 +3678,20 @@ void TestReserve()
       metrics.dtorCalls = initialCap;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(initialCap < BufCap, caseLabel);
-         VERIFY(reserveCap < BufCap, caseLabel);
-         VERIFY(reserveCap > initialCap, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(initialCap < BufCap, caseLabel);
+            VERIFY(reserveCap < BufCap, caseLabel);
+            VERIFY(reserveCap > initialCap, caseLabel);
 
-         sv.reserve(reserveCap);
+            sv.reserve(reserveCap);
 
-         VERIFY(sv.capacity() == BufCap, caseLabel);
-         VERIFY(sv.inBuffer(), caseLabel);
-         verifyVector(sv, values, caseLabel);
-      });
+            VERIFY(sv.capacity() == BufCap, caseLabel);
+            VERIFY(sv.inBuffer(), caseLabel);
+            verifyVector(sv, values, caseLabel);
+         });
    }
 }
 
@@ -3473,16 +3714,18 @@ void TestShrinkToFit()
       metrics.dtorCalls = initialCap;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.inBuffer(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.inBuffer(), caseLabel);
 
-         sv.shrink_to_fit();
+            sv.shrink_to_fit();
 
-         VERIFY(sv.capacity() == BufCap, caseLabel);
-         VERIFY(sv.inBuffer(), caseLabel);
-         verifyVector(sv, values, caseLabel);
-      });
+            VERIFY(sv.capacity() == BufCap, caseLabel);
+            VERIFY(sv.inBuffer(), caseLabel);
+            verifyVector(sv, values, caseLabel);
+         });
    }
    {
       const std::string caseLabel{
@@ -3501,17 +3744,19 @@ void TestShrinkToFit()
       metrics.dtorCalls = initialCap;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.size() == sv.capacity(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.size() == sv.capacity(), caseLabel);
 
-         sv.shrink_to_fit();
+            sv.shrink_to_fit();
 
-         VERIFY(sv.capacity() == initialCap, caseLabel);
-         VERIFY(sv.onHeap(), caseLabel);
-         verifyVector(sv, values, caseLabel);
-      });
+            VERIFY(sv.capacity() == initialCap, caseLabel);
+            VERIFY(sv.onHeap(), caseLabel);
+            verifyVector(sv, values, caseLabel);
+         });
    }
    {
       const std::string caseLabel{
@@ -3533,19 +3778,21 @@ void TestShrinkToFit()
       metrics.dtorCalls = initialSize;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         sv.reserve(initialCap);
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.size() < sv.capacity(), caseLabel);
-         VERIFY(std::is_move_constructible_v<Elem>, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            sv.reserve(initialCap);
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.size() < sv.capacity(), caseLabel);
+            VERIFY(std::is_move_constructible_v<Elem>, caseLabel);
 
-         sv.shrink_to_fit();
+            sv.shrink_to_fit();
 
-         VERIFY(sv.capacity() == initialSize, caseLabel);
-         VERIFY(sv.onHeap(), caseLabel);
-         verifyVector(sv, values, caseLabel);
-      });
+            VERIFY(sv.capacity() == initialSize, caseLabel);
+            VERIFY(sv.onHeap(), caseLabel);
+            verifyVector(sv, values, caseLabel);
+         });
    }
    {
       const std::string caseLabel{
@@ -3567,19 +3814,21 @@ void TestShrinkToFit()
       metrics.dtorCalls = 3 * initialSize;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         sv.reserve(initialCap);
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.size() < sv.capacity(), caseLabel);
-         VERIFY(!std::is_move_constructible_v<Elem>, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            sv.reserve(initialCap);
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.size() < sv.capacity(), caseLabel);
+            VERIFY(!std::is_move_constructible_v<Elem>, caseLabel);
 
-         sv.shrink_to_fit();
+            sv.shrink_to_fit();
 
-         VERIFY(sv.capacity() == initialSize, caseLabel);
-         VERIFY(sv.onHeap(), caseLabel);
-         verifyVector(sv, values, caseLabel);
-      });
+            VERIFY(sv.capacity() == initialSize, caseLabel);
+            VERIFY(sv.onHeap(), caseLabel);
+            verifyVector(sv, values, caseLabel);
+         });
    }
    {
       const std::string caseLabel{
@@ -3601,19 +3850,21 @@ void TestShrinkToFit()
       metrics.dtorCalls = initialSize;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         sv.reserve(initialCap);
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.size() < BufCap, caseLabel);
-         VERIFY(std::is_move_constructible_v<Elem>, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            sv.reserve(initialCap);
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.size() < BufCap, caseLabel);
+            VERIFY(std::is_move_constructible_v<Elem>, caseLabel);
 
-         sv.shrink_to_fit();
+            sv.shrink_to_fit();
 
-         VERIFY(sv.capacity() == BufCap, caseLabel);
-         VERIFY(sv.inBuffer(), caseLabel);
-         verifyVector(sv, values, caseLabel);
-      });
+            VERIFY(sv.capacity() == BufCap, caseLabel);
+            VERIFY(sv.inBuffer(), caseLabel);
+            verifyVector(sv, values, caseLabel);
+         });
    }
    {
       const std::string caseLabel{
@@ -3633,19 +3884,21 @@ void TestShrinkToFit()
       metrics.dtorCalls = 3 * initialSize;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         sv.reserve(initialCap);
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.size() < BufCap, caseLabel);
-         VERIFY(!std::is_move_constructible_v<Elem>, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            sv.reserve(initialCap);
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.size() < BufCap, caseLabel);
+            VERIFY(!std::is_move_constructible_v<Elem>, caseLabel);
 
-         sv.shrink_to_fit();
+            sv.shrink_to_fit();
 
-         VERIFY(sv.capacity() == BufCap, caseLabel);
-         VERIFY(sv.inBuffer(), caseLabel);
-         verifyVector(sv, values, caseLabel);
-      });
+            VERIFY(sv.capacity() == BufCap, caseLabel);
+            VERIFY(sv.inBuffer(), caseLabel);
+            verifyVector(sv, values, caseLabel);
+         });
    }
 }
 
@@ -3662,15 +3915,17 @@ void TestClear()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         SV sv;
-         VERIFY(sv.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv;
+            VERIFY(sv.empty(), caseLabel);
 
-         sv.clear();
+            sv.clear();
 
-         VERIFY(sv.capacity() == BufCap, caseLabel);
-         VERIFY(sv.empty(), caseLabel);
-      });
+            VERIFY(sv.capacity() == BufCap, caseLabel);
+            VERIFY(sv.empty(), caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::clear for buffer instance"};
@@ -3687,16 +3942,18 @@ void TestClear()
       metrics.dtorCalls = initialSize;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
 
-         sv.clear();
+            sv.clear();
 
-         VERIFY(sv.capacity() == BufCap, caseLabel);
-         VERIFY(sv.empty(), caseLabel);
-      });
+            VERIFY(sv.capacity() == BufCap, caseLabel);
+            VERIFY(sv.empty(), caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::clear for heap instance"};
@@ -3713,17 +3970,19 @@ void TestClear()
       metrics.dtorCalls = initialSize;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
 
-         sv.clear();
+            sv.clear();
 
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() == initialSize, caseLabel);
-         VERIFY(sv.empty(), caseLabel);
-      });
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() == initialSize, caseLabel);
+            VERIFY(sv.empty(), caseLabel);
+         });
    }
 }
 
@@ -3748,16 +4007,18 @@ void TestEraseSingleElement()
       metrics.dtorCalls = initialSize;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.inBuffer(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.inBuffer(), caseLabel);
 
-         SV::iterator next = sv.erase(sv.begin() + erasedPos);
+            SV::iterator next = sv.erase(sv.begin() + erasedPos);
 
-         VERIFY(next == sv.begin() + erasedPos, caseLabel);
-         VERIFY(sv.inBuffer(), caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(next == sv.begin() + erasedPos, caseLabel);
+            VERIFY(sv.inBuffer(), caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::erase only element"};
@@ -3776,16 +4037,18 @@ void TestEraseSingleElement()
       metrics.dtorCalls = initialSize;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.inBuffer(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.inBuffer(), caseLabel);
 
-         SV::iterator next = sv.erase(sv.begin() + erasedPos);
+            SV::iterator next = sv.erase(sv.begin() + erasedPos);
 
-         VERIFY(next == sv.end(), caseLabel);
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(sv.empty(), caseLabel);
-      });
+            VERIFY(next == sv.end(), caseLabel);
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(sv.empty(), caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::erase using a const-iterator"};
@@ -3805,15 +4068,17 @@ void TestEraseSingleElement()
       metrics.dtorCalls = initialSize;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
+      test.run(
+         [&]()
+         {
+            SV sv{values};
 
-         SV::iterator next = sv.erase(sv.cbegin() + erasedPos);
+            SV::iterator next = sv.erase(sv.cbegin() + erasedPos);
 
-         VERIFY(next == sv.begin() + erasedPos, caseLabel);
-         VERIFY(sv.inBuffer(), caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(next == sv.begin() + erasedPos, caseLabel);
+            VERIFY(sv.inBuffer(), caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::erase for empty vector"};
@@ -3825,15 +4090,17 @@ void TestEraseSingleElement()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         SV sv;
-         VERIFY(sv.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv;
+            VERIFY(sv.empty(), caseLabel);
 
-         SV::iterator next = sv.erase(sv.begin());
+            SV::iterator next = sv.erase(sv.begin());
 
-         VERIFY(next == sv.end(), caseLabel);
-         VERIFY(sv.empty(), caseLabel);
-      });
+            VERIFY(next == sv.end(), caseLabel);
+            VERIFY(sv.empty(), caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::erase element of heap instance"};
@@ -3853,16 +4120,18 @@ void TestEraseSingleElement()
       metrics.dtorCalls = initialSize;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.onHeap(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.onHeap(), caseLabel);
 
-         SV::iterator next = sv.erase(sv.begin() + erasedPos);
+            SV::iterator next = sv.erase(sv.begin() + erasedPos);
 
-         VERIFY(next == sv.begin() + erasedPos, caseLabel);
-         VERIFY(sv.onHeap(), caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(next == sv.begin() + erasedPos, caseLabel);
+            VERIFY(sv.onHeap(), caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::erase first element"};
@@ -3882,16 +4151,18 @@ void TestEraseSingleElement()
       metrics.dtorCalls = initialSize;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.onHeap(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.onHeap(), caseLabel);
 
-         SV::iterator next = sv.erase(sv.begin() + erasedPos);
+            SV::iterator next = sv.erase(sv.begin() + erasedPos);
 
-         VERIFY(next == sv.begin() + erasedPos, caseLabel);
-         VERIFY(sv.onHeap(), caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(next == sv.begin() + erasedPos, caseLabel);
+            VERIFY(sv.onHeap(), caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::erase last element of heap instance"};
@@ -3911,16 +4182,18 @@ void TestEraseSingleElement()
       metrics.dtorCalls = initialSize;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.onHeap(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.onHeap(), caseLabel);
 
-         SV::iterator next = sv.erase(sv.begin() + erasedPos);
+            SV::iterator next = sv.erase(sv.begin() + erasedPos);
 
-         VERIFY(next == sv.begin() + erasedPos, caseLabel);
-         VERIFY(sv.onHeap(), caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(next == sv.begin() + erasedPos, caseLabel);
+            VERIFY(sv.onHeap(), caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::erase element of heap instance that "
@@ -3941,19 +4214,21 @@ void TestEraseSingleElement()
       metrics.dtorCalls = initialSize;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(initialSize == BufCap + 1, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(initialSize == BufCap + 1, caseLabel);
 
-         SV::iterator next = sv.erase(sv.begin() + erasedPos);
+            SV::iterator next = sv.erase(sv.begin() + erasedPos);
 
-         VERIFY(next == sv.begin() + erasedPos, caseLabel);
-         // Data is still on heap even though it would fit into buffer.
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.size() == BufCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(next == sv.begin() + erasedPos, caseLabel);
+            // Data is still on heap even though it would fit into buffer.
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.size() == BufCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::erase all elements of heap instance"};
@@ -3970,17 +4245,19 @@ void TestEraseSingleElement()
       metrics.dtorCalls = initialSize;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.onHeap(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.onHeap(), caseLabel);
 
-         while (!sv.empty())
-            sv.erase(sv.begin() + sv.size() - 1);
+            while (!sv.empty())
+               sv.erase(sv.begin() + sv.size() - 1);
 
-         // Allocation is still on heap even though it is empty.
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.empty(), caseLabel);
-      });
+            // Allocation is still on heap even though it is empty.
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.empty(), caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::erase non-moveable element type"};
@@ -3999,17 +4276,19 @@ void TestEraseSingleElement()
       metrics.dtorCalls = metrics.copyCtorCalls;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(!std::is_move_constructible_v<Elem>, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(!std::is_move_constructible_v<Elem>, caseLabel);
 
-         SV::iterator next = sv.erase(sv.begin() + erasedPos);
+            SV::iterator next = sv.erase(sv.begin() + erasedPos);
 
-         VERIFY(next == sv.begin() + erasedPos, caseLabel);
-         VERIFY(sv.onHeap(), caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(next == sv.begin() + erasedPos, caseLabel);
+            VERIFY(sv.onHeap(), caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
 }
 
@@ -4018,7 +4297,8 @@ void TestEraseIteratorRange()
 {
    // Local function to calculate the expected metrics for erasing.
    auto expectedErasureMetrics = [](std::size_t initialSize,
-                                    std::size_t lastPos) -> Element::Metrics {
+                                    std::size_t lastPos) -> Element::Metrics
+   {
       Element::Metrics metrics;
       metrics.copyCtorCalls = initialSize;
       metrics.moveCtorCalls = initialSize - lastPos;
@@ -4041,17 +4321,19 @@ void TestEraseIteratorRange()
       metrics.dtorCalls = initialSize;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         SV::iterator first = sv.begin();
-         SV::iterator last = sv.begin();
-         VERIFY(!sv.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            SV::iterator first = sv.begin();
+            SV::iterator last = sv.begin();
+            VERIFY(!sv.empty(), caseLabel);
 
-         SV::iterator next = sv.erase(first, last);
+            SV::iterator next = sv.erase(first, last);
 
-         VERIFY(next == last, caseLabel);
-         verifyVector(sv, values, caseLabel);
-      });
+            VERIFY(next == last, caseLabel);
+            verifyVector(sv, values, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::erase range of buffer instance"};
@@ -4067,17 +4349,19 @@ void TestEraseIteratorRange()
       const std::initializer_list<Elem> expected{1, 2, 6, 7, 8};
 
       Test<Elem, BufCap> test{caseLabel, expectedErasureMetrics(initialSize, lastPos)};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
 
-         SV::iterator next = sv.erase(sv.begin() + firstPos, sv.begin() + lastPos);
+            SV::iterator next = sv.erase(sv.begin() + firstPos, sv.begin() + lastPos);
 
-         VERIFY(next == sv.begin() + firstPos, caseLabel);
-         VERIFY(sv.inBuffer(), caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(next == sv.begin() + firstPos, caseLabel);
+            VERIFY(sv.inBuffer(), caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{
@@ -4093,15 +4377,17 @@ void TestEraseIteratorRange()
       const std::size_t lastPos = initialSize;
 
       Test<Elem, BufCap> test{caseLabel, expectedErasureMetrics(initialSize, lastPos)};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(!sv.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(!sv.empty(), caseLabel);
 
-         SV::iterator next = sv.erase(sv.begin() + firstPos, sv.begin() + lastPos);
+            SV::iterator next = sv.erase(sv.begin() + firstPos, sv.begin() + lastPos);
 
-         VERIFY(next == sv.end(), caseLabel);
-         VERIFY(sv.empty(), caseLabel);
-      });
+            VERIFY(next == sv.end(), caseLabel);
+            VERIFY(sv.empty(), caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::erase range of heap instance"};
@@ -4117,17 +4403,19 @@ void TestEraseIteratorRange()
       const std::initializer_list<Elem> expected{1, 2, 6, 7, 8, 9};
 
       Test<Elem, BufCap> test{caseLabel, expectedErasureMetrics(initialSize, lastPos)};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
 
-         SV::iterator next = sv.erase(sv.begin() + firstPos, sv.begin() + lastPos);
+            SV::iterator next = sv.erase(sv.begin() + firstPos, sv.begin() + lastPos);
 
-         VERIFY(next == sv.begin() + firstPos, caseLabel);
-         VERIFY(sv.onHeap(), caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(next == sv.begin() + firstPos, caseLabel);
+            VERIFY(sv.onHeap(), caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::erase range at front"};
@@ -4143,17 +4431,19 @@ void TestEraseIteratorRange()
       const std::initializer_list<Elem> expected{4, 5, 6, 7, 8, 9};
 
       Test<Elem, BufCap> test{caseLabel, expectedErasureMetrics(initialSize, lastPos)};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
 
-         SV::iterator next = sv.erase(sv.begin() + firstPos, sv.begin() + lastPos);
+            SV::iterator next = sv.erase(sv.begin() + firstPos, sv.begin() + lastPos);
 
-         VERIFY(next == sv.begin() + firstPos, caseLabel);
-         VERIFY(sv.onHeap(), caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(next == sv.begin() + firstPos, caseLabel);
+            VERIFY(sv.onHeap(), caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::erase range at tail"};
@@ -4169,17 +4459,19 @@ void TestEraseIteratorRange()
       const std::initializer_list<Elem> expected{1, 2, 3, 4, 5, 6};
 
       Test<Elem, BufCap> test{caseLabel, expectedErasureMetrics(initialSize, lastPos)};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
 
-         SV::iterator next = sv.erase(sv.begin() + firstPos, sv.begin() + lastPos);
+            SV::iterator next = sv.erase(sv.begin() + firstPos, sv.begin() + lastPos);
 
-         VERIFY(next == sv.begin() + firstPos, caseLabel);
-         VERIFY(sv.onHeap(), caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(next == sv.begin() + firstPos, caseLabel);
+            VERIFY(sv.onHeap(), caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::erase range using const-iterators"};
@@ -4195,17 +4487,19 @@ void TestEraseIteratorRange()
       const std::initializer_list<Elem> expected{1, 2, 6, 7, 8, 9};
 
       Test<Elem, BufCap> test{caseLabel, expectedErasureMetrics(initialSize, lastPos)};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
 
-         SV::iterator next = sv.erase(sv.cbegin() + firstPos, sv.cbegin() + lastPos);
+            SV::iterator next = sv.erase(sv.cbegin() + firstPos, sv.cbegin() + lastPos);
 
-         VERIFY(next == sv.begin() + firstPos, caseLabel);
-         VERIFY(sv.onHeap(), caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(next == sv.begin() + firstPos, caseLabel);
+            VERIFY(sv.onHeap(), caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::erase range for empty vector"};
@@ -4217,15 +4511,17 @@ void TestEraseIteratorRange()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         SV sv;
-         VERIFY(sv.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv;
+            VERIFY(sv.empty(), caseLabel);
 
-         SV::iterator next = sv.erase(sv.begin(), sv.end());
+            SV::iterator next = sv.erase(sv.begin(), sv.end());
 
-         VERIFY(next == sv.end(), caseLabel);
-         VERIFY(sv.empty(), caseLabel);
-      });
+            VERIFY(next == sv.end(), caseLabel);
+            VERIFY(sv.empty(), caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::erase range of heap instance that makes "
@@ -4242,18 +4538,20 @@ void TestEraseIteratorRange()
       const std::initializer_list<Elem> expected{1, 2, 8, 9};
 
       Test<Elem, BufCap> test{caseLabel, expectedErasureMetrics(initialSize, lastPos)};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
 
-         SV::iterator next = sv.erase(sv.begin() + firstPos, sv.begin() + lastPos);
+            SV::iterator next = sv.erase(sv.begin() + firstPos, sv.begin() + lastPos);
 
-         VERIFY(next == sv.begin() + firstPos, caseLabel);
-         // Data is still on heap even though it would fit into buffer.
-         VERIFY(sv.onHeap(), caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(next == sv.begin() + firstPos, caseLabel);
+            // Data is still on heap even though it would fit into buffer.
+            VERIFY(sv.onHeap(), caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{
@@ -4269,19 +4567,21 @@ void TestEraseIteratorRange()
       const std::size_t lastPos = initialSize;
 
       Test<Elem, BufCap> test{caseLabel, expectedErasureMetrics(initialSize, lastPos)};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(lastPos - firstPos == initialSize, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(lastPos - firstPos == initialSize, caseLabel);
 
-         SV::iterator next = sv.erase(sv.begin() + firstPos, sv.begin() + lastPos);
+            SV::iterator next = sv.erase(sv.begin() + firstPos, sv.begin() + lastPos);
 
-         VERIFY(next == sv.end(), caseLabel);
-         // Data is still on heap even though it would fit into buffer.
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.empty(), caseLabel);
-      });
+            VERIFY(next == sv.end(), caseLabel);
+            // Data is still on heap even though it would fit into buffer.
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.empty(), caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::erase range for non-moveable element type"};
@@ -4301,18 +4601,20 @@ void TestEraseIteratorRange()
       metrics.dtorCalls = metrics.copyCtorCalls;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(!std::is_move_constructible_v<Elem>, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(!std::is_move_constructible_v<Elem>, caseLabel);
 
-         SV::iterator next = sv.erase(sv.begin() + firstPos, sv.begin() + lastPos);
+            SV::iterator next = sv.erase(sv.begin() + firstPos, sv.begin() + lastPos);
 
-         VERIFY(next == sv.begin() + firstPos, caseLabel);
-         VERIFY(sv.onHeap(), caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(next == sv.begin() + firstPos, caseLabel);
+            VERIFY(sv.onHeap(), caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
 }
 
@@ -4340,19 +4642,21 @@ void TestInsertSingleValue()
       metrics.dtorCalls = initialSize + 1;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(sv.size() + 1 <= BufCap, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(sv.size() + 1 <= BufCap, caseLabel);
 
-         SV::iterator inserted = sv.insert(sv.begin() + insertPos, insertedVal);
+            SV::iterator inserted = sv.insert(sv.begin() + insertPos, insertedVal);
 
-         VERIFY(*inserted == insertedVal, caseLabel);
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(sv.capacity() == BufCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(*inserted == insertedVal, caseLabel);
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(sv.capacity() == BufCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::insert value into buffer "
@@ -4374,19 +4678,21 @@ void TestInsertSingleValue()
       metrics.dtorCalls = initialSize + 1;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(sv.size() == BufCap, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(sv.size() == BufCap, caseLabel);
 
-         SV::iterator inserted = sv.insert(sv.begin() + insertPos, insertedVal);
+            SV::iterator inserted = sv.insert(sv.begin() + insertPos, insertedVal);
 
-         VERIFY(*inserted == insertedVal, caseLabel);
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() > BufCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(*inserted == insertedVal, caseLabel);
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() > BufCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::insert value into heap "
@@ -4410,20 +4716,22 @@ void TestInsertSingleValue()
       metrics.dtorCalls = initialSize + 1;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         sv.reserve(initialCap);
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(sv.size() + 1 <= initialCap, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            sv.reserve(initialCap);
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(sv.size() + 1 <= initialCap, caseLabel);
 
-         SV::iterator inserted = sv.insert(sv.begin() + insertPos, insertedVal);
+            SV::iterator inserted = sv.insert(sv.begin() + insertPos, insertedVal);
 
-         VERIFY(*inserted == insertedVal, caseLabel);
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() == initialCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(*inserted == insertedVal, caseLabel);
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() == initialCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::insert value into heap "
@@ -4445,19 +4753,21 @@ void TestInsertSingleValue()
       metrics.dtorCalls = initialSize + 1;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(sv.size() + 1 > sv.capacity(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(sv.size() + 1 > sv.capacity(), caseLabel);
 
-         SV::iterator inserted = sv.insert(sv.begin() + insertPos, insertedVal);
+            SV::iterator inserted = sv.insert(sv.begin() + insertPos, insertedVal);
 
-         VERIFY(*inserted == insertedVal, caseLabel);
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() > initialSize, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(*inserted == insertedVal, caseLabel);
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() > initialSize, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::insert value at beginning"};
@@ -4477,15 +4787,17 @@ void TestInsertSingleValue()
       metrics.dtorCalls = initialSize + 1;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(!sv.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(!sv.empty(), caseLabel);
 
-         SV::iterator inserted = sv.insert(sv.begin(), insertedVal);
+            SV::iterator inserted = sv.insert(sv.begin(), insertedVal);
 
-         VERIFY(*inserted == insertedVal, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(*inserted == insertedVal, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::insert value at end"};
@@ -4505,15 +4817,17 @@ void TestInsertSingleValue()
       metrics.dtorCalls = initialSize + 1;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(!sv.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(!sv.empty(), caseLabel);
 
-         SV::iterator inserted = sv.insert(sv.end(), insertedVal);
+            SV::iterator inserted = sv.insert(sv.end(), insertedVal);
 
-         VERIFY(*inserted == insertedVal, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(*inserted == insertedVal, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::insert value using a const-iterator"};
@@ -4534,19 +4848,21 @@ void TestInsertSingleValue()
       metrics.dtorCalls = initialSize + 1;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(sv.size() + 1 > sv.capacity(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(sv.size() + 1 > sv.capacity(), caseLabel);
 
-         SV::iterator inserted = sv.insert(sv.cbegin() + insertPos, insertedVal);
+            SV::iterator inserted = sv.insert(sv.cbegin() + insertPos, insertedVal);
 
-         VERIFY(*inserted == insertedVal, caseLabel);
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() > initialSize, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(*inserted == insertedVal, caseLabel);
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() > initialSize, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::insert value into empty vector"};
@@ -4563,16 +4879,18 @@ void TestInsertSingleValue()
       metrics.dtorCalls = 1;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv;
-         VERIFY(sv.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv;
+            VERIFY(sv.empty(), caseLabel);
 
-         SV::iterator inserted = sv.insert(sv.begin(), insertedVal);
+            SV::iterator inserted = sv.insert(sv.begin(), insertedVal);
 
-         VERIFY(*inserted == insertedVal, caseLabel);
-         VERIFY(sv.inBuffer(), caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(*inserted == insertedVal, caseLabel);
+            VERIFY(sv.inBuffer(), caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{
@@ -4594,19 +4912,21 @@ void TestInsertSingleValue()
       metrics.dtorCalls = initialSize + 1 + numRelocated;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(sv.size() + 1 <= BufCap, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(sv.size() + 1 <= BufCap, caseLabel);
 
-         SV::iterator inserted = sv.insert(sv.begin() + insertPos, insertedVal);
+            SV::iterator inserted = sv.insert(sv.begin() + insertPos, insertedVal);
 
-         VERIFY(*inserted == insertedVal, caseLabel);
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(sv.capacity() == BufCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(*inserted == insertedVal, caseLabel);
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(sv.capacity() == BufCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
 }
 
@@ -4635,20 +4955,22 @@ void TestInsertSingleRValue()
       metrics.dtorCalls = initialSize + 1;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(sv.size() + 1 <= BufCap, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(sv.size() + 1 <= BufCap, caseLabel);
 
-         SV::iterator inserted =
-            sv.insert(sv.begin() + insertPos, std::move(insertedElem));
+            SV::iterator inserted =
+               sv.insert(sv.begin() + insertPos, std::move(insertedElem));
 
-         VERIFY(inserted->i == insertedVal, caseLabel);
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(sv.capacity() == BufCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(inserted->i == insertedVal, caseLabel);
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(sv.capacity() == BufCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::insert r-value into buffer "
@@ -4671,20 +4993,22 @@ void TestInsertSingleRValue()
       metrics.dtorCalls = initialSize + 1;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(sv.size() == BufCap, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(sv.size() == BufCap, caseLabel);
 
-         SV::iterator inserted =
-            sv.insert(sv.begin() + insertPos, std::move(insertedElem));
+            SV::iterator inserted =
+               sv.insert(sv.begin() + insertPos, std::move(insertedElem));
 
-         VERIFY(inserted->i == insertedVal, caseLabel);
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() > BufCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(inserted->i == insertedVal, caseLabel);
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() > BufCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::insert r-value into heap "
@@ -4709,21 +5033,23 @@ void TestInsertSingleRValue()
       metrics.dtorCalls = initialSize + 1;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         sv.reserve(initialCap);
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(sv.size() + 1 <= initialCap, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            sv.reserve(initialCap);
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(sv.size() + 1 <= initialCap, caseLabel);
 
-         SV::iterator inserted =
-            sv.insert(sv.begin() + insertPos, std::move(insertedElem));
+            SV::iterator inserted =
+               sv.insert(sv.begin() + insertPos, std::move(insertedElem));
 
-         VERIFY(inserted->i == insertedVal, caseLabel);
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() == initialCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(inserted->i == insertedVal, caseLabel);
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() == initialCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::insert r-value into heap "
@@ -4746,20 +5072,22 @@ void TestInsertSingleRValue()
       metrics.dtorCalls = initialSize + 1;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(sv.size() + 1 > sv.capacity(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(sv.size() + 1 > sv.capacity(), caseLabel);
 
-         SV::iterator inserted =
-            sv.insert(sv.begin() + insertPos, std::move(insertedElem));
+            SV::iterator inserted =
+               sv.insert(sv.begin() + insertPos, std::move(insertedElem));
 
-         VERIFY(inserted->i == insertedVal, caseLabel);
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() > initialSize, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(inserted->i == insertedVal, caseLabel);
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() > initialSize, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::insert r-value at beginning"};
@@ -4780,15 +5108,17 @@ void TestInsertSingleRValue()
       metrics.dtorCalls = initialSize + 1;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(!sv.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(!sv.empty(), caseLabel);
 
-         SV::iterator inserted = sv.insert(sv.begin(), std::move(insertedElem));
+            SV::iterator inserted = sv.insert(sv.begin(), std::move(insertedElem));
 
-         VERIFY(inserted->i == insertedVal, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(inserted->i == insertedVal, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::insert r-value at end"};
@@ -4809,15 +5139,17 @@ void TestInsertSingleRValue()
       metrics.dtorCalls = initialSize + 1;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(!sv.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(!sv.empty(), caseLabel);
 
-         SV::iterator inserted = sv.insert(sv.end(), std::move(insertedElem));
+            SV::iterator inserted = sv.insert(sv.end(), std::move(insertedElem));
 
-         VERIFY(inserted->i == insertedVal, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(inserted->i == insertedVal, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::insert r-value into heap "
@@ -4840,20 +5172,22 @@ void TestInsertSingleRValue()
       metrics.dtorCalls = initialSize + 1;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(sv.size() + 1 > sv.capacity(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(sv.size() + 1 > sv.capacity(), caseLabel);
 
-         SV::iterator inserted =
-            sv.insert(sv.cbegin() + insertPos, std::move(insertedElem));
+            SV::iterator inserted =
+               sv.insert(sv.cbegin() + insertPos, std::move(insertedElem));
 
-         VERIFY(inserted->i == insertedVal, caseLabel);
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() > initialSize, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(inserted->i == insertedVal, caseLabel);
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() > initialSize, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::insert r-value into empty vector"};
@@ -4871,16 +5205,18 @@ void TestInsertSingleRValue()
       metrics.dtorCalls = 1;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv;
-         VERIFY(sv.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv;
+            VERIFY(sv.empty(), caseLabel);
 
-         SV::iterator inserted = sv.insert(sv.begin(), std::move(insertedElem));
+            SV::iterator inserted = sv.insert(sv.begin(), std::move(insertedElem));
 
-         VERIFY(inserted->i == insertedVal, caseLabel);
-         VERIFY(sv.inBuffer(), caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(inserted->i == insertedVal, caseLabel);
+            VERIFY(sv.inBuffer(), caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
 }
 
@@ -4909,20 +5245,22 @@ void TestInsertValueMultipleTimes()
       metrics.dtorCalls = initialSize + numInserted;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(sv.size() + numInserted <= BufCap, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(sv.size() + numInserted <= BufCap, caseLabel);
 
-         SV::iterator inserted =
-            sv.insert(sv.begin() + insertPos, numInserted, insertedElem);
+            SV::iterator inserted =
+               sv.insert(sv.begin() + insertPos, numInserted, insertedElem);
 
-         VERIFY(inserted == sv.begin() + insertPos, caseLabel);
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(sv.capacity() == BufCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(inserted == sv.begin() + insertPos, caseLabel);
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(sv.capacity() == BufCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::insert value multiple times into buffer "
@@ -4937,7 +5275,6 @@ void TestInsertValueMultipleTimes()
       Elem insertedElem = 100;
       constexpr std::size_t insertPos = 3;
       constexpr std::size_t numInserted = 4;
-      const std::size_t numRelocated = initialSize - insertPos;
       const std::initializer_list<Elem> expected{0, 1, 2, 100, 100, 100, 100, 3, 4};
 
       Elem::Metrics metrics;
@@ -4946,20 +5283,22 @@ void TestInsertValueMultipleTimes()
       metrics.dtorCalls = initialSize + numInserted;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(sv.size() + numInserted > BufCap, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(sv.size() + numInserted > BufCap, caseLabel);
 
-         SV::iterator inserted =
-            sv.insert(sv.begin() + insertPos, numInserted, insertedElem);
+            SV::iterator inserted =
+               sv.insert(sv.begin() + insertPos, numInserted, insertedElem);
 
-         VERIFY(inserted == sv.begin() + insertPos, caseLabel);
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() > BufCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(inserted == sv.begin() + insertPos, caseLabel);
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() > BufCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::insert value multiple times into heap "
@@ -4984,21 +5323,23 @@ void TestInsertValueMultipleTimes()
       metrics.dtorCalls = initialSize + numInserted;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         sv.reserve(initialCap);
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(sv.size() + numInserted <= sv.capacity(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            sv.reserve(initialCap);
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(sv.size() + numInserted <= sv.capacity(), caseLabel);
 
-         SV::iterator inserted =
-            sv.insert(sv.begin() + insertPos, numInserted, insertedElem);
+            SV::iterator inserted =
+               sv.insert(sv.begin() + insertPos, numInserted, insertedElem);
 
-         VERIFY(inserted == sv.begin() + insertPos, caseLabel);
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() == initialCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(inserted == sv.begin() + insertPos, caseLabel);
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() == initialCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::insert value multiple times into heap "
@@ -5014,7 +5355,6 @@ void TestInsertValueMultipleTimes()
       Elem insertedElem = 100;
       constexpr std::size_t insertPos = 3;
       constexpr std::size_t numInserted = 4;
-      const std::size_t numRelocated = initialSize - insertPos;
       const std::initializer_list<Elem> expected{0, 1, 2, 100, 100, 100, 100, 3, 4, 5, 6};
 
       Elem::Metrics metrics;
@@ -5023,20 +5363,22 @@ void TestInsertValueMultipleTimes()
       metrics.dtorCalls = initialSize + numInserted;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(sv.size() + numInserted > sv.capacity(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(sv.size() + numInserted > sv.capacity(), caseLabel);
 
-         SV::iterator inserted =
-            sv.insert(sv.begin() + insertPos, numInserted, insertedElem);
+            SV::iterator inserted =
+               sv.insert(sv.begin() + insertPos, numInserted, insertedElem);
 
-         VERIFY(inserted == sv.begin() + insertPos, caseLabel);
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() > initialCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(inserted == sv.begin() + insertPos, caseLabel);
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() > initialCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::insert value multiple times at front"};
@@ -5058,19 +5400,21 @@ void TestInsertValueMultipleTimes()
       metrics.dtorCalls = initialSize + numInserted;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(sv.size() + numInserted <= BufCap, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(sv.size() + numInserted <= BufCap, caseLabel);
 
-         SV::iterator inserted = sv.insert(sv.begin(), numInserted, insertedElem);
+            SV::iterator inserted = sv.insert(sv.begin(), numInserted, insertedElem);
 
-         VERIFY(inserted == sv.begin(), caseLabel);
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(sv.capacity() == BufCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(inserted == sv.begin(), caseLabel);
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(sv.capacity() == BufCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::insert value multiple times at end"};
@@ -5093,20 +5437,22 @@ void TestInsertValueMultipleTimes()
       metrics.dtorCalls = initialSize + numInserted;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(sv.size() + numInserted <= BufCap, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(sv.size() + numInserted <= BufCap, caseLabel);
 
-         SV::iterator inserted =
-            sv.insert(sv.begin() + insertPos, numInserted, insertedElem);
+            SV::iterator inserted =
+               sv.insert(sv.begin() + insertPos, numInserted, insertedElem);
 
-         VERIFY(inserted == sv.begin() + insertPos, caseLabel);
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(sv.capacity() == BufCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(inserted == sv.begin() + insertPos, caseLabel);
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(sv.capacity() == BufCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{
@@ -5130,16 +5476,18 @@ void TestInsertValueMultipleTimes()
       metrics.dtorCalls = initialSize + numInserted;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(!sv.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(!sv.empty(), caseLabel);
 
-         SV::iterator inserted =
-            sv.insert(sv.cbegin() + insertPos, numInserted, insertedElem);
+            SV::iterator inserted =
+               sv.insert(sv.cbegin() + insertPos, numInserted, insertedElem);
 
-         VERIFY(inserted == sv.begin() + insertPos, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(inserted == sv.begin() + insertPos, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{
@@ -5158,15 +5506,17 @@ void TestInsertValueMultipleTimes()
       metrics.dtorCalls = numInserted;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv;
-         VERIFY(sv.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv;
+            VERIFY(sv.empty(), caseLabel);
 
-         SV::iterator inserted = sv.insert(sv.begin(), numInserted, insertedElem);
+            SV::iterator inserted = sv.insert(sv.begin(), numInserted, insertedElem);
 
-         VERIFY(inserted == sv.begin(), caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(inserted == sv.begin(), caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{
@@ -5189,17 +5539,19 @@ void TestInsertValueMultipleTimes()
       metrics.dtorCalls = metrics.copyCtorCalls;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(!std::is_move_constructible_v<Elem>, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(!std::is_move_constructible_v<Elem>, caseLabel);
 
-         SV::iterator inserted =
-            sv.insert(sv.begin() + insertPos, numInserted, insertedElem);
+            SV::iterator inserted =
+               sv.insert(sv.begin() + insertPos, numInserted, insertedElem);
 
-         VERIFY(inserted == sv.begin() + insertPos, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(inserted == sv.begin() + insertPos, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::insert value zero times into vector"};
@@ -5218,16 +5570,18 @@ void TestInsertValueMultipleTimes()
       metrics.dtorCalls = metrics.copyCtorCalls;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(!sv.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(!sv.empty(), caseLabel);
 
-         SV::iterator expectedIter = sv.begin() + insertPos;
-         SV::iterator inserted = sv.insert(sv.begin() + insertPos, 0, insertedElem);
+            SV::iterator expectedIter = sv.begin() + insertPos;
+            SV::iterator inserted = sv.insert(sv.begin() + insertPos, 0, insertedElem);
 
-         VERIFY(inserted == expectedIter, caseLabel);
-         verifyVector(sv, values, caseLabel);
-      });
+            VERIFY(inserted == expectedIter, caseLabel);
+            verifyVector(sv, values, caseLabel);
+         });
    }
 }
 
@@ -5258,19 +5612,21 @@ void TestInsertRange()
       metrics.dtorCalls = initialSize + numInserted;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(sv.size() + numInserted <= BufCap, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(sv.size() + numInserted <= BufCap, caseLabel);
 
-         SV::iterator inserted = sv.insert(sv.begin() + insertPos, srcFirst, srcLast);
+            SV::iterator inserted = sv.insert(sv.begin() + insertPos, srcFirst, srcLast);
 
-         VERIFY(inserted == sv.begin() + insertPos, caseLabel);
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(sv.capacity() == BufCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(inserted == sv.begin() + insertPos, caseLabel);
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(sv.capacity() == BufCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::insert iterator range into buffer "
@@ -5287,7 +5643,6 @@ void TestInsertRange()
       auto srcLast = src.begin() + 4;
       constexpr std::size_t insertPos = 3;
       const std::size_t numInserted = std::distance(srcFirst, srcLast);
-      const std::size_t numRelocated = initialSize - insertPos;
       const std::initializer_list<Elem> expected{0, 1, 2, 101, 102, 103, 3, 4};
 
       Elem::Metrics metrics;
@@ -5296,19 +5651,21 @@ void TestInsertRange()
       metrics.dtorCalls = initialSize + numInserted;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(sv.size() + numInserted > BufCap, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(sv.size() + numInserted > BufCap, caseLabel);
 
-         SV::iterator inserted = sv.insert(sv.begin() + insertPos, srcFirst, srcLast);
+            SV::iterator inserted = sv.insert(sv.begin() + insertPos, srcFirst, srcLast);
 
-         VERIFY(inserted == sv.begin() + insertPos, caseLabel);
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() > BufCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(inserted == sv.begin() + insertPos, caseLabel);
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() > BufCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::insert iterator range into heap "
@@ -5335,20 +5692,22 @@ void TestInsertRange()
       metrics.dtorCalls = initialSize + numInserted;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         sv.reserve(initialCap);
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(sv.size() + numInserted <= sv.capacity(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            sv.reserve(initialCap);
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(sv.size() + numInserted <= sv.capacity(), caseLabel);
 
-         SV::iterator inserted = sv.insert(sv.begin() + insertPos, srcFirst, srcLast);
+            SV::iterator inserted = sv.insert(sv.begin() + insertPos, srcFirst, srcLast);
 
-         VERIFY(inserted == sv.begin() + insertPos, caseLabel);
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() == initialCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(inserted == sv.begin() + insertPos, caseLabel);
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() == initialCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::insert iterator range into heap "
@@ -5366,7 +5725,6 @@ void TestInsertRange()
       auto srcLast = src.begin() + 4;
       constexpr std::size_t insertPos = 3;
       const std::size_t numInserted = std::distance(srcFirst, srcLast);
-      const std::size_t numRelocated = initialSize - insertPos;
       const std::initializer_list<Elem> expected{0, 1, 2, 101, 102, 103, 3, 4, 5, 6};
 
       Elem::Metrics metrics;
@@ -5374,20 +5732,22 @@ void TestInsertRange()
       metrics.moveCtorCalls = initialSize;
       metrics.dtorCalls = initialSize + numInserted;
 
-      Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(sv.size() + numInserted > sv.capacity(), caseLabel);
+      const Test<Elem, BufCap> test{caseLabel, metrics};
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(sv.size() + numInserted > sv.capacity(), caseLabel);
 
-         SV::iterator inserted = sv.insert(sv.begin() + insertPos, srcFirst, srcLast);
+            SV::iterator inserted = sv.insert(sv.begin() + insertPos, srcFirst, srcLast);
 
-         VERIFY(inserted == sv.begin() + insertPos, caseLabel);
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() > initialCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(inserted == sv.begin() + insertPos, caseLabel);
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() > initialCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::insert iterator range at front"};
@@ -5410,15 +5770,17 @@ void TestInsertRange()
       metrics.dtorCalls = initialSize + numInserted;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(!sv.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(!sv.empty(), caseLabel);
 
-         SV::iterator inserted = sv.insert(sv.begin(), srcFirst, srcLast);
+            SV::iterator inserted = sv.insert(sv.begin(), srcFirst, srcLast);
 
-         VERIFY(inserted == sv.begin(), caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(inserted == sv.begin(), caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::insert iterator range at end"};
@@ -5441,15 +5803,17 @@ void TestInsertRange()
       metrics.dtorCalls = initialSize + numInserted;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(!sv.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(!sv.empty(), caseLabel);
 
-         SV::iterator inserted = sv.insert(sv.end(), srcFirst, srcLast);
+            SV::iterator inserted = sv.insert(sv.end(), srcFirst, srcLast);
 
-         VERIFY(inserted == sv.begin() + initialSize, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(inserted == sv.begin() + initialSize, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{
@@ -5475,15 +5839,17 @@ void TestInsertRange()
       metrics.dtorCalls = initialSize + numInserted;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(!sv.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(!sv.empty(), caseLabel);
 
-         SV::iterator inserted = sv.insert(sv.cbegin() + insertPos, srcFirst, srcLast);
+            SV::iterator inserted = sv.insert(sv.cbegin() + insertPos, srcFirst, srcLast);
 
-         VERIFY(inserted == sv.begin() + insertPos, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(inserted == sv.begin() + insertPos, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::insert iterator range into empty vector"};
@@ -5503,15 +5869,17 @@ void TestInsertRange()
       metrics.dtorCalls = numInserted;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv;
-         VERIFY(sv.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv;
+            VERIFY(sv.empty(), caseLabel);
 
-         SV::iterator inserted = sv.insert(sv.begin(), srcFirst, srcLast);
+            SV::iterator inserted = sv.insert(sv.begin(), srcFirst, srcLast);
 
-         VERIFY(inserted == sv.begin(), caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(inserted == sv.begin(), caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{
@@ -5536,16 +5904,18 @@ void TestInsertRange()
       metrics.dtorCalls = metrics.copyCtorCalls;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(!std::is_move_constructible_v<Elem>, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(!std::is_move_constructible_v<Elem>, caseLabel);
 
-         SV::iterator inserted = sv.insert(sv.begin() + insertPos, srcFirst, srcLast);
+            SV::iterator inserted = sv.insert(sv.begin() + insertPos, srcFirst, srcLast);
 
-         VERIFY(inserted == sv.begin() + insertPos, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(inserted == sv.begin() + insertPos, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::insert empty iterator range into vector"};
@@ -5567,16 +5937,18 @@ void TestInsertRange()
       metrics.dtorCalls = initialSize;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(srcFirst == srcLast, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(srcFirst == srcLast, caseLabel);
 
-         SV::iterator inserted = sv.insert(sv.begin() + insertPos, srcFirst, srcLast);
+            SV::iterator inserted = sv.insert(sv.begin() + insertPos, srcFirst, srcLast);
 
-         VERIFY(inserted == sv.begin() + insertPos, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(inserted == sv.begin() + insertPos, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::insert forward iterator range"};
@@ -5603,17 +5975,19 @@ void TestInsertRange()
       metrics.dtorCalls = initialSize + numInserted;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(!sv.empty(), caseLabel);
-         static_assert(
-            std::is_same_v<ForwardIter::iterator_category, std::forward_iterator_tag>);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(!sv.empty(), caseLabel);
+            static_assert(
+               std::is_same_v<ForwardIter::iterator_category, std::forward_iterator_tag>);
 
-         SV::iterator inserted = sv.insert(sv.begin() + insertPos, srcFirst, srcLast);
+            SV::iterator inserted = sv.insert(sv.begin() + insertPos, srcFirst, srcLast);
 
-         VERIFY(inserted == sv.begin() + insertPos, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(inserted == sv.begin() + insertPos, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
 }
 
@@ -5642,19 +6016,21 @@ void TestInsertInitializerList()
       metrics.dtorCalls = initialSize + numInserted;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(sv.size() + numInserted <= BufCap, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(sv.size() + numInserted <= BufCap, caseLabel);
 
-         SV::iterator inserted = sv.insert(sv.begin() + insertPos, src);
+            SV::iterator inserted = sv.insert(sv.begin() + insertPos, src);
 
-         VERIFY(inserted == sv.begin() + insertPos, caseLabel);
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(sv.capacity() == BufCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(inserted == sv.begin() + insertPos, caseLabel);
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(sv.capacity() == BufCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{
@@ -5676,15 +6052,17 @@ void TestInsertInitializerList()
       metrics.dtorCalls = initialSize + numInserted;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(!sv.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(!sv.empty(), caseLabel);
 
-         SV::iterator inserted = sv.insert(sv.begin(), src);
+            SV::iterator inserted = sv.insert(sv.begin(), src);
 
-         VERIFY(inserted == sv.begin(), caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(inserted == sv.begin(), caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::insert initializer list at end of vector"};
@@ -5705,15 +6083,17 @@ void TestInsertInitializerList()
       metrics.dtorCalls = initialSize + numInserted;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(!sv.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(!sv.empty(), caseLabel);
 
-         SV::iterator inserted = sv.insert(sv.end(), src);
+            SV::iterator inserted = sv.insert(sv.end(), src);
 
-         VERIFY(inserted == sv.begin() + initialSize, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(inserted == sv.begin() + initialSize, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::insert initializer list into buffer "
@@ -5728,7 +6108,6 @@ void TestInsertInitializerList()
       const std::initializer_list<Elem> src{100, 101, 102};
       const std::size_t numInserted = src.size();
       constexpr std::size_t insertPos = 3;
-      const std::size_t numRelocated = initialSize - insertPos;
       const std::initializer_list<Elem> expected{0, 1, 2, 100, 101, 102, 3, 4};
 
       Elem::Metrics metrics;
@@ -5737,19 +6116,21 @@ void TestInsertInitializerList()
       metrics.dtorCalls = initialSize + numInserted;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(sv.size() + numInserted > BufCap, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(sv.size() + numInserted > BufCap, caseLabel);
 
-         SV::iterator inserted = sv.insert(sv.begin() + insertPos, src);
+            SV::iterator inserted = sv.insert(sv.begin() + insertPos, src);
 
-         VERIFY(inserted == sv.begin() + insertPos, caseLabel);
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() > BufCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(inserted == sv.begin() + insertPos, caseLabel);
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() > BufCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::insert initializer list into heap "
@@ -5774,20 +6155,22 @@ void TestInsertInitializerList()
       metrics.dtorCalls = initialSize + numInserted;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         sv.reserve(initialCap);
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(sv.size() + numInserted <= sv.capacity(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            sv.reserve(initialCap);
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(sv.size() + numInserted <= sv.capacity(), caseLabel);
 
-         SV::iterator inserted = sv.insert(sv.begin() + insertPos, src);
+            SV::iterator inserted = sv.insert(sv.begin() + insertPos, src);
 
-         VERIFY(inserted == sv.begin() + insertPos, caseLabel);
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() == initialCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(inserted == sv.begin() + insertPos, caseLabel);
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() == initialCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::insert initializer list into heap "
@@ -5803,7 +6186,6 @@ void TestInsertInitializerList()
       const std::initializer_list<Elem> src{100, 101, 102};
       const std::size_t numInserted = src.size();
       constexpr std::size_t insertPos = 3;
-      const std::size_t numRelocated = initialSize - insertPos;
       const std::initializer_list<Elem> expected{0, 1, 2, 100, 101, 102, 3, 4, 5, 6};
 
       Elem::Metrics metrics;
@@ -5812,19 +6194,21 @@ void TestInsertInitializerList()
       metrics.dtorCalls = initialSize + numInserted;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(sv.size() + numInserted > sv.capacity(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(sv.size() + numInserted > sv.capacity(), caseLabel);
 
-         SV::iterator inserted = sv.insert(sv.begin() + insertPos, src);
+            SV::iterator inserted = sv.insert(sv.begin() + insertPos, src);
 
-         VERIFY(inserted == sv.begin() + insertPos, caseLabel);
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() > initialCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(inserted == sv.begin() + insertPos, caseLabel);
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() > initialCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{
@@ -5848,15 +6232,17 @@ void TestInsertInitializerList()
       metrics.dtorCalls = initialSize + numInserted;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(!sv.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(!sv.empty(), caseLabel);
 
-         SV::iterator inserted = sv.insert(sv.cbegin() + insertPos, src);
+            SV::iterator inserted = sv.insert(sv.cbegin() + insertPos, src);
 
-         VERIFY(inserted == sv.begin() + insertPos, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(inserted == sv.begin() + insertPos, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::insert initializer list into empty vector"};
@@ -5873,15 +6259,17 @@ void TestInsertInitializerList()
       metrics.dtorCalls = numInserted;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv;
-         VERIFY(sv.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv;
+            VERIFY(sv.empty(), caseLabel);
 
-         SV::iterator inserted = sv.insert(sv.begin(), src);
+            SV::iterator inserted = sv.insert(sv.begin(), src);
 
-         VERIFY(inserted == sv.begin(), caseLabel);
-         verifyVector(sv, src, caseLabel);
-      });
+            VERIFY(inserted == sv.begin(), caseLabel);
+            verifyVector(sv, src, caseLabel);
+         });
    }
    {
       const std::string caseLabel{
@@ -5904,16 +6292,18 @@ void TestInsertInitializerList()
       metrics.dtorCalls = metrics.copyCtorCalls;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(!std::is_move_constructible_v<Elem>, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(!std::is_move_constructible_v<Elem>, caseLabel);
 
-         SV::iterator inserted = sv.insert(sv.begin() + insertPos, src);
+            SV::iterator inserted = sv.insert(sv.begin() + insertPos, src);
 
-         VERIFY(inserted == sv.begin() + insertPos, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(inserted == sv.begin() + insertPos, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::insert empty initializer list into vector"};
@@ -5932,17 +6322,19 @@ void TestInsertInitializerList()
       metrics.dtorCalls = initialSize;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(src.size() == 0, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(src.size() == 0, caseLabel);
 
-         SV::iterator expectedPos = sv.begin() + insertPos;
-         SV::iterator inserted = sv.insert(sv.begin() + insertPos, src);
+            SV::iterator expectedPos = sv.begin() + insertPos;
+            SV::iterator inserted = sv.insert(sv.begin() + insertPos, src);
 
-         VERIFY(inserted == expectedPos, caseLabel);
-         verifyVector(sv, values, caseLabel);
-      });
+            VERIFY(inserted == expectedPos, caseLabel);
+            verifyVector(sv, values, caseLabel);
+         });
    }
 }
 
@@ -5967,18 +6359,20 @@ void TestPushBackLValue()
       metrics.dtorCalls = initialSize + 1;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(sv.size() + 1 <= BufCap, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(sv.size() + 1 <= BufCap, caseLabel);
 
-         sv.push_back(insertedVal);
+            sv.push_back(insertedVal);
 
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(sv.capacity() == BufCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(sv.capacity() == BufCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::push_back l-value into buffer "
@@ -5999,18 +6393,20 @@ void TestPushBackLValue()
       metrics.dtorCalls = initialSize + 1;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(sv.size() == BufCap, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(sv.size() == BufCap, caseLabel);
 
-         sv.push_back(insertedVal);
+            sv.push_back(insertedVal);
 
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() > BufCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() > BufCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::push_back l-value into heap "
@@ -6032,19 +6428,21 @@ void TestPushBackLValue()
       metrics.dtorCalls = initialSize + 1;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         sv.reserve(initialCap);
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(sv.size() + 1 <= initialCap, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            sv.reserve(initialCap);
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(sv.size() + 1 <= initialCap, caseLabel);
 
-         sv.push_back(insertedVal);
+            sv.push_back(insertedVal);
 
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() == initialCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() == initialCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::push_back l-value into heap "
@@ -6065,18 +6463,20 @@ void TestPushBackLValue()
       metrics.dtorCalls = initialSize + 1;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(sv.size() + 1 > sv.capacity(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(sv.size() + 1 > sv.capacity(), caseLabel);
 
-         sv.push_back(insertedVal);
+            sv.push_back(insertedVal);
 
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() > initialSize, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() > initialSize, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::push_back l-value into empty vector"};
@@ -6093,15 +6493,17 @@ void TestPushBackLValue()
       metrics.dtorCalls = 1;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv;
-         VERIFY(sv.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv;
+            VERIFY(sv.empty(), caseLabel);
 
-         sv.push_back(insertedVal);
+            sv.push_back(insertedVal);
 
-         VERIFY(sv.inBuffer(), caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(sv.inBuffer(), caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{
@@ -6121,18 +6523,20 @@ void TestPushBackLValue()
       metrics.dtorCalls = initialSize + 1;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(sv.size() + 1 <= BufCap, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(sv.size() + 1 <= BufCap, caseLabel);
 
-         sv.push_back(insertedVal);
+            sv.push_back(insertedVal);
 
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(sv.capacity() == BufCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(sv.capacity() == BufCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{
@@ -6166,18 +6570,20 @@ void TestPushBackRValue()
       metrics.dtorCalls = initialSize + 1;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(sv.size() + 1 <= BufCap, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(sv.size() + 1 <= BufCap, caseLabel);
 
-         sv.push_back(std::move(insertedElem));
+            sv.push_back(std::move(insertedElem));
 
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(sv.capacity() == BufCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(sv.capacity() == BufCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::push_back r-value into buffer "
@@ -6199,18 +6605,20 @@ void TestPushBackRValue()
       metrics.dtorCalls = initialSize + 1;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(sv.size() == BufCap, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(sv.size() == BufCap, caseLabel);
 
-         sv.push_back(std::move(insertedElem));
+            sv.push_back(std::move(insertedElem));
 
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() > BufCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() > BufCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::push_back r-value into heap "
@@ -6233,19 +6641,21 @@ void TestPushBackRValue()
       metrics.dtorCalls = initialSize + 1;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         sv.reserve(initialCap);
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(sv.size() + 1 <= initialCap, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            sv.reserve(initialCap);
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(sv.size() + 1 <= initialCap, caseLabel);
 
-         sv.push_back(std::move(insertedElem));
+            sv.push_back(std::move(insertedElem));
 
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() == initialCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() == initialCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::push_back r-value into heap "
@@ -6267,18 +6677,20 @@ void TestPushBackRValue()
       metrics.dtorCalls = initialSize + 1;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(sv.size() + 1 > sv.capacity(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(sv.size() + 1 > sv.capacity(), caseLabel);
 
-         sv.push_back(std::move(insertedElem));
+            sv.push_back(std::move(insertedElem));
 
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() > initialSize, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() > initialSize, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::push_back r-value into heap "
@@ -6300,18 +6712,20 @@ void TestPushBackRValue()
       metrics.dtorCalls = initialSize + 1;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(sv.size() + 1 > sv.capacity(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(sv.size() + 1 > sv.capacity(), caseLabel);
 
-         sv.push_back(std::move(insertedElem));
+            sv.push_back(std::move(insertedElem));
 
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() > initialSize, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() > initialSize, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::push_back r-value into empty vector"};
@@ -6329,15 +6743,17 @@ void TestPushBackRValue()
       metrics.dtorCalls = 1;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv;
-         VERIFY(sv.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv;
+            VERIFY(sv.empty(), caseLabel);
 
-         sv.push_back(std::move(insertedElem));
+            sv.push_back(std::move(insertedElem));
 
-         VERIFY(sv.inBuffer(), caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(sv.inBuffer(), caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
 }
 
@@ -6361,17 +6777,19 @@ void TestPopBack()
       metrics.dtorCalls = initialSize;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(sv.size() > 1, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(sv.size() > 1, caseLabel);
 
-         sv.pop_back();
+            sv.pop_back();
 
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(sv.capacity() == BufCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(sv.capacity() == BufCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::pop_back for vector with one element"};
@@ -6387,17 +6805,19 @@ void TestPopBack()
       metrics.dtorCalls = 1;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(sv.size() == 1, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(sv.size() == 1, caseLabel);
 
-         sv.pop_back();
+            sv.pop_back();
 
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(sv.capacity() == BufCap, caseLabel);
-         VERIFY(sv.empty(), caseLabel);
-      });
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(sv.capacity() == BufCap, caseLabel);
+            VERIFY(sv.empty(), caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::pop_back for empty vector"};
@@ -6420,17 +6840,19 @@ void TestPopBack()
       metrics.dtorCalls = initialSize;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.size() > BufCap + 1, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.size() > BufCap + 1, caseLabel);
 
-         sv.pop_back();
+            sv.pop_back();
 
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() > BufCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() > BufCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::pop_back for removing elements until heap "
@@ -6450,19 +6872,21 @@ void TestPopBack()
       metrics.dtorCalls = initialSize;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.size() - numPops < BufCap, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.size() - numPops < BufCap, caseLabel);
 
-         for (int i = 0; i < numPops; ++i)
-            sv.pop_back();
+            for (int i = 0; i < numPops; ++i)
+               sv.pop_back();
 
-         // Remains on heap.
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() > BufCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            // Remains on heap.
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() > BufCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
 }
 
@@ -6491,19 +6915,21 @@ void TestEmplace()
       metrics.dtorCalls = initialSize + 1;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(sv.size() + 1 <= BufCap, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(sv.size() + 1 <= BufCap, caseLabel);
 
-         SV::iterator inserted = sv.emplace(sv.begin() + insertPos, emplacedArg);
+            SV::iterator inserted = sv.emplace(sv.begin() + insertPos, emplacedArg);
 
-         VERIFY(inserted->i == emplacedArg, caseLabel);
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(sv.capacity() == BufCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(inserted->i == emplacedArg, caseLabel);
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(sv.capacity() == BufCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::emplace value into buffer "
@@ -6526,19 +6952,21 @@ void TestEmplace()
       metrics.dtorCalls = initialSize + 1;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(sv.size() == BufCap, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(sv.size() == BufCap, caseLabel);
 
-         SV::iterator inserted = sv.emplace(sv.begin() + insertPos, emplacedArg);
+            SV::iterator inserted = sv.emplace(sv.begin() + insertPos, emplacedArg);
 
-         VERIFY(inserted->i == emplacedArg, caseLabel);
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() > BufCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(inserted->i == emplacedArg, caseLabel);
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() > BufCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::emplace value into heap "
@@ -6563,20 +6991,22 @@ void TestEmplace()
       metrics.dtorCalls = initialSize + 1;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         sv.reserve(initialCap);
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(sv.size() + 1 <= initialCap, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            sv.reserve(initialCap);
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(sv.size() + 1 <= initialCap, caseLabel);
 
-         SV::iterator inserted = sv.emplace(sv.begin() + insertPos, emplacedArg);
+            SV::iterator inserted = sv.emplace(sv.begin() + insertPos, emplacedArg);
 
-         VERIFY(inserted->i == emplacedArg, caseLabel);
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() == initialCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(inserted->i == emplacedArg, caseLabel);
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() == initialCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::emplace value into heap "
@@ -6599,19 +7029,21 @@ void TestEmplace()
       metrics.dtorCalls = initialSize + 1;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(sv.size() + 1 > sv.capacity(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(sv.size() + 1 > sv.capacity(), caseLabel);
 
-         SV::iterator inserted = sv.emplace(sv.begin() + insertPos, emplacedArg);
+            SV::iterator inserted = sv.emplace(sv.begin() + insertPos, emplacedArg);
 
-         VERIFY(inserted->i == emplacedArg, caseLabel);
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() > initialSize, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(inserted->i == emplacedArg, caseLabel);
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() > initialSize, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::emplace value at beginning"};
@@ -6632,15 +7064,17 @@ void TestEmplace()
       metrics.dtorCalls = initialSize + 1;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(!sv.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(!sv.empty(), caseLabel);
 
-         SV::iterator inserted = sv.emplace(sv.begin(), emplacedArg);
+            SV::iterator inserted = sv.emplace(sv.begin(), emplacedArg);
 
-         VERIFY(inserted->i == emplacedArg, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(inserted->i == emplacedArg, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::emplace value at end"};
@@ -6661,15 +7095,17 @@ void TestEmplace()
       metrics.dtorCalls = initialSize + 1;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(!sv.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(!sv.empty(), caseLabel);
 
-         SV::iterator inserted = sv.emplace(sv.end(), emplacedArg);
+            SV::iterator inserted = sv.emplace(sv.end(), emplacedArg);
 
-         VERIFY(inserted->i == emplacedArg, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(inserted->i == emplacedArg, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::emplace value using a const-iterator"};
@@ -6691,19 +7127,21 @@ void TestEmplace()
       metrics.dtorCalls = initialSize + 1;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(sv.size() + 1 > sv.capacity(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(sv.size() + 1 > sv.capacity(), caseLabel);
 
-         SV::iterator inserted = sv.emplace(sv.cbegin() + insertPos, emplacedArg);
+            SV::iterator inserted = sv.emplace(sv.cbegin() + insertPos, emplacedArg);
 
-         VERIFY(inserted->i == emplacedArg, caseLabel);
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() > initialSize, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(inserted->i == emplacedArg, caseLabel);
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() > initialSize, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::emplace value into empty vector"};
@@ -6720,16 +7158,18 @@ void TestEmplace()
       metrics.dtorCalls = 1;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv;
-         VERIFY(sv.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv;
+            VERIFY(sv.empty(), caseLabel);
 
-         SV::iterator inserted = sv.emplace(sv.begin(), emplacedArg);
+            SV::iterator inserted = sv.emplace(sv.begin(), emplacedArg);
 
-         VERIFY(inserted->i == emplacedArg, caseLabel);
-         VERIFY(sv.inBuffer(), caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(inserted->i == emplacedArg, caseLabel);
+            VERIFY(sv.inBuffer(), caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{
@@ -6752,19 +7192,21 @@ void TestEmplace()
       metrics.dtorCalls = initialSize + 1 + numRelocated;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(sv.size() + 1 <= BufCap, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(sv.size() + 1 <= BufCap, caseLabel);
 
-         SV::iterator inserted = sv.emplace(sv.begin() + insertPos, emplacedArg);
+            SV::iterator inserted = sv.emplace(sv.begin() + insertPos, emplacedArg);
 
-         VERIFY(inserted->i == emplacedArg, caseLabel);
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(sv.capacity() == BufCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(inserted->i == emplacedArg, caseLabel);
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(sv.capacity() == BufCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::emplace elements with reference argument"};
@@ -6880,19 +7322,21 @@ void TestEmplaceBack()
       metrics.dtorCalls = initialSize + 1;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(sv.size() + 1 <= BufCap, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(sv.size() + 1 <= BufCap, caseLabel);
 
-         SV::reference inserted = sv.emplace_back(emplacedArg);
+            SV::reference inserted = sv.emplace_back(emplacedArg);
 
-         VERIFY(inserted.i == emplacedArg, caseLabel);
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(sv.capacity() == BufCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(inserted.i == emplacedArg, caseLabel);
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(sv.capacity() == BufCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::emplace_back value into buffer "
@@ -6914,19 +7358,21 @@ void TestEmplaceBack()
       metrics.dtorCalls = initialSize + 1;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(sv.size() == BufCap, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(sv.size() == BufCap, caseLabel);
 
-         SV::reference inserted = sv.emplace_back(emplacedArg);
+            SV::reference inserted = sv.emplace_back(emplacedArg);
 
-         VERIFY(inserted.i == emplacedArg, caseLabel);
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() > BufCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(inserted.i == emplacedArg, caseLabel);
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() > BufCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::emplace_back value into heap "
@@ -6949,20 +7395,22 @@ void TestEmplaceBack()
       metrics.dtorCalls = initialSize + 1;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         sv.reserve(initialCap);
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(sv.size() + 1 <= initialCap, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            sv.reserve(initialCap);
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(sv.size() + 1 <= initialCap, caseLabel);
 
-         SV::reference inserted = sv.emplace_back(emplacedArg);
+            SV::reference inserted = sv.emplace_back(emplacedArg);
 
-         VERIFY(inserted.i == emplacedArg, caseLabel);
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() == initialCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(inserted.i == emplacedArg, caseLabel);
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() == initialCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::emplace_back value into heap "
@@ -6984,19 +7432,21 @@ void TestEmplaceBack()
       metrics.dtorCalls = initialSize + 1;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(sv.size() + 1 > sv.capacity(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(sv.size() + 1 > sv.capacity(), caseLabel);
 
-         SV::reference inserted = sv.emplace_back(emplacedArg);
+            SV::reference inserted = sv.emplace_back(emplacedArg);
 
-         VERIFY(inserted.i == emplacedArg, caseLabel);
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() > initialSize, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(inserted.i == emplacedArg, caseLabel);
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() > initialSize, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::emplace_back value using a const-iterator"};
@@ -7017,19 +7467,21 @@ void TestEmplaceBack()
       metrics.dtorCalls = initialSize + 1;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(sv.size() + 1 > sv.capacity(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(sv.size() + 1 > sv.capacity(), caseLabel);
 
-         SV::reference inserted = sv.emplace_back(emplacedArg);
+            SV::reference inserted = sv.emplace_back(emplacedArg);
 
-         VERIFY(inserted.i == emplacedArg, caseLabel);
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() > initialSize, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(inserted.i == emplacedArg, caseLabel);
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() > initialSize, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::emplace_back value into empty vector"};
@@ -7046,16 +7498,18 @@ void TestEmplaceBack()
       metrics.dtorCalls = 1;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv;
-         VERIFY(sv.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv;
+            VERIFY(sv.empty(), caseLabel);
 
-         SV::reference inserted = sv.emplace_back(emplacedArg);
+            SV::reference inserted = sv.emplace_back(emplacedArg);
 
-         VERIFY(inserted.i == emplacedArg, caseLabel);
-         VERIFY(sv.inBuffer(), caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(inserted.i == emplacedArg, caseLabel);
+            VERIFY(sv.inBuffer(), caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{
@@ -7076,19 +7530,21 @@ void TestEmplaceBack()
       metrics.dtorCalls = initialSize + 1;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(sv.size() + 1 <= BufCap, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(sv.size() + 1 <= BufCap, caseLabel);
 
-         SV::reference inserted = sv.emplace_back(emplacedArg);
+            SV::reference inserted = sv.emplace_back(emplacedArg);
 
-         VERIFY(inserted.i == emplacedArg, caseLabel);
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(sv.capacity() == BufCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(inserted.i == emplacedArg, caseLabel);
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(sv.capacity() == BufCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{
@@ -7206,18 +7662,20 @@ void TestResizeWithDefaultValue()
       metrics.dtorCalls = initialSize;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         const std::size_t initialCap = sv.capacity();
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(resizeTo == sv.size(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            const std::size_t initialCap = sv.capacity();
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(resizeTo == sv.size(), caseLabel);
 
-         sv.resize(resizeTo);
+            sv.resize(resizeTo);
 
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(sv.capacity() == initialCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(sv.capacity() == initialCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::resize with default value for buffer "
@@ -7238,18 +7696,20 @@ void TestResizeWithDefaultValue()
       metrics.dtorCalls = resizeTo;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(resizeTo > sv.size(), caseLabel);
-         VERIFY(resizeTo <= BufCap, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(resizeTo > sv.size(), caseLabel);
+            VERIFY(resizeTo <= BufCap, caseLabel);
 
-         sv.resize(resizeTo);
+            sv.resize(resizeTo);
 
-         VERIFY(sv.inBuffer(), caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(sv.inBuffer(), caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::resize with default value for buffer "
@@ -7271,18 +7731,20 @@ void TestResizeWithDefaultValue()
       metrics.dtorCalls = resizeTo;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(resizeTo > sv.size(), caseLabel);
-         VERIFY(resizeTo > BufCap, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(resizeTo > sv.size(), caseLabel);
+            VERIFY(resizeTo > BufCap, caseLabel);
 
-         sv.resize(resizeTo);
+            sv.resize(resizeTo);
 
-         VERIFY(sv.onHeap(), caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(sv.onHeap(), caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{
@@ -7306,20 +7768,22 @@ void TestResizeWithDefaultValue()
       metrics.dtorCalls = resizeTo;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         sv.reserve(initialCap);
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(resizeTo > sv.size(), caseLabel);
-         VERIFY(resizeTo < initialCap, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            sv.reserve(initialCap);
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(resizeTo > sv.size(), caseLabel);
+            VERIFY(resizeTo < initialCap, caseLabel);
 
-         sv.resize(resizeTo);
+            sv.resize(resizeTo);
 
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() == initialCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() == initialCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{
@@ -7343,19 +7807,21 @@ void TestResizeWithDefaultValue()
       metrics.dtorCalls = resizeTo;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(resizeTo > sv.size(), caseLabel);
-         VERIFY(resizeTo > initialCap, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(resizeTo > sv.size(), caseLabel);
+            VERIFY(resizeTo > initialCap, caseLabel);
 
-         sv.resize(resizeTo);
+            sv.resize(resizeTo);
 
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() > initialCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() > initialCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::resize with default value for buffer "
@@ -7375,18 +7841,20 @@ void TestResizeWithDefaultValue()
       metrics.dtorCalls = initialSize;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(resizeTo < sv.size(), caseLabel);
-         VERIFY(resizeTo <= BufCap, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(resizeTo < sv.size(), caseLabel);
+            VERIFY(resizeTo <= BufCap, caseLabel);
 
-         sv.resize(resizeTo);
+            sv.resize(resizeTo);
 
-         VERIFY(sv.inBuffer(), caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(sv.inBuffer(), caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::resize with default value for heap "
@@ -7406,21 +7874,23 @@ void TestResizeWithDefaultValue()
       metrics.dtorCalls = initialSize;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         const std::size_t initialCap = sv.capacity();
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(resizeTo < sv.size(), caseLabel);
-         VERIFY(resizeTo < BufCap, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            const std::size_t initialCap = sv.capacity();
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(resizeTo < sv.size(), caseLabel);
+            VERIFY(resizeTo < BufCap, caseLabel);
 
-         sv.resize(resizeTo);
+            sv.resize(resizeTo);
 
-         // Remains on heap.
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() == initialCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            // Remains on heap.
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() == initialCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::resize with default value for heap "
@@ -7440,20 +7910,22 @@ void TestResizeWithDefaultValue()
       metrics.dtorCalls = initialSize;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         const std::size_t initialCap = sv.capacity();
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(resizeTo < sv.size(), caseLabel);
-         VERIFY(resizeTo > BufCap, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            const std::size_t initialCap = sv.capacity();
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(resizeTo < sv.size(), caseLabel);
+            VERIFY(resizeTo > BufCap, caseLabel);
 
-         sv.resize(resizeTo);
+            sv.resize(resizeTo);
 
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() == initialCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() == initialCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::resize with default value for buffer "
@@ -7471,16 +7943,18 @@ void TestResizeWithDefaultValue()
       metrics.dtorCalls = initialSize;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
 
-         sv.resize(0);
+            sv.resize(0);
 
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(sv.empty(), caseLabel);
-      });
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(sv.empty(), caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::resize with default value for heap "
@@ -7498,17 +7972,19 @@ void TestResizeWithDefaultValue()
       metrics.dtorCalls = initialSize;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
 
-         sv.resize(0);
+            sv.resize(0);
 
-         // Remains on heap.
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.empty(), caseLabel);
-      });
+            // Remains on heap.
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.empty(), caseLabel);
+         });
    }
 }
 
@@ -7533,18 +8009,20 @@ void TestResizeWithValue()
       metrics.dtorCalls = initialSize;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         const std::size_t initialCap = sv.capacity();
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(resizeTo == sv.size(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            const std::size_t initialCap = sv.capacity();
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(resizeTo == sv.size(), caseLabel);
 
-         sv.resize(resizeTo, value);
+            sv.resize(resizeTo, value);
 
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(sv.capacity() == initialCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(sv.capacity() == initialCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::resize with given value for buffer "
@@ -7555,7 +8033,6 @@ void TestResizeWithValue()
       using SV = SboVector<Elem, BufCap>;
 
       const std::initializer_list<Elem> values{0, 1, 2, 3, 4};
-      const std::size_t initialSize = values.size();
       const std::size_t resizeTo = 8;
       const Elem value = 100;
       const std::initializer_list<Elem> expected{0, 1, 2, 3, 4, 100, 100, 100};
@@ -7565,18 +8042,20 @@ void TestResizeWithValue()
       metrics.dtorCalls = resizeTo;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(resizeTo > sv.size(), caseLabel);
-         VERIFY(resizeTo <= BufCap, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(resizeTo > sv.size(), caseLabel);
+            VERIFY(resizeTo <= BufCap, caseLabel);
 
-         sv.resize(resizeTo, value);
+            sv.resize(resizeTo, value);
 
-         VERIFY(sv.inBuffer(), caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(sv.inBuffer(), caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::resize with given value for buffer "
@@ -7598,18 +8077,20 @@ void TestResizeWithValue()
       metrics.dtorCalls = resizeTo;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(resizeTo > sv.size(), caseLabel);
-         VERIFY(resizeTo > BufCap, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(resizeTo > sv.size(), caseLabel);
+            VERIFY(resizeTo > BufCap, caseLabel);
 
-         sv.resize(resizeTo, value);
+            sv.resize(resizeTo, value);
 
-         VERIFY(sv.onHeap(), caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(sv.onHeap(), caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{
@@ -7633,20 +8114,22 @@ void TestResizeWithValue()
       metrics.dtorCalls = resizeTo;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         sv.reserve(initialCap);
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(resizeTo > sv.size(), caseLabel);
-         VERIFY(resizeTo < initialCap, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            sv.reserve(initialCap);
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(resizeTo > sv.size(), caseLabel);
+            VERIFY(resizeTo < initialCap, caseLabel);
 
-         sv.resize(resizeTo, value);
+            sv.resize(resizeTo, value);
 
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() == initialCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() == initialCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{
@@ -7670,19 +8153,21 @@ void TestResizeWithValue()
       metrics.dtorCalls = resizeTo;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(resizeTo > sv.size(), caseLabel);
-         VERIFY(resizeTo > initialCap, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(resizeTo > sv.size(), caseLabel);
+            VERIFY(resizeTo > initialCap, caseLabel);
 
-         sv.resize(resizeTo, value);
+            sv.resize(resizeTo, value);
 
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() > initialCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() > initialCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::resize with given value for buffer "
@@ -7703,18 +8188,20 @@ void TestResizeWithValue()
       metrics.dtorCalls = initialSize;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(resizeTo < sv.size(), caseLabel);
-         VERIFY(resizeTo <= BufCap, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(resizeTo < sv.size(), caseLabel);
+            VERIFY(resizeTo <= BufCap, caseLabel);
 
-         sv.resize(resizeTo, value);
+            sv.resize(resizeTo, value);
 
-         VERIFY(sv.inBuffer(), caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(sv.inBuffer(), caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::resize with given value for heap "
@@ -7735,21 +8222,23 @@ void TestResizeWithValue()
       metrics.dtorCalls = initialSize;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         const std::size_t initialCap = sv.capacity();
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(resizeTo < sv.size(), caseLabel);
-         VERIFY(resizeTo < BufCap, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            const std::size_t initialCap = sv.capacity();
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(resizeTo < sv.size(), caseLabel);
+            VERIFY(resizeTo < BufCap, caseLabel);
 
-         sv.resize(resizeTo, value);
+            sv.resize(resizeTo, value);
 
-         // Remains on heap.
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() == initialCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            // Remains on heap.
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() == initialCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::resize with given value for heap "
@@ -7770,20 +8259,22 @@ void TestResizeWithValue()
       metrics.dtorCalls = initialSize;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         const std::size_t initialCap = sv.capacity();
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
-         VERIFY(resizeTo < sv.size(), caseLabel);
-         VERIFY(resizeTo > BufCap, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            const std::size_t initialCap = sv.capacity();
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
+            VERIFY(resizeTo < sv.size(), caseLabel);
+            VERIFY(resizeTo > BufCap, caseLabel);
 
-         sv.resize(resizeTo, value);
+            sv.resize(resizeTo, value);
 
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.capacity() == initialCap, caseLabel);
-         verifyVector(sv, expected, caseLabel);
-      });
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.capacity() == initialCap, caseLabel);
+            verifyVector(sv, expected, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::resize with given value for buffer "
@@ -7802,16 +8293,18 @@ void TestResizeWithValue()
       metrics.dtorCalls = initialSize;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
 
-         sv.resize(0, value);
+            sv.resize(0, value);
 
-         VERIFY(sv.inBuffer(), caseLabel);
-         VERIFY(sv.empty(), caseLabel);
-      });
+            VERIFY(sv.inBuffer(), caseLabel);
+            VERIFY(sv.empty(), caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::resize with given value for heap "
@@ -7830,17 +8323,19 @@ void TestResizeWithValue()
       metrics.dtorCalls = initialSize;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV sv{values};
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(!sv.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV sv{values};
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(!sv.empty(), caseLabel);
 
-         sv.resize(0, value);
+            sv.resize(0, value);
 
-         // Remains on heap.
-         VERIFY(sv.onHeap(), caseLabel);
-         VERIFY(sv.empty(), caseLabel);
-      });
+            // Remains on heap.
+            VERIFY(sv.onHeap(), caseLabel);
+            VERIFY(sv.empty(), caseLabel);
+         });
    }
 }
 
@@ -7865,23 +8360,25 @@ void TestSwap()
       metrics.dtorCalls = sizeA + sizeB;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV svA{valuesA};
-         const std::size_t capA = svA.capacity();
-         VERIFY(svA.onHeap(), caseLabel);
-         SV svB{valuesB};
-         const std::size_t capB = svB.capacity();
-         VERIFY(svB.onHeap(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV svA{valuesA};
+            const std::size_t capA = svA.capacity();
+            VERIFY(svA.onHeap(), caseLabel);
+            SV svB{valuesB};
+            const std::size_t capB = svB.capacity();
+            VERIFY(svB.onHeap(), caseLabel);
 
-         svA.swap(svB);
+            svA.swap(svB);
 
-         VERIFY(svA.onHeap(), caseLabel);
-         VERIFY(svA.capacity() == capB, caseLabel);
-         verifyVector(svA, valuesB, caseLabel);
-         VERIFY(svB.onHeap(), caseLabel);
-         VERIFY(svB.capacity() == capA, caseLabel);
-         verifyVector(svB, valuesA, caseLabel);
-      });
+            VERIFY(svA.onHeap(), caseLabel);
+            VERIFY(svA.capacity() == capB, caseLabel);
+            verifyVector(svA, valuesB, caseLabel);
+            VERIFY(svB.onHeap(), caseLabel);
+            VERIFY(svB.capacity() == capA, caseLabel);
+            verifyVector(svB, valuesA, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::swap of two buffer instances"};
@@ -7904,21 +8401,23 @@ void TestSwap()
       metrics.dtorCalls = sizeA + sizeB + numElemSwaps;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV svA{valuesA};
-         VERIFY(svA.inBuffer(), caseLabel);
-         SV svB{valuesB};
-         VERIFY(svB.inBuffer(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV svA{valuesA};
+            VERIFY(svA.inBuffer(), caseLabel);
+            SV svB{valuesB};
+            VERIFY(svB.inBuffer(), caseLabel);
 
-         svA.swap(svB);
+            svA.swap(svB);
 
-         VERIFY(svA.inBuffer(), caseLabel);
-         VERIFY(svA.capacity() == BufCap, caseLabel);
-         verifyVector(svA, valuesB, caseLabel);
-         VERIFY(svB.inBuffer(), caseLabel);
-         VERIFY(svB.capacity() == BufCap, caseLabel);
-         verifyVector(svB, valuesA, caseLabel);
-      });
+            VERIFY(svA.inBuffer(), caseLabel);
+            VERIFY(svA.capacity() == BufCap, caseLabel);
+            verifyVector(svA, valuesB, caseLabel);
+            VERIFY(svB.inBuffer(), caseLabel);
+            VERIFY(svB.capacity() == BufCap, caseLabel);
+            verifyVector(svB, valuesA, caseLabel);
+         });
    }
    {
       const std::string caseLabel{
@@ -7941,22 +8440,24 @@ void TestSwap()
       metrics.dtorCalls = sizeA + sizeB + numElemCopies;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV svA{valuesA};
-         VERIFY(svA.inBuffer(), caseLabel);
-         SV svB{valuesB};
-         VERIFY(svB.inBuffer(), caseLabel);
-         VERIFY(!std::is_move_constructible_v<Elem>, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV svA{valuesA};
+            VERIFY(svA.inBuffer(), caseLabel);
+            SV svB{valuesB};
+            VERIFY(svB.inBuffer(), caseLabel);
+            VERIFY(!std::is_move_constructible_v<Elem>, caseLabel);
 
-         svA.swap(svB);
+            svA.swap(svB);
 
-         VERIFY(svA.inBuffer(), caseLabel);
-         VERIFY(svA.capacity() == BufCap, caseLabel);
-         verifyVector(svA, valuesB, caseLabel);
-         VERIFY(svB.inBuffer(), caseLabel);
-         VERIFY(svB.capacity() == BufCap, caseLabel);
-         verifyVector(svB, valuesA, caseLabel);
-      });
+            VERIFY(svA.inBuffer(), caseLabel);
+            VERIFY(svA.capacity() == BufCap, caseLabel);
+            verifyVector(svA, valuesB, caseLabel);
+            VERIFY(svB.inBuffer(), caseLabel);
+            VERIFY(svB.capacity() == BufCap, caseLabel);
+            verifyVector(svB, valuesA, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::swap of between buffer and heap instance"};
@@ -7976,22 +8477,24 @@ void TestSwap()
       metrics.dtorCalls = sizeA + sizeB;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV svA{valuesA};
-         VERIFY(svA.inBuffer(), caseLabel);
-         SV svB{valuesB};
-         const std::size_t heapCap = svB.capacity();
-         VERIFY(svB.onHeap(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV svA{valuesA};
+            VERIFY(svA.inBuffer(), caseLabel);
+            SV svB{valuesB};
+            const std::size_t heapCap = svB.capacity();
+            VERIFY(svB.onHeap(), caseLabel);
 
-         svA.swap(svB);
+            svA.swap(svB);
 
-         VERIFY(svA.onHeap(), caseLabel);
-         VERIFY(svA.capacity() == heapCap, caseLabel);
-         verifyVector(svA, valuesB, caseLabel);
-         VERIFY(svB.inBuffer(), caseLabel);
-         VERIFY(svB.capacity() == BufCap, caseLabel);
-         verifyVector(svB, valuesA, caseLabel);
-      });
+            VERIFY(svA.onHeap(), caseLabel);
+            VERIFY(svA.capacity() == heapCap, caseLabel);
+            verifyVector(svA, valuesB, caseLabel);
+            VERIFY(svB.inBuffer(), caseLabel);
+            VERIFY(svB.capacity() == BufCap, caseLabel);
+            verifyVector(svB, valuesA, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::swap of between buffer and heap instance "
@@ -8011,23 +8514,25 @@ void TestSwap()
       metrics.dtorCalls = 2 * sizeA + sizeB;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV svA{valuesA};
-         VERIFY(svA.inBuffer(), caseLabel);
-         SV svB{valuesB};
-         const std::size_t heapCap = svB.capacity();
-         VERIFY(svB.onHeap(), caseLabel);
-         VERIFY(!std::is_move_constructible_v<Elem>, caseLabel);
+      test.run(
+         [&]()
+         {
+            SV svA{valuesA};
+            VERIFY(svA.inBuffer(), caseLabel);
+            SV svB{valuesB};
+            const std::size_t heapCap = svB.capacity();
+            VERIFY(svB.onHeap(), caseLabel);
+            VERIFY(!std::is_move_constructible_v<Elem>, caseLabel);
 
-         svA.swap(svB);
+            svA.swap(svB);
 
-         VERIFY(svA.onHeap(), caseLabel);
-         VERIFY(svA.capacity() == heapCap, caseLabel);
-         verifyVector(svA, valuesB, caseLabel);
-         VERIFY(svB.inBuffer(), caseLabel);
-         VERIFY(svB.capacity() == BufCap, caseLabel);
-         verifyVector(svB, valuesA, caseLabel);
-      });
+            VERIFY(svA.onHeap(), caseLabel);
+            VERIFY(svA.capacity() == heapCap, caseLabel);
+            verifyVector(svA, valuesB, caseLabel);
+            VERIFY(svB.inBuffer(), caseLabel);
+            VERIFY(svB.capacity() == BufCap, caseLabel);
+            verifyVector(svB, valuesA, caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::swap of between empty and heap instance"};
@@ -8044,22 +8549,24 @@ void TestSwap()
       metrics.dtorCalls = sizeB;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV svA;
-         VERIFY(svA.empty(), caseLabel);
-         SV svB{valuesB};
-         const std::size_t heapCap = svB.capacity();
-         VERIFY(svB.onHeap(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV svA;
+            VERIFY(svA.empty(), caseLabel);
+            SV svB{valuesB};
+            const std::size_t heapCap = svB.capacity();
+            VERIFY(svB.onHeap(), caseLabel);
 
-         svA.swap(svB);
+            svA.swap(svB);
 
-         VERIFY(svA.onHeap(), caseLabel);
-         VERIFY(svA.capacity() == heapCap, caseLabel);
-         verifyVector(svA, valuesB, caseLabel);
-         VERIFY(svB.inBuffer(), caseLabel);
-         VERIFY(svB.capacity() == BufCap, caseLabel);
-         VERIFY(svB.empty(), caseLabel);
-      });
+            VERIFY(svA.onHeap(), caseLabel);
+            VERIFY(svA.capacity() == heapCap, caseLabel);
+            verifyVector(svA, valuesB, caseLabel);
+            VERIFY(svB.inBuffer(), caseLabel);
+            VERIFY(svB.capacity() == BufCap, caseLabel);
+            VERIFY(svB.empty(), caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::swap of between empty and buffer instance"};
@@ -8077,19 +8584,21 @@ void TestSwap()
       metrics.dtorCalls = sizeB;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV svA;
-         VERIFY(svA.empty(), caseLabel);
-         SV svB{valuesB};
-         VERIFY(svB.inBuffer(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV svA;
+            VERIFY(svA.empty(), caseLabel);
+            SV svB{valuesB};
+            VERIFY(svB.inBuffer(), caseLabel);
 
-         svA.swap(svB);
+            svA.swap(svB);
 
-         VERIFY(svA.inBuffer(), caseLabel);
-         verifyVector(svA, valuesB, caseLabel);
-         VERIFY(svB.inBuffer(), caseLabel);
-         VERIFY(svB.empty(), caseLabel);
-      });
+            VERIFY(svA.inBuffer(), caseLabel);
+            verifyVector(svA, valuesB, caseLabel);
+            VERIFY(svB.inBuffer(), caseLabel);
+            VERIFY(svB.empty(), caseLabel);
+         });
    }
    {
       const std::string caseLabel{"SvoVector::swap of two empty vectors"};
@@ -8101,17 +8610,19 @@ void TestSwap()
       Elem::Metrics zeros;
 
       Test<Elem, BufCap> test{caseLabel, zeros};
-      test.run([&]() {
-         SV svA;
-         VERIFY(svA.empty(), caseLabel);
-         SV svB;
-         VERIFY(svB.empty(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV svA;
+            VERIFY(svA.empty(), caseLabel);
+            SV svB;
+            VERIFY(svB.empty(), caseLabel);
 
-         svA.swap(svB);
+            svA.swap(svB);
 
-         VERIFY(svA.empty(), caseLabel);
-         VERIFY(svB.empty(), caseLabel);
-      });
+            VERIFY(svA.empty(), caseLabel);
+            VERIFY(svB.empty(), caseLabel);
+         });
    }
 }
 
@@ -8353,22 +8864,24 @@ void TestStandaloneSwap()
       metrics.dtorCalls = sizeA + sizeB;
 
       Test<Elem, BufCap> test{caseLabel, metrics};
-      test.run([&]() {
-         SV svA{valuesA};
-         VERIFY(svA.inBuffer(), caseLabel);
-         SV svB{valuesB};
-         const std::size_t heapCap = svB.capacity();
-         VERIFY(svB.onHeap(), caseLabel);
+      test.run(
+         [&]()
+         {
+            SV svA{valuesA};
+            VERIFY(svA.inBuffer(), caseLabel);
+            SV svB{valuesB};
+            const std::size_t heapCap = svB.capacity();
+            VERIFY(svB.onHeap(), caseLabel);
 
-         swap(svA, svB);
+            swap(svA, svB);
 
-         VERIFY(svA.onHeap(), caseLabel);
-         VERIFY(svA.capacity() == heapCap, caseLabel);
-         verifyVector(svA, valuesB, caseLabel);
-         VERIFY(svB.inBuffer(), caseLabel);
-         VERIFY(svB.capacity() == BufCap, caseLabel);
-         verifyVector(svB, valuesA, caseLabel);
-      });
+            VERIFY(svA.onHeap(), caseLabel);
+            VERIFY(svA.capacity() == heapCap, caseLabel);
+            verifyVector(svA, valuesB, caseLabel);
+            VERIFY(svB.inBuffer(), caseLabel);
+            VERIFY(svB.capacity() == BufCap, caseLabel);
+            verifyVector(svB, valuesA, caseLabel);
+         });
    }
 }
 

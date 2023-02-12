@@ -555,7 +555,7 @@ void TestRingBufferBeginConst()
    }
    {
       const std::string caseLabel{"RingBuffer::begin() const for empty buffer"};
-      const RingBuffer<int, 10> rb;
+      const RingBuffer<int, 10> rb{};
       auto first = rb.begin();
       VERIFY(first == rb.end(), caseLabel);
    }
@@ -581,7 +581,7 @@ void TestRingBufferEndConst()
    }
    {
       const std::string caseLabel{"RingBuffer::end() const for empty buffer"};
-      const RingBuffer<int, 10> rb;
+      const RingBuffer<int, 10> rb{};
       auto end = rb.end();
       VERIFY(end == rb.begin(), caseLabel);
    }
@@ -711,7 +711,7 @@ void TestRingBufferRBeginConst()
    }
    {
       const std::string caseLabel{"RingBuffer::rbegin() const for empty buffer"};
-      const RingBuffer<int, 10> rb;
+      const RingBuffer<int, 10> rb{};
       auto rfirst = rb.rbegin();
       VERIFY(rfirst == rb.rend(), caseLabel);
    }
@@ -737,7 +737,7 @@ void TestRingBufferREndConst()
    }
    {
       const std::string caseLabel{"RingBuffer::rend() const for empty buffer"};
-      const RingBuffer<int, 10> rb;
+      const RingBuffer<int, 10> rb{};
       auto rend = rb.rend();
       VERIFY(rend == rb.rbegin(), caseLabel);
    }
