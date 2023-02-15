@@ -88,6 +88,25 @@ void TestInsertionSort()
       const std::vector<int> expected{100, 101, 102, 103};
       VERIFY(seq == expected, caseLabel);
    }
+   {
+      const std::string caseLabel{"InsertionSort range interface for vector"};
+
+      std::vector<int> seq{7, 3, 2, 9, 5, 6};
+      InsertionSort(seq);
+
+      const std::vector<int> expected{2, 3, 5, 6, 7, 9};
+      VERIFY(seq == expected, caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "InsertionSort range interface for vector and custom comparision"};
+
+      std::vector<int> seq{7, 3, 2, 9, 5, 6};
+      InsertionSort(seq, std::greater<int>());
+
+      const std::vector<int> expected{9, 7, 6, 5, 3, 2};
+      VERIFY(seq == expected, caseLabel);
+   }
 }
 
 } // namespace

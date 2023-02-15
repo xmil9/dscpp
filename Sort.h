@@ -17,6 +17,7 @@ namespace ds
 // Worst time: O(n^2) (for reverse sorted)
 // Avg time: O(n^2)
 
+// Iterator interface
 template <typename Iter, typename Compare = std::less<typename Iter::value_type>>
 void InsertionSort(Iter first, Iter last, Compare cmp = {}) noexcept
 {
@@ -36,6 +37,13 @@ void InsertionSort(Iter first, Iter last, Compare cmp = {}) noexcept
 
       *pos = val;
    }
+}
+
+// Range interface
+template <typename Container, typename Compare = std::less<typename Container::value_type>>
+void InsertionSort(Container& seq, Compare cmp = {}) noexcept
+{
+   InsertionSort(std::begin(seq), std::end(seq), cmp);
 }
 
 } // namespace ds
