@@ -20,6 +20,9 @@ namespace ds
 template <typename Iter, typename Compare = std::less<typename Iter::value_type>>
 void InsertionSort(Iter first, Iter last, Compare cmp = {}) noexcept
 {
+   if (first == last)
+      return;
+
    for (Iter it = first + 1; it < last; ++it)
    {
       const Iter::value_type val = *it;
