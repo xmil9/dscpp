@@ -4,6 +4,7 @@
 //
 #pragma once
 #include <functional>
+#include <vector>
 
 namespace ds
 {
@@ -21,12 +22,14 @@ namespace ds
 template <typename Iter, typename Compare = std::less<typename Iter::value_type>>
 void InsertionSort(Iter first, Iter last, Compare cmp = {}) noexcept
 {
+   using Elem = typename Iter::value_type;
+
    if (first == last)
       return;
 
    for (Iter it = first + 1; it < last; ++it)
    {
-      const Iter::value_type val = *it;
+      const Elem val = *it;
 
       Iter pos = it;
       while (pos > first && cmp(val, *(pos - 1)))
@@ -45,6 +48,69 @@ template <typename Container,
 void InsertionSort(Container& seq, Compare cmp = {}) noexcept
 {
    InsertionSort(std::begin(seq), std::end(seq), cmp);
+}
+
+///////////////////
+
+// Merge sort
+// Cormen, pg 30
+// Divide sequence into smaller and smaller sub sequences and merge then back together
+// while sorting the elements.
+// Time: O(nlgn)
+
+// Helper function to merge two subsequences back together.
+template <typename Iter, typename Compare>
+void Merge(Iter first, Iter mid, Iter last, Compare cmp)
+{
+   using Elem = typename Iter::value_type;
+
+   const std::vector<Elem> subA(first, mid);
+   const std::vector<Elem> subB(mid + 1, last);
+
+   Iter merged = first;
+   auto posA = subA.begin();
+   auto endA = subA.end();
+   auto posB = subB.begin();
+   auto endB = subB.end();
+
+   // Copy the element that wins the comparision between the next elements in each
+   // subsequence to the merged sequence.
+   while (posA < endA && posB < endB)
+      *merged++ = cmp(*posA, *posB) ? *posA++ : *posB++;
+
+   // Flush the subsequence that still has unmerged elemens to the merged sequence.
+   const bool flushA = posB == endB;
+   auto& flushPos = flushA ? posA : posB;
+   auto& flushEnd = flushA ? endA : endB;
+
+   while (flushPos < flushEnd)
+      *merged++ = *flushPos++;
+}
+
+// Iterator interface
+template <typename Iter, typename Compare = std::less<typename Iter::value_type>>
+void MergeSort(Iter first, Iter last, Compare cmp = {})
+{
+   // Base case - sequence is fully sorted.
+   auto len = std::distance(first, last);
+   if (len < 2)
+      return;
+
+   // Divide into subsequences and sort those.
+   Iter mid = first + len / 2;
+   MergeSort(first, mid);
+   MergeSort(mid + 1, last);
+
+   // Merge subsequences back together.
+   Merge(first, mid, last);
+}
+
+// Container interface
+template <typename Container,
+          typename Compare = std::less<typename Container::value_type>>
+void MergeSort(Container& seq, Compare cmp = {}) noexcept
+{
+   MergeSort(std::begin(seq), std::end(seq), cmp);
 }
 
 } // namespace ds
