@@ -39,7 +39,7 @@ void InsertionSort(Iter first, Iter last, Compare cmp = {}) noexcept
    }
 }
 
-// Range interface
+// Container interface
 template <typename Container,
           typename Compare = std::less<typename Container::value_type>>
 void InsertionSort(Container& seq, Compare cmp = {}) noexcept
