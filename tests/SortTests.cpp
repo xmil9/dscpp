@@ -109,6 +109,20 @@ void TestInsertionSort()
    }
 }
 
+void TestMergeSort()
+{
+   {
+      const std::string caseLabel{
+         "MergeSort for sorting integers with default comparision"};
+
+      std::vector<int> seq{7, 3, 2, 9, 5, 6};
+      MergeSort(std::begin(seq), std::end(seq));
+
+      const std::vector<int> expected{2, 3, 5, 6, 7, 9};
+      VERIFY(seq == expected, caseLabel);
+   }
+}
+
 } // namespace
 
 
@@ -117,4 +131,5 @@ void TestInsertionSort()
 void TestSort()
 {
    TestInsertionSort();
+   TestMergeSort();
 }

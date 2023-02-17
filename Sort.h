@@ -58,6 +58,8 @@ void InsertionSort(Container& seq, Compare cmp = {}) noexcept
 // while sorting the elements.
 // Time: O(nlgn)
 
+namespace internal
+{
 // Helper function to merge two subsequences back together.
 template <typename Iter, typename Compare>
 void Merge(Iter first, Iter mid, Iter last, Compare cmp)
@@ -65,7 +67,7 @@ void Merge(Iter first, Iter mid, Iter last, Compare cmp)
    using Elem = typename Iter::value_type;
 
    const std::vector<Elem> subA(first, mid);
-   const std::vector<Elem> subB(mid + 1, last);
+   const std::vector<Elem> subB(mid, last);
 
    Iter merged = first;
    auto posA = subA.begin();
@@ -86,6 +88,7 @@ void Merge(Iter first, Iter mid, Iter last, Compare cmp)
    while (flushPos < flushEnd)
       *merged++ = *flushPos++;
 }
+} // namespace internal
 
 // Iterator interface
 template <typename Iter, typename Compare = std::less<typename Iter::value_type>>
@@ -98,11 +101,11 @@ void MergeSort(Iter first, Iter last, Compare cmp = {})
 
    // Divide into subsequences and sort those.
    Iter mid = first + len / 2;
-   MergeSort(first, mid);
-   MergeSort(mid + 1, last);
+   MergeSort(first, mid, cmp);
+   MergeSort(mid, last, cmp);
 
    // Merge subsequences back together.
-   Merge(first, mid, last);
+   internal::Merge(first, mid, last, cmp);
 }
 
 // Container interface
