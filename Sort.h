@@ -62,7 +62,7 @@ namespace internal
 {
 // Helper function to merge two subsequences back together.
 template <typename Iter, typename Compare>
-void Merge(Iter first, Iter mid, Iter last, Compare cmp)
+void Merge(Iter first, Iter mid, Iter last, Compare cmp) noexcept
 {
    using Elem = typename Iter::value_type;
 
@@ -92,7 +92,7 @@ void Merge(Iter first, Iter mid, Iter last, Compare cmp)
 
 // Iterator interface
 template <typename Iter, typename Compare = std::less<typename Iter::value_type>>
-void MergeSort(Iter first, Iter last, Compare cmp = {})
+void MergeSort(Iter first, Iter last, Compare cmp = {}) noexcept
 {
    // Base case - sequence is fully sorted.
    const auto len = std::distance(first, last);
