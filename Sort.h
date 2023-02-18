@@ -116,4 +116,29 @@ void MergeSort(Container& seq, Compare cmp = {}) noexcept
    MergeSort(std::begin(seq), std::end(seq), cmp);
 }
 
+///////////////////
+
+// Bubble sort
+// Cormen, pg 40
+// Swap consecutive elements until squence is sorted.
+// Time: O(n^2)
+
+// Iterator interface
+template <typename Iter, typename Compare = std::less<typename Iter::value_type>>
+void BubbleSort(Iter first, Iter last, Compare cmp = {}) noexcept
+{
+   for (Iter i = first; i != last; ++i)
+      for (Iter j = i + 1; j != last; ++j)
+         if (cmp(*j, *i))
+            std::swap(*i, *j);
+}
+
+// Container interface
+template <typename Container,
+          typename Compare = std::less<typename Container::value_type>>
+void BubbleSort(Container& seq, Compare cmp = {}) noexcept
+{
+   BubbleSort(std::begin(seq), std::end(seq), cmp);
+}
+
 } // namespace ds
