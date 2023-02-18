@@ -95,7 +95,7 @@ template <typename Iter, typename Compare = std::less<typename Iter::value_type>
 void MergeSort(Iter first, Iter last, Compare cmp = {})
 {
    // Base case - sequence is fully sorted.
-   auto len = std::distance(first, last);
+   const auto len = std::distance(first, last);
    if (len < 2)
       return;
 
