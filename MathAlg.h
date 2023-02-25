@@ -4,6 +4,7 @@
 //
 #pragma once
 #include <algorithm>
+#include <array>
 #include <cassert>
 #include <iterator>
 #include <limits>
@@ -33,6 +34,13 @@ bool operator!=(const FindMaxSubsequenceResult<Iter>& a,
    return !(a == b);
 }
 
+template <typename Iter>
+bool operator<(const FindMaxSubsequenceResult<Iter>& a,
+               const FindMaxSubsequenceResult<Iter>& b)
+{
+   return a.max < b.max;
+}
+
 namespace internal
 {
 template <typename Iter>
@@ -54,21 +62,24 @@ FindMaxSubsequenceResult<Iter> FindMaxCrossingSubsequence(Iter first, Iter mid,
 template <typename Iter>
 FindMaxSubsequenceResult<Iter> FindMaxSubsequence(Iter first, Iter last)
 {
+   using Result = FindMaxSubsequenceResult<Iter>;
    using Value = Iter::value_type;
-   const size_t n = std::distance(first, last);
 
+   const size_t n = std::distance(first, last);
    if (n < 2)
       return {first, last, std::numeric_limits<Value>::lowest()};
    else if (n == 2)
       return {first, last, *(first + 1) - *first};
 
    Iter mid = first + n / 2;
-   const auto lowerHalf = FindMaxSubsequence(first, mid);
-   const auto upperHalf = FindMaxSubsequence(mid, last);
-   const auto crossing = internal::FindMaxCrossingSubsequence(first, mid, last);
+   // clang-format off
+   const std::array<Result, 3> results{
+      FindMaxSubsequence(first, mid),
+      FindMaxSubsequence(mid, last),
+      internal::FindMaxCrossingSubsequence(first, mid, last)};
+   // clang-format on
 
-   const auto& tmp = lowerHalf.max > crossing.max ? lowerHalf : crossing;
-   return upperHalf.max > tmp.max ? upperHalf : tmp;
+   return *std::max_element(std::begin(results), std::end(results));
 }
 
 } // namespace ds
