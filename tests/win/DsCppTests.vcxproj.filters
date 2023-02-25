@@ -6,6 +6,7 @@
     <ClCompile Include="..\SboVectorTests.cpp" />
     <ClCompile Include="..\SboVectorPerformanceTests.cpp" />
     <ClCompile Include="..\SortTests.cpp" />
+    <ClCompile Include="..\MathAlgTests.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\RingBuffer.h" />
@@ -17,5 +18,7 @@
     <ClInclude Include="..\SboVectorPerformanceTests.h" />
     <ClInclude Include="..\..\Sort.h" />
     <ClInclude Include="..\SortTests.h" />
+    <ClInclude Include="..\..\MathAlg.h" />
+    <ClInclude Include="..\MathAlgTests.h" />
   </ItemGroup>
 </Project>
