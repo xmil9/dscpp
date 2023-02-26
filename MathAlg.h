@@ -14,9 +14,9 @@ namespace ds
 ///////////////////
 
 // Find maximum subarray/subsequence
-// Cormen, pg 68
-// Finds max difference between two values in a sequence. The lower value has appear
-// first. Example use: Find best buying and selling points for a stock on a timeline.
+// Finds max difference between two values in a sequence. The lower value has to appear
+// before the higher value.
+// Example use: Find best buying and selling points for a stock on a timeline.
 
 // Result data.
 template <typename Iter> struct FindMaxSubsequenceResult
@@ -50,6 +50,10 @@ bool operator<(const FindMaxSubsequenceResult<Iter>& a,
    return a.max < b.max;
 }
 
+// Recursive solution
+// Cormen, pg 68
+// Time: O(nlgn)
+
 namespace internal
 {
 // Find a max subsequence that is restricted to having to cross a mid point in the
@@ -73,7 +77,7 @@ FindMaxSubsequenceResult<Iter> FindMaxCrossingSubsequence(Iter first, Iter mid,
 
 // Iterator interface
 template <typename Iter>
-FindMaxSubsequenceResult<Iter> FindMaxSubsequence(Iter first, Iter last)
+FindMaxSubsequenceResult<Iter> FindMaxSubsequenceRecursive(Iter first, Iter last)
 {
    using Result = FindMaxSubsequenceResult<Iter>;
    using Value = Iter::value_type;
@@ -91,8 +95,8 @@ FindMaxSubsequenceResult<Iter> FindMaxSubsequence(Iter first, Iter last)
    Iter mid = first + n / 2;
    // clang-format off
    const std::array<Result, 3> results{
-      FindMaxSubsequence(first, mid),
-      FindMaxSubsequence(mid, last),
+      FindMaxSubsequenceRecursive(first, mid),
+      FindMaxSubsequenceRecursive(mid, last),
       internal::FindMaxCrossingSubsequence(first, mid, last)};
    // clang-format on
 
@@ -103,9 +107,9 @@ FindMaxSubsequenceResult<Iter> FindMaxSubsequence(Iter first, Iter last)
 // Container interface
 template <typename Container>
 FindMaxSubsequenceResult<typename Container::const_iterator>
-FindMaxSubsequence(const Container& seq)
+FindMaxSubsequenceRecursive(const Container& seq)
 {
-   return FindMaxSubsequence(seq.begin(), seq.end());
+   return FindMaxSubsequenceRecursive(seq.begin(), seq.end());
 }
 
 } // namespace ds
