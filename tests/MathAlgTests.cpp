@@ -199,6 +199,36 @@ void TestFindMaxSubsequence()
       const decltype(res) expected{seq.begin() + 2, seq.end(), 5};
       VERIFY(res == expected, caseLabel);
    }
+   {
+      const std::string caseLabel{
+         "TestFindMaxSubsequence - 4 elements, with negative values"};
+
+      std::vector<int> seq{4, -5, 2, 7};
+      const auto res = FindMaxSubsequence(std::begin(seq), std::end(seq));
+
+      const decltype(res) expected{seq.begin() + 1, seq.end(), 12};
+      VERIFY(res == expected, caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "TestFindMaxSubsequence - container interface with 5 elements"};
+
+      std::vector<int> seq{4, 1, 2, 2, 5};
+      const auto res = FindMaxSubsequence(seq);
+
+      const decltype(res) expected{seq.begin() + 1, seq.end(), 4};
+      VERIFY(res == expected, caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "TestFindMaxSubsequence - container interface with deque"};
+
+      std::deque<int> seq{2, 0, 3, 5, 2};
+      const auto res = FindMaxSubsequence(seq);
+
+      const decltype(res) expected{seq.begin() + 1, seq.begin() + 4, 5};
+      VERIFY(res == expected, caseLabel);
+   }
 }
 
 } // namespace

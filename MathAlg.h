@@ -13,10 +13,19 @@ namespace ds
 {
 ///////////////////
 
+// Find maximum subarray/subsequence
+// Cormen, pg 68
+// Finds max difference between two values in a sequence. The lower value has appear
+// first. Example use: Find best buying and selling points for a stock on a timeline.
+
+// Result data.
 template <typename Iter> struct FindMaxSubsequenceResult
 {
+   // Position of low element.
    Iter start{};
+   // Position of one after the high element.
    Iter end{};
+   // Value of subsequence.
    Iter::value_type max{};
 };
 
@@ -43,6 +52,9 @@ bool operator<(const FindMaxSubsequenceResult<Iter>& a,
 
 namespace internal
 {
+// Find a max subsequence that is restricted to having to cross a mid point in the
+// sequence. This is a much simpler problem to solve than finding an unrestricted
+// subsequence.
 template <typename Iter>
 FindMaxSubsequenceResult<Iter> FindMaxCrossingSubsequence(Iter first, Iter mid,
                                                           Iter last) noexcept
@@ -59,6 +71,7 @@ FindMaxSubsequenceResult<Iter> FindMaxCrossingSubsequence(Iter first, Iter mid,
 }
 } // namespace internal
 
+// Iterator interface
 template <typename Iter>
 FindMaxSubsequenceResult<Iter> FindMaxSubsequence(Iter first, Iter last)
 {
@@ -66,11 +79,15 @@ FindMaxSubsequenceResult<Iter> FindMaxSubsequence(Iter first, Iter last)
    using Value = Iter::value_type;
 
    const size_t n = std::distance(first, last);
+
+   // Base cases - Two or less elements.
    if (n < 2)
       return {first, last, std::numeric_limits<Value>::lowest()};
    else if (n == 2)
       return {first, last, *(first + 1) - *first};
 
+   // Divide into three cases - Lower and upper halfs of the sequence, and a
+   // max subsequence that crosses the mid point.
    Iter mid = first + n / 2;
    // clang-format off
    const std::array<Result, 3> results{
@@ -79,7 +96,16 @@ FindMaxSubsequenceResult<Iter> FindMaxSubsequence(Iter first, Iter last)
       internal::FindMaxCrossingSubsequence(first, mid, last)};
    // clang-format on
 
+   // Return max of the intermediate results.
    return *std::max_element(std::begin(results), std::end(results));
+}
+
+// Container interface
+template <typename Container>
+FindMaxSubsequenceResult<typename Container::const_iterator>
+FindMaxSubsequence(const Container& seq)
+{
+   return FindMaxSubsequence(seq.begin(), seq.end());
 }
 
 } // namespace ds
