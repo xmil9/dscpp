@@ -53,6 +53,7 @@ bool operator<(const FindMaxSubsequenceResult<Iter>& a,
 // Recursive solution
 // Cormen, pg 68
 // Time: O(nlgn)
+// Avoid - Slower than iterative solution below!
 
 namespace internal
 {
@@ -110,6 +111,82 @@ FindMaxSubsequenceResult<typename Container::const_iterator>
 FindMaxSubsequenceRecursive(const Container& seq)
 {
    return FindMaxSubsequenceRecursive(seq.begin(), seq.end());
+}
+
+// Iterative solution
+// Cormen, pg 75, exercise 4.1-5
+// Time: O(n)
+// Faster than recursive solution above.
+
+// Iterator interface
+template <typename Iter>
+FindMaxSubsequenceResult<Iter> FindMaxSubsequenceIterative(Iter first, Iter last)
+{
+   using Value = Iter::value_type;
+
+   const size_t n = std::distance(first, last);
+   if (n < 2)
+      return {first, last, std::numeric_limits<Value>::lowest()};
+
+   Iter subStart = first;
+   Iter subEnd = first + 1;
+   Value max = *subEnd - *subStart;
+   // Minimum element found overall. Not necessarily the same as the start of the
+   // max subsequence.
+   Iter minPos = *subStart < *subEnd ? subStart : subEnd;
+
+   for (Iter cur = first + 2; cur != last; ++cur)
+   {
+      // Extend subsequence if current value is larger than the end of the
+      // subsequence.
+      if (*cur > *subEnd)
+      {
+         subEnd = cur;
+         max = *subEnd - *subStart;
+      }
+
+      // Difference of min overall element to current element is larger
+      // than the subsequence max.
+      // Reset subsequence to [minPos, cur].
+      if (minPos != subStart && *cur - *minPos > max)
+      {
+         subStart = minPos;
+         subEnd = cur;
+         max = *cur - *minPos;
+      }
+
+      // Keep track if current element is the absolute min value.
+      if (*cur < *minPos)
+         minPos = cur;
+   }
+
+   return {subStart, subEnd + 1, max};
+}
+
+// Container interface
+template <typename Container>
+FindMaxSubsequenceResult<typename Container::const_iterator>
+FindMaxSubsequenceIterative(const Container& seq)
+{
+   return FindMaxSubsequenceIterative(seq.begin(), seq.end());
+}
+
+// Preferred solution
+
+// Iterator interface
+template <typename Iter>
+FindMaxSubsequenceResult<Iter> FindMaxSubsequence(Iter first, Iter last)
+{
+   // Iterative solution is faster with O(n) vs O(nlgn) for recursive solution.
+   return FindMaxSubsequenceIterative(first, last);
+}
+
+// Container interface
+template <typename Container>
+FindMaxSubsequenceResult<typename Container::const_iterator>
+FindMaxSubsequence(const Container& seq)
+{
+   return FindMaxSubsequence(seq.begin(), seq.end());
 }
 
 } // namespace ds
