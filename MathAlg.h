@@ -6,12 +6,22 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
+#include <cmath>
 #include <iterator>
 #include <limits>
 #include <vector>
 
 namespace ds
 {
+///////////////////
+
+// Checks if a given value is a power of 2.
+template <typename Val> bool isPow2(Val v)
+{
+   const auto lg2 = std::log2(v);
+   return std::ceil(lg2) == std::floor(lg2);
+}
+
 ///////////////////
 
 // Find maximum subarray/subsequence

@@ -16,6 +16,46 @@ namespace
 {
 ///////////////////
 
+void TestIsPow2()
+{
+   {
+      const std::string caseLabel{"isPow2"};
+
+      VERIFY(isPow2(1.), caseLabel);
+      VERIFY(isPow2(2.), caseLabel);
+      VERIFY(!isPow2(3.), caseLabel);
+      VERIFY(isPow2(4.), caseLabel);
+      VERIFY(!isPow2(6.), caseLabel);
+      VERIFY(!isPow2(7.), caseLabel);
+      VERIFY(!isPow2(5.), caseLabel);
+      VERIFY(isPow2(8.), caseLabel);
+      VERIFY(!isPow2(9.), caseLabel);
+      VERIFY(!isPow2(10.), caseLabel);
+      VERIFY(isPow2(16.), caseLabel);
+      VERIFY(!isPow2(30.), caseLabel);
+      VERIFY(isPow2(32.), caseLabel);
+      VERIFY(!isPow2(50.), caseLabel);
+      VERIFY(isPow2(64.), caseLabel);
+      VERIFY(!isPow2(100.), caseLabel);
+      VERIFY(isPow2(128.), caseLabel);
+      VERIFY(!isPow2(255.), caseLabel);
+      VERIFY(isPow2(256.), caseLabel);
+      VERIFY(!isPow2(500.), caseLabel);
+      VERIFY(isPow2(512.), caseLabel);
+      VERIFY(!isPow2(1000), caseLabel);
+      VERIFY(isPow2(1024), caseLabel);
+      VERIFY(!isPow2(2046), caseLabel);
+      VERIFY(isPow2(2048), caseLabel);
+      VERIFY(!isPow2(4100), caseLabel);
+      VERIFY(isPow2(4096), caseLabel);
+      VERIFY(!isPow2(8200), caseLabel);
+      VERIFY(isPow2(8192), caseLabel);
+      VERIFY(isPow2(16384), caseLabel);
+      VERIFY(isPow2(32768), caseLabel);
+      VERIFY(!isPow2(100000), caseLabel);
+   }
+}
+
 void TestFindMaxSubsequenceRecursive()
 {
    {
@@ -481,6 +521,7 @@ void TestFindMaxSubsequenceIterative()
 
 void TestMathAlg()
 {
+   TestIsPow2();
    TestFindMaxSubsequenceRecursive();
    TestFindMaxSubsequenceIterative();
 }
