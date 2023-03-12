@@ -3,6 +3,8 @@
 // MIT license
 //
 #pragma once
+#include "MathAlg.h"
+#include "MatrixView.h"
 #include <array>
 #include <cassert>
 #include <vector>
@@ -11,84 +13,6 @@ namespace ds
 {
 ///////////////////
 
-// Light-weight matrix view.
-template <typename Val> class MatrixView
-{
- public:
-   // Construct directly from some matrix storage. The row and column indices define the
-   // slice of the view.
-   MatrixView(Val* mat, size_t rowOffset, size_t rowStart, size_t rowEnd, size_t colStart,
-              size_t colEnd) noexcept;
-   // Construct from another view. The row and column indices are relative to the base
-   // view.
-   MatrixView(const MatrixView<Val>& base, size_t rowStartOff, size_t rowEndOff,
-              size_t colStartOff, size_t colEndOff) noexcept;
-
-   size_t rows() const noexcept { return m_rowEnd - m_rowStart + 1; }
-   size_t columns() const noexcept { return m_colEnd - m_colStart + 1; }
-   void clear();
-
-   const Val& operator()(size_t r, size_t c) const { return m_data[index(r, c)]; }
-   Val& operator()(size_t r, size_t c) { return m_data[index(r, c)]; }
-
- private:
-   size_t index(size_t r, size_t c) const;
-
- private:
-   // Pointer to matrix values. Assumed to be in continuous row-major memory.
-   Val* m_data = nullptr;
-   // Offset to get from one row to the next. Usually the number of columns of
-   // the original matrix.
-   size_t m_rowOffset = 0;
-   // Start and end zero-based index (inclusive) of rows.
-   size_t m_rowStart = 0;
-   size_t m_rowEnd = 0;
-   // Start and end zero-based index (inclusive) of columns.
-   size_t m_colStart = 0;
-   size_t m_colEnd = 0;
-};
-
-template <typename Val>
-MatrixView<Val>::MatrixView(Val* mat, size_t rowOffset, size_t rowStart, size_t rowEnd,
-                            size_t colStart, size_t colEnd) noexcept
-: m_data{mat}, m_rowOffset{rowOffset}, m_rowStart{rowStart}, m_rowEnd{rowEnd},
-  m_colStart{colStart}, m_colEnd{colEnd}
-{
-   assert(m_data);
-   assert(m_rowStart <= m_rowEnd);
-   assert(m_colStart <= m_colEnd);
-}
-
-template <typename Val>
-MatrixView<Val>::MatrixView(const MatrixView<Val>& base, size_t fromRow, size_t toRow,
-                            size_t fromCol, size_t toCol) noexcept
-: m_data{base.m_data}, m_rowOffset{base.m_rowOffset},
-  m_rowStart{base.m_rowStart + fromRow}, m_rowEnd{base.m_rowStart + toRow},
-  m_colStart{base.m_colStart + fromCol}, m_colEnd{base.m_colStart + toCol}
-{
-   assert(m_data);
-   assert(m_rowStart <= m_rowEnd);
-   assert(m_colStart <= m_colEnd);
-}
-
-template <typename Val> void MatrixView<Val>::clear()
-{
-   const size_t numRows = rows();
-   const size_t numCols = columns();
-
-   for (size_t r = 0; r < numRows; ++r)
-      for (size_t c = 0; c < numCols; ++c)
-         m_data[index(r, c)] = {};
-}
-
-template <typename Val> size_t MatrixView<Val>::index(size_t r, size_t c) const
-{
-   assert(r < rows() && c < columns());
-   return (m_rowStart + r) * m_rowOffset + m_colStart + c;
-}
-
-namespace internal
-{
 // Add matrix views.
 template <typename Val>
 MatrixView<Val>& add(const MatrixView<Val>& a, const MatrixView<Val>& b,
@@ -145,8 +69,8 @@ MatrixView<Val>& multiplyIterative(const MatrixView<Val>& a, const MatrixView<Va
       for (size_t j = 0; j < numCols; ++j)
       {
          c(i, j) = {};
-         for (size_t i = 0; i < numCols; ++i)
-            c(i, j) += a(i, i) * b(i, j);
+         for (size_t k = 0; k < numCols; ++k)
+            c(i, j) += a(i, k) * b(k, j);
       }
 
    return c;
@@ -154,6 +78,9 @@ MatrixView<Val>& multiplyIterative(const MatrixView<Val>& a, const MatrixView<Va
 
 // Multiplies two matrices by partitioning each into four submatrices, recursively
 // multiplying the submatrices, and combining them into the result.
+// Limitation: Only implemented for square matrices with the matrix dimension a power of
+// two. Other matrices would have to be split into submatrices in other ways and padded
+// with zeros.
 // Cormen, pg 77
 // Time: O(n^3)
 template <typename Val>
@@ -162,9 +89,12 @@ MatrixView<Val>& multiplyRecursive(const MatrixView<Val>& a, const MatrixView<Va
 {
    // Square matices.
    assert(a.rows() == a.columns());
+   assert(a.rows() == a.columns());
    // Matices have same dimensions.
    assert(a.rows() == b.rows() && a.columns() == b.columns());
    assert(a.rows() == c.rows() && a.columns() == c.columns());
+   // Dimensions must be power of two.
+   assert(isPow2(a.rows()));
 
    using MV = MatrixView<Val>;
    const auto n = a.rows();
@@ -173,7 +103,7 @@ MatrixView<Val>& multiplyRecursive(const MatrixView<Val>& a, const MatrixView<Va
    if (n == 1)
    {
       c(0, 0) += a(0, 0) * b(0, 0);
-      return;
+      return c;
    }
 
    // Divide matrices into four submatrices and multiply those.
@@ -216,6 +146,9 @@ MatrixView<Val>& multiplyRecursive(const MatrixView<Val>& a, const MatrixView<Va
 }
 
 // Strassen algorithm for matrix multiplication.
+// Limitation: Only implemented for square matrices with the matrix dimension a power of
+// two. Other matrices would have to be split into submatrices in other ways and padded
+// with zeros.
 // Time: O(n^lg7) = O(n^2.81)
 template <typename Val>
 MatrixView<Val>& multiplyStrassen(const MatrixView<Val>& a, const MatrixView<Val>& b,
@@ -226,6 +159,8 @@ MatrixView<Val>& multiplyStrassen(const MatrixView<Val>& a, const MatrixView<Val
    // Matices have same dimensions.
    assert(a.rows() == b.rows() && a.columns() == b.columns());
    assert(a.rows() == c.rows() && a.columns() == c.columns());
+   // Dimensions must be power of two.
+   assert(isPow2(a.rows()));
 
    using MV = MatrixView<Val>;
    const auto n = a.rows();
@@ -234,7 +169,7 @@ MatrixView<Val>& multiplyStrassen(const MatrixView<Val>& a, const MatrixView<Val
    if (n == 1)
    {
       c(0, 0) += a(0, 0) * b(0, 0);
-      return;
+      return c;
    }
 
    // Divide matrices into four submatrices.
@@ -263,18 +198,16 @@ MatrixView<Val>& multiplyStrassen(const MatrixView<Val>& a, const MatrixView<Val
    for (auto& mat : matPool)
       mat.resize(mid * mid, {});
 
+   // Internal function to create a view of a matrix from the pool.
    auto makeView = [&matPool, mid](size_t matIdx)
    { return MV{matPool[matIdx].data(), mid, 0, mid - 1, 0, mid - 1}; };
 
    // Intermediate matrix sums.
-   std::array<MV, 10> s;
-
-   // Assign matrix storage to views.
-   size_t poolIdx = 0;
-   for (auto& view : s)
-      view = makeView(poolIdx++);
+   std::array<MV, 10> s{makeView(0), makeView(1), makeView(2), makeView(3), makeView(4),
+                        makeView(5), makeView(6), makeView(7), makeView(8), makeView(9)};
 
    // Calculate intermediate sums.
+
    subtract(b12, b22, s[0]);
    add(a11, a12, s[1]);
    add(a21, a22, s[2]);
@@ -282,16 +215,13 @@ MatrixView<Val>& multiplyStrassen(const MatrixView<Val>& a, const MatrixView<Val
    add(a11, a22, s[4]);
    add(b11, b22, s[5]);
    subtract(a12, a22, s[6]);
-   add(b12, b22, s[7]);
+   add(b21, b22, s[7]);
    subtract(a11, a21, s[8]);
    add(b11, b12, s[9]);
 
    // Intermediate matrix products.
-   std::array<MV, 7> p;
-
-   // Assign matrix storage to views.
-   for (auto& view : p)
-      view = makeView(poolIdx++);
+   std::array<MV, 7> p{makeView(10), makeView(11), makeView(12), makeView(13),
+                       makeView(14), makeView(15), makeView(16)};
 
    // Calculate products through recursive Strassen multiplication.
    multiplyStrassen(a11, s[0], p[0]);
@@ -303,29 +233,29 @@ MatrixView<Val>& multiplyStrassen(const MatrixView<Val>& a, const MatrixView<Val
    multiplyStrassen(s[8], s[9], p[6]);
 
    // Combine back into result matrix.
-   add(p[1], p[5], c11);
-   subtract(p[3], c11, c11);
-   add(p[4], c11, c11);
+   add(p[4], p[3], c11);
+   subtract(c11, p[1], c11);
+   add(c11, p[5], c11);
 
    add(p[0], p[1], c12);
 
    add(p[2], p[3], c21);
 
-   subract(p[2], p[6], c22);
-   subtract(p[0], c22, c22);
-   add(p[4], c22, c22);
+   add(p[4], p[0], c22);
+   subtract(c22, p[2], c22);
+   subtract(c22, p[6], c22);
 
    return c;
 }
-
-} // namespace internal
 
 template <typename Val>
 MatrixView<Val>& multiply(const MatrixView<Val>& a, const MatrixView<Val>& b,
                           MatrixView<Val>& c)
 {
    c.clear();
-   return multiplyStrassen(a, b, c);
+   // Use simple iterative method because the implemented Strassen method is limited to
+   // square matrices with a dimension that is a power of two.
+   return multiplyIterative(a, b, c);
 }
 
 } // namespace ds

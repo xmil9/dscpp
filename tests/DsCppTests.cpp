@@ -4,6 +4,7 @@
 //
 #include "LinearAlgebraTests.h"
 #include "MathAlgTests.h"
+#include "MatrixViewTests.h"
 #include "RingBufferTests.h"
 #include "SboVectorPerformanceTests.h"
 #include "SboVectorTests.h"
@@ -16,6 +17,7 @@ int main()
 {
    TestLinearAlgebra();
    TestMathAlg();
+   TestMatrixView();
    TestRingBuffer();
    TestSboVector();
    TestSboVectorPerformance();

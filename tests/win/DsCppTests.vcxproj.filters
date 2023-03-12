@@ -8,6 +8,7 @@
     <ClCompile Include="..\SortTests.cpp" />
     <ClCompile Include="..\MathAlgTests.cpp" />
     <ClCompile Include="..\LinearAlgebraTests.cpp" />
+    <ClCompile Include="..\MatrixViewTests.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\RingBuffer.h" />
@@ -23,5 +24,7 @@
     <ClInclude Include="..\MathAlgTests.h" />
     <ClInclude Include="..\..\LinearAlgebra.h" />
     <ClInclude Include="..\LinearAlgebraTests.h" />
+    <ClInclude Include="..\..\MatrixView.h" />
+    <ClInclude Include="..\MatrixViewTests.h" />
   </ItemGroup>
 </Project>

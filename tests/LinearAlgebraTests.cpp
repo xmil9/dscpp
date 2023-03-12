@@ -15,22 +15,11 @@ namespace
 {
 ///////////////////
 
-void TestMatrixViewCtorForMatrixStorage()
+void TestMatrixAddition()
 {
    {
-      const std::string caseLabel{"MatrixView ctor for matrix storage for 2x3 matrix"};
-
-      std::vector<int> m{7, 2, 3, 5, 9, 6};
-      const MatrixView<int> v{m.data(), 3, 0, 1, 0, 2};
-
-      size_t mIdx = 0;
-      for (size_t r = 0; r < v.rows(); ++r)
-         for (size_t c = 0; c < v.columns(); ++c)
-            VERIFY(v(r, c) == m[mIdx++], caseLabel);
-   }
-   {
       const std::string caseLabel{
-         "MatrixView ctor for matrix storage for 2x2 matrix slice"};
+         "add(MatrixView, MatrixView, MatrixView&) for 2x3 matrix slices"};
 
       // clang-format off
       std::array<double, 12> m{
@@ -40,51 +29,67 @@ void TestMatrixViewCtorForMatrixStorage()
       };
       // clang-format on
 
-      MatrixView<double> v{m.data(), 4, 0, 1, 1, 2};
+      const MatrixView<double> va{m.data(), 4, 0, 1, 1, 3};
+      const MatrixView<double> vb{m.data(), 4, 1, 2, 0, 2};
+
+      std::array<double, 6> sum;
+      MatrixView vsum{sum.data(), 3, 0, 1, 0, 2};
+      add(va, vb, vsum);
 
       // clang-format off
-      const std::array<double, 4> expected{
-         2., 3.,
-         6., 7.,
+      const std::array<double, 6> expected{
+         7., 9., 11.,
+         15., 17., 19
       };
       // clang-format on
 
       size_t expectedIdx = 0;
-      for (size_t r = 0; r < v.rows(); ++r)
-         for (size_t c = 0; c < v.columns(); ++c)
-            VERIFY(v(r, c) == expected[expectedIdx++], caseLabel);
+      for (size_t r = 0; r < vsum.rows(); ++r)
+         for (size_t c = 0; c < vsum.columns(); ++c)
+            VERIFY(vsum(r, c) == expected[expectedIdx++], caseLabel);
    }
 }
 
-void TestMatrixViewCtorForBaseView()
+void TestMatrixSubtraction()
 {
    {
-      const std::string caseLabel{"MatrixView ctor for base view for 2x1 matrix"};
+      const std::string caseLabel{
+         "subtract(MatrixView, MatrixView, MatrixView&) for 2x2 matrix slices"};
 
       // clang-format off
-      std::vector<int> m{
-         7, 2, 3,
-         5, 9, 6
+      std::array<double, 12> m{
+         1., 2., 3., 4.,
+         5., 6., 7., 8.,
+         9., 10., 11., 12.
       };
       // clang-format on
 
-      const MatrixView<int> base{m.data(), 3, 0, 1, 0, 2};
-      MatrixView<int> v{base, 0, 1, 2, 2};
+      const MatrixView<double> va{m.data(), 4, 0, 1, 0, 1};
+      const MatrixView<double> vb{m.data(), 4, 1, 2, 2, 3};
+
+      std::array<double, 4> diff;
+      MatrixView vdiff{diff.data(), 2, 0, 1, 0, 1};
+      subtract(va, vb, vdiff);
 
       // clang-format off
-      const std::array<double, 2> expected{
-         3.,
-         6.,
+      const std::array<double, 4> expected{
+         -6., -6.,
+         -6., -6.
       };
       // clang-format on
 
       size_t expectedIdx = 0;
-      for (size_t r = 0; r < v.rows(); ++r)
-         for (size_t c = 0; c < v.columns(); ++c)
-            VERIFY(v(r, c) == expected[expectedIdx++], caseLabel);
+      for (size_t r = 0; r < vdiff.rows(); ++r)
+         for (size_t c = 0; c < vdiff.columns(); ++c)
+            VERIFY(vdiff(r, c) == expected[expectedIdx++], caseLabel);
    }
+}
+
+void TestMatrixMultiplyIterative()
+{
    {
-      const std::string caseLabel{"MatrixView ctor for base view for 2x3 matrix slice"};
+      const std::string caseLabel{
+         "multiplyIterative(MatrixView, MatrixView, MatrixView&) for 3x3 matrix slices"};
 
       // clang-format off
       std::array<double, 16> m{
@@ -95,209 +100,176 @@ void TestMatrixViewCtorForBaseView()
       };
       // clang-format on
 
-      MatrixView<double> base{m.data(), 4, 1, 3, 0, 3};
-      MatrixView<double> v{base, 1, 2, 0, 2};
+      const MatrixView<double> va{m.data(), 4, 0, 2, 1, 3};
+      const MatrixView<double> vb{m.data(), 4, 1, 3, 0, 2};
+
+      std::array<double, 9> prod;
+      MatrixView vprod{prod.data(), 3, 0, 2, 0, 2};
+      multiplyIterative(va, vb, vprod);
 
       // clang-format off
-      const std::array<double, 6> expected{
-         9., 10., 11.,
-         13., 14., 15.,
+      const std::array<double, 9> expected{
+         89., 98., 107.,
+         197., 218., 239.,
+         305., 338., 371.
       };
       // clang-format on
 
       size_t expectedIdx = 0;
-      for (size_t r = 0; r < v.rows(); ++r)
-         for (size_t c = 0; c < v.columns(); ++c)
-            VERIFY(v(r, c) == expected[expectedIdx++], caseLabel);
+      for (size_t r = 0; r < vprod.rows(); ++r)
+         for (size_t c = 0; c < vprod.columns(); ++c)
+            VERIFY(vprod(r, c) == expected[expectedIdx++], caseLabel);
    }
 }
 
-void TestMatrixViewRowsColumns()
+void TestMatrixMultiplyRecursive()
 {
    {
       const std::string caseLabel{
-         "MatrixView::rows() and MatrixView::columns for 2x3 matrix"};
-
-      std::vector<int> m{7, 2, 3, 5, 9, 6};
-      const MatrixView<int> v{m.data(), 3, 0, 1, 0, 2};
-
-      VERIFY(v.rows() == 2, caseLabel);
-      VERIFY(v.columns() == 3, caseLabel);
-   }
-   {
-      const std::string caseLabel{
-         "MatrixView::rows() and MatrixView::columns for 5x1 matrix"};
-
-      std::vector<double> m{7., 2., 3., 5., 9.};
-      const MatrixView<double> v{m.data(), 5, 0, 0, 0, 4};
-
-      VERIFY(v.rows() == 1, caseLabel);
-      VERIFY(v.columns() == 5, caseLabel);
-   }
-   {
-      const std::string caseLabel{
-         "MatrixView::rows() and MatrixView::columns for 1x5 matrix"};
-
-      std::vector<double> m{7., 2., 3., 5., 9.};
-      const MatrixView<double> v{m.data(), 1, 0, 4, 0, 0};
-
-      VERIFY(v.rows() == 5, caseLabel);
-      VERIFY(v.columns() == 1, caseLabel);
-   }
-   {
-      const std::string caseLabel{
-         "MatrixView::rows() and MatrixView::columns for 3x2 matrix slice"};
+         "multiplyRecursive(MatrixView, MatrixView, MatrixView&) for 4x4 matrix slices"};
 
       // clang-format off
-      std::vector<int> m{
-         1, 2, 3,
-         4, 5, 6,
-         7, 8, 9,
-         10, 11, 12,
-         13, 14, 15
+      std::array<double, 20> m{
+         1., 2., 3., 4., 5.,
+         6., 7., 8., 9., 10.,
+         10., 11., 12., 1., 2.,
+         3., 4., 5., 6., 7.
       };
       // clang-format on
 
-      const MatrixView<int> v{m.data(), 3, 1, 3, 1, 2};
+      const MatrixView<double> va{m.data(), 5, 0, 3, 0, 3};
+      const MatrixView<double> vb{m.data(), 5, 0, 3, 1, 4};
 
-      VERIFY(v.rows() == 3, caseLabel);
-      VERIFY(v.columns() == 2, caseLabel);
-   }
-   {
-      const std::string caseLabel{
-         "MatrixView::rows() and MatrixView::columns for 1x1 matrix slice"};
-
-      // clang-format off
-      std::vector<int> m{
-         1, 2, 3,
-         4, 5, 6,
-         7, 8, 9,
-         10, 11, 12,
-         13, 14, 15
-      };
-      // clang-format on
-
-      const MatrixView<int> v{m.data(), 3, 4, 4, 2, 2};
-
-      VERIFY(v.rows() == 1, caseLabel);
-      VERIFY(v.columns() == 1, caseLabel);
-   }
-}
-
-void TestMatrixViewClear()
-{
-   {
-      const std::string caseLabel{"MatrixView::clear() for 2x3 matrix"};
-
-      std::vector<int> m{7, 2, 3, 5, 9, 6};
-      MatrixView<int> v{m.data(), 3, 0, 1, 0, 2};
-
-      v.clear();
-
-      for (const auto& val : m)
-         VERIFY(val == 0, caseLabel);
-   }
-   {
-      const std::string caseLabel{"MatrixView::clear() for 2x2 matrix slice"};
+      std::array<double, 16> prod;
+      for (auto& v : prod)
+         v = 0.;
+      MatrixView vprod{prod.data(), 4, 0, 3, 0, 3};
+      multiplyRecursive(va, vb, vprod);
 
       // clang-format off
-      std::array<double, 12> m{
-         1., 2., 3., 4.,
-         5., 6., 7., 8.,
-         9., 10., 11., 12.
-      };
-      // clang-format on
-
-      MatrixView<double> v{m.data(), 4, 0, 1, 1, 2};
-
-      v.clear();
-
-      // clang-format off
-      const std::array<double, 12> expected{
-         1., 0., 0., 4.,
-         5., 0., 0., 8.,
-         9., 10., 11., 12.
-      };
-      // clang-format on
-
-      VERIFY(m == expected, caseLabel);
-   }
-   {
-      const std::string caseLabel{"MatrixView::clear() for 2x2 matrix slice at end"};
-
-      // clang-format off
-      std::array<double, 12> m{
-         1., 2., 3., 4.,
-         5., 6., 7., 8.,
-         9., 10., 11., 12.
-      };
-      // clang-format on
-
-      MatrixView<double> v{m.data(), 4, 1, 2, 2, 3};
-
-      v.clear();
-
-      // clang-format off
-      const std::array<double, 12> expected{
-         1., 2., 3., 4.,
-         5., 6., 0., 0.,
-         9., 10., 0., 0.
-      };
-      // clang-format on
-
-      VERIFY(m == expected, caseLabel);
-   }
-}
-
-void TestMatrixView2DIndexOperator()
-{
-   {
-      const std::string caseLabel{"MatrixView::operator(row, col) for 2x3 matrix"};
-
-      std::vector<int> m{7, 2, 3, 5, 9, 6};
-      const MatrixView<int> v{m.data(), 3, 0, 1, 0, 2};
-
-      size_t mIdx = 0;
-      for (size_t r = 0; r < v.rows(); ++r)
-         for (size_t c = 0; c < v.columns(); ++c)
-            VERIFY(v(r, c) == m[mIdx++], caseLabel);
-   }
-   {
-      const std::string caseLabel{"MatrixView::operator(row, col) for 2x2 matrix slice"};
-
-      // clang-format off
-      std::array<double, 12> m{
-         1., 2., 3., 4.,
-         5., 6., 7., 8.,
-         9., 10., 11., 12.
-      };
-      // clang-format on
-
-      const MatrixView<double> v{m.data(), 4, 0, 1, 1, 2};
-
-      // clang-format off
-      const std::array<double, 4> expected{
-         2., 3.,
-         6., 7.
+      const decltype(prod) expected{
+         65., 75., 49., 59.,
+         185., 215., 149., 179.,
+         233., 267., 157., 191.,
+         113., 131., 89., 107.
       };
       // clang-format on
 
       size_t expectedIdx = 0;
-      for (size_t r = 0; r < v.rows(); ++r)
-         for (size_t c = 0; c < v.columns(); ++c)
-            VERIFY(v(r, c) == expected[expectedIdx++], caseLabel);
-   }
-   {
-      const std::string caseLabel{"MatrixView::operator(row, col) for changing values"};
-
-      std::vector<int> m{7, 2, 3, 5, 9, 6};
-      MatrixView<int> v{m.data(), 3, 1, 1, 1, 2};
-
-      v(0, 1) = 100;
-      VERIFY(v(0, 1) == 100, caseLabel);
-      VERIFY(m[5] == 100, caseLabel);
+      for (size_t r = 0; r < vprod.rows(); ++r)
+         for (size_t c = 0; c < vprod.columns(); ++c)
+            VERIFY(vprod(r, c) == expected[expectedIdx++], caseLabel);
    }
 }
+
+void TestMatrixMultiplyStrassen()
+{
+   {
+      const std::string caseLabel{
+         "multiplyStrassen(MatrixView, MatrixView, MatrixView&) for 1x1 matrix slices"};
+
+      // clang-format off
+      std::array<double, 20> m{
+         1., 2., 3., 4., 5.,
+         6., 7., 8., 9., 10.,
+         10., 11., 12., 1., 2.,
+         3., 4., 5., 6., 7.
+      };
+      // clang-format on
+
+      const MatrixView<double> va{m.data(), 5, 0, 0, 2, 2};
+      const MatrixView<double> vb{m.data(), 5, 3, 3, 1, 1};
+
+      std::array<double, 1> prod;
+      for (auto& v : prod)
+         v = 0.;
+      MatrixView vprod{prod.data(), 1, 0, 0, 0, 0};
+      multiplyStrassen(va, vb, vprod);
+
+      // clang-format off
+      const decltype(prod) expected{
+         12.
+      };
+      // clang-format on
+
+      size_t expectedIdx = 0;
+      for (size_t r = 0; r < vprod.rows(); ++r)
+         for (size_t c = 0; c < vprod.columns(); ++c)
+            VERIFY(vprod(r, c) == expected[expectedIdx++], caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "multiplyStrassen(MatrixView, MatrixView, MatrixView&) for 2x2 matrix slices"};
+
+      // clang-format off
+      std::array<double, 20> m{
+         1., 2., 3., 4., 5.,
+         6., 7., 8., 9., 10.,
+         10., 11., 12., 1., 2.,
+         3., 4., 5., 6., 7.
+      };
+      // clang-format on
+
+      const MatrixView<double> va{m.data(), 5, 1, 2, 2, 3};
+      const MatrixView<double> vb{m.data(), 5, 2, 3, 3, 4};
+
+      std::array<double, 4> prod;
+      for (auto& v : prod)
+         v = 0.;
+      MatrixView vprod{prod.data(), 2, 0, 1, 0, 1};
+      multiplyStrassen(va, vb, vprod);
+
+      // clang-format off
+      const decltype(prod) expected{
+         62., 79.,
+         18., 31.
+      };
+      // clang-format on
+
+      size_t expectedIdx = 0;
+      for (size_t r = 0; r < vprod.rows(); ++r)
+         for (size_t c = 0; c < vprod.columns(); ++c)
+            VERIFY(vprod(r, c) == expected[expectedIdx++], caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "multiplyStrassen(MatrixView, MatrixView, MatrixView&) for 4x4 matrix slices"};
+
+      // clang-format off
+      std::array<double, 20> m{
+         1., 2., 3., 4., 5.,
+         6., 7., 8., 9., 10.,
+         10., 11., 12., 1., 2.,
+         3., 4., 5., 6., 7.
+      };
+      // clang-format on
+
+      const MatrixView<double> va{m.data(), 5, 0, 3, 0, 3};
+      const MatrixView<double> vb{m.data(), 5, 0, 3, 1, 4};
+
+      std::array<double, 16> prod;
+      for (auto& v : prod)
+         v = 0.;
+      MatrixView vprod{prod.data(), 4, 0, 3, 0, 3};
+      multiplyStrassen(va, vb, vprod);
+
+      // clang-format off
+      const decltype(prod) expected{
+         65., 75., 49., 59.,
+         185., 215., 149., 179.,
+         233., 267., 157., 191.,
+         113., 131., 89., 107.
+      };
+      // clang-format on
+
+      size_t expectedIdx = 0;
+      for (size_t r = 0; r < vprod.rows(); ++r)
+         for (size_t c = 0; c < vprod.columns(); ++c)
+            VERIFY(vprod(r, c) == expected[expectedIdx++], caseLabel);
+   }
+}
+
+///////////////////
 
 } // namespace
 
@@ -306,9 +278,9 @@ void TestMatrixView2DIndexOperator()
 
 void TestLinearAlgebra()
 {
-   TestMatrixViewCtorForMatrixStorage();
-   TestMatrixViewCtorForBaseView();
-   TestMatrixViewRowsColumns();
-   TestMatrixViewClear();
-   TestMatrixView2DIndexOperator();
+   TestMatrixAddition();
+   TestMatrixSubtraction();
+   TestMatrixMultiplyIterative();
+   TestMatrixMultiplyRecursive();
+   TestMatrixMultiplyStrassen();
 }
