@@ -18,6 +18,9 @@ namespace ds
 // Checks if a given value is a power of 2.
 template <typename Val> bool isPow2(Val v)
 {
+   if (v <= 0)
+      return false;
+
    const auto lg2 = std::log2(v);
    return std::ceil(lg2) == std::floor(lg2);
 }

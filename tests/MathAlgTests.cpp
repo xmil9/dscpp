@@ -21,6 +21,8 @@ void TestIsPow2()
    {
       const std::string caseLabel{"isPow2"};
 
+      VERIFY(!isPow2(-4.), caseLabel);
+      VERIFY(!isPow2(0.), caseLabel);
       VERIFY(isPow2(1.), caseLabel);
       VERIFY(isPow2(2.), caseLabel);
       VERIFY(!isPow2(3.), caseLabel);
@@ -42,17 +44,24 @@ void TestIsPow2()
       VERIFY(isPow2(256.), caseLabel);
       VERIFY(!isPow2(500.), caseLabel);
       VERIFY(isPow2(512.), caseLabel);
-      VERIFY(!isPow2(1000), caseLabel);
-      VERIFY(isPow2(1024), caseLabel);
-      VERIFY(!isPow2(2046), caseLabel);
-      VERIFY(isPow2(2048), caseLabel);
-      VERIFY(!isPow2(4100), caseLabel);
-      VERIFY(isPow2(4096), caseLabel);
-      VERIFY(!isPow2(8200), caseLabel);
-      VERIFY(isPow2(8192), caseLabel);
-      VERIFY(isPow2(16384), caseLabel);
-      VERIFY(isPow2(32768), caseLabel);
-      VERIFY(!isPow2(100000), caseLabel);
+      VERIFY(!isPow2(1000.), caseLabel);
+      VERIFY(isPow2(1024.), caseLabel);
+      VERIFY(!isPow2(2046.), caseLabel);
+      VERIFY(isPow2(2048.), caseLabel);
+      VERIFY(!isPow2(4100.), caseLabel);
+      VERIFY(isPow2(4096.), caseLabel);
+      VERIFY(!isPow2(8200.), caseLabel);
+      VERIFY(isPow2(8192.), caseLabel);
+      VERIFY(isPow2(16384.), caseLabel);
+      VERIFY(isPow2(32768.), caseLabel);
+      VERIFY(!isPow2(100000.), caseLabel);
+   }
+   {
+      const std::string caseLabel{"isPow2 for other value types"};
+
+      VERIFY(isPow2(16), caseLabel);
+      VERIFY(isPow2(16.f), caseLabel);
+      VERIFY(isPow2(static_cast<short>(16)), caseLabel);
    }
 }
 
