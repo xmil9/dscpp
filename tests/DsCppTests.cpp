@@ -2,6 +2,7 @@
 // Michael Lindner
 // MIT license
 //
+#include "LinearAlgebraTests.h"
 #include "MathAlgTests.h"
 #include "RingBufferTests.h"
 #include "SboVectorPerformanceTests.h"
@@ -13,6 +14,7 @@
 
 int main()
 {
+   TestLinearAlgebra();
    TestMathAlg();
    TestRingBuffer();
    TestSboVector();

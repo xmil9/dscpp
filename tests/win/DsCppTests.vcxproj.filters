@@ -7,6 +7,7 @@
     <ClCompile Include="..\SboVectorPerformanceTests.cpp" />
     <ClCompile Include="..\SortTests.cpp" />
     <ClCompile Include="..\MathAlgTests.cpp" />
+    <ClCompile Include="..\LinearAlgebraTests.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\RingBuffer.h" />
@@ -20,5 +21,7 @@
     <ClInclude Include="..\SortTests.h" />
     <ClInclude Include="..\..\MathAlg.h" />
     <ClInclude Include="..\MathAlgTests.h" />
+    <ClInclude Include="..\..\LinearAlgebra.h" />
+    <ClInclude Include="..\LinearAlgebraTests.h" />
   </ItemGroup>
 </Project>

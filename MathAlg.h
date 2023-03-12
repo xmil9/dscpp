@@ -8,6 +8,7 @@
 #include <cassert>
 #include <iterator>
 #include <limits>
+#include <vector>
 
 namespace ds
 {
@@ -17,6 +18,8 @@ namespace ds
 // Finds max difference between two values in a sequence. The lower value has to appear
 // before the higher value.
 // Example use: Find best buying and selling points for a stock on a timeline.
+// Time (for iterative solution): O(n)
+
 
 // Result data.
 template <typename Iter> struct FindMaxSubsequenceResult
