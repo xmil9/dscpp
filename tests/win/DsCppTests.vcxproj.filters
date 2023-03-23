@@ -9,6 +9,7 @@
     <ClCompile Include="..\MathAlgTests.cpp" />
     <ClCompile Include="..\LinearAlgebraTests.cpp" />
     <ClCompile Include="..\MatrixViewTests.cpp" />
+    <ClCompile Include="..\RandomTests.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\RingBuffer.h" />
@@ -26,5 +27,7 @@
     <ClInclude Include="..\LinearAlgebraTests.h" />
     <ClInclude Include="..\..\MatrixView.h" />
     <ClInclude Include="..\MatrixViewTests.h" />
+    <ClInclude Include="..\..\Random.h" />
+    <ClInclude Include="..\RandomTests.h" />
   </ItemGroup>
 </Project>
