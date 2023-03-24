@@ -103,13 +103,19 @@ template <typename Int> Int RandomInt<Int>::next()
 
 ///////////////////
 
+// Generate random permutation of sequence.
+// Cormen, pg 126
+// Time: O(n)
 template <typename Iter> void permute(Iter first, Iter last)
 {
    for (Iter it = first; it != last; ++it)
    {
       const size_t n = std::distance(it, last);
-      const size_t pos = RandomInt(1, n - 1);
-      std::swap(*it, *(it + pos));
+      // The random offset could be zero because the element staying in place is a
+      // valid permutation.
+      const size_t pos = RandomInt(0, n - 1);
+      if (pos != 0)
+         std::swap(*it, *(it + pos));
    }
 }
 
