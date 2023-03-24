@@ -14,16 +14,16 @@ template <typename T = double> class Random
 {
  public:
    // Values in range (0, 1] with random seed.
-   Random();
+   Random() noexcept;
    // Values in range (0, 1] with given seed.
    Random(unsigned int seed);
    // Values in range (a, b] with random seed.
    Random(T a, T b);
    // Values in range (a, b] with given seed.
    Random(T a, T b, unsigned int seed);
+
    Random(const Random&) = delete;
    Random(Random&&) = default;
-
    Random& operator=(const Random&) = delete;
    Random& operator=(Random&&) = default;
 
@@ -35,18 +35,16 @@ template <typename T = double> class Random
 };
 
 
-template <typename T> Random<T>::Random() : Random{std::random_device{}()}
+template <typename T> Random<T>::Random() noexcept : Random{std::random_device{}()}
 {
 }
 
 template <typename T>
-Random<T>::Random(unsigned int seed)
-: Random{static_cast<T>(0), static_cast<T>(1), seed}
+Random<T>::Random(unsigned int seed) : Random{static_cast<T>(0), static_cast<T>(1), seed}
 {
 }
 
-template <typename T>
-Random<T>::Random(T a, T b) : Random{a, b, std::random_device{}()}
+template <typename T> Random<T>::Random(T a, T b) : Random{a, b, std::random_device{}()}
 {
 }
 
@@ -70,20 +68,26 @@ template <typename Int = int> class RandomInt
    RandomInt(Int a, Int b);
    // Values in range [a, b] with given seed.
    RandomInt(Int a, Int b, unsigned int seed);
+
    RandomInt(const RandomInt&) = delete;
    RandomInt(RandomInt&&) = default;
-
    RandomInt& operator=(const RandomInt&) = delete;
    RandomInt& operator=(RandomInt&&) = default;
 
    Int next();
 
  private:
-   Random<float> m_rand;
+   Random<double> m_rand;
 };
 
 
-template <typename Int> RandomInt<Int>::RandomInt(Int a, Int b) : m_rand{a, b + 1}
+template <typename Int>
+RandomInt<Int>::RandomInt(Int a, Int b)
+: m_rand{
+     // Make sure negative start values get truncated to include the start of the range.
+     a < 0 ? a - 0.9999999 : a,
+     // Make sure negative end values get truncated to include the start of the range.
+     b < 0 ? b : b + 1}
 {
 }
 
