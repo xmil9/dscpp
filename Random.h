@@ -77,28 +77,42 @@ template <typename Int = int> class RandomInt
    Int next();
 
  private:
+   using Fp = double;
+   // Calc floating point range values that are used for the internal random generator.
+   static Fp minFloat(Int min);
+   static Fp maxFloat(Int max);
+
+ private:
    Random<double> m_rand;
 };
 
 
 template <typename Int>
-RandomInt<Int>::RandomInt(Int a, Int b)
-: m_rand{
-     // Make sure negative start values get truncated to include the start of the range.
-     a < 0 ? a - 0.9999999 : a,
-     // Make sure negative end values get truncated to include the start of the range.
-     b < 0 ? b : b + 1}
+RandomInt<Int>::RandomInt(Int a, Int b) : m_rand{minFloat(a), maxFloat(b)}
 {
 }
 
 template <typename Int>
-RandomInt<Int>::RandomInt(Int a, Int b, unsigned int seed) : m_rand{a, b + 1, seed}
+RandomInt<Int>::RandomInt(Int a, Int b, unsigned int seed)
+: m_rand{minFloat(a), maxFloat(b), seed}
 {
 }
 
 template <typename Int> Int RandomInt<Int>::next()
 {
    return static_cast<Int>(m_rand.next());
+}
+
+template <typename Int> RandomInt<Int>::Fp RandomInt<Int>::minFloat(Int min)
+{
+   // Make sure negative start values get truncated to include the start of the range.
+   return min < 0 ? min - 0.9999999 : min;
+}
+
+template <typename Int> RandomInt<Int>::Fp RandomInt<Int>::maxFloat(Int max)
+{
+   // Make sure negative end values get truncated to include the end of the range.
+   return max < 0 ? max : max + 1;
 }
 
 ///////////////////

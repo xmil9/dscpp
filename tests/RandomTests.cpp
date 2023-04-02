@@ -225,6 +225,34 @@ void testRandomIntCtorWithRangeValuesAndSeed()
 
       VERIFY(vals == repeated, caseLabel);
    }
+   {
+      const std::string caseLabel = "RandomInt ctor with seed and negative values";
+
+      using Int = long;
+      constexpr std::size_t numVals = 300;
+      constexpr unsigned int seed = 123456789;
+      constexpr Int min = -10;
+      constexpr Int max = -1;
+
+      std::vector<Int> vals;
+      RandomInt<Int> rndA{min, max, seed};
+      for (std::size_t i = 0; i < numVals; ++i)
+         vals.push_back(rndA.next());
+
+      VERIFY(std::find(vals.begin(), vals.end(), min) != vals.end(), caseLabel);
+      VERIFY(std::find(vals.begin(), vals.end(), max) != vals.end(), caseLabel);
+      // No value gap should be more than one, i.e. all values are present.
+      VERIFY(verifyUniform(vals, 0l, 1l), caseLabel);
+      // No value is outside the range.
+      VERIFY(verifyClosedRange(vals, min, max), caseLabel);
+
+      std::vector<Int> repeated;
+      RandomInt<Int> rndB{min, max, seed};
+      for (std::size_t i = 0; i < numVals; ++i)
+         repeated.push_back(rndB.next());
+
+      VERIFY(vals == repeated, caseLabel);
+   }
 }
 
 } // namespace
