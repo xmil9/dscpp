@@ -255,6 +255,61 @@ void testRandomIntCtorWithRangeValuesAndSeed()
    }
 }
 
+///////////////////
+
+void testPermute()
+{
+   {
+      const std::string caseLabel = "permute() for integer sequence";
+
+      using Val = short;
+      constexpr std::size_t numVals = 300;
+
+      std::vector<Val> vals(numVals, 0);
+      Val counter{0};
+      std::ranges::generate_n(vals.begin(), numVals, [&counter](){ return counter++; });
+      const auto original = vals;
+
+      permute(vals.begin(), vals.end());
+
+      VERIFY(std::ranges::is_permutation(vals, original), caseLabel);
+      // It is legal for the permutation to be the same as the original but should be
+      // very unlikely, so let's use it as a check here.
+      VERIFY(vals != original, caseLabel);
+   }
+   {
+      const std::string caseLabel = "permute() for string sequence";
+
+      std::vector<std::string> seq{"aa", "bb", "cc", "dd", "ee", "ff", "gg", "hh", "ii", "jj", "kk"};
+      const auto original = seq;
+
+      permute(seq.begin(), seq.end());
+
+      VERIFY(std::ranges::is_permutation(seq, original), caseLabel);
+      // It is legal for the permutation to be the same as the original but should be
+      // very unlikely, so let's use it as a check here.
+      VERIFY(seq != original, caseLabel);
+   }
+   {
+      const std::string caseLabel = "permute() range interface";
+
+      using Val = double;
+      constexpr std::size_t numVals = 300;
+
+      std::vector<Val> vals(numVals, 0);
+      Val counter{0};
+      std::ranges::generate_n(vals.begin(), numVals, [&counter](){ return counter++; });
+      const auto original = vals;
+
+      permute(vals);
+
+      VERIFY(std::ranges::is_permutation(vals, original), caseLabel);
+      // It is legal for the permutation to be the same as the original but should be
+      // very unlikely, so let's use it as a check here.
+      VERIFY(vals != original, caseLabel);
+   }
+}
+
 } // namespace
 
 
@@ -268,4 +323,5 @@ void testRandom()
    testRandomCtorWithRangeValuesAndSeed();
    testRandomIntCtorWithRangeValues();
    testRandomIntCtorWithRangeValuesAndSeed();
+   testPermute();
 }

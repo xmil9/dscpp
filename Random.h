@@ -106,13 +106,13 @@ template <typename Int> Int RandomInt<Int>::next()
 template <typename Int> RandomInt<Int>::Fp RandomInt<Int>::minFloat(Int min)
 {
    // Make sure negative start values get truncated to include the start of the range.
-   return min < 0 ? min - 0.9999999 : min;
+   return static_cast<Fp>(min < 0 ? min - 0.9999999 : min);
 }
 
 template <typename Int> RandomInt<Int>::Fp RandomInt<Int>::maxFloat(Int max)
 {
    // Make sure negative end values get truncated to include the end of the range.
-   return max < 0 ? max : max + 1;
+   return static_cast<Fp>(max < 0 ? max : max + 1);
 }
 
 ///////////////////
@@ -120,6 +120,8 @@ template <typename Int> RandomInt<Int>::Fp RandomInt<Int>::maxFloat(Int max)
 // Generate random permutation of sequence.
 // Cormen, pg 126
 // Time: O(n)
+
+// Iterator interface
 template <typename Iter> void permute(Iter first, Iter last)
 {
    for (Iter it = first; it != last; ++it)
@@ -127,10 +129,16 @@ template <typename Iter> void permute(Iter first, Iter last)
       const size_t n = std::distance(it, last);
       // The random offset could be zero because the element staying in place is a
       // valid permutation.
-      const size_t pos = RandomInt(0, n - 1);
+      const size_t pos = RandomInt<size_t>{0, n - 1}.next();
       if (pos != 0)
          std::swap(*it, *(it + pos));
    }
+}
+
+// Container interface
+template <typename Container> void permute(Container& seq)
+{
+   permute(std::begin(seq), std::end(seq));
 }
 
 } // namespace ds
