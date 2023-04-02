@@ -149,6 +149,25 @@ void testRandomCtorWithRangeValuesAndSeed()
    }
 }
 
+void testRandomValue()
+{
+   {
+      const std::string caseLabel = "Random::value()";
+
+      for (size_t i = 0; i < 100; ++i)
+      {
+         const auto valF = Random<float>::value(2.5f, 7.2f);
+         VERIFY(2.5f <= valF && valF < 7.2f, caseLabel);
+      }
+
+      for (size_t i = 0; i < 100; ++i)
+      {
+         const auto valD = Random<double>::value(-2.1, -1.4);
+         VERIFY(-2.1 <= valD && valD < -1.4, caseLabel);
+      }
+   }
+}
+
 ///////////////////
 
 void testRandomIntCtorWithRangeValues()
@@ -255,6 +274,25 @@ void testRandomIntCtorWithRangeValuesAndSeed()
    }
 }
 
+void testRandomIntValue()
+{
+   {
+      const std::string caseLabel = "RandomInt::value()";
+
+      for (size_t i = 0; i < 100; ++i)
+      {
+         const auto valI = RandomInt<int>::value(4, 7);
+         VERIFY(4 <= valI && valI <= 7, caseLabel);
+      }
+
+      for (size_t i = 0; i < 100; ++i)
+      {
+         const auto valL = RandomInt<long>::value(-200l, -180l);
+         VERIFY(-200l <= valL && valL <= -100l, caseLabel);
+      }
+   }
+}
+
 ///////////////////
 
 void testPermute()
@@ -267,7 +305,7 @@ void testPermute()
 
       std::vector<Val> vals(numVals, 0);
       Val counter{0};
-      std::ranges::generate_n(vals.begin(), numVals, [&counter](){ return counter++; });
+      std::ranges::generate_n(vals.begin(), numVals, [&counter]() { return counter++; });
       const auto original = vals;
 
       permute(vals.begin(), vals.end());
@@ -280,7 +318,8 @@ void testPermute()
    {
       const std::string caseLabel = "permute() for string sequence";
 
-      std::vector<std::string> seq{"aa", "bb", "cc", "dd", "ee", "ff", "gg", "hh", "ii", "jj", "kk"};
+      std::vector<std::string> seq{"aa", "bb", "cc", "dd", "ee", "ff",
+                                   "gg", "hh", "ii", "jj", "kk"};
       const auto original = seq;
 
       permute(seq.begin(), seq.end());
@@ -298,7 +337,7 @@ void testPermute()
 
       std::vector<Val> vals(numVals, 0);
       Val counter{0};
-      std::ranges::generate_n(vals.begin(), numVals, [&counter](){ return counter++; });
+      std::ranges::generate_n(vals.begin(), numVals, [&counter]() { return counter++; });
       const auto original = vals;
 
       permute(vals);
@@ -321,7 +360,9 @@ void testRandom()
    testRandomCtorWithSeed();
    testRandomCtorWithRangeValues();
    testRandomCtorWithRangeValuesAndSeed();
+   testRandomValue();
    testRandomIntCtorWithRangeValues();
    testRandomIntCtorWithRangeValuesAndSeed();
+   testRandomIntValue();
    testPermute();
 }
