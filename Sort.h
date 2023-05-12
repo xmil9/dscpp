@@ -14,7 +14,7 @@ namespace ds
 // Insertion sort
 // Cormen, pg 16
 // Take each element and insert backwards into already sorted front of sequence.
-// Efficient for small number of elements.
+// Efficient for small number of elements. Sorts in place, no extra space needed.
 // Worst time: O(n^2) (for reverse sorted)
 // Avg time: O(n^2)
 
@@ -55,7 +55,7 @@ void InsertionSort(Container& seq, Compare cmp = {}) noexcept
 // Merge sort
 // Cormen, pg 30
 // Divide sequence into smaller and smaller sub sequences and merge then back together
-// while sorting the elements.
+// while sorting the elements. Does not sort in place, needs additional space.
 // Time: O(nlgn)
 
 namespace internal
@@ -121,6 +121,7 @@ void MergeSort(Container& seq, Compare cmp = {}) noexcept
 // Bubble sort
 // Cormen, pg 40
 // Swap consecutive elements until squence is sorted.
+// Sorts in place, no extra space needed.
 // Time: O(n^2)
 
 // Iterator interface
