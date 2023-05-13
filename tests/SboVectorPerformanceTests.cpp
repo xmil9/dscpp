@@ -46,7 +46,7 @@ template <typename TRes> struct MicroBenchmark
 
 ///////////////////
 
-void TestPushBackLValue()
+void testPushBackLValue()
 {
    {
       const std::string caseLabel{"push_back: SboVector in buffer vs std::vector"};
@@ -116,7 +116,7 @@ void TestPushBackLValue()
 }
 
 
-void TestCopyIntoContainer()
+void testCopyIntoContainer()
 {
    {
       const std::string caseLabel{"std::copy: SboVector in buffer vs std::vector"};
@@ -189,7 +189,7 @@ void TestCopyIntoContainer()
 }
 
 
-void TestAccessElementsByIndex()
+void testAccessElementsByIndex()
 {
    {
       const std::string caseLabel{"Element access: SboVector in buffer vs std::vector"};
@@ -280,12 +280,12 @@ void TestAccessElementsByIndex()
 
 ///////////////////
 
-void TestSboVectorPerformance()
+void testSboVectorPerformance()
 {
 #ifdef NDEBUG
-   TestPushBackLValue();
-   TestCopyIntoContainer();
-   TestAccessElementsByIndex();
+   testPushBackLValue();
+   testCopyIntoContainer();
+   testAccessElementsByIndex();
 #else  // !NDEBUG
    std::cout << "Performance tests skipped - Use Release config for performance tests.\n";
 #endif // NDEBUG

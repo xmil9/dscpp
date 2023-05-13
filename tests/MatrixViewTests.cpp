@@ -15,7 +15,7 @@ namespace
 {
 ///////////////////
 
-void TestMatrixViewCtorForMatrixStorage()
+void testMatrixViewCtorForMatrixStorage()
 {
    {
       const std::string caseLabel{"MatrixView ctor for matrix storage for 2x3 matrix"};
@@ -56,7 +56,7 @@ void TestMatrixViewCtorForMatrixStorage()
    }
 }
 
-void TestMatrixViewCtorForBaseView()
+void testMatrixViewCtorForBaseView()
 {
    {
       const std::string caseLabel{"MatrixView ctor for base view for 2x1 matrix"};
@@ -112,7 +112,7 @@ void TestMatrixViewCtorForBaseView()
    }
 }
 
-void TestMatrixViewRowsColumns()
+void testMatrixViewRowsColumns()
 {
    {
       const std::string caseLabel{
@@ -184,7 +184,7 @@ void TestMatrixViewRowsColumns()
    }
 }
 
-void TestMatrixViewClear()
+void testMatrixViewClear()
 {
    {
       const std::string caseLabel{"MatrixView::clear() for 2x3 matrix"};
@@ -249,7 +249,7 @@ void TestMatrixViewClear()
    }
 }
 
-void TestMatrixView2DIndexOperator()
+void testMatrixView2DIndexOperator()
 {
    {
       const std::string caseLabel{"MatrixView::operator(row, col) for 2x3 matrix"};
@@ -299,7 +299,7 @@ void TestMatrixView2DIndexOperator()
    }
 }
 
-void TestMatrixViewToString()
+void testMatrixViewToString()
 {
    {
       const std::string caseLabel{"MatrixView::toString()"};
@@ -318,12 +318,12 @@ void TestMatrixViewToString()
 
 ///////////////////
 
-void TestMatrixView()
+void testMatrixView()
 {
-   TestMatrixViewCtorForMatrixStorage();
-   TestMatrixViewCtorForBaseView();
-   TestMatrixViewRowsColumns();
-   TestMatrixViewClear();
-   TestMatrixView2DIndexOperator();
-   TestMatrixViewToString();
+   testMatrixViewCtorForMatrixStorage();
+   testMatrixViewCtorForBaseView();
+   testMatrixViewRowsColumns();
+   testMatrixViewClear();
+   testMatrixView2DIndexOperator();
+   testMatrixViewToString();
 }

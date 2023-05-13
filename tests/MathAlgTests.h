@@ -4,4 +4,4 @@
 //
 #pragma once
 
-void TestMathAlg();
+void testMathAlg();

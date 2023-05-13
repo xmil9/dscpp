@@ -4,4 +4,4 @@
 //
 #pragma once
 
-void TestSort();
+void testSort();

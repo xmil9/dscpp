@@ -15,7 +15,7 @@ namespace
 {
 ///////////////////
 
-void TestMatrixAddition()
+void testMatrixAddition()
 {
    {
       const std::string caseLabel{
@@ -50,7 +50,7 @@ void TestMatrixAddition()
    }
 }
 
-void TestMatrixSubtraction()
+void testMatrixSubtraction()
 {
    {
       const std::string caseLabel{
@@ -85,7 +85,7 @@ void TestMatrixSubtraction()
    }
 }
 
-void TestMatrixMultiplyIterative()
+void testMatrixMultiplyIterative()
 {
    {
       const std::string caseLabel{
@@ -122,7 +122,7 @@ void TestMatrixMultiplyIterative()
    }
 }
 
-void TestMatrixMultiplyRecursive()
+void testMatrixMultiplyRecursive()
 {
    {
       const std::string caseLabel{
@@ -162,7 +162,7 @@ void TestMatrixMultiplyRecursive()
    }
 }
 
-void TestMatrixMultiplyStrassen()
+void testMatrixMultiplyStrassen()
 {
    {
       const std::string caseLabel{
@@ -276,11 +276,11 @@ void TestMatrixMultiplyStrassen()
 
 ///////////////////
 
-void TestLinearAlgebra()
+void testLinearAlgebra()
 {
-   TestMatrixAddition();
-   TestMatrixSubtraction();
-   TestMatrixMultiplyIterative();
-   TestMatrixMultiplyRecursive();
-   TestMatrixMultiplyStrassen();
+   testMatrixAddition();
+   testMatrixSubtraction();
+   testMatrixMultiplyIterative();
+   testMatrixMultiplyRecursive();
+   testMatrixMultiplyStrassen();
 }

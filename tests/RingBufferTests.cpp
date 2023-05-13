@@ -11,7 +11,7 @@ using namespace ds;
 namespace
 {
 
-void TestRingBufferDefaultCtor()
+void testRingBufferDefaultCtor()
 {
    {
       const std::string caseLabel{"RingBuffer default ctor"};
@@ -28,7 +28,7 @@ void TestRingBufferDefaultCtor()
 }
 
 
-void TestRingBufferIteratorCtor()
+void testRingBufferIteratorCtor()
 {
    {
       const std::string caseLabel{"RingBuffer iterator ctor"};
@@ -54,7 +54,7 @@ void TestRingBufferIteratorCtor()
 }
 
 
-void TestRingBufferInitializerListCtor()
+void testRingBufferInitializerListCtor()
 {
    {
       const std::string caseLabel{"RingBuffer initializer list ctor"};
@@ -78,7 +78,7 @@ void TestRingBufferInitializerListCtor()
 }
 
 
-void TestRingBufferCopyCtor()
+void testRingBufferCopyCtor()
 {
    {
       const std::string caseLabel{"RingBuffer copy ctor"};
@@ -90,7 +90,7 @@ void TestRingBufferCopyCtor()
 }
 
 
-void TestRingBufferMoveCtor()
+void testRingBufferMoveCtor()
 {
    {
       const std::string caseLabel{"RingBuffer move ctor"};
@@ -102,7 +102,7 @@ void TestRingBufferMoveCtor()
 }
 
 
-void TestRingBufferCopyAssignment()
+void testRingBufferCopyAssignment()
 {
    {
       const std::string caseLabel{"RingBuffer copy assignment operator"};
@@ -115,7 +115,7 @@ void TestRingBufferCopyAssignment()
 }
 
 
-void TestRingBufferMoveAssignment()
+void testRingBufferMoveAssignment()
 {
    {
       const std::string caseLabel{"RingBuffer move assignment operator"};
@@ -128,7 +128,7 @@ void TestRingBufferMoveAssignment()
 }
 
 
-void TestRingBufferSize()
+void testRingBufferSize()
 {
    {
       const std::string caseLabel{"RingBuffer::size()"};
@@ -148,7 +148,7 @@ void TestRingBufferSize()
 }
 
 
-void TestRingBufferCapacity()
+void testRingBufferCapacity()
 {
    {
       const std::string caseLabel{"RingBuffer::capacity() "};
@@ -178,7 +178,7 @@ void TestRingBufferCapacity()
 }
 
 
-void TestRingBufferEmpty()
+void testRingBufferEmpty()
 {
    {
       const std::string caseLabel{"RingBuffer::empty() for empty buffer"};
@@ -198,7 +198,7 @@ void TestRingBufferEmpty()
 }
 
 
-void TestRingBufferFull()
+void testRingBufferFull()
 {
    {
       const std::string caseLabel{"RingBuffer::full() for full buffer"};
@@ -218,7 +218,7 @@ void TestRingBufferFull()
 }
 
 
-void TestRingBufferAt()
+void testRingBufferAt()
 {
    {
       const std::string caseLabel{"RingBuffer::at() for access"};
@@ -269,7 +269,7 @@ void TestRingBufferAt()
 }
 
 
-void TestRingBufferAtConst()
+void testRingBufferAtConst()
 {
    {
       const std::string caseLabel{"RingBuffer::at() const"};
@@ -314,7 +314,7 @@ void TestRingBufferAtConst()
 }
 
 
-void TestRingBufferIndexOperator()
+void testRingBufferIndexOperator()
 {
    {
       const std::string caseLabel{"RingBuffer index operator for access"};
@@ -337,7 +337,7 @@ void TestRingBufferIndexOperator()
 }
 
 
-void TestRingBufferIndexOperatorConst()
+void testRingBufferIndexOperatorConst()
 {
    {
       const std::string caseLabel{"RingBuffer const index operator"};
@@ -354,7 +354,7 @@ void TestRingBufferIndexOperatorConst()
 }
 
 
-void TestRingBufferPush()
+void testRingBufferPush()
 {
    {
       const std::string caseLabel{"RingBuffer::push()"};
@@ -389,7 +389,7 @@ void TestRingBufferPush()
 }
 
 
-void TestRingBufferPop()
+void testRingBufferPop()
 {
    {
       const std::string caseLabel{"RingBuffer::pop()"};
@@ -429,7 +429,7 @@ void TestRingBufferPop()
 }
 
 
-void TestRingBufferClear()
+void testRingBufferClear()
 {
    {
       const std::string caseLabel{"RingBuffer::clear()"};
@@ -452,7 +452,7 @@ void TestRingBufferClear()
 }
 
 
-void TestRingBufferSwap()
+void testRingBufferSwap()
 {
    {
       const std::string caseLabel{"RingBuffer::swap()"};
@@ -493,7 +493,7 @@ void TestRingBufferSwap()
 }
 
 
-void TestRingBufferBegin()
+void testRingBufferBegin()
 {
    {
       const std::string caseLabel{"RingBuffer::begin()"};
@@ -516,7 +516,7 @@ void TestRingBufferBegin()
 }
 
 
-void TestRingBufferEnd()
+void testRingBufferEnd()
 {
    {
       const std::string caseLabel{"RingBuffer::end()"};
@@ -545,7 +545,7 @@ void TestRingBufferEnd()
 }
 
 
-void TestRingBufferBeginConst()
+void testRingBufferBeginConst()
 {
    {
       const std::string caseLabel{"RingBuffer::begin() const"};
@@ -568,7 +568,7 @@ void TestRingBufferBeginConst()
 }
 
 
-void TestRingBufferEndConst()
+void testRingBufferEndConst()
 {
    {
       const std::string caseLabel{"RingBuffer::end() const"};
@@ -597,7 +597,7 @@ void TestRingBufferEndConst()
 }
 
 
-void TestRingBufferCBegin()
+void testRingBufferCBegin()
 {
    {
       const std::string caseLabel{"RingBuffer::cbegin()"};
@@ -620,7 +620,7 @@ void TestRingBufferCBegin()
 }
 
 
-void TestRingBufferCEnd()
+void testRingBufferCEnd()
 {
    {
       const std::string caseLabel{"RingBuffer::cend()"};
@@ -649,7 +649,7 @@ void TestRingBufferCEnd()
 }
 
 
-void TestRingBufferRBegin()
+void testRingBufferRBegin()
 {
    {
       const std::string caseLabel{"RingBuffer::rbegin()"};
@@ -672,7 +672,7 @@ void TestRingBufferRBegin()
 }
 
 
-void TestRingBufferREnd()
+void testRingBufferREnd()
 {
    {
       const std::string caseLabel{"RingBuffer::rend()"};
@@ -701,7 +701,7 @@ void TestRingBufferREnd()
 }
 
 
-void TestRingBufferRBeginConst()
+void testRingBufferRBeginConst()
 {
    {
       const std::string caseLabel{"RingBuffer::rbegin() const"};
@@ -724,7 +724,7 @@ void TestRingBufferRBeginConst()
 }
 
 
-void TestRingBufferREndConst()
+void testRingBufferREndConst()
 {
    {
       const std::string caseLabel{"RingBuffer::rend() const"};
@@ -753,7 +753,7 @@ void TestRingBufferREndConst()
 }
 
 
-void TestRingBufferCRBegin()
+void testRingBufferCRBegin()
 {
    {
       const std::string caseLabel{"RingBuffer::crbegin()"};
@@ -776,7 +776,7 @@ void TestRingBufferCRBegin()
 }
 
 
-void TestRingBufferCREnd()
+void testRingBufferCREnd()
 {
    {
       const std::string caseLabel{"RingBuffer::crend()"};
@@ -804,7 +804,7 @@ void TestRingBufferCREnd()
    }
 }
 
-void TestRingBufferConstIteratorCtor()
+void testRingBufferConstIteratorCtor()
 {
    {
       const std::string caseLabel{"RingBufferConstIterator default ctor"};
@@ -815,7 +815,7 @@ void TestRingBufferConstIteratorCtor()
 }
 
 
-void TestRingBufferConstIteratorCopyCtor()
+void testRingBufferConstIteratorCopyCtor()
 {
    {
       const std::string caseLabel{"RingBufferConstIterator copy ctor"};
@@ -827,7 +827,7 @@ void TestRingBufferConstIteratorCopyCtor()
 }
 
 
-void TestRingBufferConstIteratorMoveCtor()
+void testRingBufferConstIteratorMoveCtor()
 {
    {
       const std::string caseLabel{"RingBufferConstIterator move ctor"};
@@ -838,7 +838,7 @@ void TestRingBufferConstIteratorMoveCtor()
    }
 }
 
-void TestRingBufferConstIteratorCopyAssignment()
+void testRingBufferConstIteratorCopyAssignment()
 {
    {
       const std::string caseLabel{"RingBufferConstIterator copy assignment ctor"};
@@ -850,7 +850,7 @@ void TestRingBufferConstIteratorCopyAssignment()
 }
 
 
-void TestRingBufferConstIteratorMoveAssignment()
+void testRingBufferConstIteratorMoveAssignment()
 {
    {
       const std::string caseLabel{"RingBufferConstIterator move assignment ctor"};
@@ -862,7 +862,7 @@ void TestRingBufferConstIteratorMoveAssignment()
 }
 
 
-void TestRingBufferConstIteratorDerefOperator()
+void testRingBufferConstIteratorDerefOperator()
 {
    {
       const std::string caseLabel{"RingBufferConstIterator dereference operator"};
@@ -880,7 +880,7 @@ void TestRingBufferConstIteratorDerefOperator()
 }
 
 
-void TestRingBufferConstIteratorArrowOperator()
+void testRingBufferConstIteratorArrowOperator()
 {
    {
       const std::string caseLabel{"RingBufferConstIterator arrow operator"};
@@ -900,7 +900,7 @@ void TestRingBufferConstIteratorArrowOperator()
 }
 
 
-void TestRingBufferConstIteratorSubscriptOperator()
+void testRingBufferConstIteratorSubscriptOperator()
 {
    {
       const std::string caseLabel{"RingBufferConstIterator subscript operator"};
@@ -920,7 +920,7 @@ void TestRingBufferConstIteratorSubscriptOperator()
 }
 
 
-void TestRingBufferConstIteratorPrefixIncOperator()
+void testRingBufferConstIteratorPrefixIncOperator()
 {
    {
       const std::string caseLabel{
@@ -953,7 +953,7 @@ void TestRingBufferConstIteratorPrefixIncOperator()
 }
 
 
-void TestRingBufferConstIteratorPostfixIncOperator()
+void testRingBufferConstIteratorPostfixIncOperator()
 {
    {
       const std::string caseLabel{
@@ -987,7 +987,7 @@ void TestRingBufferConstIteratorPostfixIncOperator()
 }
 
 
-void TestRingBufferConstIteratorPrefixDecOperator()
+void testRingBufferConstIteratorPrefixDecOperator()
 {
    {
       const std::string caseLabel{
@@ -1025,7 +1025,7 @@ void TestRingBufferConstIteratorPrefixDecOperator()
    }
 }
 
-void TestRingBufferConstIteratorPostfixDecOperator()
+void testRingBufferConstIteratorPostfixDecOperator()
 {
    {
       const std::string caseLabel{
@@ -1065,7 +1065,7 @@ void TestRingBufferConstIteratorPostfixDecOperator()
 }
 
 
-void TestRingBufferConstIteratorAddAssignmentOperator()
+void testRingBufferConstIteratorAddAssignmentOperator()
 {
    {
       const std::string caseLabel{"RingBufferConstIterator assignment addition operator"};
@@ -1085,7 +1085,7 @@ void TestRingBufferConstIteratorAddAssignmentOperator()
 }
 
 
-void TestRingBufferConstIteratorAdditionOperator()
+void testRingBufferConstIteratorAdditionOperator()
 {
    {
       const std::string caseLabel{"RingBufferConstIterator addition operator"};
@@ -1121,7 +1121,7 @@ void TestRingBufferConstIteratorAdditionOperator()
 }
 
 
-void TestRingBufferConstIteratorSubAssignmentOperator()
+void testRingBufferConstIteratorSubAssignmentOperator()
 {
    {
       const std::string caseLabel{
@@ -1142,7 +1142,7 @@ void TestRingBufferConstIteratorSubAssignmentOperator()
 }
 
 
-void TestRingBufferConstIteratorSubtractionOperator()
+void testRingBufferConstIteratorSubtractionOperator()
 {
    {
       const std::string caseLabel{"RingBufferConstIterator subtraction operator"};
@@ -1162,7 +1162,7 @@ void TestRingBufferConstIteratorSubtractionOperator()
 }
 
 
-void TestRingBufferConstIteratorDifferenceOperator()
+void testRingBufferConstIteratorDifferenceOperator()
 {
    {
       const std::string caseLabel{"RingBufferConstIterator difference operator"};
@@ -1184,7 +1184,7 @@ void TestRingBufferConstIteratorDifferenceOperator()
 }
 
 
-void TestRingBufferConstIteratorEqualityOperator()
+void testRingBufferConstIteratorEqualityOperator()
 {
    {
       const std::string caseLabel{
@@ -1236,7 +1236,7 @@ void TestRingBufferConstIteratorEqualityOperator()
 }
 
 
-void TestRingBufferConstIteratorInequalityOperator()
+void testRingBufferConstIteratorInequalityOperator()
 {
    {
       const std::string caseLabel{
@@ -1272,7 +1272,7 @@ void TestRingBufferConstIteratorInequalityOperator()
 }
 
 
-void TestRingBufferConstIteratorLessThanOperator()
+void testRingBufferConstIteratorLessThanOperator()
 {
    {
       const std::string caseLabel{"RingBufferConstIterator less-than operator"};
@@ -1309,7 +1309,7 @@ void TestRingBufferConstIteratorLessThanOperator()
 }
 
 
-void TestRingBufferConstIteratorGreaterThanOperator()
+void testRingBufferConstIteratorGreaterThanOperator()
 {
    {
       const std::string caseLabel{"RingBufferConstIterator greater-than operator"};
@@ -1346,7 +1346,7 @@ void TestRingBufferConstIteratorGreaterThanOperator()
 }
 
 
-void TestRingBufferConstIteratorLessThanEqualOperator()
+void testRingBufferConstIteratorLessThanEqualOperator()
 {
    {
       const std::string caseLabel{"RingBufferConstIterator less-or-equal-than operator"};
@@ -1384,7 +1384,7 @@ void TestRingBufferConstIteratorLessThanEqualOperator()
 }
 
 
-void TestRingBufferConstIteratorGreaterThanEqualOperator()
+void testRingBufferConstIteratorGreaterThanEqualOperator()
 {
    {
       const std::string caseLabel{
@@ -1423,7 +1423,7 @@ void TestRingBufferConstIteratorGreaterThanEqualOperator()
 }
 
 
-void TestRingBufferConstIteratorSwap()
+void testRingBufferConstIteratorSwap()
 {
    {
       const std::string caseLabel{"RingBufferConstIterator swap"};
@@ -1437,7 +1437,7 @@ void TestRingBufferConstIteratorSwap()
 }
 
 
-void TestRingBufferIteratorDefaultCtor()
+void testRingBufferIteratorDefaultCtor()
 {
    {
       const std::string caseLabel{"RingBufferIterator default ctor"};
@@ -1448,7 +1448,7 @@ void TestRingBufferIteratorDefaultCtor()
 }
 
 
-void TestRingBufferIteratorRBAndIndexCtor()
+void testRingBufferIteratorRBAndIndexCtor()
 {
    {
       const std::string caseLabel{"RingBufferIterator ctor for ring buffer and index"};
@@ -1466,7 +1466,7 @@ void TestRingBufferIteratorRBAndIndexCtor()
 }
 
 
-void TestRingBufferIteratorCopyCtor()
+void testRingBufferIteratorCopyCtor()
 {
    {
       const std::string caseLabel{"RingBufferIterator copy ctor"};
@@ -1478,7 +1478,7 @@ void TestRingBufferIteratorCopyCtor()
 }
 
 
-void TestRingBufferIteratorMoveCtor()
+void testRingBufferIteratorMoveCtor()
 {
    {
       const std::string caseLabel{"RingBufferIterator move ctor"};
@@ -1490,7 +1490,7 @@ void TestRingBufferIteratorMoveCtor()
 }
 
 
-void TestRingBufferIteratorCopyAssignment()
+void testRingBufferIteratorCopyAssignment()
 {
    {
       const std::string caseLabel{"RingBufferIterator copy assignment ctor"};
@@ -1502,7 +1502,7 @@ void TestRingBufferIteratorCopyAssignment()
 }
 
 
-void TestRingBufferIteratorMoveAssignment()
+void testRingBufferIteratorMoveAssignment()
 {
    {
       const std::string caseLabel{"RingBufferIterator move assignment ctor"};
@@ -1514,7 +1514,7 @@ void TestRingBufferIteratorMoveAssignment()
 }
 
 
-void TestRingBufferIteratorConstDerefOperator()
+void testRingBufferIteratorConstDerefOperator()
 {
    {
       const std::string caseLabel{"RingBufferIterator const dereference operator"};
@@ -1532,7 +1532,7 @@ void TestRingBufferIteratorConstDerefOperator()
 }
 
 
-void TestRingBufferIteratorDerefOperator()
+void testRingBufferIteratorDerefOperator()
 {
    {
       const std::string caseLabel{"RingBufferIterator dereference operator"};
@@ -1554,7 +1554,7 @@ void TestRingBufferIteratorDerefOperator()
 }
 
 
-void TestRingBufferIteratorConstArrowOperator()
+void testRingBufferIteratorConstArrowOperator()
 {
    {
       const std::string caseLabel{"RingBufferIterator const arrow operator"};
@@ -1574,7 +1574,7 @@ void TestRingBufferIteratorConstArrowOperator()
 }
 
 
-void TestRingBufferIteratorArrowOperator()
+void testRingBufferIteratorArrowOperator()
 {
    {
       const std::string caseLabel{"RingBufferIterator arrow operator"};
@@ -1597,7 +1597,7 @@ void TestRingBufferIteratorArrowOperator()
 }
 
 
-void TestRingBufferIteratorSubscriptOperator()
+void testRingBufferIteratorSubscriptOperator()
 {
    {
       const std::string caseLabel{"RingBufferIterator subscript operator"};
@@ -1621,7 +1621,7 @@ void TestRingBufferIteratorSubscriptOperator()
 }
 
 
-void TestRingBufferIteratorConstSubscriptOperator()
+void testRingBufferIteratorConstSubscriptOperator()
 {
    {
       const std::string caseLabel{"RingBufferIterator const subscript operator"};
@@ -1641,7 +1641,7 @@ void TestRingBufferIteratorConstSubscriptOperator()
 }
 
 
-void TestRingBufferIteratorPrefixIncOperator()
+void testRingBufferIteratorPrefixIncOperator()
 {
    {
       const std::string caseLabel{
@@ -1674,7 +1674,7 @@ void TestRingBufferIteratorPrefixIncOperator()
 }
 
 
-void TestRingBufferIteratorPostfixIncOperator()
+void testRingBufferIteratorPostfixIncOperator()
 {
    {
       const std::string caseLabel{
@@ -1707,7 +1707,7 @@ void TestRingBufferIteratorPostfixIncOperator()
 }
 
 
-void TestRingBufferIteratorPrefixDecOperator()
+void testRingBufferIteratorPrefixDecOperator()
 {
    {
       const std::string caseLabel{
@@ -1746,7 +1746,7 @@ void TestRingBufferIteratorPrefixDecOperator()
 }
 
 
-void TestRingBufferIteratorPostfixDecOperator()
+void testRingBufferIteratorPostfixDecOperator()
 {
    {
       const std::string caseLabel{
@@ -1785,7 +1785,7 @@ void TestRingBufferIteratorPostfixDecOperator()
 }
 
 
-void TestRingBufferIteratorAddAssignmentOperator()
+void testRingBufferIteratorAddAssignmentOperator()
 {
    {
       const std::string caseLabel{"RingBufferIterator assignment addition operator"};
@@ -1805,7 +1805,7 @@ void TestRingBufferIteratorAddAssignmentOperator()
 }
 
 
-void TestRingBufferIteratorAdditionOperator()
+void testRingBufferIteratorAdditionOperator()
 {
    {
       const std::string caseLabel{"RingBufferIterator addition operator"};
@@ -1841,7 +1841,7 @@ void TestRingBufferIteratorAdditionOperator()
 }
 
 
-void TestRingBufferIteratorSubAssignmentOperator()
+void testRingBufferIteratorSubAssignmentOperator()
 {
    {
       const std::string caseLabel{"RingBufferIterator assignment subtraction operator"};
@@ -1861,7 +1861,7 @@ void TestRingBufferIteratorSubAssignmentOperator()
 }
 
 
-void TestRingBufferIteratorSubtractionOperator()
+void testRingBufferIteratorSubtractionOperator()
 {
    {
       const std::string caseLabel{"RingBufferIterator subtraction operator"};
@@ -1881,7 +1881,7 @@ void TestRingBufferIteratorSubtractionOperator()
 }
 
 
-void TestRingBufferIteratorDifferenceOperator()
+void testRingBufferIteratorDifferenceOperator()
 {
    {
       const std::string caseLabel{"RingBufferIterator difference operator"};
@@ -1903,7 +1903,7 @@ void TestRingBufferIteratorDifferenceOperator()
 }
 
 
-void TestRingBufferIteratorEqualityOperator()
+void testRingBufferIteratorEqualityOperator()
 {
    {
       const std::string caseLabel{"RingBufferIterator equality operator for equality"};
@@ -1954,7 +1954,7 @@ void TestRingBufferIteratorEqualityOperator()
 }
 
 
-void TestRingBufferIteratorInequalityOperator()
+void testRingBufferIteratorInequalityOperator()
 {
    {
       const std::string caseLabel{
@@ -1989,7 +1989,7 @@ void TestRingBufferIteratorInequalityOperator()
 }
 
 
-void TestRingBufferIteratorLessThanOperator()
+void testRingBufferIteratorLessThanOperator()
 {
    {
       const std::string caseLabel{"RingBufferIterator less-than operator"};
@@ -2026,7 +2026,7 @@ void TestRingBufferIteratorLessThanOperator()
 }
 
 
-void TestRingBufferIteratorGreaterThanOperator()
+void testRingBufferIteratorGreaterThanOperator()
 {
    {
       const std::string caseLabel{"RingBufferIterator greater-than operator"};
@@ -2062,7 +2062,7 @@ void TestRingBufferIteratorGreaterThanOperator()
    }
 }
 
-void TestRingBufferIteratorLessThanEqualOperator()
+void testRingBufferIteratorLessThanEqualOperator()
 {
    {
       const std::string caseLabel{"RingBufferIterator less-or-equal-than operator"};
@@ -2100,7 +2100,7 @@ void TestRingBufferIteratorLessThanEqualOperator()
 }
 
 
-void TestRingBufferIteratorGreaterThanEqualOperator()
+void testRingBufferIteratorGreaterThanEqualOperator()
 {
    {
       const std::string caseLabel{"RingBufferIterator greater-or-equal-than operator"};
@@ -2138,7 +2138,7 @@ void TestRingBufferIteratorGreaterThanEqualOperator()
 }
 
 
-void TestRingBufferIteratorSwap()
+void testRingBufferIteratorSwap()
 {
    {
       const std::string caseLabel{"RingBufferConstIterator swap"};
@@ -2152,7 +2152,7 @@ void TestRingBufferIteratorSwap()
 }
 
 
-void TestRingBufferConstReverseIteratorCtor()
+void testRingBufferConstReverseIteratorCtor()
 {
    {
       const std::string caseLabel{"RingBuffer::const_reverse_iterator default ctor"};
@@ -2163,7 +2163,7 @@ void TestRingBufferConstReverseIteratorCtor()
 }
 
 
-void TestRingBufferConstReverseIteratorFromIterator()
+void testRingBufferConstReverseIteratorFromIterator()
 {
    {
       const std::string caseLabel{"RingBuffer::const_reverse_iterator ctor for iterator"};
@@ -2182,7 +2182,7 @@ void TestRingBufferConstReverseIteratorFromIterator()
 }
 
 
-void TestRingBufferConstReverseIteratorCopyCtor()
+void testRingBufferConstReverseIteratorCopyCtor()
 {
    {
       const std::string caseLabel{"RingBuffer::const_reverse_iterator copy ctor"};
@@ -2195,7 +2195,7 @@ void TestRingBufferConstReverseIteratorCopyCtor()
 }
 
 
-void TestRingBufferConstReverseIteratorMoveCtor()
+void testRingBufferConstReverseIteratorMoveCtor()
 {
    {
       const std::string caseLabel{"RingBuffer::const_reverse_iterator move ctor"};
@@ -2208,7 +2208,7 @@ void TestRingBufferConstReverseIteratorMoveCtor()
 }
 
 
-void TestRingBufferConstReverseIteratorCopyAssignment()
+void testRingBufferConstReverseIteratorCopyAssignment()
 {
    {
       const std::string caseLabel{
@@ -2222,7 +2222,7 @@ void TestRingBufferConstReverseIteratorCopyAssignment()
 }
 
 
-void TestRingBufferConstReverseIteratorMoveAssignment()
+void testRingBufferConstReverseIteratorMoveAssignment()
 {
    {
       const std::string caseLabel{
@@ -2236,7 +2236,7 @@ void TestRingBufferConstReverseIteratorMoveAssignment()
 }
 
 
-void TestRingBufferConstReverseIteratorDerefOperator()
+void testRingBufferConstReverseIteratorDerefOperator()
 {
    {
       const std::string caseLabel{
@@ -2257,7 +2257,7 @@ void TestRingBufferConstReverseIteratorDerefOperator()
 }
 
 
-void TestRingBufferConstReverseIteratorArrowOperator()
+void testRingBufferConstReverseIteratorArrowOperator()
 {
    {
       const std::string caseLabel{"RingBuffer::const_reverse_iterator arrow operator"};
@@ -2280,7 +2280,7 @@ void TestRingBufferConstReverseIteratorArrowOperator()
 }
 
 
-void TestRingBufferConstReverseIteratorPrefixIncOperator()
+void testRingBufferConstReverseIteratorPrefixIncOperator()
 {
    {
       const std::string caseLabel{"RingBuffer::const_reverse_iterator prefix behavior of "
@@ -2315,7 +2315,7 @@ void TestRingBufferConstReverseIteratorPrefixIncOperator()
 }
 
 
-void TestRingBufferConstReverseIteratorPostfixIncOperator()
+void testRingBufferConstReverseIteratorPostfixIncOperator()
 {
    {
       const std::string caseLabel{"RingBuffer::const_reverse_iterator postfix behavior "
@@ -2350,7 +2350,7 @@ void TestRingBufferConstReverseIteratorPostfixIncOperator()
 }
 
 
-void TestRingBufferConstReverseIteratorPrefixDecOperator()
+void testRingBufferConstReverseIteratorPrefixDecOperator()
 {
    {
       const std::string caseLabel{"RingBuffer::const_reverse_iterator prefix behavior of "
@@ -2390,7 +2390,7 @@ void TestRingBufferConstReverseIteratorPrefixDecOperator()
 }
 
 
-void TestRingBufferConstReverseIteratorPostfixDecOperator()
+void testRingBufferConstReverseIteratorPostfixDecOperator()
 {
    {
       const std::string caseLabel{"RingBuffer::const_reverse_iterator postfix behavior "
@@ -2431,7 +2431,7 @@ void TestRingBufferConstReverseIteratorPostfixDecOperator()
 }
 
 
-void TestRingBufferConstReverseIteratorAddAssignmentOperator()
+void testRingBufferConstReverseIteratorAddAssignmentOperator()
 {
    {
       const std::string caseLabel{
@@ -2452,7 +2452,7 @@ void TestRingBufferConstReverseIteratorAddAssignmentOperator()
 }
 
 
-void TestRingBufferConstReverseIteratorAdditionOperator()
+void testRingBufferConstReverseIteratorAdditionOperator()
 {
    {
       const std::string caseLabel{"RingBuffer::const_reverse_iterator addition operator"};
@@ -2472,7 +2472,7 @@ void TestRingBufferConstReverseIteratorAdditionOperator()
 }
 
 
-void TestRingBufferConstReverseIteratorSubAssignmentOperator()
+void testRingBufferConstReverseIteratorSubAssignmentOperator()
 {
    {
       const std::string caseLabel{
@@ -2493,7 +2493,7 @@ void TestRingBufferConstReverseIteratorSubAssignmentOperator()
 }
 
 
-void TestRingBufferConstReverseIteratorSubtractionOperator()
+void testRingBufferConstReverseIteratorSubtractionOperator()
 {
    {
       const std::string caseLabel{
@@ -2514,7 +2514,7 @@ void TestRingBufferConstReverseIteratorSubtractionOperator()
 }
 
 
-void TestRingBufferConstReverseIteratorDifferenceOperator()
+void testRingBufferConstReverseIteratorDifferenceOperator()
 {
    // Iterator difference does not seem to be defined for the reverse iterator adaptor.
    //{
@@ -2537,7 +2537,7 @@ void TestRingBufferConstReverseIteratorDifferenceOperator()
 }
 
 
-void TestRingBufferConstReverseIteratorEqualityOperator()
+void testRingBufferConstReverseIteratorEqualityOperator()
 {
    {
       const std::string caseLabel{
@@ -2589,7 +2589,7 @@ void TestRingBufferConstReverseIteratorEqualityOperator()
 }
 
 
-void TestRingBufferConstReverseIteratorInequalityOperator()
+void testRingBufferConstReverseIteratorInequalityOperator()
 {
    {
       const std::string caseLabel{
@@ -2625,7 +2625,7 @@ void TestRingBufferConstReverseIteratorInequalityOperator()
 }
 
 
-void TestRingBufferConstReverseIteratorLessThanOperator()
+void testRingBufferConstReverseIteratorLessThanOperator()
 {
    {
       const std::string caseLabel{
@@ -2663,7 +2663,7 @@ void TestRingBufferConstReverseIteratorLessThanOperator()
 }
 
 
-void TestRingBufferConstReverseIteratorGreaterThanOperator()
+void testRingBufferConstReverseIteratorGreaterThanOperator()
 {
    {
       const std::string caseLabel{
@@ -2701,7 +2701,7 @@ void TestRingBufferConstReverseIteratorGreaterThanOperator()
 }
 
 
-void TestRingBufferConstReverseIteratorLessThanEqualOperator()
+void testRingBufferConstReverseIteratorLessThanEqualOperator()
 {
    {
       const std::string caseLabel{
@@ -2740,7 +2740,7 @@ void TestRingBufferConstReverseIteratorLessThanEqualOperator()
 }
 
 
-void TestRingBufferConstReverseIteratorGreaterThanEqualOperator()
+void testRingBufferConstReverseIteratorGreaterThanEqualOperator()
 {
    {
       const std::string caseLabel{
@@ -2779,7 +2779,7 @@ void TestRingBufferConstReverseIteratorGreaterThanEqualOperator()
 }
 
 
-void TestRingBufferReverseIteratorCtor()
+void testRingBufferReverseIteratorCtor()
 {
    {
       const std::string caseLabel{"RingBuffer::reverse_iterator default ctor"};
@@ -2790,7 +2790,7 @@ void TestRingBufferReverseIteratorCtor()
 }
 
 
-void TestRingBufferReverseIteratorFromIterator()
+void testRingBufferReverseIteratorFromIterator()
 {
    {
       const std::string caseLabel{"RingBuffer::reverse_iterator ctor for iterator"};
@@ -2808,7 +2808,7 @@ void TestRingBufferReverseIteratorFromIterator()
 }
 
 
-void TestRingBufferReverseIteratorCopyCtor()
+void testRingBufferReverseIteratorCopyCtor()
 {
    {
       const std::string caseLabel{"RingBuffer::reverse_iterator copy ctor"};
@@ -2821,7 +2821,7 @@ void TestRingBufferReverseIteratorCopyCtor()
 }
 
 
-void TestRingBufferReverseIteratorMoveCtor()
+void testRingBufferReverseIteratorMoveCtor()
 {
    {
       const std::string caseLabel{"RingBuffer::reverse_iterator move ctor"};
@@ -2834,7 +2834,7 @@ void TestRingBufferReverseIteratorMoveCtor()
 }
 
 
-void TestRingBufferReverseIteratorCopyAssignment()
+void testRingBufferReverseIteratorCopyAssignment()
 {
    {
       const std::string caseLabel{"RingBuffer::reverse_iterator copy assignment ctor"};
@@ -2847,7 +2847,7 @@ void TestRingBufferReverseIteratorCopyAssignment()
 }
 
 
-void TestRingBufferReverseIteratorMoveAssignment()
+void testRingBufferReverseIteratorMoveAssignment()
 {
    {
       const std::string caseLabel{"RingBuffer::reverse_iterator move assignment ctor"};
@@ -2860,7 +2860,7 @@ void TestRingBufferReverseIteratorMoveAssignment()
 }
 
 
-void TestRingBufferReverseIteratorConstDerefOperator()
+void testRingBufferReverseIteratorConstDerefOperator()
 {
    {
       const std::string caseLabel{
@@ -2880,7 +2880,7 @@ void TestRingBufferReverseIteratorConstDerefOperator()
    }
 }
 
-void TestRingBufferReverseIteratorDerefOperator()
+void testRingBufferReverseIteratorDerefOperator()
 {
    {
       const std::string caseLabel{"RingBuffer::reverse_iterator dereference operator"};
@@ -2903,7 +2903,7 @@ void TestRingBufferReverseIteratorDerefOperator()
    }
 }
 
-void TestRingBufferReverseIteratorConstArrowOperator()
+void testRingBufferReverseIteratorConstArrowOperator()
 {
    {
       const std::string caseLabel{"RingBuffer::reverse_iterator const arrow operator"};
@@ -2926,7 +2926,7 @@ void TestRingBufferReverseIteratorConstArrowOperator()
 }
 
 
-void TestRingBufferReverseIteratorArrowOperator()
+void testRingBufferReverseIteratorArrowOperator()
 {
    {
       const std::string caseLabel{"RingBuffer::reverse_iterator arrow operator"};
@@ -2953,7 +2953,7 @@ void TestRingBufferReverseIteratorArrowOperator()
 }
 
 
-void TestRingBufferReverseIteratorPrefixIncOperator()
+void testRingBufferReverseIteratorPrefixIncOperator()
 {
    {
       const std::string caseLabel{
@@ -2988,7 +2988,7 @@ void TestRingBufferReverseIteratorPrefixIncOperator()
 }
 
 
-void TestRingBufferReverseIteratorPostfixIncOperator()
+void testRingBufferReverseIteratorPostfixIncOperator()
 {
    {
       const std::string caseLabel{
@@ -3023,7 +3023,7 @@ void TestRingBufferReverseIteratorPostfixIncOperator()
 }
 
 
-void TestRingBufferReverseIteratorPrefixDecOperator()
+void testRingBufferReverseIteratorPrefixDecOperator()
 {
    {
       const std::string caseLabel{
@@ -3063,7 +3063,7 @@ void TestRingBufferReverseIteratorPrefixDecOperator()
 }
 
 
-void TestRingBufferReverseIteratorPostfixDecOperator()
+void testRingBufferReverseIteratorPostfixDecOperator()
 {
    {
       const std::string caseLabel{
@@ -3104,7 +3104,7 @@ void TestRingBufferReverseIteratorPostfixDecOperator()
 }
 
 
-void TestRingBufferReverseIteratorAddAssignmentOperator()
+void testRingBufferReverseIteratorAddAssignmentOperator()
 {
    {
       const std::string caseLabel{
@@ -3125,7 +3125,7 @@ void TestRingBufferReverseIteratorAddAssignmentOperator()
 }
 
 
-void TestRingBufferReverseIteratorAdditionOperator()
+void testRingBufferReverseIteratorAdditionOperator()
 {
    {
       const std::string caseLabel{"RingBuffer::reverse_iterator addition operator"};
@@ -3145,7 +3145,7 @@ void TestRingBufferReverseIteratorAdditionOperator()
 }
 
 
-void TestRingBufferReverseIteratorSubAssignmentOperator()
+void testRingBufferReverseIteratorSubAssignmentOperator()
 {
    {
       const std::string caseLabel{
@@ -3166,7 +3166,7 @@ void TestRingBufferReverseIteratorSubAssignmentOperator()
 }
 
 
-void TestRingBufferReverseIteratorSubtractionOperator()
+void testRingBufferReverseIteratorSubtractionOperator()
 {
    {
       const std::string caseLabel{"RingBuffer::reverse_iterator subtraction operator"};
@@ -3186,7 +3186,7 @@ void TestRingBufferReverseIteratorSubtractionOperator()
 }
 
 
-void TestRingBufferReverseIteratorDifferenceOperator()
+void testRingBufferReverseIteratorDifferenceOperator()
 {
    // Iterator difference does not seem to be defined for the reverse iterator adaptor.
    //{
@@ -3209,7 +3209,7 @@ void TestRingBufferReverseIteratorDifferenceOperator()
 }
 
 
-void TestRingBufferReverseIteratorEqualityOperator()
+void testRingBufferReverseIteratorEqualityOperator()
 {
    {
       const std::string caseLabel{
@@ -3261,7 +3261,7 @@ void TestRingBufferReverseIteratorEqualityOperator()
 }
 
 
-void TestRingBufferReverseIteratorInequalityOperator()
+void testRingBufferReverseIteratorInequalityOperator()
 {
    {
       const std::string caseLabel{
@@ -3297,7 +3297,7 @@ void TestRingBufferReverseIteratorInequalityOperator()
 }
 
 
-void TestRingBufferReverseIteratorLessThanOperator()
+void testRingBufferReverseIteratorLessThanOperator()
 {
    {
       const std::string caseLabel{"RingBuffer::reverse_iterator less-than operator"};
@@ -3334,7 +3334,7 @@ void TestRingBufferReverseIteratorLessThanOperator()
 }
 
 
-void TestRingBufferReverseIteratorGreaterThanOperator()
+void testRingBufferReverseIteratorGreaterThanOperator()
 {
    {
       const std::string caseLabel{"RingBuffer::reverse_iterator greater-than operator"};
@@ -3371,7 +3371,7 @@ void TestRingBufferReverseIteratorGreaterThanOperator()
 }
 
 
-void TestRingBufferReverseIteratorLessThanEqualOperator()
+void testRingBufferReverseIteratorLessThanEqualOperator()
 {
    {
       const std::string caseLabel{
@@ -3410,7 +3410,7 @@ void TestRingBufferReverseIteratorLessThanEqualOperator()
 }
 
 
-void TestRingBufferReverseIteratorGreaterThanEqualOperator()
+void testRingBufferReverseIteratorGreaterThanEqualOperator()
 {
    {
       const std::string caseLabel{
@@ -3451,141 +3451,141 @@ void TestRingBufferReverseIteratorGreaterThanEqualOperator()
 } // namespace
 
 
-void TestRingBuffer()
+void testRingBuffer()
 {
-   TestRingBufferDefaultCtor();
-   TestRingBufferIteratorCtor();
-   TestRingBufferInitializerListCtor();
-   TestRingBufferCopyCtor();
-   TestRingBufferMoveCtor();
-   TestRingBufferCopyAssignment();
-   TestRingBufferMoveAssignment();
-   TestRingBufferSize();
-   TestRingBufferCapacity();
-   TestRingBufferEmpty();
-   TestRingBufferFull();
-   TestRingBufferAt();
-   TestRingBufferAtConst();
-   TestRingBufferIndexOperator();
-   TestRingBufferIndexOperatorConst();
-   TestRingBufferPush();
-   TestRingBufferPop();
-   TestRingBufferClear();
-   TestRingBufferSwap();
-   TestRingBufferBegin();
-   TestRingBufferEnd();
-   TestRingBufferBeginConst();
-   TestRingBufferEndConst();
-   TestRingBufferCBegin();
-   TestRingBufferCEnd();
-   TestRingBufferRBegin();
-   TestRingBufferREnd();
-   TestRingBufferRBeginConst();
-   TestRingBufferREndConst();
-   TestRingBufferCRBegin();
-   TestRingBufferCREnd();
+   testRingBufferDefaultCtor();
+   testRingBufferIteratorCtor();
+   testRingBufferInitializerListCtor();
+   testRingBufferCopyCtor();
+   testRingBufferMoveCtor();
+   testRingBufferCopyAssignment();
+   testRingBufferMoveAssignment();
+   testRingBufferSize();
+   testRingBufferCapacity();
+   testRingBufferEmpty();
+   testRingBufferFull();
+   testRingBufferAt();
+   testRingBufferAtConst();
+   testRingBufferIndexOperator();
+   testRingBufferIndexOperatorConst();
+   testRingBufferPush();
+   testRingBufferPop();
+   testRingBufferClear();
+   testRingBufferSwap();
+   testRingBufferBegin();
+   testRingBufferEnd();
+   testRingBufferBeginConst();
+   testRingBufferEndConst();
+   testRingBufferCBegin();
+   testRingBufferCEnd();
+   testRingBufferRBegin();
+   testRingBufferREnd();
+   testRingBufferRBeginConst();
+   testRingBufferREndConst();
+   testRingBufferCRBegin();
+   testRingBufferCREnd();
 
-   TestRingBufferConstIteratorCtor();
-   TestRingBufferConstIteratorCopyCtor();
-   TestRingBufferConstIteratorMoveCtor();
-   TestRingBufferConstIteratorCopyAssignment();
-   TestRingBufferConstIteratorMoveAssignment();
-   TestRingBufferConstIteratorDerefOperator();
-   TestRingBufferConstIteratorArrowOperator();
-   TestRingBufferConstIteratorSubscriptOperator();
-   TestRingBufferConstIteratorPrefixIncOperator();
-   TestRingBufferConstIteratorPostfixIncOperator();
-   TestRingBufferConstIteratorPrefixDecOperator();
-   TestRingBufferConstIteratorPostfixDecOperator();
-   TestRingBufferConstIteratorAddAssignmentOperator();
-   TestRingBufferConstIteratorAdditionOperator();
-   TestRingBufferConstIteratorSubAssignmentOperator();
-   TestRingBufferConstIteratorSubtractionOperator();
-   TestRingBufferConstIteratorDifferenceOperator();
-   TestRingBufferConstIteratorEqualityOperator();
-   TestRingBufferConstIteratorInequalityOperator();
-   TestRingBufferConstIteratorLessThanOperator();
-   TestRingBufferConstIteratorGreaterThanOperator();
-   TestRingBufferConstIteratorLessThanEqualOperator();
-   TestRingBufferConstIteratorGreaterThanEqualOperator();
-   TestRingBufferConstIteratorSwap();
+   testRingBufferConstIteratorCtor();
+   testRingBufferConstIteratorCopyCtor();
+   testRingBufferConstIteratorMoveCtor();
+   testRingBufferConstIteratorCopyAssignment();
+   testRingBufferConstIteratorMoveAssignment();
+   testRingBufferConstIteratorDerefOperator();
+   testRingBufferConstIteratorArrowOperator();
+   testRingBufferConstIteratorSubscriptOperator();
+   testRingBufferConstIteratorPrefixIncOperator();
+   testRingBufferConstIteratorPostfixIncOperator();
+   testRingBufferConstIteratorPrefixDecOperator();
+   testRingBufferConstIteratorPostfixDecOperator();
+   testRingBufferConstIteratorAddAssignmentOperator();
+   testRingBufferConstIteratorAdditionOperator();
+   testRingBufferConstIteratorSubAssignmentOperator();
+   testRingBufferConstIteratorSubtractionOperator();
+   testRingBufferConstIteratorDifferenceOperator();
+   testRingBufferConstIteratorEqualityOperator();
+   testRingBufferConstIteratorInequalityOperator();
+   testRingBufferConstIteratorLessThanOperator();
+   testRingBufferConstIteratorGreaterThanOperator();
+   testRingBufferConstIteratorLessThanEqualOperator();
+   testRingBufferConstIteratorGreaterThanEqualOperator();
+   testRingBufferConstIteratorSwap();
 
-   TestRingBufferIteratorDefaultCtor();
-   TestRingBufferIteratorRBAndIndexCtor();
-   TestRingBufferIteratorCopyCtor();
-   TestRingBufferIteratorMoveCtor();
-   TestRingBufferIteratorCopyAssignment();
-   TestRingBufferIteratorMoveAssignment();
-   TestRingBufferIteratorConstDerefOperator();
-   TestRingBufferIteratorDerefOperator();
-   TestRingBufferIteratorConstArrowOperator();
-   TestRingBufferIteratorArrowOperator();
-   TestRingBufferIteratorSubscriptOperator();
-   TestRingBufferIteratorConstSubscriptOperator();
-   TestRingBufferIteratorPrefixIncOperator();
-   TestRingBufferIteratorPostfixIncOperator();
-   TestRingBufferIteratorPrefixDecOperator();
-   TestRingBufferIteratorPostfixDecOperator();
-   TestRingBufferIteratorAddAssignmentOperator();
-   TestRingBufferIteratorAdditionOperator();
-   TestRingBufferIteratorSubAssignmentOperator();
-   TestRingBufferIteratorSubtractionOperator();
-   TestRingBufferIteratorDifferenceOperator();
-   TestRingBufferIteratorEqualityOperator();
-   TestRingBufferIteratorInequalityOperator();
-   TestRingBufferIteratorLessThanOperator();
-   TestRingBufferIteratorGreaterThanOperator();
-   TestRingBufferIteratorLessThanEqualOperator();
-   TestRingBufferIteratorGreaterThanEqualOperator();
-   TestRingBufferIteratorSwap();
+   testRingBufferIteratorDefaultCtor();
+   testRingBufferIteratorRBAndIndexCtor();
+   testRingBufferIteratorCopyCtor();
+   testRingBufferIteratorMoveCtor();
+   testRingBufferIteratorCopyAssignment();
+   testRingBufferIteratorMoveAssignment();
+   testRingBufferIteratorConstDerefOperator();
+   testRingBufferIteratorDerefOperator();
+   testRingBufferIteratorConstArrowOperator();
+   testRingBufferIteratorArrowOperator();
+   testRingBufferIteratorSubscriptOperator();
+   testRingBufferIteratorConstSubscriptOperator();
+   testRingBufferIteratorPrefixIncOperator();
+   testRingBufferIteratorPostfixIncOperator();
+   testRingBufferIteratorPrefixDecOperator();
+   testRingBufferIteratorPostfixDecOperator();
+   testRingBufferIteratorAddAssignmentOperator();
+   testRingBufferIteratorAdditionOperator();
+   testRingBufferIteratorSubAssignmentOperator();
+   testRingBufferIteratorSubtractionOperator();
+   testRingBufferIteratorDifferenceOperator();
+   testRingBufferIteratorEqualityOperator();
+   testRingBufferIteratorInequalityOperator();
+   testRingBufferIteratorLessThanOperator();
+   testRingBufferIteratorGreaterThanOperator();
+   testRingBufferIteratorLessThanEqualOperator();
+   testRingBufferIteratorGreaterThanEqualOperator();
+   testRingBufferIteratorSwap();
 
-   TestRingBufferConstReverseIteratorCtor();
-   TestRingBufferConstReverseIteratorFromIterator();
-   TestRingBufferConstReverseIteratorCopyCtor();
-   TestRingBufferConstReverseIteratorMoveCtor();
-   TestRingBufferConstReverseIteratorCopyAssignment();
-   TestRingBufferConstReverseIteratorMoveAssignment();
-   TestRingBufferConstReverseIteratorDerefOperator();
-   TestRingBufferConstReverseIteratorArrowOperator();
-   TestRingBufferConstReverseIteratorPrefixIncOperator();
-   TestRingBufferConstReverseIteratorPostfixIncOperator();
-   TestRingBufferConstReverseIteratorPrefixDecOperator();
-   TestRingBufferConstReverseIteratorPostfixDecOperator();
-   TestRingBufferConstReverseIteratorAddAssignmentOperator();
-   TestRingBufferConstReverseIteratorAdditionOperator();
-   TestRingBufferConstReverseIteratorSubAssignmentOperator();
-   TestRingBufferConstReverseIteratorSubtractionOperator();
-   TestRingBufferConstReverseIteratorDifferenceOperator();
-   TestRingBufferConstReverseIteratorEqualityOperator();
-   TestRingBufferConstReverseIteratorInequalityOperator();
-   TestRingBufferConstReverseIteratorLessThanOperator();
-   TestRingBufferConstReverseIteratorGreaterThanOperator();
-   TestRingBufferConstReverseIteratorLessThanEqualOperator();
-   TestRingBufferConstReverseIteratorGreaterThanEqualOperator();
+   testRingBufferConstReverseIteratorCtor();
+   testRingBufferConstReverseIteratorFromIterator();
+   testRingBufferConstReverseIteratorCopyCtor();
+   testRingBufferConstReverseIteratorMoveCtor();
+   testRingBufferConstReverseIteratorCopyAssignment();
+   testRingBufferConstReverseIteratorMoveAssignment();
+   testRingBufferConstReverseIteratorDerefOperator();
+   testRingBufferConstReverseIteratorArrowOperator();
+   testRingBufferConstReverseIteratorPrefixIncOperator();
+   testRingBufferConstReverseIteratorPostfixIncOperator();
+   testRingBufferConstReverseIteratorPrefixDecOperator();
+   testRingBufferConstReverseIteratorPostfixDecOperator();
+   testRingBufferConstReverseIteratorAddAssignmentOperator();
+   testRingBufferConstReverseIteratorAdditionOperator();
+   testRingBufferConstReverseIteratorSubAssignmentOperator();
+   testRingBufferConstReverseIteratorSubtractionOperator();
+   testRingBufferConstReverseIteratorDifferenceOperator();
+   testRingBufferConstReverseIteratorEqualityOperator();
+   testRingBufferConstReverseIteratorInequalityOperator();
+   testRingBufferConstReverseIteratorLessThanOperator();
+   testRingBufferConstReverseIteratorGreaterThanOperator();
+   testRingBufferConstReverseIteratorLessThanEqualOperator();
+   testRingBufferConstReverseIteratorGreaterThanEqualOperator();
 
-   TestRingBufferReverseIteratorCtor();
-   TestRingBufferReverseIteratorFromIterator();
-   TestRingBufferReverseIteratorCopyCtor();
-   TestRingBufferReverseIteratorMoveCtor();
-   TestRingBufferReverseIteratorCopyAssignment();
-   TestRingBufferReverseIteratorMoveAssignment();
-   TestRingBufferReverseIteratorConstDerefOperator();
-   TestRingBufferReverseIteratorDerefOperator();
-   TestRingBufferReverseIteratorConstArrowOperator();
-   TestRingBufferReverseIteratorArrowOperator();
-   TestRingBufferReverseIteratorPrefixIncOperator();
-   TestRingBufferReverseIteratorPostfixIncOperator();
-   TestRingBufferReverseIteratorPrefixDecOperator();
-   TestRingBufferReverseIteratorPostfixDecOperator();
-   TestRingBufferReverseIteratorAddAssignmentOperator();
-   TestRingBufferReverseIteratorAdditionOperator();
-   TestRingBufferReverseIteratorSubAssignmentOperator();
-   TestRingBufferReverseIteratorSubtractionOperator();
-   TestRingBufferReverseIteratorDifferenceOperator();
-   TestRingBufferReverseIteratorEqualityOperator();
-   TestRingBufferReverseIteratorInequalityOperator();
-   TestRingBufferReverseIteratorLessThanOperator();
-   TestRingBufferReverseIteratorGreaterThanOperator();
-   TestRingBufferReverseIteratorLessThanEqualOperator();
-   TestRingBufferReverseIteratorGreaterThanEqualOperator();
+   testRingBufferReverseIteratorCtor();
+   testRingBufferReverseIteratorFromIterator();
+   testRingBufferReverseIteratorCopyCtor();
+   testRingBufferReverseIteratorMoveCtor();
+   testRingBufferReverseIteratorCopyAssignment();
+   testRingBufferReverseIteratorMoveAssignment();
+   testRingBufferReverseIteratorConstDerefOperator();
+   testRingBufferReverseIteratorDerefOperator();
+   testRingBufferReverseIteratorConstArrowOperator();
+   testRingBufferReverseIteratorArrowOperator();
+   testRingBufferReverseIteratorPrefixIncOperator();
+   testRingBufferReverseIteratorPostfixIncOperator();
+   testRingBufferReverseIteratorPrefixDecOperator();
+   testRingBufferReverseIteratorPostfixDecOperator();
+   testRingBufferReverseIteratorAddAssignmentOperator();
+   testRingBufferReverseIteratorAdditionOperator();
+   testRingBufferReverseIteratorSubAssignmentOperator();
+   testRingBufferReverseIteratorSubtractionOperator();
+   testRingBufferReverseIteratorDifferenceOperator();
+   testRingBufferReverseIteratorEqualityOperator();
+   testRingBufferReverseIteratorInequalityOperator();
+   testRingBufferReverseIteratorLessThanOperator();
+   testRingBufferReverseIteratorGreaterThanOperator();
+   testRingBufferReverseIteratorLessThanEqualOperator();
+   testRingBufferReverseIteratorGreaterThanEqualOperator();
 }

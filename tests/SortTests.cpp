@@ -14,198 +14,198 @@ namespace
 {
 ///////////////////
 
-void TestInsertionSort()
+void testInsertionSort()
 {
    {
       const std::string caseLabel{
-         "InsertionSort for sorting integers with default comparision"};
+         "insertionSort for sorting integers with default comparision"};
 
       std::vector<int> seq{7, 3, 2, 9, 5, 6};
-      InsertionSort(std::begin(seq), std::end(seq));
+      insertionSort(std::begin(seq), std::end(seq));
 
       const std::vector<int> expected{2, 3, 5, 6, 7, 9};
       VERIFY(seq == expected, caseLabel);
    }
    {
       const std::string caseLabel{
-         "InsertionSort for sorting integers with greater-than comparision"};
+         "insertionSort for sorting integers with greater-than comparision"};
 
       std::vector<int> seq{7, 3, 2, 9, 5, 6};
-      InsertionSort(std::begin(seq), std::end(seq), std::greater<int>());
+      insertionSort(std::begin(seq), std::end(seq), std::greater<int>());
 
       const std::vector<int> expected{9, 7, 6, 5, 3, 2};
       VERIFY(seq == expected, caseLabel);
    }
    {
       const std::string caseLabel{
-         "InsertionSort for sorting strings with default comparision"};
+         "insertionSort for sorting strings with default comparision"};
 
       std::vector<std::string> seq{"cd", "aa", "ab", "fe", "ba", "fa"};
-      InsertionSort(std::begin(seq), std::end(seq));
+      insertionSort(std::begin(seq), std::end(seq));
 
       const std::vector<std::string> expected{"aa", "ab", "ba", "cd", "fa", "fe"};
       VERIFY(seq == expected, caseLabel);
    }
    {
       const std::string caseLabel{
-         "InsertionSort for sorting strings with greater-than comparision"};
+         "insertionSort for sorting strings with greater-than comparision"};
 
       std::vector<std::string> seq{"cd", "aa", "ab", "fe", "ba", "fa"};
-      InsertionSort(std::begin(seq), std::end(seq), std::greater<std::string>());
+      insertionSort(std::begin(seq), std::end(seq), std::greater<std::string>());
 
       const std::vector<std::string> expected{"fe", "fa", "cd", "ba", "ab", "aa"};
       VERIFY(seq == expected, caseLabel);
    }
    {
-      const std::string caseLabel{"InsertionSort for sorting empty container"};
+      const std::string caseLabel{"insertionSort for sorting empty container"};
 
       std::vector<int> seq;
-      InsertionSort(std::begin(seq), std::end(seq));
+      insertionSort(std::begin(seq), std::end(seq));
 
       const std::vector<int> expected;
       VERIFY(seq == expected, caseLabel);
    }
    {
-      const std::string caseLabel{"InsertionSort for sorting container with one element"};
+      const std::string caseLabel{"insertionSort for sorting container with one element"};
 
       std::vector<int> seq{100};
-      InsertionSort(std::begin(seq), std::end(seq));
+      insertionSort(std::begin(seq), std::end(seq));
 
       const std::vector<int> expected{100};
       VERIFY(seq == expected, caseLabel);
    }
    {
-      const std::string caseLabel{"InsertionSort for sorting std::deque container"};
+      const std::string caseLabel{"insertionSort for sorting std::deque container"};
 
       std::deque<int> seq{100, 50, 30, 75, 200, 1};
-      InsertionSort(std::begin(seq), std::end(seq));
+      insertionSort(std::begin(seq), std::end(seq));
 
       const std::deque<int> expected{1, 30, 50, 75, 100, 200};
       VERIFY(seq == expected, caseLabel);
    }
    {
-      const std::string caseLabel{"InsertionSort for sorting already sorted container"};
+      const std::string caseLabel{"insertionSort for sorting already sorted container"};
 
       std::vector<int> seq{100, 101, 102, 103};
-      InsertionSort(std::begin(seq), std::end(seq));
+      insertionSort(std::begin(seq), std::end(seq));
 
       const std::vector<int> expected{100, 101, 102, 103};
       VERIFY(seq == expected, caseLabel);
    }
    {
-      const std::string caseLabel{"InsertionSort range interface for vector"};
+      const std::string caseLabel{"insertionSort range interface for vector"};
 
       std::vector<int> seq{7, 3, 2, 9, 5, 6};
-      InsertionSort(seq);
+      insertionSort(seq);
 
       const std::vector<int> expected{2, 3, 5, 6, 7, 9};
       VERIFY(seq == expected, caseLabel);
    }
    {
       const std::string caseLabel{
-         "InsertionSort range interface for vector and custom comparision"};
+         "insertionSort range interface for vector and custom comparision"};
 
       std::vector<int> seq{7, 3, 2, 9, 5, 6};
-      InsertionSort(seq, std::greater<int>());
+      insertionSort(seq, std::greater<int>());
 
       const std::vector<int> expected{9, 7, 6, 5, 3, 2};
       VERIFY(seq == expected, caseLabel);
    }
 }
 
-void TestMergeSort()
+void testMergeSort()
 {
    {
       const std::string caseLabel{
-         "MergeSort for sorting integers with default comparision"};
+         "mergeSort for sorting integers with default comparision"};
 
       std::vector<int> seq{7, 3, 2, 9, 5, 6};
-      MergeSort(std::begin(seq), std::end(seq));
+      mergeSort(std::begin(seq), std::end(seq));
 
       const std::vector<int> expected{2, 3, 5, 6, 7, 9};
       VERIFY(seq == expected, caseLabel);
    }
    {
       const std::string caseLabel{
-         "MergeSort for sorting integers with greater-than comparision"};
+         "mergeSort for sorting integers with greater-than comparision"};
 
       std::vector<int> seq{7, 3, 2, 9, 5, 6};
-      MergeSort(std::begin(seq), std::end(seq), std::greater<int>());
+      mergeSort(std::begin(seq), std::end(seq), std::greater<int>());
 
       const std::vector<int> expected{9, 7, 6, 5, 3, 2};
       VERIFY(seq == expected, caseLabel);
    }
    {
       const std::string caseLabel{
-         "MergeSort for sorting strings with default comparision"};
+         "mergeSort for sorting strings with default comparision"};
 
       std::vector<std::string> seq{"cd", "aa", "ab", "fe", "ba", "fa"};
-      MergeSort(std::begin(seq), std::end(seq));
+      mergeSort(std::begin(seq), std::end(seq));
 
       const std::vector<std::string> expected{"aa", "ab", "ba", "cd", "fa", "fe"};
       VERIFY(seq == expected, caseLabel);
    }
    {
       const std::string caseLabel{
-         "MergeSort for sorting strings with greater-than comparision"};
+         "mergeSort for sorting strings with greater-than comparision"};
 
       std::vector<std::string> seq{"cd", "aa", "ab", "fe", "ba", "fa"};
-      MergeSort(std::begin(seq), std::end(seq), std::greater<std::string>());
+      mergeSort(std::begin(seq), std::end(seq), std::greater<std::string>());
 
       const std::vector<std::string> expected{"fe", "fa", "cd", "ba", "ab", "aa"};
       VERIFY(seq == expected, caseLabel);
    }
    {
-      const std::string caseLabel{"MergeSort for sorting empty container"};
+      const std::string caseLabel{"mergeSort for sorting empty container"};
 
       std::vector<int> seq;
-      MergeSort(std::begin(seq), std::end(seq));
+      mergeSort(std::begin(seq), std::end(seq));
 
       const std::vector<int> expected;
       VERIFY(seq == expected, caseLabel);
    }
    {
-      const std::string caseLabel{"MergeSort for sorting container with one element"};
+      const std::string caseLabel{"mergeSort for sorting container with one element"};
 
       std::vector<int> seq{100};
-      MergeSort(std::begin(seq), std::end(seq));
+      mergeSort(std::begin(seq), std::end(seq));
 
       const std::vector<int> expected{100};
       VERIFY(seq == expected, caseLabel);
    }
    {
-      const std::string caseLabel{"MergeSort for sorting std::deque container"};
+      const std::string caseLabel{"mergeSort for sorting std::deque container"};
 
       std::deque<int> seq{100, 50, 30, 75, 200, 1};
-      MergeSort(std::begin(seq), std::end(seq));
+      mergeSort(std::begin(seq), std::end(seq));
 
       const std::deque<int> expected{1, 30, 50, 75, 100, 200};
       VERIFY(seq == expected, caseLabel);
    }
    {
-      const std::string caseLabel{"MergeSort for sorting already sorted container"};
+      const std::string caseLabel{"mergeSort for sorting already sorted container"};
 
       std::vector<int> seq{100, 101, 102, 103};
-      MergeSort(std::begin(seq), std::end(seq));
+      mergeSort(std::begin(seq), std::end(seq));
 
       const std::vector<int> expected{100, 101, 102, 103};
       VERIFY(seq == expected, caseLabel);
    }
    {
-      const std::string caseLabel{"MergeSort range interface for vector"};
+      const std::string caseLabel{"mergeSort range interface for vector"};
 
       std::vector<int> seq{7, 3, 2, 9, 5, 6};
-      MergeSort(seq);
+      mergeSort(seq);
 
       const std::vector<int> expected{2, 3, 5, 6, 7, 9};
       VERIFY(seq == expected, caseLabel);
    }
    {
       const std::string caseLabel{
-         "MergeSort range interface for vector and custom comparision"};
+         "mergeSort range interface for vector and custom comparision"};
 
       std::vector<int> seq{7, 3, 2, 9, 5, 6};
-      MergeSort(seq, std::greater<int>());
+      mergeSort(seq, std::greater<int>());
 
       const std::vector<int> expected{9, 7, 6, 5, 3, 2};
       VERIFY(seq == expected, caseLabel);
@@ -213,99 +213,99 @@ void TestMergeSort()
 }
 
 
-void TestBubbleSort()
+void testBubbleSort()
 {
    {
       const std::string caseLabel{
-         "BubbleSort for sorting integers with default comparision"};
+         "bubbleSort for sorting integers with default comparision"};
 
       std::vector<int> seq{7, 3, 2, 9, 5, 6};
-      BubbleSort(std::begin(seq), std::end(seq));
+      bubbleSort(std::begin(seq), std::end(seq));
 
       const std::vector<int> expected{2, 3, 5, 6, 7, 9};
       VERIFY(seq == expected, caseLabel);
    }
    {
       const std::string caseLabel{
-         "BubbleSort for sorting integers with greater-than comparision"};
+         "bubbleSort for sorting integers with greater-than comparision"};
 
       std::vector<int> seq{7, 3, 2, 9, 5, 6};
-      BubbleSort(std::begin(seq), std::end(seq), std::greater<int>());
+      bubbleSort(std::begin(seq), std::end(seq), std::greater<int>());
 
       const std::vector<int> expected{9, 7, 6, 5, 3, 2};
       VERIFY(seq == expected, caseLabel);
    }
    {
       const std::string caseLabel{
-         "BubbleSort for sorting strings with default comparision"};
+         "bubbleSort for sorting strings with default comparision"};
 
       std::vector<std::string> seq{"cd", "aa", "ab", "fe", "ba", "fa"};
-      BubbleSort(std::begin(seq), std::end(seq));
+      bubbleSort(std::begin(seq), std::end(seq));
 
       const std::vector<std::string> expected{"aa", "ab", "ba", "cd", "fa", "fe"};
       VERIFY(seq == expected, caseLabel);
    }
    {
       const std::string caseLabel{
-         "BubbleSort for sorting strings with greater-than comparision"};
+         "bubbleSort for sorting strings with greater-than comparision"};
 
       std::vector<std::string> seq{"cd", "aa", "ab", "fe", "ba", "fa"};
-      BubbleSort(std::begin(seq), std::end(seq), std::greater<std::string>());
+      bubbleSort(std::begin(seq), std::end(seq), std::greater<std::string>());
 
       const std::vector<std::string> expected{"fe", "fa", "cd", "ba", "ab", "aa"};
       VERIFY(seq == expected, caseLabel);
    }
    {
-      const std::string caseLabel{"BubbleSort for sorting empty container"};
+      const std::string caseLabel{"bubbleSort for sorting empty container"};
 
       std::vector<int> seq;
-      BubbleSort(std::begin(seq), std::end(seq));
+      bubbleSort(std::begin(seq), std::end(seq));
 
       const std::vector<int> expected;
       VERIFY(seq == expected, caseLabel);
    }
    {
-      const std::string caseLabel{"BubbleSort for sorting container with one element"};
+      const std::string caseLabel{"bubbleSort for sorting container with one element"};
 
       std::vector<int> seq{100};
-      BubbleSort(std::begin(seq), std::end(seq));
+      bubbleSort(std::begin(seq), std::end(seq));
 
       const std::vector<int> expected{100};
       VERIFY(seq == expected, caseLabel);
    }
    {
-      const std::string caseLabel{"BubbleSort for sorting std::deque container"};
+      const std::string caseLabel{"bubbleSort for sorting std::deque container"};
 
       std::deque<int> seq{100, 50, 30, 75, 200, 1};
-      BubbleSort(std::begin(seq), std::end(seq));
+      bubbleSort(std::begin(seq), std::end(seq));
 
       const std::deque<int> expected{1, 30, 50, 75, 100, 200};
       VERIFY(seq == expected, caseLabel);
    }
    {
-      const std::string caseLabel{"BubbleSort for sorting already sorted container"};
+      const std::string caseLabel{"bubbleSort for sorting already sorted container"};
 
       std::vector<int> seq{100, 101, 102, 103};
-      BubbleSort(std::begin(seq), std::end(seq));
+      bubbleSort(std::begin(seq), std::end(seq));
 
       const std::vector<int> expected{100, 101, 102, 103};
       VERIFY(seq == expected, caseLabel);
    }
    {
-      const std::string caseLabel{"BubbleSort range interface for vector"};
+      const std::string caseLabel{"bubbleSort range interface for vector"};
 
       std::vector<int> seq{7, 3, 2, 9, 5, 6};
-      BubbleSort(seq);
+      bubbleSort(seq);
 
       const std::vector<int> expected{2, 3, 5, 6, 7, 9};
       VERIFY(seq == expected, caseLabel);
    }
    {
       const std::string caseLabel{
-         "BubbleSort range interface for vector and custom comparision"};
+         "bubbleSort range interface for vector and custom comparision"};
 
       std::vector<int> seq{7, 3, 2, 9, 5, 6};
-      BubbleSort(seq, std::greater<int>());
+      bubbleSort(seq, std::greater<int>());
 
       const std::vector<int> expected{9, 7, 6, 5, 3, 2};
       VERIFY(seq == expected, caseLabel);
@@ -317,9 +317,9 @@ void TestBubbleSort()
 
 ///////////////////
 
-void TestSort()
+void testSort()
 {
-   TestInsertionSort();
-   TestMergeSort();
-   TestBubbleSort();
+   testInsertionSort();
+   testMergeSort();
+   testBubbleSort();
 }

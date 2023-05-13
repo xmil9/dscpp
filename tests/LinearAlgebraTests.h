@@ -4,4 +4,4 @@
 //
 #pragma once
 
-void TestLinearAlgebra();
+void testLinearAlgebra();

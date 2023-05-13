@@ -16,14 +16,14 @@
 
 int main()
 {
-   TestLinearAlgebra();
-   TestMathAlg();
-   TestMatrixView();
+   testLinearAlgebra();
+   testMathAlg();
+   testMatrixView();
    testRandom();
-   TestRingBuffer();
-   TestSboVector();
-   TestSboVectorPerformance();
-   TestSort();
+   testRingBuffer();
+   testSboVector();
+   testSboVectorPerformance();
+   testSort();
    std::cout << "DsCpp tests finished.\n";
    return EXIT_SUCCESS;
 }

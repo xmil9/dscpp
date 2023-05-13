@@ -20,7 +20,7 @@ namespace ds
 
 // Iterator interface
 template <typename Iter, typename Compare = std::less<typename Iter::value_type>>
-void InsertionSort(Iter first, Iter last, Compare cmp = {}) noexcept
+void insertionSort(Iter first, Iter last, Compare cmp = {}) noexcept
 {
    using Elem = typename Iter::value_type;
 
@@ -45,9 +45,9 @@ void InsertionSort(Iter first, Iter last, Compare cmp = {}) noexcept
 // Container interface
 template <typename Container,
           typename Compare = std::less<typename Container::value_type>>
-void InsertionSort(Container& seq, Compare cmp = {}) noexcept
+void insertionSort(Container& seq, Compare cmp = {}) noexcept
 {
-   InsertionSort(std::begin(seq), std::end(seq), cmp);
+   insertionSort(std::begin(seq), std::end(seq), cmp);
 }
 
 ///////////////////
@@ -62,7 +62,7 @@ namespace internal
 {
 // Helper function to merge two subsequences back together.
 template <typename Iter, typename Compare>
-void Merge(Iter first, Iter mid, Iter last, Compare cmp) noexcept
+void merge(Iter first, Iter mid, Iter last, Compare cmp) noexcept
 {
    using Elem = typename Iter::value_type;
 
@@ -92,7 +92,7 @@ void Merge(Iter first, Iter mid, Iter last, Compare cmp) noexcept
 
 // Iterator interface
 template <typename Iter, typename Compare = std::less<typename Iter::value_type>>
-void MergeSort(Iter first, Iter last, Compare cmp = {}) noexcept
+void mergeSort(Iter first, Iter last, Compare cmp = {}) noexcept
 {
    // Base case - sequence is fully sorted.
    const auto len = std::distance(first, last);
@@ -101,19 +101,19 @@ void MergeSort(Iter first, Iter last, Compare cmp = {}) noexcept
 
    // Divide into subsequences and sort those.
    Iter mid = first + len / 2;
-   MergeSort(first, mid, cmp);
-   MergeSort(mid, last, cmp);
+   mergeSort(first, mid, cmp);
+   mergeSort(mid, last, cmp);
 
    // Merge subsequences back together.
-   internal::Merge(first, mid, last, cmp);
+   internal::merge(first, mid, last, cmp);
 }
 
 // Container interface
 template <typename Container,
           typename Compare = std::less<typename Container::value_type>>
-void MergeSort(Container& seq, Compare cmp = {}) noexcept
+void mergeSort(Container& seq, Compare cmp = {}) noexcept
 {
-   MergeSort(std::begin(seq), std::end(seq), cmp);
+   mergeSort(std::begin(seq), std::end(seq), cmp);
 }
 
 ///////////////////
@@ -126,7 +126,7 @@ void MergeSort(Container& seq, Compare cmp = {}) noexcept
 
 // Iterator interface
 template <typename Iter, typename Compare = std::less<typename Iter::value_type>>
-void BubbleSort(Iter first, Iter last, Compare cmp = {}) noexcept
+void bubbleSort(Iter first, Iter last, Compare cmp = {}) noexcept
 {
    for (Iter i = first; i != last; ++i)
       for (Iter j = i + 1; j != last; ++j)
@@ -137,9 +137,9 @@ void BubbleSort(Iter first, Iter last, Compare cmp = {}) noexcept
 // Container interface
 template <typename Container,
           typename Compare = std::less<typename Container::value_type>>
-void BubbleSort(Container& seq, Compare cmp = {}) noexcept
+void bubbleSort(Container& seq, Compare cmp = {}) noexcept
 {
-   BubbleSort(std::begin(seq), std::end(seq), cmp);
+   bubbleSort(std::begin(seq), std::end(seq), cmp);
 }
 
 } // namespace ds

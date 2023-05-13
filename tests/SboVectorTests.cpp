@@ -372,7 +372,7 @@ template <typename Elem, std::size_t BufCap> class Test
 
 ///////////////////
 
-void TestDefaultCtor()
+void testDefaultCtor()
 {
    const std::string caseLabel{"SboVector default ctor"};
 
@@ -395,7 +395,7 @@ void TestDefaultCtor()
 }
 
 
-void TestCtorForElementCountAndValue()
+void testCtorForElementCountAndValue()
 {
    {
       const std::string caseLabel{"SboVector count-and-value ctor for buffer storage"};
@@ -455,7 +455,7 @@ void TestCtorForElementCountAndValue()
 }
 
 
-void TestIteratorCtor()
+void testIteratorCtor()
 {
    {
       const std::string caseLabel{"SboVector iterator ctor for buffer instance"};
@@ -588,7 +588,7 @@ void TestIteratorCtor()
 }
 
 
-void TestInitializerListCtor()
+void testInitializerListCtor()
 {
    {
       const std::string caseLabel{"SboVector initializer list ctor for buffer instance"};
@@ -643,7 +643,7 @@ void TestInitializerListCtor()
 }
 
 
-void TestCopyCtor()
+void testCopyCtor()
 {
    {
       const std::string caseLabel{"SboVector copy ctor for buffer instance"};
@@ -702,7 +702,7 @@ void TestCopyCtor()
 }
 
 
-void TestMoveCtor()
+void testMoveCtor()
 {
    {
       const std::string caseLabel{"SboVector move ctor for buffer instance"};
@@ -771,7 +771,7 @@ void TestMoveCtor()
 }
 
 
-void TestDtor()
+void testDtor()
 {
    {
       const std::string caseLabel{"SboVector dtor for buffer instance"};
@@ -829,7 +829,7 @@ void TestDtor()
 }
 
 
-void TestCopyAssignment()
+void testCopyAssignment()
 {
    // Local function to calculate the expected metrics for copy-assignments.
    auto expectedCopyMetrics = [](std::size_t numFrom,
@@ -1001,7 +1001,7 @@ void TestCopyAssignment()
 }
 
 
-void TestMoveAssignment()
+void testMoveAssignment()
 {
    // Local functions to calculate the expected metrics for move-assignments.
    auto expectedMoveHeapMetrics = [](std::size_t numFrom,
@@ -1181,7 +1181,7 @@ void TestMoveAssignment()
 }
 
 
-void TestInitializerListAssignment()
+void testInitializerListAssignment()
 {
    // Local functions to calculate the expected metrics for assignment of
    // an initializer list.
@@ -1345,7 +1345,7 @@ void TestInitializerListAssignment()
 }
 
 
-void TestAssignElementValue()
+void testAssignElementValue()
 {
    // Local functions to calculate the expected metrics.
    auto expectedMetrics = [](std::size_t numInitial,
@@ -1520,7 +1520,7 @@ void TestAssignElementValue()
 }
 
 
-void TestAssignIteratorRange()
+void testAssignIteratorRange()
 {
    // Local functions to calculate the expected metrics.
    auto expectedMetrics = [](std::size_t numInitial,
@@ -1694,7 +1694,7 @@ void TestAssignIteratorRange()
 }
 
 
-void TestAssignInitializerList()
+void testAssignInitializerList()
 {
    // Local functions to calculate the expected metrics.
    auto expectedMetrics = [](std::size_t numInitial,
@@ -1863,7 +1863,7 @@ void TestAssignInitializerList()
 }
 
 
-void TestAt()
+void testAt()
 {
    {
       const std::string caseLabel{"SvoVector::at for buffer instance"};
@@ -1950,7 +1950,7 @@ void TestAt()
 }
 
 
-void TestAtConst()
+void testAtConst()
 {
    {
       const std::string caseLabel{"SvoVector::at const for buffer instance"};
@@ -2030,7 +2030,7 @@ void TestAtConst()
 }
 
 
-void TestSubscriptOperator()
+void testSubscriptOperator()
 {
    {
       const std::string caseLabel{"SvoVector::operator[] for buffer instance"};
@@ -2099,7 +2099,7 @@ void TestSubscriptOperator()
 }
 
 
-void TestSubscriptOperatorConst()
+void testSubscriptOperatorConst()
 {
    {
       const std::string caseLabel{"SvoVector::operator[] const for buffer instance"};
@@ -2150,7 +2150,7 @@ void TestSubscriptOperatorConst()
 }
 
 
-void TestFront()
+void testFront()
 {
    {
       const std::string caseLabel{"SvoVector::front for buffer instance"};
@@ -2209,7 +2209,7 @@ void TestFront()
 }
 
 
-void TestFrontConst()
+void testFrontConst()
 {
    {
       const std::string caseLabel{"SvoVector::front const for buffer instance"};
@@ -2257,7 +2257,7 @@ void TestFrontConst()
 }
 
 
-void TestBack()
+void testBack()
 {
    {
       const std::string caseLabel{"SvoVector::back for buffer instance"};
@@ -2316,7 +2316,7 @@ void TestBack()
 }
 
 
-void TestBackConst()
+void testBackConst()
 {
    {
       const std::string caseLabel{"SvoVector::back const for buffer instance"};
@@ -2363,7 +2363,7 @@ void TestBackConst()
 }
 
 
-void TestData()
+void testData()
 {
    {
       const std::string caseLabel{"SvoVector::data for buffer instance"};
@@ -2430,7 +2430,7 @@ void TestData()
 }
 
 
-void TestDataConst()
+void testDataConst()
 {
    {
       const std::string caseLabel{"SvoVector::data const for buffer instance"};
@@ -2479,7 +2479,7 @@ void TestDataConst()
 }
 
 
-void TestBegin()
+void testBegin()
 {
    {
       const std::string caseLabel{"SboVector::begin for buffer instance"};
@@ -2544,7 +2544,7 @@ void TestBegin()
 }
 
 
-void TestEnd()
+void testEnd()
 {
    {
       const std::string caseLabel{"SboVector::end for buffer instance"};
@@ -2609,7 +2609,7 @@ void TestEnd()
 }
 
 
-void TestBeginConst()
+void testBeginConst()
 {
    {
       const std::string caseLabel{"SboVector::begin const for buffer instance"};
@@ -2680,7 +2680,7 @@ void TestBeginConst()
 }
 
 
-void TestEndConst()
+void testEndConst()
 {
    {
       const std::string caseLabel{"SboVector::end for buffer instance"};
@@ -2751,7 +2751,7 @@ void TestEndConst()
 }
 
 
-void TestCBegin()
+void testCBegin()
 {
    {
       const std::string caseLabel{"SboVector::cbegin const for buffer instance"};
@@ -2816,7 +2816,7 @@ void TestCBegin()
 }
 
 
-void TestCEnd()
+void testCEnd()
 {
    {
       const std::string caseLabel{"SboVector::cend for buffer instance"};
@@ -2881,7 +2881,7 @@ void TestCEnd()
 }
 
 
-void TestRBegin()
+void testRBegin()
 {
    {
       const std::string caseLabel{"SboVector::rbegin for buffer instance"};
@@ -2946,7 +2946,7 @@ void TestRBegin()
 }
 
 
-void TestREnd()
+void testREnd()
 {
    {
       const std::string caseLabel{"SboVector::rend for buffer instance"};
@@ -3011,7 +3011,7 @@ void TestREnd()
 }
 
 
-void TestRBeginConst()
+void testRBeginConst()
 {
    {
       const std::string caseLabel{"SboVector::rbegin const for buffer instance"};
@@ -3082,7 +3082,7 @@ void TestRBeginConst()
 }
 
 
-void TestREndConst()
+void testREndConst()
 {
    {
       const std::string caseLabel{"SboVector::rend const for buffer instance"};
@@ -3153,7 +3153,7 @@ void TestREndConst()
 }
 
 
-void TestCRBegin()
+void testCRBegin()
 {
    {
       const std::string caseLabel{"SboVector::crbegin for buffer instance"};
@@ -3218,7 +3218,7 @@ void TestCRBegin()
 }
 
 
-void TestCREnd()
+void testCREnd()
 {
    {
       const std::string caseLabel{"SboVector::crend for buffer instance"};
@@ -3283,7 +3283,7 @@ void TestCREnd()
 }
 
 
-void TestEmpty()
+void testEmpty()
 {
    {
       const std::string caseLabel{"SvoVector::empty for empty instance"};
@@ -3347,7 +3347,7 @@ void TestEmpty()
 }
 
 
-void TestSize()
+void testSize()
 {
    {
       const std::string caseLabel{"SvoVector::size for empty instance"};
@@ -3413,7 +3413,7 @@ void TestSize()
 }
 
 
-void TestMaxSize()
+void testMaxSize()
 {
    {
       const std::string caseLabel{"SvoVector::max_size for buffer instance"};
@@ -3477,7 +3477,7 @@ void TestMaxSize()
 }
 
 
-void TestReserve()
+void testReserve()
 {
    {
       const std::string caseLabel{"SvoVector::reserve for capacity less than current"};
@@ -3696,7 +3696,7 @@ void TestReserve()
 }
 
 
-void TestShrinkToFit()
+void testShrinkToFit()
 {
    {
       const std::string caseLabel{"SvoVector::shrink_to_fit for buffer instance"};
@@ -3903,7 +3903,7 @@ void TestShrinkToFit()
 }
 
 
-void TestClear()
+void testClear()
 {
    {
       const std::string caseLabel{"SvoVector::clear for empty vector"};
@@ -3987,7 +3987,7 @@ void TestClear()
 }
 
 
-void TestEraseSingleElement()
+void testEraseSingleElement()
 {
    {
       const std::string caseLabel{"SvoVector::erase element of buffer instance"};
@@ -4293,7 +4293,7 @@ void TestEraseSingleElement()
 }
 
 
-void TestEraseIteratorRange()
+void testEraseIteratorRange()
 {
    // Local function to calculate the expected metrics for erasing.
    auto expectedErasureMetrics = [](std::size_t initialSize,
@@ -4619,7 +4619,7 @@ void TestEraseIteratorRange()
 }
 
 
-void TestInsertSingleValue()
+void testInsertSingleValue()
 {
    {
       const std::string caseLabel{"SvoVector::insert value into buffer "
@@ -4931,7 +4931,7 @@ void TestInsertSingleValue()
 }
 
 
-void TestInsertSingleRValue()
+void testInsertSingleRValue()
 {
    {
       const std::string caseLabel{"SvoVector::insert r-value into buffer "
@@ -5221,7 +5221,7 @@ void TestInsertSingleRValue()
 }
 
 
-void TestInsertValueMultipleTimes()
+void testInsertValueMultipleTimes()
 {
    {
       const std::string caseLabel{"SvoVector::insert value multiple times into buffer "
@@ -5586,7 +5586,7 @@ void TestInsertValueMultipleTimes()
 }
 
 
-void TestInsertRange()
+void testInsertRange()
 {
    {
       const std::string caseLabel{"SvoVector::insert iterator range into buffer "
@@ -5992,7 +5992,7 @@ void TestInsertRange()
 }
 
 
-void TestInsertInitializerList()
+void testInsertInitializerList()
 {
    {
       const std::string caseLabel{"SvoVector::insert initializer list into buffer "
@@ -6339,7 +6339,7 @@ void TestInsertInitializerList()
 }
 
 
-void TestPushBackLValue()
+void testPushBackLValue()
 {
    {
       const std::string caseLabel{"SvoVector::push_back l-value into buffer "
@@ -6548,7 +6548,7 @@ void TestPushBackLValue()
 }
 
 
-void TestPushBackRValue()
+void testPushBackRValue()
 {
    {
       const std::string caseLabel{"SvoVector::push_back r-value into buffer "
@@ -6758,7 +6758,7 @@ void TestPushBackRValue()
 }
 
 
-void TestPopBack()
+void testPopBack()
 {
    {
       const std::string caseLabel{"SvoVector::pop_back for buffer "
@@ -6891,7 +6891,7 @@ void TestPopBack()
 }
 
 
-void TestEmplace()
+void testEmplace()
 {
    {
       const std::string caseLabel{"SvoVector::emplace value into buffer "
@@ -7301,7 +7301,7 @@ void TestEmplace()
 }
 
 
-void TestEmplaceBack()
+void testEmplaceBack()
 {
    {
       const std::string caseLabel{"SvoVector::emplace_back value into buffer "
@@ -7643,7 +7643,7 @@ void TestEmplaceBack()
 }
 
 
-void TestResizeWithDefaultValue()
+void testResizeWithDefaultValue()
 {
    {
       const std::string caseLabel{"SvoVector::resize with default value to same size"};
@@ -7989,7 +7989,7 @@ void TestResizeWithDefaultValue()
 }
 
 
-void TestResizeWithValue()
+void testResizeWithValue()
 {
    {
       const std::string caseLabel{"SvoVector::resize with given value to same size"};
@@ -8340,7 +8340,7 @@ void TestResizeWithValue()
 }
 
 
-void TestSwap()
+void testSwap()
 {
    {
       const std::string caseLabel{"SvoVector::swap of two heap instances"};
@@ -8627,7 +8627,7 @@ void TestSwap()
 }
 
 
-void TestEquality()
+void testEquality()
 {
    {
       const std::string caseLabel{"Equality of equal vectors"};
@@ -8672,7 +8672,7 @@ void TestEquality()
 }
 
 
-void TestInequality()
+void testInequality()
 {
    {
       const std::string caseLabel{"Inequality of equal vectors"};
@@ -8717,7 +8717,7 @@ void TestInequality()
 }
 
 
-void TestLessThan()
+void testLessThan()
 {
    {
       const std::string caseLabel{"Less-than for vectors with different sizes"};
@@ -8748,7 +8748,7 @@ void TestLessThan()
 }
 
 
-void TestGreaterThan()
+void testGreaterThan()
 {
    {
       const std::string caseLabel{"Greater-than for vectors with different sizes"};
@@ -8779,7 +8779,7 @@ void TestGreaterThan()
 }
 
 
-void TestLessOrEqualThan()
+void testLessOrEqualThan()
 {
    {
       const std::string caseLabel{"Less-or-equal-than for vectors with different sizes"};
@@ -8811,7 +8811,7 @@ void TestLessOrEqualThan()
 }
 
 
-void TestGreaterOrEqualThan()
+void testGreaterOrEqualThan()
 {
    {
       const std::string caseLabel{
@@ -8844,7 +8844,7 @@ void TestGreaterOrEqualThan()
 }
 
 
-void TestStandaloneSwap()
+void testStandaloneSwap()
 {
    {
       const std::string caseLabel{"Standalone swap"};
@@ -8888,7 +8888,7 @@ void TestStandaloneSwap()
 
 ///////////////////
 
-void TestIteratorCopyCtor()
+void testIteratorCopyCtor()
 {
    {
       const std::string caseLabel{"SboVectorIterator copy ctor"};
@@ -8908,7 +8908,7 @@ void TestIteratorCopyCtor()
 }
 
 
-void TestIteratorMoveCtor()
+void testIteratorMoveCtor()
 {
    {
       const std::string caseLabel{"SboVectorIterator move ctor"};
@@ -8928,7 +8928,7 @@ void TestIteratorMoveCtor()
 }
 
 
-void TestIteratorCopyAssignment()
+void testIteratorCopyAssignment()
 {
    {
       const std::string caseLabel{"SboVectorIterator copy assignment"};
@@ -8949,7 +8949,7 @@ void TestIteratorCopyAssignment()
 }
 
 
-void TestIteratorMoveAssignment()
+void testIteratorMoveAssignment()
 {
    {
       const std::string caseLabel{"SboVectorIterator move assignment"};
@@ -8970,7 +8970,7 @@ void TestIteratorMoveAssignment()
 }
 
 
-void TestIteratorIndirectionOperator()
+void testIteratorIndirectionOperator()
 {
    {
       const std::string caseLabel{"SboVectorIterator indirection operator for reading"};
@@ -9004,7 +9004,7 @@ void TestIteratorIndirectionOperator()
 }
 
 
-void TestIteratorIndirectionOperatorConst()
+void testIteratorIndirectionOperatorConst()
 {
    {
       const std::string caseLabel{"SboVectorIterator const indirection operator"};
@@ -9023,7 +9023,7 @@ void TestIteratorIndirectionOperatorConst()
 }
 
 
-void TestIteratorDereferenceOperator()
+void testIteratorDereferenceOperator()
 {
    {
       const std::string caseLabel{"SboVectorIterator dereference operator for reading"};
@@ -9072,7 +9072,7 @@ void TestIteratorDereferenceOperator()
 }
 
 
-void TestIteratorDereferenceOperatorConst()
+void testIteratorDereferenceOperatorConst()
 {
    {
       const std::string caseLabel{"SboVectorIterator const dereference operator"};
@@ -9098,7 +9098,7 @@ void TestIteratorDereferenceOperatorConst()
 }
 
 
-void TestIteratorSubscriptOperator()
+void testIteratorSubscriptOperator()
 {
    {
       const std::string caseLabel{"SboVectorIterator operator[] for reading"};
@@ -9132,7 +9132,7 @@ void TestIteratorSubscriptOperator()
 }
 
 
-void TestIteratorSubscriptOperatorConst()
+void testIteratorSubscriptOperatorConst()
 {
    {
       const std::string caseLabel{"SboVectorIterator const operator[] for reading"};
@@ -9151,7 +9151,7 @@ void TestIteratorSubscriptOperatorConst()
 }
 
 
-void TestIteratorPrefixIncrementOperator()
+void testIteratorPrefixIncrementOperator()
 {
    {
       const std::string caseLabel{"SboVectorIterator prefix increment operator"};
@@ -9172,7 +9172,7 @@ void TestIteratorPrefixIncrementOperator()
 }
 
 
-void TestIteratorPostfixIncrementOperator()
+void testIteratorPostfixIncrementOperator()
 {
    {
       const std::string caseLabel{"SboVectorIterator prefix increment operator"};
@@ -9193,7 +9193,7 @@ void TestIteratorPostfixIncrementOperator()
 }
 
 
-void TestIteratorPrefixDecrementOperator()
+void testIteratorPrefixDecrementOperator()
 {
    {
       const std::string caseLabel{"SboVectorIterator prefix decrement operator"};
@@ -9214,7 +9214,7 @@ void TestIteratorPrefixDecrementOperator()
 }
 
 
-void TestIteratorPostfixDecrementOperator()
+void testIteratorPostfixDecrementOperator()
 {
    {
       const std::string caseLabel{"SboVectorIterator prefix increment operator"};
@@ -9235,7 +9235,7 @@ void TestIteratorPostfixDecrementOperator()
 }
 
 
-void TestIteratorSwap()
+void testIteratorSwap()
 {
    {
       const std::string caseLabel{"SboVectorIterator swap"};
@@ -9258,7 +9258,7 @@ void TestIteratorSwap()
 }
 
 
-void TestIteratorEquality()
+void testIteratorEquality()
 {
    {
       const std::string caseLabel{"SboVectorIterator equality for equal values"};
@@ -9309,7 +9309,7 @@ void TestIteratorEquality()
 }
 
 
-void TestIteratorInequality()
+void testIteratorInequality()
 {
    {
       const std::string caseLabel{"SboVectorIterator inequality for equal values"};
@@ -9360,7 +9360,7 @@ void TestIteratorInequality()
 }
 
 
-void TestIteratorAdditionAssignment()
+void testIteratorAdditionAssignment()
 {
    {
       const std::string caseLabel{"SboVectorIterator operator+= for positive offset"};
@@ -9395,7 +9395,7 @@ void TestIteratorAdditionAssignment()
 }
 
 
-void TestIteratorSubtractionAssignment()
+void testIteratorSubtractionAssignment()
 {
    {
       const std::string caseLabel{"SboVectorIterator operator-= for positive offset"};
@@ -9430,7 +9430,7 @@ void TestIteratorSubtractionAssignment()
 }
 
 
-void TestIteratorAdditionOfIteratorAndOffset()
+void testIteratorAdditionOfIteratorAndOffset()
 {
    {
       const std::string caseLabel{
@@ -9467,7 +9467,7 @@ void TestIteratorAdditionOfIteratorAndOffset()
 }
 
 
-void TestIteratorAdditionOfOffsetAndIterator()
+void testIteratorAdditionOfOffsetAndIterator()
 {
    {
       const std::string caseLabel{
@@ -9504,7 +9504,7 @@ void TestIteratorAdditionOfOffsetAndIterator()
 }
 
 
-void TestIteratorSubtractionOfIteratorAndOffset()
+void testIteratorSubtractionOfIteratorAndOffset()
 {
    {
       const std::string caseLabel{
@@ -9541,7 +9541,7 @@ void TestIteratorSubtractionOfIteratorAndOffset()
 }
 
 
-void TestIteratorSubtractionOfIterators()
+void testIteratorSubtractionOfIterators()
 {
    {
       const std::string caseLabel{"SboVectorIterator iterator minus iterator"};
@@ -9562,7 +9562,7 @@ void TestIteratorSubtractionOfIterators()
 }
 
 
-void TestIteratorLessThan()
+void testIteratorLessThan()
 {
    {
       const std::string caseLabel{"SboVectorIterator operator< for less-than iterators"};
@@ -9613,7 +9613,7 @@ void TestIteratorLessThan()
 }
 
 
-void TestIteratorLessOrEqualThan()
+void testIteratorLessOrEqualThan()
 {
    {
       const std::string caseLabel{"SboVectorIterator operator<= for less-than iterators"};
@@ -9664,7 +9664,7 @@ void TestIteratorLessOrEqualThan()
 }
 
 
-void TestIteratorGreaterThan()
+void testIteratorGreaterThan()
 {
    {
       const std::string caseLabel{"SboVectorIterator operator> for less-than iterators"};
@@ -9715,7 +9715,7 @@ void TestIteratorGreaterThan()
 }
 
 
-void TestIteratorGreaterOrEqualThan()
+void testIteratorGreaterOrEqualThan()
 {
    {
       const std::string caseLabel{"SboVectorIterator operator>= for less-than iterators"};
@@ -9768,7 +9768,7 @@ void TestIteratorGreaterOrEqualThan()
 
 ///////////////////
 
-void TestConstIteratorCopyCtor()
+void testConstIteratorCopyCtor()
 {
    {
       const std::string caseLabel{"SboVectorConstIterator copy ctor"};
@@ -9788,7 +9788,7 @@ void TestConstIteratorCopyCtor()
 }
 
 
-void TestConstIteratorMoveCtor()
+void testConstIteratorMoveCtor()
 {
    {
       const std::string caseLabel{"SboVectorConstIterator move ctor"};
@@ -9808,7 +9808,7 @@ void TestConstIteratorMoveCtor()
 }
 
 
-void TestConstIteratorCopyAssignment()
+void testConstIteratorCopyAssignment()
 {
    {
       const std::string caseLabel{"SboVectorConstIterator copy assignment"};
@@ -9829,7 +9829,7 @@ void TestConstIteratorCopyAssignment()
 }
 
 
-void TestConstIteratorMoveAssignment()
+void testConstIteratorMoveAssignment()
 {
    {
       const std::string caseLabel{"SboVectorConstIterator move assignment"};
@@ -9850,7 +9850,7 @@ void TestConstIteratorMoveAssignment()
 }
 
 
-void TestConstIteratorIndirectionOperatorConst()
+void testConstIteratorIndirectionOperatorConst()
 {
    {
       const std::string caseLabel{"SboVectorConstIterator const indirection operator"};
@@ -9869,7 +9869,7 @@ void TestConstIteratorIndirectionOperatorConst()
 }
 
 
-void TestConstIteratorDereferenceOperatorConst()
+void testConstIteratorDereferenceOperatorConst()
 {
    {
       const std::string caseLabel{"SboVectorConstIterator const dereference operator"};
@@ -9895,7 +9895,7 @@ void TestConstIteratorDereferenceOperatorConst()
 }
 
 
-void TestConstIteratorSubscriptOperatorConst()
+void testConstIteratorSubscriptOperatorConst()
 {
    {
       const std::string caseLabel{"SboVectorConstIterator const operator[] for reading"};
@@ -9914,7 +9914,7 @@ void TestConstIteratorSubscriptOperatorConst()
 }
 
 
-void TestConstIteratorPrefixIncrementOperator()
+void testConstIteratorPrefixIncrementOperator()
 {
    {
       const std::string caseLabel{"SboVectorConstIterator prefix increment operator"};
@@ -9935,7 +9935,7 @@ void TestConstIteratorPrefixIncrementOperator()
 }
 
 
-void TestConstIteratorPostfixIncrementOperator()
+void testConstIteratorPostfixIncrementOperator()
 {
    {
       const std::string caseLabel{"SboVectorConstIterator prefix increment operator"};
@@ -9956,7 +9956,7 @@ void TestConstIteratorPostfixIncrementOperator()
 }
 
 
-void TestConstIteratorPrefixDecrementOperator()
+void testConstIteratorPrefixDecrementOperator()
 {
    {
       const std::string caseLabel{"SboVectorConstIterator prefix decrement operator"};
@@ -9977,7 +9977,7 @@ void TestConstIteratorPrefixDecrementOperator()
 }
 
 
-void TestConstIteratorPostfixDecrementOperator()
+void testConstIteratorPostfixDecrementOperator()
 {
    {
       const std::string caseLabel{"SboVectorConstIterator prefix increment operator"};
@@ -9998,7 +9998,7 @@ void TestConstIteratorPostfixDecrementOperator()
 }
 
 
-void TestConstIteratorSwap()
+void testConstIteratorSwap()
 {
    {
       const std::string caseLabel{"SboVectorConstIterator swap"};
@@ -10021,7 +10021,7 @@ void TestConstIteratorSwap()
 }
 
 
-void TestConstIteratorEquality()
+void testConstIteratorEquality()
 {
    {
       const std::string caseLabel{"SboVectorConstIterator equality for equal values"};
@@ -10074,7 +10074,7 @@ void TestConstIteratorEquality()
 }
 
 
-void TestConstIteratorInequality()
+void testConstIteratorInequality()
 {
    {
       const std::string caseLabel{"SboVectorConstIterator inequality for equal values"};
@@ -10127,7 +10127,7 @@ void TestConstIteratorInequality()
 }
 
 
-void TestConstIteratorAdditionAssignment()
+void testConstIteratorAdditionAssignment()
 {
    {
       const std::string caseLabel{
@@ -10164,7 +10164,7 @@ void TestConstIteratorAdditionAssignment()
 }
 
 
-void TestConstIteratorSubtractionAssignment()
+void testConstIteratorSubtractionAssignment()
 {
    {
       const std::string caseLabel{
@@ -10201,7 +10201,7 @@ void TestConstIteratorSubtractionAssignment()
 }
 
 
-void TestConstIteratorAdditionOfIteratorAndOffset()
+void testConstIteratorAdditionOfIteratorAndOffset()
 {
    {
       const std::string caseLabel{
@@ -10238,7 +10238,7 @@ void TestConstIteratorAdditionOfIteratorAndOffset()
 }
 
 
-void TestConstIteratorAdditionOfOffsetAndIterator()
+void testConstIteratorAdditionOfOffsetAndIterator()
 {
    {
       const std::string caseLabel{
@@ -10275,7 +10275,7 @@ void TestConstIteratorAdditionOfOffsetAndIterator()
 }
 
 
-void TestConstIteratorSubtractionOfIteratorAndOffset()
+void testConstIteratorSubtractionOfIteratorAndOffset()
 {
    {
       const std::string caseLabel{
@@ -10312,7 +10312,7 @@ void TestConstIteratorSubtractionOfIteratorAndOffset()
 }
 
 
-void TestConstIteratorSubtractionOfIterators()
+void testConstIteratorSubtractionOfIterators()
 {
    {
       const std::string caseLabel{"SboVectorConstIterator iterator minus iterator"};
@@ -10333,7 +10333,7 @@ void TestConstIteratorSubtractionOfIterators()
 }
 
 
-void TestConstIteratorLessThan()
+void testConstIteratorLessThan()
 {
    {
       const std::string caseLabel{
@@ -10385,7 +10385,7 @@ void TestConstIteratorLessThan()
 }
 
 
-void TestConstIteratorLessOrEqualThan()
+void testConstIteratorLessOrEqualThan()
 {
    {
       const std::string caseLabel{
@@ -10438,7 +10438,7 @@ void TestConstIteratorLessOrEqualThan()
 }
 
 
-void TestConstIteratorGreaterThan()
+void testConstIteratorGreaterThan()
 {
    {
       const std::string caseLabel{
@@ -10490,7 +10490,7 @@ void TestConstIteratorGreaterThan()
 }
 
 
-void TestConstIteratorGreaterOrEqualThan()
+void testConstIteratorGreaterOrEqualThan()
 {
    {
       const std::string caseLabel{
@@ -10547,122 +10547,122 @@ void TestConstIteratorGreaterOrEqualThan()
 
 ///////////////////
 
-void TestSboVector()
+void testSboVector()
 {
-   TestDefaultCtor();
-   TestCtorForElementCountAndValue();
-   TestIteratorCtor();
-   TestInitializerListCtor();
-   TestCopyCtor();
-   TestMoveCtor();
-   TestDtor();
-   TestCopyAssignment();
-   TestMoveAssignment();
-   TestInitializerListAssignment();
-   TestAssignElementValue();
-   TestAssignIteratorRange();
-   TestAssignInitializerList();
-   TestAt();
-   TestAtConst();
-   TestSubscriptOperator();
-   TestSubscriptOperatorConst();
-   TestFront();
-   TestFrontConst();
-   TestBack();
-   TestBackConst();
-   TestData();
-   TestDataConst();
-   TestBegin();
-   TestEnd();
-   TestBeginConst();
-   TestEndConst();
-   TestCBegin();
-   TestCEnd();
-   TestRBegin();
-   TestREnd();
-   TestRBeginConst();
-   TestREndConst();
-   TestCRBegin();
-   TestCREnd();
-   TestEmpty();
-   TestSize();
-   TestMaxSize();
-   TestReserve();
-   TestShrinkToFit();
-   TestClear();
-   TestEraseSingleElement();
-   TestEraseIteratorRange();
-   TestInsertSingleValue();
-   TestInsertSingleRValue();
-   TestInsertValueMultipleTimes();
-   TestInsertRange();
-   TestInsertInitializerList();
-   TestPushBackLValue();
-   TestPushBackRValue();
-   TestPopBack();
-   TestEmplace();
-   TestEmplaceBack();
-   TestResizeWithDefaultValue();
-   TestResizeWithValue();
-   TestSwap();
-   TestEquality();
-   TestInequality();
-   TestLessThan();
-   TestGreaterThan();
-   TestLessOrEqualThan();
-   TestGreaterOrEqualThan();
-   TestStandaloneSwap();
+   testDefaultCtor();
+   testCtorForElementCountAndValue();
+   testIteratorCtor();
+   testInitializerListCtor();
+   testCopyCtor();
+   testMoveCtor();
+   testDtor();
+   testCopyAssignment();
+   testMoveAssignment();
+   testInitializerListAssignment();
+   testAssignElementValue();
+   testAssignIteratorRange();
+   testAssignInitializerList();
+   testAt();
+   testAtConst();
+   testSubscriptOperator();
+   testSubscriptOperatorConst();
+   testFront();
+   testFrontConst();
+   testBack();
+   testBackConst();
+   testData();
+   testDataConst();
+   testBegin();
+   testEnd();
+   testBeginConst();
+   testEndConst();
+   testCBegin();
+   testCEnd();
+   testRBegin();
+   testREnd();
+   testRBeginConst();
+   testREndConst();
+   testCRBegin();
+   testCREnd();
+   testEmpty();
+   testSize();
+   testMaxSize();
+   testReserve();
+   testShrinkToFit();
+   testClear();
+   testEraseSingleElement();
+   testEraseIteratorRange();
+   testInsertSingleValue();
+   testInsertSingleRValue();
+   testInsertValueMultipleTimes();
+   testInsertRange();
+   testInsertInitializerList();
+   testPushBackLValue();
+   testPushBackRValue();
+   testPopBack();
+   testEmplace();
+   testEmplaceBack();
+   testResizeWithDefaultValue();
+   testResizeWithValue();
+   testSwap();
+   testEquality();
+   testInequality();
+   testLessThan();
+   testGreaterThan();
+   testLessOrEqualThan();
+   testGreaterOrEqualThan();
+   testStandaloneSwap();
 
-   TestIteratorCopyCtor();
-   TestIteratorMoveCtor();
-   TestIteratorCopyAssignment();
-   TestIteratorMoveAssignment();
-   TestIteratorIndirectionOperator();
-   TestIteratorIndirectionOperatorConst();
-   TestIteratorDereferenceOperator();
-   TestIteratorDereferenceOperatorConst();
-   TestIteratorSubscriptOperator();
-   TestIteratorSubscriptOperatorConst();
-   TestIteratorPrefixIncrementOperator();
-   TestIteratorPostfixIncrementOperator();
-   TestIteratorPrefixDecrementOperator();
-   TestIteratorPostfixDecrementOperator();
-   TestIteratorSwap();
-   TestIteratorEquality();
-   TestIteratorInequality();
-   TestIteratorAdditionAssignment();
-   TestIteratorSubtractionAssignment();
-   TestIteratorAdditionOfIteratorAndOffset();
-   TestIteratorAdditionOfOffsetAndIterator();
-   TestIteratorSubtractionOfIteratorAndOffset();
-   TestIteratorSubtractionOfIterators();
-   TestIteratorLessThan();
-   TestIteratorLessOrEqualThan();
-   TestIteratorGreaterThan();
-   TestIteratorGreaterOrEqualThan();
+   testIteratorCopyCtor();
+   testIteratorMoveCtor();
+   testIteratorCopyAssignment();
+   testIteratorMoveAssignment();
+   testIteratorIndirectionOperator();
+   testIteratorIndirectionOperatorConst();
+   testIteratorDereferenceOperator();
+   testIteratorDereferenceOperatorConst();
+   testIteratorSubscriptOperator();
+   testIteratorSubscriptOperatorConst();
+   testIteratorPrefixIncrementOperator();
+   testIteratorPostfixIncrementOperator();
+   testIteratorPrefixDecrementOperator();
+   testIteratorPostfixDecrementOperator();
+   testIteratorSwap();
+   testIteratorEquality();
+   testIteratorInequality();
+   testIteratorAdditionAssignment();
+   testIteratorSubtractionAssignment();
+   testIteratorAdditionOfIteratorAndOffset();
+   testIteratorAdditionOfOffsetAndIterator();
+   testIteratorSubtractionOfIteratorAndOffset();
+   testIteratorSubtractionOfIterators();
+   testIteratorLessThan();
+   testIteratorLessOrEqualThan();
+   testIteratorGreaterThan();
+   testIteratorGreaterOrEqualThan();
 
-   TestConstIteratorCopyCtor();
-   TestConstIteratorMoveCtor();
-   TestConstIteratorCopyAssignment();
-   TestConstIteratorMoveAssignment();
-   TestConstIteratorIndirectionOperatorConst();
-   TestConstIteratorDereferenceOperatorConst();
-   TestConstIteratorSubscriptOperatorConst();
-   TestConstIteratorPrefixIncrementOperator();
-   TestConstIteratorPostfixIncrementOperator();
-   TestConstIteratorPrefixDecrementOperator();
-   TestConstIteratorPostfixDecrementOperator();
-   TestConstIteratorSwap();
-   TestConstIteratorEquality();
-   TestConstIteratorInequality();
-   TestConstIteratorAdditionAssignment();
-   TestConstIteratorSubtractionAssignment();
-   TestConstIteratorAdditionOfIteratorAndOffset();
-   TestConstIteratorAdditionOfOffsetAndIterator();
-   TestConstIteratorSubtractionOfIteratorAndOffset();
-   TestConstIteratorSubtractionOfIterators();
-   TestConstIteratorLessThan();
-   TestConstIteratorLessOrEqualThan();
-   TestConstIteratorGreaterThan();
-   TestConstIteratorGreaterOrEqualThan();
+   testConstIteratorCopyCtor();
+   testConstIteratorMoveCtor();
+   testConstIteratorCopyAssignment();
+   testConstIteratorMoveAssignment();
+   testConstIteratorIndirectionOperatorConst();
+   testConstIteratorDereferenceOperatorConst();
+   testConstIteratorSubscriptOperatorConst();
+   testConstIteratorPrefixIncrementOperator();
+   testConstIteratorPostfixIncrementOperator();
+   testConstIteratorPrefixDecrementOperator();
+   testConstIteratorPostfixDecrementOperator();
+   testConstIteratorSwap();
+   testConstIteratorEquality();
+   testConstIteratorInequality();
+   testConstIteratorAdditionAssignment();
+   testConstIteratorSubtractionAssignment();
+   testConstIteratorAdditionOfIteratorAndOffset();
+   testConstIteratorAdditionOfOffsetAndIterator();
+   testConstIteratorSubtractionOfIteratorAndOffset();
+   testConstIteratorSubtractionOfIterators();
+   testConstIteratorLessThan();
+   testConstIteratorLessOrEqualThan();
+   testConstIteratorGreaterThan();
+   testConstIteratorGreaterOrEqualThan();
 }

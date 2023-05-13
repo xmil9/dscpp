@@ -4,4 +4,4 @@
 //
 #pragma once
 
-void TestMatrixView();
+void testMatrixView();

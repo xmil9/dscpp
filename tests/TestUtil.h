@@ -8,7 +8,7 @@
 namespace test_detail
 {
 
-inline std::string ComposeErrorMessage(const std::string& label,
+inline std::string composeErrorMessage(const std::string& label,
                                        const std::string& condStr,
                                        const std::string& fileName, int lineNum)
 {
@@ -28,7 +28,7 @@ inline std::string ComposeErrorMessage(const std::string& label,
 
 
 template <typename Exception>
-std::string ComposeErrorMessage(const std::string& label, const std::string& fileName,
+std::string composeErrorMessage(const std::string& label, const std::string& fileName,
                                 int lineNum)
 {
    std::string msg;
@@ -49,18 +49,18 @@ std::string ComposeErrorMessage(const std::string& label, const std::string& fil
 } // namespace test_detail
 
 
-inline bool Verify(bool cond, const std::string& label, const std::string& condStr,
+inline bool verify(bool cond, const std::string& label, const std::string& condStr,
                    const std::string& fileName, int lineNum)
 {
    if (!cond)
-      std::cout << test_detail::ComposeErrorMessage(label, condStr, fileName, lineNum)
+      std::cout << test_detail::composeErrorMessage(label, condStr, fileName, lineNum)
                 << "\n";
    return cond;
 }
 
 
 template <typename Exception>
-bool VerifyThrow(std::function<void()> toVerify, const std::string& label,
+bool verifyThrow(std::function<void()> toVerify, const std::string& label,
                  const std::string& fileName, int lineNum)
 {
    bool threwException = false;
@@ -77,12 +77,12 @@ bool VerifyThrow(std::function<void()> toVerify, const std::string& label,
    }
 
    if (!threwException)
-      std::cout << test_detail::ComposeErrorMessage<Exception>(label, fileName, lineNum)
+      std::cout << test_detail::composeErrorMessage<Exception>(label, fileName, lineNum)
                 << "\n";
    return threwException;
 }
 
 
-#define VERIFY(cond, label) (Verify(cond, label, #cond, __FILE__, __LINE__))
+#define VERIFY(cond, label) (verify(cond, label, #cond, __FILE__, __LINE__))
 #define VERIFY_THROW(toVerify, Exception, label)                                         \
-   (VerifyThrow<Exception>(toVerify, label, __FILE__, __LINE__))
+   (verifyThrow<Exception>(toVerify, label, __FILE__, __LINE__))

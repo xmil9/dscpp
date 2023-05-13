@@ -77,7 +77,7 @@ namespace internal
 // sequence. This is a much simpler problem to solve than finding an unrestricted
 // subsequence.
 template <typename Iter>
-FindMaxSubsequenceResult<Iter> FindMaxCrossingSubsequence(Iter first, Iter mid,
+FindMaxSubsequenceResult<Iter> findMaxCrossingSubsequence(Iter first, Iter mid,
                                                           Iter last) noexcept
 {
    assert(first != mid);
@@ -94,7 +94,7 @@ FindMaxSubsequenceResult<Iter> FindMaxCrossingSubsequence(Iter first, Iter mid,
 
 // Iterator interface
 template <typename Iter>
-FindMaxSubsequenceResult<Iter> FindMaxSubsequenceRecursive(Iter first, Iter last)
+FindMaxSubsequenceResult<Iter> findMaxSubsequenceRecursive(Iter first, Iter last)
 {
    using Result = FindMaxSubsequenceResult<Iter>;
    using Value = Iter::value_type;
@@ -112,9 +112,9 @@ FindMaxSubsequenceResult<Iter> FindMaxSubsequenceRecursive(Iter first, Iter last
    Iter mid = first + n / 2;
    // clang-format off
    const std::array<Result, 3> results{
-      FindMaxSubsequenceRecursive(first, mid),
-      FindMaxSubsequenceRecursive(mid, last),
-      internal::FindMaxCrossingSubsequence(first, mid, last)};
+      findMaxSubsequenceRecursive(first, mid),
+      findMaxSubsequenceRecursive(mid, last),
+      internal::findMaxCrossingSubsequence(first, mid, last)};
    // clang-format on
 
    // Return max of the intermediate results.
@@ -124,9 +124,9 @@ FindMaxSubsequenceResult<Iter> FindMaxSubsequenceRecursive(Iter first, Iter last
 // Container interface
 template <typename Container>
 FindMaxSubsequenceResult<typename Container::const_iterator>
-FindMaxSubsequenceRecursive(const Container& seq)
+findMaxSubsequenceRecursive(const Container& seq)
 {
-   return FindMaxSubsequenceRecursive(seq.begin(), seq.end());
+   return findMaxSubsequenceRecursive(seq.begin(), seq.end());
 }
 
 // Iterative solution
@@ -136,7 +136,7 @@ FindMaxSubsequenceRecursive(const Container& seq)
 
 // Iterator interface
 template <typename Iter>
-FindMaxSubsequenceResult<Iter> FindMaxSubsequenceIterative(Iter first, Iter last)
+FindMaxSubsequenceResult<Iter> findMaxSubsequenceIterative(Iter first, Iter last)
 {
    using Value = Iter::value_type;
 
@@ -182,27 +182,27 @@ FindMaxSubsequenceResult<Iter> FindMaxSubsequenceIterative(Iter first, Iter last
 // Container interface
 template <typename Container>
 FindMaxSubsequenceResult<typename Container::const_iterator>
-FindMaxSubsequenceIterative(const Container& seq)
+findMaxSubsequenceIterative(const Container& seq)
 {
-   return FindMaxSubsequenceIterative(seq.begin(), seq.end());
+   return findMaxSubsequenceIterative(seq.begin(), seq.end());
 }
 
 // Preferred solution
 
 // Iterator interface
 template <typename Iter>
-FindMaxSubsequenceResult<Iter> FindMaxSubsequence(Iter first, Iter last)
+FindMaxSubsequenceResult<Iter> findMaxSubsequence(Iter first, Iter last)
 {
    // Iterative solution is faster with O(n) vs O(nlgn) for recursive solution.
-   return FindMaxSubsequenceIterative(first, last);
+   return findMaxSubsequenceIterative(first, last);
 }
 
 // Container interface
 template <typename Container>
 FindMaxSubsequenceResult<typename Container::const_iterator>
-FindMaxSubsequence(const Container& seq)
+findMaxSubsequence(const Container& seq)
 {
-   return FindMaxSubsequence(seq.begin(), seq.end());
+   return findMaxSubsequence(seq.begin(), seq.end());
 }
 
 } // namespace ds
