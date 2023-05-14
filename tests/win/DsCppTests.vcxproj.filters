@@ -10,6 +10,7 @@
     <ClCompile Include="..\LinearAlgebraTests.cpp" />
     <ClCompile Include="..\MatrixViewTests.cpp" />
     <ClCompile Include="..\RandomTests.cpp" />
+    <ClCompile Include="..\..\Heap.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\RingBuffer.h" />

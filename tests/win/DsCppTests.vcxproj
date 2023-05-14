@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\Heap.cpp" />
     <ClCompile Include="..\DsCppTests.cpp" />
     <ClCompile Include="..\LinearAlgebraTests.cpp" />
     <ClCompile Include="..\MathAlgTests.cpp" />
