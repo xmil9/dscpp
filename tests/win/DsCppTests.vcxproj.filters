@@ -10,7 +10,7 @@
     <ClCompile Include="..\LinearAlgebraTests.cpp" />
     <ClCompile Include="..\MatrixViewTests.cpp" />
     <ClCompile Include="..\RandomTests.cpp" />
-    <ClCompile Include="..\..\Heap.cpp" />
+    <ClCompile Include="..\HeapTests.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\RingBuffer.h" />
@@ -30,5 +30,7 @@
     <ClInclude Include="..\MatrixViewTests.h" />
     <ClInclude Include="..\..\Random.h" />
     <ClInclude Include="..\RandomTests.h" />
+    <ClInclude Include="..\..\Heap.h" />
+    <ClInclude Include="..\HeapTests.h" />
   </ItemGroup>
 </Project>

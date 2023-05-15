@@ -19,8 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\Heap.cpp" />
     <ClCompile Include="..\DsCppTests.cpp" />
+    <ClCompile Include="..\HeapTests.cpp" />
     <ClCompile Include="..\LinearAlgebraTests.cpp" />
     <ClCompile Include="..\MathAlgTests.cpp" />
     <ClCompile Include="..\MatrixViewTests.cpp" />
@@ -31,6 +31,7 @@
     <ClCompile Include="..\SortTests.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Heap.h" />
     <ClInclude Include="..\..\LinearAlgebra.h" />
     <ClInclude Include="..\..\MathAlg.h" />
     <ClInclude Include="..\..\MatrixView.h" />
@@ -39,6 +40,7 @@
     <ClInclude Include="..\..\SboVector.h" />
     <ClInclude Include="..\..\Sort.h" />
     <ClInclude Include="..\..\TypeTraitsEx.h" />
+    <ClInclude Include="..\HeapTests.h" />
     <ClInclude Include="..\LinearAlgebraTests.h" />
     <ClInclude Include="..\MathAlgTests.h" />
     <ClInclude Include="..\MatrixViewTests.h" />

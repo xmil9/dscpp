@@ -2,6 +2,7 @@
 // Michael Lindner
 // MIT license
 //
+#include "HeapTests.h"
 #include "LinearAlgebraTests.h"
 #include "MathAlgTests.h"
 #include "MatrixViewTests.h"
@@ -16,6 +17,7 @@
 
 int main()
 {
+   testHeapView();
    testLinearAlgebra();
    testMathAlg();
    testMatrixView();

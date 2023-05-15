@@ -31,7 +31,7 @@ template <typename T, typename Condition> class HeapView
 
  public:
    HeapView() = default;
-   HeapView(T* elems, size_t numElems, const Condition& heapProp);
+   HeapView(T* elems, size_t numElems, const Condition& heapProp = {});
 
    size_t size() const { return m_heapSize; }
    bool empty() const { return m_heapSize == 0; }
@@ -58,7 +58,7 @@ template <typename T, typename Condition> class HeapView
    static ArrayIdx arrayIdx(HeapIdx i) { return i - 1; }
    static HeapIdx heapIdx(ArrayIdx i) { return i + 1; }
    // Access element at given heap index.
-   T& elem(HeapIdx i) { return m_tree[arrayIdx(i)]; }
+   T& elem(HeapIdx i) { return m_root[arrayIdx(i)]; }
 
    // Builds a heap out of the given element array.
    void buildHeap();
@@ -73,8 +73,8 @@ template <typename T, typename Condition> class HeapView
    // the array at positions 2*i and 2*i+1 (assuming one-based indices for easier
    // calculation). A node's parent is located at the array position floor(i/2)
    // (for one-based indices).
-   T* m_tree = nullptr;
-   size_t m_heapSize = 0;
+   T* m_root{nullptr};
+   size_t m_heapSize{0};
 
    // Condition that defines the heap-property.
    Condition m_heapProp{};
@@ -82,15 +82,17 @@ template <typename T, typename Condition> class HeapView
 
 // Standard heap types.
 // Max-heaps are used for the heap sort algorithm.
-template <typename T> using MaxHeap = HeapView<T, std::greater<T>>;
+template <typename T>
+using MaxHeap = HeapView<T, std::greater<T>>;
 // Min-heaps are used to implement priority queue.
-template <typename T> using MinHeap = HeapView<T, std::less<T>>;
+template <typename T>
+using MinHeap = HeapView<T, std::less<T>>;
 
 // Implementation
 
 template <typename T, typename Condition>
-HeapView<T, Condition>::HeapView(T* elems, size_t numElems, const Condition& heapProp)
-: m_tree{elems}, m_heapSize{numElems}, m_heapProp{heapProp}
+HeapView<T, Condition>::HeapView(T* vals, size_t numElems, const Condition& heapProp)
+: m_root{vals}, m_heapSize{numElems}, m_heapProp{heapProp}
 {
    buildHeap();
 }
@@ -101,24 +103,32 @@ const T* HeapView<T, Condition>::pop()
    if (empty())
       return nullptr;
 
-   std::swap(m_tree[0], m_tree[--m_heapSize]);
-   return &m_tree[m_heapSize];
+   // Swap first (next one in sort order) with last element. This puts the element into
+   // its correct order. Reduce the heap size by one to exclude the now sorted last element
+   // from the data structure.
+   std::swap(m_root[0], m_root[--m_heapSize]);
+
+   // Restore the heap property for the element that got swapped into the root position.
+   heapify(1);
+
+   // Return sorted element.
+   return &m_root[m_heapSize];
 }
 
-template <typename T, typename Condition>
-void HeapView<T, Condition>::buildHeap()
+template <typename T, typename Condition> void HeapView<T, Condition>::buildHeap()
 {
    if (empty())
       return;
 
-   const HeapIdx lastInnerNode = size() << 1;
+   const HeapIdx lastInnerNode = size() >> 1;
 
    // From bottom to top heapify all non-leaf nodes.
    for (HeapIdx i = lastInnerNode; i >= 1; --i)
       heapify(i);
 }
 
-template <typename T, typename Condition> void HeapView<T, Condition>::heapify(HeapIdx i)
+template <typename Iter, typename Condition>
+void HeapView<Iter, Condition>::heapify(HeapIdx i)
 {
    const HeapIdx l = left(i);
    const HeapIdx r = right(i);

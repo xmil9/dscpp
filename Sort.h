@@ -3,6 +3,7 @@
 // MIT license
 //
 #pragma once
+#include "Heap.h"
 #include <functional>
 #include <vector>
 
@@ -140,6 +141,31 @@ template <typename Container,
 void bubbleSort(Container& seq, Compare cmp = {}) noexcept
 {
    bubbleSort(std::begin(seq), std::end(seq), cmp);
+}
+
+///////////////////
+
+// Heap sort
+// Cormen, pg 151
+// Uses heap data structure to repeatedly sort the next element into its correct place.
+// Sorts in place, no extra space needed.
+// Time: O(nlgn)
+
+// Iterator interface
+template <typename Iter, typename Compare = std::less<typename Iter::value_type>>
+void heapSort(Iter first, Iter last, const Compare& cmp = {}) noexcept
+{
+   HeapView<Iter, Compare> heap{first, last, cmp};
+   while (!heap.empty())
+      heap.pop();
+}
+
+// Container interface
+template <typename Container,
+          typename Compare = std::less<typename Container::value_type>>
+void heapSort(Container& seq, const Compare& cmp = {}) noexcept
+{
+   heapSort(std::begin(seq), std::end(seq), cmp);
 }
 
 } // namespace ds
