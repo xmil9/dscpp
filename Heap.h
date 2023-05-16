@@ -3,11 +3,8 @@
 // MIT license
 //
 #pragma once
-#include <cmath>
-#include <deque>
-#include <functional>
-#include <initializer_list>
-#include <queue>
+#include <cassert>
+#include <stdexcept>
 
 namespace ds
 {
@@ -27,20 +24,22 @@ template <typename T, typename Condition> class HeapView
  public:
    using value_type = T;
    using size_type = size_t;
-   using iterator = T*;
 
  public:
    HeapView() = default;
    HeapView(T* elems, size_t numElems, const Condition& heapProp = {});
+   template <typename Container>
+   explicit HeapView(Container& arrayLike, const Condition& heapProp = {});
 
-   size_t size() const { return m_heapSize; }
-   bool empty() const { return m_heapSize == 0; }
+   size_t size() const noexcept { return m_heapSize; }
+   bool empty() const noexcept { return m_heapSize == 0; }
 
    // Returns the top element of the heap.
+   // Calling it on an empty heap raises an exception.
    // Internally this also sorts that element at the correct place in the passed
    // in storage. Calling pop() repeatedly until the heap is empty will sort the
    // underlying data.
-   const T* pop();
+   const T& pop();
 
  private:
    // 1-based logical heap index.
@@ -50,8 +49,8 @@ template <typename T, typename Condition> class HeapView
 
  private:
    // Heap navigation.
-   static HeapIdx parent(HeapIdx i) { return i << 1; }
-   static HeapIdx left(HeapIdx i) { return i >> 1; }
+   static HeapIdx parent(HeapIdx i) { return i >> 1; }
+   static HeapIdx left(HeapIdx i) { return i << 1; }
    static HeapIdx right(HeapIdx i) { return left(i) + 1; }
 
    // Converts between heap and array indices.
@@ -82,11 +81,9 @@ template <typename T, typename Condition> class HeapView
 
 // Standard heap types.
 // Max-heaps are used for the heap sort algorithm.
-template <typename T>
-using MaxHeap = HeapView<T, std::greater<T>>;
+template <typename T> using MaxHeap = HeapView<T, std::greater<T>>;
 // Min-heaps are used to implement priority queue.
-template <typename T>
-using MinHeap = HeapView<T, std::less<T>>;
+template <typename T> using MinHeap = HeapView<T, std::less<T>>;
 
 // Implementation
 
@@ -94,25 +91,32 @@ template <typename T, typename Condition>
 HeapView<T, Condition>::HeapView(T* vals, size_t numElems, const Condition& heapProp)
 : m_root{vals}, m_heapSize{numElems}, m_heapProp{heapProp}
 {
+   assert((m_heapSize > 0 && m_root) || m_heapSize == 0);
    buildHeap();
 }
 
 template <typename T, typename Condition>
-const T* HeapView<T, Condition>::pop()
+template <typename Container>
+HeapView<T, Condition>::HeapView(Container& arrayLike, const Condition& heapProp)
+: HeapView{arrayLike.data(), arrayLike.size(), heapProp}
+{
+}
+
+template <typename T, typename Condition> const T& HeapView<T, Condition>::pop()
 {
    if (empty())
-      return nullptr;
+      throw std::runtime_error("Cannot pop from an empty heap.");
 
    // Swap first (next one in sort order) with last element. This puts the element into
-   // its correct order. Reduce the heap size by one to exclude the now sorted last element
-   // from the data structure.
+   // its correct order. Reduce the heap size by one to exclude the now sorted last
+   // element from the data structure.
    std::swap(m_root[0], m_root[--m_heapSize]);
 
    // Restore the heap property for the element that got swapped into the root position.
    heapify(1);
 
    // Return sorted element.
-   return &m_root[m_heapSize];
+   return m_root[m_heapSize];
 }
 
 template <typename T, typename Condition> void HeapView<T, Condition>::buildHeap()
