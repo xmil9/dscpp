@@ -150,15 +150,20 @@ void bubbleSort(Container& seq, Compare cmp = {}) noexcept
 // Uses heap data structure to repeatedly sort the next element into its correct place.
 // Sorts in place, no extra space needed.
 // Time: O(nlgn)
+// The actual heap sort algorithm uses a max-heap to sort in ascending order but to allow
+// the caller to pass their own comparision we have to use the general heap data structure
+// and then reverse the output sequence.
 
 template <typename T, typename Compare = std::less<T>>
 void heapSort(T* first, size_t numElems, const Compare& cmp = {})
 {
-   // We have to invert the passed comparision because the heap puts the max element for a
-   // condition at the end.
-   HeapView heap(first, numElems, [cmp](const T& a, const T& b) { return !cmp(a, b); });
+   HeapView heap(first, numElems, cmp);
    while (!heap.empty())
       heap.pop();
+   
+   // We have to reverse the sequence because the heap puts the most extreme element at the
+   // end of the sequence.
+   std::reverse(first, first + numElems);
 }
 
 template <typename Container,
