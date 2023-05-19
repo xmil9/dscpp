@@ -151,21 +151,21 @@ void bubbleSort(Container& seq, Compare cmp = {}) noexcept
 // Sorts in place, no extra space needed.
 // Time: O(nlgn)
 
-// Iterator interface
-template <typename Iter, typename Compare = std::less<typename Iter::value_type>>
-void heapSort(Iter first, Iter last, const Compare& cmp = {}) noexcept
+template <typename T, typename Compare = std::less<T>>
+void heapSort(T* first, size_t numElems, const Compare& cmp = {})
 {
-   HeapView<Iter, Compare> heap{first, last, cmp};
+   // We have to invert the passed comparision because the heap puts the max element for a
+   // condition at the end.
+   HeapView heap(first, numElems, [cmp](const T& a, const T& b) { return !cmp(a, b); });
    while (!heap.empty())
       heap.pop();
 }
 
-// Container interface
 template <typename Container,
           typename Compare = std::less<typename Container::value_type>>
-void heapSort(Container& seq, const Compare& cmp = {}) noexcept
+void heapSort(Container& seq, const Compare& cmp = {})
 {
-   heapSort(std::begin(seq), std::end(seq), cmp);
+   heapSort(seq.data(), seq.size(), cmp);
 }
 
 } // namespace ds

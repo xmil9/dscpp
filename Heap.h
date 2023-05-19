@@ -36,7 +36,7 @@ template <typename T, typename Condition> class HeapView
 
    // Returns the top element of the heap.
    // Calling it on an empty heap raises an exception.
-   // Internally this also sorts that element at the correct place in the passed
+   // Internally this also sorts that element at the correct place in the given
    // in storage. Calling pop() repeatedly until the heap is empty will sort the
    // underlying data.
    const T& pop();

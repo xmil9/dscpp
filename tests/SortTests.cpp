@@ -5,6 +5,7 @@
 #include "SortTests.h"
 #include "Sort.h"
 #include "TestUtil.h"
+#include <array>
 #include <deque>
 
 using namespace ds;
@@ -212,7 +213,6 @@ void testMergeSort()
    }
 }
 
-
 void testBubbleSort()
 {
    {
@@ -312,6 +312,105 @@ void testBubbleSort()
    }
 }
 
+void testHeapSort()
+{
+   {
+      const std::string caseLabel{
+         "heapSort for sorting integers with default comparision"};
+
+      std::vector<int> seq{7, 3, 2, 9, 5, 6};
+      heapSort(seq.data(), seq.size());
+
+      const std::vector<int> expected{2, 3, 5, 6, 7, 9};
+      VERIFY(seq == expected, caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "heapSort for sorting integers with greater-than comparision"};
+
+      std::vector<int> seq{7, 3, 2, 9, 5, 6};
+      heapSort(seq.data(), seq.size(), std::greater<int>());
+
+      const std::vector<int> expected{9, 7, 6, 5, 3, 2};
+      VERIFY(seq == expected, caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "heapSort for sorting strings with default comparision"};
+
+      std::vector<std::string> seq{"cd", "aa", "ab", "fe", "ba", "fa"};
+      heapSort(seq.data(), seq.size());
+
+      const std::vector<std::string> expected{"aa", "ab", "ba", "cd", "fa", "fe"};
+      VERIFY(seq == expected, caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "heapSort for sorting strings with greater-than comparision"};
+
+      std::vector<std::string> seq{"cd", "aa", "ab", "fe", "ba", "fa"};
+      heapSort(seq.data(), seq.size(), std::greater<std::string>());
+
+      const std::vector<std::string> expected{"fe", "fa", "cd", "ba", "ab", "aa"};
+      VERIFY(seq == expected, caseLabel);
+   }
+   {
+      const std::string caseLabel{"heapSort for sorting empty container"};
+
+      std::vector<int> seq;
+      heapSort(seq.data(), seq.size());
+
+      const std::vector<int> expected;
+      VERIFY(seq == expected, caseLabel);
+   }
+   {
+      const std::string caseLabel{"heapSort for sorting container with one element"};
+
+      std::vector<int> seq{100};
+      heapSort(seq.data(), seq.size());
+
+      const std::vector<int> expected{100};
+      VERIFY(seq == expected, caseLabel);
+   }
+   {
+      const std::string caseLabel{"heapSort for sorting std::array container"};
+
+      std::array<int, 6> seq{100, 50, 30, 75, 200, 1};
+      heapSort(&seq[0], seq.size());
+
+      const std::array<int, 6> expected{1, 30, 50, 75, 100, 200};
+      VERIFY(seq == expected, caseLabel);
+   }
+   {
+      const std::string caseLabel{"heapSort for sorting already sorted container"};
+
+      std::vector<int> seq{100, 101, 102, 103};
+      heapSort(seq.data(), seq.size());
+
+      const std::vector<int> expected{100, 101, 102, 103};
+      VERIFY(seq == expected, caseLabel);
+   }
+   {
+      const std::string caseLabel{"heapSort range interface for vector"};
+
+      std::vector<int> seq{7, 3, 2, 9, 5, 6};
+      heapSort(seq);
+
+      const std::vector<int> expected{2, 3, 5, 6, 7, 9};
+      VERIFY(seq == expected, caseLabel);
+   }
+   {
+      const std::string caseLabel{
+         "heapSort range interface for vector and custom comparision"};
+
+      std::vector<int> seq{7, 3, 2, 9, 5, 6};
+      heapSort(seq, std::greater<int>());
+
+      const std::vector<int> expected{9, 7, 6, 5, 3, 2};
+      VERIFY(seq == expected, caseLabel);
+   }
+}
+
 } // namespace
 
 
@@ -322,4 +421,5 @@ void testSort()
    testInsertionSort();
    testMergeSort();
    testBubbleSort();
+   testHeapSort();
 }
