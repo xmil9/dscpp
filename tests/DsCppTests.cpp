@@ -6,6 +6,7 @@
 #include "LinearAlgebraTests.h"
 #include "MathAlgTests.h"
 #include "MatrixViewTests.h"
+#include "PriorityQueueTests.h"
 #include "RandomTests.h"
 #include "RingBufferTests.h"
 #include "SboVectorPerformanceTests.h"
@@ -21,6 +22,7 @@ int main()
    testLinearAlgebra();
    testMathAlg();
    testMatrixView();
+   testPriorityQueue();
    testRandom();
    testRingBuffer();
    testSboVector();

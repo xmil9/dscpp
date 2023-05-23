@@ -11,6 +11,7 @@
     <ClCompile Include="..\MatrixViewTests.cpp" />
     <ClCompile Include="..\RandomTests.cpp" />
     <ClCompile Include="..\HeapTests.cpp" />
+    <ClCompile Include="..\PriorityQueueTests.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\RingBuffer.h" />
@@ -32,5 +33,7 @@
     <ClInclude Include="..\RandomTests.h" />
     <ClInclude Include="..\..\Heap.h" />
     <ClInclude Include="..\HeapTests.h" />
+    <ClInclude Include="..\..\PriorityQueue.h" />
+    <ClInclude Include="..\PriorityQueueTests.h" />
   </ItemGroup>
 </Project>

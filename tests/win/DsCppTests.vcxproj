@@ -24,6 +24,7 @@
     <ClCompile Include="..\LinearAlgebraTests.cpp" />
     <ClCompile Include="..\MathAlgTests.cpp" />
     <ClCompile Include="..\MatrixViewTests.cpp" />
+    <ClCompile Include="..\PriorityQueueTests.cpp" />
     <ClCompile Include="..\RandomTests.cpp" />
     <ClCompile Include="..\RingBufferTests.cpp" />
     <ClCompile Include="..\SboVectorPerformanceTests.cpp" />
@@ -35,6 +36,7 @@
     <ClInclude Include="..\..\LinearAlgebra.h" />
     <ClInclude Include="..\..\MathAlg.h" />
     <ClInclude Include="..\..\MatrixView.h" />
+    <ClInclude Include="..\..\PriorityQueue.h" />
     <ClInclude Include="..\..\Random.h" />
     <ClInclude Include="..\..\RingBuffer.h" />
     <ClInclude Include="..\..\SboVector.h" />
@@ -44,6 +46,7 @@
     <ClInclude Include="..\LinearAlgebraTests.h" />
     <ClInclude Include="..\MathAlgTests.h" />
     <ClInclude Include="..\MatrixViewTests.h" />
+    <ClInclude Include="..\PriorityQueueTests.h" />
     <ClInclude Include="..\RandomTests.h" />
     <ClInclude Include="..\RingBufferTests.h" />
     <ClInclude Include="..\SboVectorPerformanceTests.h" />

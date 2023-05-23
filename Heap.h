@@ -12,11 +12,11 @@ namespace ds
 ///////////////////
 
 // HeapView data structure.
-// Does not store elements itself but uses passed storage.
+// Does not store elements itself but uses given storage.
 // Conceptuall builds a binary tree that fulfills a given heap property for each of its
-// nodes. The heap property is that each parent node fulfills a condition when compared to
-// its two child nodes.
-// HeapView types (see type aliases below):
+// nodes. The heap property is a given condition that each parent node fulfills when
+// compared to its two child nodes.
+// Predefined HeapView types (see type aliases below):
 //  Max-heap: Each parent node is larger than its child nodes.
 //  Min-heap: Each parent node is smaller than its child nodes.
 template <typename T, typename Condition> class HeapView
@@ -25,9 +25,8 @@ template <typename T, typename Condition> class HeapView
    using value_type = T;
    using size_type = size_t;
 
- public:
    HeapView() = default;
-   HeapView(T* elems, size_t numElems, const Condition& heapProp = {});
+   HeapView(T* vals, size_t numVals, const Condition& heapProp = {});
    template <typename Container>
    explicit HeapView(Container& arrayLike, const Condition& heapProp = {});
 
@@ -35,28 +34,50 @@ template <typename T, typename Condition> class HeapView
    bool empty() const noexcept { return m_heapSize == 0; }
 
    // Returns the top element of the heap.
-   // Calling it on an empty heap raises an exception.
-   // Internally this also sorts that element at the correct place in the given
-   // in storage. Calling pop() repeatedly until the heap is empty will sort the
-   // underlying data.
-   const T& pop();
+   const T& top() const;
 
- private:
+   // Returns and removes the top element of the heap.
+   // Calling it on an empty heap raises an exception.
+   // Internally this also sorts that element to the correct place in the given
+   // storage. Calling pop() repeatedly until the heap is empty will sort the
+   // underlying storage in reverse order.
+   T pop();
+
+   ////////////////
+
+   // The following functions allow higher-level data structures to manipulate
+   // a heap's internals. They are not meant to be called for simple heap usage
+   // and can result in invalid heap states if used incorrectly.
+
    // 1-based logical heap index.
    using HeapIdx = size_t;
    // 0-based physical array index.
    using ArrayIdx = size_t;
 
- private:
    // Heap navigation.
-   static HeapIdx parent(HeapIdx i) { return i >> 1; }
-   static HeapIdx left(HeapIdx i) { return i << 1; }
-   static HeapIdx right(HeapIdx i) { return left(i) + 1; }
+   static HeapIdx parent(HeapIdx i) noexcept { return i >> 1; }
+   static HeapIdx left(HeapIdx i) noexcept { return i << 1; }
+   static HeapIdx right(HeapIdx i) noexcept { return left(i) + 1; }
 
+   // Checks if two elements fulfill the heap condition.
+   bool compare(HeapIdx a, HeapIdx b) const { return m_heapProp(elem(a), elem(b)); }
+
+   // Swaps two elements in the underlying storage.
+   void exchange(HeapIdx a, HeapIdx b) { std::swap(elem(a), elem(b)); }
+
+   // Updates the heap data without changing the heap's layout.
+   void set(T* vals);
+   void set(T* vals, size_t numVals);
+   // Updates the heap data and rebuilds the heap's layout.
+   void reset(T* vals, size_t numVals);
+
+ private:
    // Converts between heap and array indices.
    static ArrayIdx arrayIdx(HeapIdx i) { return i - 1; }
    static HeapIdx heapIdx(ArrayIdx i) { return i + 1; }
+
    // Access element at given heap index.
+   const T& elem(HeapIdx i) const { return m_root[arrayIdx(i)]; }
    T& elem(HeapIdx i) { return m_root[arrayIdx(i)]; }
 
    // Builds a heap out of the given element array.
@@ -88,10 +109,10 @@ template <typename T> using MinHeap = HeapView<T, std::less<T>>;
 // Implementation
 
 template <typename T, typename Condition>
-HeapView<T, Condition>::HeapView(T* vals, size_t numElems, const Condition& heapProp)
-: m_root{vals}, m_heapSize{numElems}, m_heapProp{heapProp}
+HeapView<T, Condition>::HeapView(T* vals, size_t numVals, const Condition& heapProp)
+: m_root{vals}, m_heapSize{numVals}, m_heapProp{heapProp}
 {
-   assert((m_heapSize > 0 && m_root) || m_heapSize == 0);
+   assert((numVals > 0 && vals) || numVals == 0);
    buildHeap();
 }
 
@@ -102,7 +123,14 @@ HeapView<T, Condition>::HeapView(Container& arrayLike, const Condition& heapProp
 {
 }
 
-template <typename T, typename Condition> const T& HeapView<T, Condition>::pop()
+template <typename T, typename Condition> const T& HeapView<T, Condition>::top() const
+{
+   if (empty())
+      throw std::runtime_error("Cannot access top of an empty heap.");
+   return m_root[0];
+}
+
+template <typename T, typename Condition> T HeapView<T, Condition>::pop()
 {
    if (empty())
       throw std::runtime_error("Cannot pop from an empty heap.");
@@ -117,6 +145,27 @@ template <typename T, typename Condition> const T& HeapView<T, Condition>::pop()
 
    // Return sorted element.
    return m_root[m_heapSize];
+}
+
+template <typename T, typename Condition> void HeapView<T, Condition>::set(T* vals)
+{
+   assert((m_heapSize > 0 && vals) || m_heapSize == 0);
+   m_root = vals;
+}
+
+template <typename T, typename Condition>
+void HeapView<T, Condition>::set(T* vals, size_t numVals)
+{
+   assert((numVals > 0 && vals) || numVals == 0);
+   m_root = vals;
+   m_heapSize = numVals;
+}
+
+template <typename T, typename Condition>
+void HeapView<T, Condition>::reset(T* vals, size_t numVals)
+{
+   set(vals, numVals);
+   buildHeap();
 }
 
 template <typename T, typename Condition> void HeapView<T, Condition>::buildHeap()
@@ -141,14 +190,14 @@ void HeapView<Iter, Condition>::heapify(HeapIdx i)
    // Note that the heap-property condition is inverted below by reversing the order of
    // the passed elements, i.e. the child element is the first parameter.
    HeapIdx largest = i;
-   if (l <= size() && m_heapProp(elem(l), elem(i)))
+   if (l <= size() && compare(l, i))
       largest = l;
-   if (r <= size() && m_heapProp(elem(r), elem(largest)))
+   if (r <= size() && compare(r, largest))
       largest = r;
 
    if (largest != i)
    {
-      std::swap(elem(i), elem(largest));
+      exchange(i, largest);
       heapify(largest);
    }
 }
