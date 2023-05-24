@@ -238,7 +238,7 @@ void testPriorityQueueInsert()
       VERIFY(q.top() == 20, caseLabel);
    }
    {
-      const std::string caseLabel{"PriorityQueue::insert() into max-queue as smallest element"};
+      const std::string caseLabel{"PriorityQueue::insert() into max-queue as largest element"};
 
       PriorityQueue<int, std::greater<int>> q{{44, 22, 100, 32, 102}, {}};
       const size_t initialSize = q.size();
@@ -247,6 +247,39 @@ void testPriorityQueueInsert()
 
       VERIFY(q.size() == initialSize + 1, caseLabel);
       VERIFY(q.top() == 200, caseLabel);
+   }
+   {
+      const std::string caseLabel{"PriorityQueue::insert() multiple elements"};
+
+      PriorityQueue<int, std::greater<int>> q{{44, 22, 100, 32, 102}, {}};
+      q.insert(200);
+      q.insert(2);
+      q.insert(50);
+
+
+      const std::vector<int> expected{200, 102, 100, 50, 44, 32, 22, 2};
+      VERIFY(q.size() == expected.size(), caseLabel);
+      for (size_t i = 0; i < expected.size(); ++i)
+         VERIFY(q.pop() == expected[i], caseLabel);
+   }
+   {
+      const std::string caseLabel{"PriorityQueue::insert() mixed insertions and popping"};
+
+      PriorityQueue<int, std::greater<int>> q{{44, 22, 100, 32, 102}, {}};
+      q.pop();
+      q.insert(200);
+      q.insert(2);
+      q.pop();
+      q.pop();
+      q.insert(50);
+      q.pop();
+      q.insert(-1);
+      q.insert(7);
+
+      const std::vector<int> expected{44, 32, 22, 7, 2, -1};
+      VERIFY(q.size() == expected.size(), caseLabel);
+      for (size_t i = 0; i < expected.size(); ++i)
+         VERIFY(q.pop() == expected[i], caseLabel);
    }
 }
 

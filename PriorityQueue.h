@@ -14,15 +14,16 @@ namespace ds
 
 ///////////////////
 
-template <typename T, typename Compare = std::less<T>> class PriorityQueue
+// Priority queue that orders elements based on a given criterium.
+template <typename T, typename Criterium = std::less<T>> class PriorityQueue
 {
  public:
    PriorityQueue();
-   PriorityQueue(const Compare& cmp);
+   PriorityQueue(const Criterium& crit);
    PriorityQueue(std::initializer_list<T> ilist);
-   PriorityQueue(std::initializer_list<T> ilist, const Compare& cmp);
+   PriorityQueue(std::initializer_list<T> ilist, const Criterium& crit);
    template <typename Iter> PriorityQueue(Iter first, Iter last);
-   template <typename Iter> PriorityQueue(Iter first, Iter last, const Compare& cmp);
+   template <typename Iter> PriorityQueue(Iter first, Iter last, const Criterium& crit);
 
    size_t size() const noexcept { return m_heap.size(); }
    bool empty() const noexcept { return m_heap.empty(); }
@@ -32,49 +33,49 @@ template <typename T, typename Compare = std::less<T>> class PriorityQueue
 
  private:
    std::vector<T> m_storage;
-   HeapView<T, Compare> m_heap;
+   HeapView<T, Criterium> m_heap;
 };
 
-template <typename T, typename Compare>
-PriorityQueue<T, Compare>::PriorityQueue() : m_storage{}, m_heap{m_storage}
+template <typename T, typename Criterium>
+PriorityQueue<T, Criterium>::PriorityQueue() : m_storage{}, m_heap{m_storage}
 {
 }
 
-template <typename T, typename Compare>
-PriorityQueue<T, Compare>::PriorityQueue(const Compare& cmp)
-: m_storage{}, m_heap{m_storage, cmp}
+template <typename T, typename Criterium>
+PriorityQueue<T, Criterium>::PriorityQueue(const Criterium& crit)
+: m_storage{}, m_heap{m_storage, crit}
 {
 }
 
-template <typename T, typename Compare>
-PriorityQueue<T, Compare>::PriorityQueue(std::initializer_list<T> ilist)
+template <typename T, typename Criterium>
+PriorityQueue<T, Criterium>::PriorityQueue(std::initializer_list<T> ilist)
 : m_storage{ilist}, m_heap{m_storage}
 {
 }
 
-template <typename T, typename Compare>
-PriorityQueue<T, Compare>::PriorityQueue(std::initializer_list<T> ilist,
-                                         const Compare& cmp)
-: m_storage{ilist}, m_heap{m_storage, cmp}
+template <typename T, typename Criterium>
+PriorityQueue<T, Criterium>::PriorityQueue(std::initializer_list<T> ilist,
+                                         const Criterium& crit)
+: m_storage{ilist}, m_heap{m_storage, crit}
 {
 }
 
-template <typename T, typename Compare>
+template <typename T, typename Criterium>
 template <typename Iter>
-PriorityQueue<T, Compare>::PriorityQueue(Iter first, Iter last)
+PriorityQueue<T, Criterium>::PriorityQueue(Iter first, Iter last)
 : m_storage{first, last}, m_heap{m_storage}
 {
 }
 
-template <typename T, typename Compare>
+template <typename T, typename Criterium>
 template <typename Iter>
-PriorityQueue<T, Compare>::PriorityQueue(Iter first, Iter last, const Compare& cmp)
-: m_storage{first, last}, m_heap{m_storage, cmp}
+PriorityQueue<T, Criterium>::PriorityQueue(Iter first, Iter last, const Criterium& crit)
+: m_storage{first, last}, m_heap{m_storage, crit}
 {
 }
 
-template <typename T, typename Compare>
-void PriorityQueue<T, Compare>::insert(const T& val)
+template <typename T, typename Criterium>
+void PriorityQueue<T, Criterium>::insert(const T& val)
 {
    // Since the heap can shrink below the capacity of the storage when elements are
    // removed, we might have unused space. If not resize the storage.
@@ -86,14 +87,14 @@ void PriorityQueue<T, Compare>::insert(const T& val)
    m_heap.set(m_storage.data(), m_heap.size() + 1);
 
    // Move new element up in heap until the heap property is fulfilled.
-   using HeapIdx = HeapView<T, Compare>::HeapIdx;
+   using HeapIdx = HeapView<T, Criterium>::HeapIdx;
    HeapIdx i = m_heap.size();
-   HeapIdx parentIdx = HeapView<T, Compare>::parent(i);
+   HeapIdx parentIdx = HeapView<T, Criterium>::parent(i);
    while (i > 1 && m_heap.compare(i, parentIdx))
    {
       m_heap.exchange(i, parentIdx);
       i = parentIdx;
-      parentIdx = HeapView<T, Compare>::parent(i);
+      parentIdx = HeapView<T, Criterium>::parent(i);
    }
 }
 
